@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { LessonLanguage } from "@/lib/studio/timeline";
+import type { LessonLocale } from "@/lib/studio/i18n";
+import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 
 type Props = {
-  language: LessonLanguage;
+  language: LessonLocale;
   speaking: boolean;
   frozen: boolean;
   playing: boolean;
@@ -26,7 +27,7 @@ export function AvatarPlayer({
   videoUrl,
   audioUrl,
   poster = DEFAULT_POSTER,
-  teacherName = "Prof. Munzer Haddara · الأستاذ منذر حدارة",
+  teacherName = "Prof. Munzer Al-Tarah · الأستاذ منذر حدارة",
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -49,13 +50,16 @@ export function AvatarPlayer({
     if (!playing && !audio.paused) audio.pause();
   }, [audioUrl, currentTime, playing]);
 
+  const status = frozen
+    ? pickText(STUDIO_UI.boardFreeze, language)
+    : speaking
+      ? pickText(STUDIO_UI.speaking, language)
+      : pickText(STUDIO_UI.paused, language);
+
   return (
-    <section
-      className={`studio-avatar-panel ${speaking ? "speaking" : ""} ${frozen ? "frozen" : ""}`}
-      aria-label={language === "ar" ? "مشغّل صورة الأستاذ" : "Teacher avatar player"}
-    >
+    <section className={`studio-avatar-panel ${speaking ? "speaking" : ""} ${frozen ? "frozen" : ""}`} aria-label={pickText(STUDIO_UI.avatar, language)}>
       <p className="eyebrow">
-        {language === "ar" ? "مشغّل الدروس الشارحة" : "AI avatar player"} · {frozen ? (language === "ar" ? "تجميد الرسم" : "board freeze") : speaking ? (language === "ar" ? "يشرح" : "speaking") : language === "ar" ? "إيقاف" : "paused"}
+        {pickText(STUDIO_UI.avatar, language)} · {status}
       </p>
       <div className="studio-avatar-frame">
         {videoUrl ? (
@@ -72,23 +76,11 @@ export function AvatarPlayer({
           <img src={poster} alt={teacherName} draggable={false} />
         )}
         <span className="dynamic-watermark">MathMentor · {teacherName}</span>
-        {frozen ? (
-          <div className="studio-freeze">
-            {language === "ar" ? "انظر إلى السبورة" : "Look at the board"}
-          </div>
-        ) : null}
+        {frozen ? <div className="studio-freeze">{pickText(STUDIO_UI.freeze, language)}</div> : null}
         <p className="teacher-nameplate">{teacherName}</p>
       </div>
       {audioUrl ? <audio ref={audioRef} src={audioUrl} preload="auto" /> : null}
-      <p className="muted studio-demo-hint">
-        {videoUrl
-          ? language === "ar"
-            ? "فيديو هيغن / ملف محلي."
-            : "HeyGen or local video."
-          : language === "ar"
-            ? "وضع تجريبي: صورة الأستاذ منذر + خط زمني صامت (أو صوت HTML5 إن وُجد). لا يُستدعى HeyGen بدون مفتاح."
-            : "Demo mode: Professor Munzer still + silent timeline (or HTML5 audio if provided). HeyGen is not called without a key."}
-      </p>
+      <p className="muted studio-demo-hint">{videoUrl ? pickText(STUDIO_UI.videoHint, language) : pickText(STUDIO_UI.demoHint, language)}</p>
     </section>
   );
 }

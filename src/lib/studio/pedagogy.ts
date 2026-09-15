@@ -1,3 +1,4 @@
+import { L } from "./i18n";
 import {
   REQUIRED_PHASES,
   hasRenderGraph,
@@ -16,8 +17,8 @@ const PHASE_DURATION: Record<LessonPhase, number> = {
   common_mistake: 30,
 };
 
-function bilingual(ar: string, en: string) {
-  return { ar, en };
+function bilingual(en: string, fr: string) {
+  return L(en, fr);
 }
 
 function shiftActions(actions: CanvasAction[], extra = 0): CanvasAction[] {
@@ -74,7 +75,7 @@ export function ensurePedagogy(timeline: LessonTimeline): LessonTimeline {
         fn: "exp(x)",
         xDomain: [-2, 2],
         yDomain: [-1, 8],
-        title: bilingual("رسم بياني إلزامي", "Mandatory graph"),
+        title: bilingual("Mandatory graph", "Graphe obligatoire"),
       },
     });
   }
@@ -87,7 +88,7 @@ export function ensurePedagogy(timeline: LessonTimeline): LessonTimeline {
         type: "show_step",
         payload: {
           latex: "\\text{Given} \\to \\text{rule} \\to \\text{substitute}",
-          text: bilingual("اكتب المعطى ثم القانون ثم التعويض.", "Write given, then the rule, then substitution."),
+          text: bilingual("Write given, then the rule, then substitution.", "Écrivez les données, puis la règle, puis la substitution."),
         },
       },
       {
@@ -95,7 +96,7 @@ export function ensurePedagogy(timeline: LessonTimeline): LessonTimeline {
         type: "show_step",
         payload: {
           latex: "\\text{Check by substitution}",
-          text: bilingual("تحقق بالتعويض قبل تأطير الناتج.", "Check by substitution before boxing the answer."),
+          text: bilingual("Check by substitution before boxing the answer.", "Vérifiez par substitution avant d’encadrer la réponse."),
         },
       },
     );
@@ -124,8 +125,8 @@ function placeholderSegment(
       phase,
       avatar: { state: "speaking" },
       narration: bilingual(
-        `نعرّف ${topic} كما يرد في الامتحانات اللبنانية الرسمية.`,
-        `We define ${topic} as it appears in Lebanese official exams.`,
+        `We define ${topic} as it appears in Lebanese official exams (Brevet / Terminale LS, GS, SE).`,
+        `Nous définissons ${topic} tel qu’il apparaît dans les examens officiels libanais (Brevet / Terminale LS, GS, SE).`,
       ),
       canvas: {
         actions: [
@@ -134,7 +135,7 @@ function placeholderSegment(
             type: "show_equation",
             payload: {
               latex: "\\text{" + topic.replace(/[\\{}]/g, "") + "}",
-              caption: bilingual("تعريف الفكرة", "Concept definition"),
+              caption: bilingual("Concept definition", "Définition"),
             },
           },
         ],
@@ -149,8 +150,8 @@ function placeholderSegment(
       phase,
       avatar: { state: "paused" },
       narration: bilingual(
-        "نتوقف عند السبورة لنرسم القاعدة ونعلّم الجذور والتقارب والنهايات إن وُجدت.",
         "We freeze at the board to draw the rule and mark roots, asymptotes, and extrema when they exist.",
+        "Nous gelons l’avatar pour tracer la règle et marquer racines, asymptotes et extrema s’ils existent.",
       ),
       canvas: {
         actions: [
@@ -162,7 +163,7 @@ function placeholderSegment(
               fn: "exp(x)",
               xDomain: [-2, 2],
               yDomain: [-1, 8],
-              title: bilingual("الرسم الإلزامي", "Mandatory graph"),
+              title: bilingual("Mandatory graph", "Graphe obligatoire"),
             },
           },
         ],
@@ -177,8 +178,8 @@ function placeholderSegment(
       phase,
       avatar: { state: "speaking" },
       narration: bilingual(
-        `مثال محلول كامل على ${topic} مع تعويض وتحقق.`,
         `A full worked example on ${topic} with substitution and a check.`,
+        `Un exemple entièrement résolu sur ${topic} avec substitution et vérification.`,
       ),
       canvas: {
         actions: [
@@ -187,7 +188,7 @@ function placeholderSegment(
             type: "show_step",
             payload: {
               latex: "\\text{step 1}",
-              text: bilingual("خطوة بعد خطوة", "Step by step"),
+              text: bilingual("Step by step", "Étape par étape"),
             },
           },
         ],
@@ -201,8 +202,8 @@ function placeholderSegment(
     phase,
     avatar: { state: "speaking" },
     narration: bilingual(
-      "تحذير من الخطأ الشائع في النماذج الرسمية.",
       "A warning about the typical official-exam mistake.",
+      "Un avertissement sur l’erreur typique des examens officiels.",
     ),
     canvas: {
       actions: [
@@ -211,7 +212,7 @@ function placeholderSegment(
           type: "show_equation",
           payload: {
             latex: "\\text{Check the hypothesis before the formula.}",
-            caption: bilingual("خطأ شائع", "Common mistake"),
+            caption: bilingual("Common mistake", "Erreur fréquente"),
           },
         },
       ],

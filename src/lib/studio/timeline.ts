@@ -1,14 +1,21 @@
 import { z } from "zod";
+import { coerceBilingual, type Bilingual, type LessonLanguage, type LessonLocale } from "./i18n";
+import { isSceneDocument, timelineFromScenes } from "./scenes";
 
-export const bilingualSchema = z.object({
-  ar: z.string(),
+export type { Bilingual, LessonLanguage, LessonLocale };
+export { pickText, L, toLessonLocale } from "./i18n";
+
+export const bilingualSchema = z.preprocess((value) => {
+  const coerced = coerceBilingual(value);
+  return coerced ?? { en: "", fr: "" };
+}, z.object({
   en: z.string(),
-});
+  fr: z.string().optional(),
+  ar: z.string().optional(),
+}));
 
-export type Bilingual = z.infer<typeof bilingualSchema>;
-
-export const lessonLanguageSchema = z.enum(["ar", "en"]);
-export type LessonLanguage = z.infer<typeof lessonLanguageSchema>;
+export const lessonLanguageSchema = z.enum(["en", "fr", "ar"]);
+export const lessonLocaleSchema = z.enum(["en", "fr"]);
 
 export const lessonPhaseSchema = z.enum([
   "introduction",
@@ -27,6 +34,8 @@ export const canvasActionTypeSchema = z.enum([
   "highlight_point",
   "show_step",
   "clear",
+  "renderMath",
+  "plotFunction",
 ]);
 export type CanvasActionType = z.infer<typeof canvasActionTypeSchema>;
 
@@ -61,6 +70,7 @@ export const lessonSegmentSchema = z.object({
   start: z.number().min(0),
   end: z.number().positive(),
   phase: lessonPhaseSchema,
+  label: bilingualSchema.optional(),
   narration: bilingualSchema,
   avatar: z.object({ state: avatarStateSchema }),
   canvas: z.object({
@@ -83,11 +93,14 @@ export const lessonTimelineSchema = z
     id: z.string().min(1),
     title: bilingualSchema,
     language: lessonLanguageSchema,
+    defaultLanguage: lessonLocaleSchema.optional(),
     durationSec: z.number().positive(),
+    instructor: z.string().optional(),
     track: certificateTrackSchema.optional(),
     grade: z.string().optional(),
     topic: z.string().optional(),
     media: lessonMediaSchema,
+    scenes: z.array(z.unknown()).optional(),
     segments: z.array(lessonSegmentSchema).min(1),
   })
   .superRefine((value, ctx) => {
@@ -153,10 +166,6 @@ export const REQUIRED_PHASES: LessonPhase[] = [
 
 export const TIMELINE_STORAGE_KEY = "mathmentor.lessonTimeline";
 
-export function pickText(value: Bilingual, language: LessonLanguage) {
-  return value[language];
-}
-
 export function segmentAt(timeline: LessonTimeline, timeSec: number): LessonSegment | undefined {
   const t = clampTime(timeline, timeSec);
   return (
@@ -175,34 +184,34 @@ export function clampTime(timeline: LessonTimeline, timeSec: number) {
   return Math.min(timeSec, timeline.durationSec);
 }
 
-function asBilingual(value: unknown): Bilingual | undefined {
-  if (!value || typeof value !== "object") return undefined;
-  const record = value as Record<string, unknown>;
-  if (typeof record.ar === "string" && typeof record.en === "string") {
-    return { ar: record.ar, en: record.en };
-  }
-  return undefined;
+function pairDomain(value: unknown): [number, number] | undefined {
+  if (!Array.isArray(value) || value.length < 2) return undefined;
+  const a = Number(value[0]);
+  const b = Number(value[1]);
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return undefined;
+  return [a, b];
 }
 
 function asGraph(value: Record<string, unknown>): GraphPayload {
-  const xDomain = Array.isArray(value.xDomain) ? (value.xDomain as [number, number]) : undefined;
-  const yDomain = Array.isArray(value.yDomain) ? (value.yDomain as [number, number]) : undefined;
+  const xDomain = pairDomain(value.xDomain) ?? pairDomain(value.domain);
+  const yDomain = pairDomain(value.yDomain);
   const points = Array.isArray(value.points)
     ? (value.points as Array<Record<string, unknown>>).map((point) => ({
         x: Number(point.x) || 0,
         y: Number(point.y) || 0,
-        label: asBilingual(point.label),
+        label: coerceBilingual(point.label),
         kind: highlightKindSchema.safeParse(point.kind).success
           ? (point.kind as HighlightKind)
           : undefined,
       }))
     : undefined;
+  const fn = typeof value.fn === "string" ? value.fn : typeof value.expression === "string" ? value.expression : undefined;
   return {
     kind: graphKindSchema.safeParse(value.kind).success ? (value.kind as GraphKind) : "function",
-    fn: typeof value.fn === "string" ? value.fn : undefined,
+    fn,
     xDomain,
     yDomain,
-    title: asBilingual(value.title),
+    title: coerceBilingual(value.title),
     samples: typeof value.samples === "number" ? value.samples : undefined,
     points,
   };
@@ -215,7 +224,7 @@ function asHighlight(value: Record<string, unknown>): HighlightPayload {
     y: typeof value.y === "number" ? value.y : undefined,
     axis: value.axis === "x" || value.axis === "y" ? value.axis : undefined,
     value: typeof value.value === "number" ? value.value : undefined,
-    label: asBilingual(value.label),
+    label: coerceBilingual(value.label),
   };
 }
 
@@ -230,6 +239,25 @@ export function emptyCanvasState(): DerivedCanvasState {
   };
 }
 
+function normalizedActionType(type: CanvasActionType): CanvasActionType {
+  if (type === "renderMath") return "show_equation";
+  if (type === "plotFunction") return "render_graph";
+  return type;
+}
+
+function latexOf(payload: Record<string, unknown>) {
+  if (typeof payload.latex === "string" && payload.latex) return payload.latex;
+  if (typeof payload.math_latex === "string" && payload.math_latex) return payload.math_latex;
+  return "";
+}
+
+function stepTextOf(payload: Record<string, unknown>) {
+  return (
+    coerceBilingual(payload.text) ??
+    coerceBilingual({ en: payload.step_en, fr: payload.step_fr })
+  );
+}
+
 export function canvasStateAt(timeline: LessonTimeline, timeSec: number): DerivedCanvasState {
   const t = clampTime(timeline, timeSec);
   const state = emptyCanvasState();
@@ -240,10 +268,11 @@ export function canvasStateAt(timeline: LessonTimeline, timeSec: number): Derive
     for (const action of actions) {
       const abs = actionAbsoluteTime(segment, action);
       if (abs > t) continue;
-      state.lastActionType = action.type;
+      const type = normalizedActionType(action.type);
+      state.lastActionType = type;
       const payload = action.payload ?? {};
 
-      if (action.type === "clear") {
+      if (type === "clear") {
         state.equations = [];
         state.steps = [];
         state.graph = null;
@@ -253,31 +282,31 @@ export function canvasStateAt(timeline: LessonTimeline, timeSec: number): Derive
         continue;
       }
 
-      if (action.type === "show_equation") {
-        const latex = typeof payload.latex === "string" ? payload.latex : "";
+      if (type === "show_equation") {
+        const latex = latexOf(payload);
         if (latex) {
-          state.equations.push({ latex, caption: asBilingual(payload.caption) });
+          state.equations.push({ latex, caption: coerceBilingual(payload.caption) });
         }
         continue;
       }
 
-      if (action.type === "show_step") {
+      if (type === "show_step") {
         stepIndex += 1;
         state.steps.push({
-          latex: typeof payload.latex === "string" ? payload.latex : undefined,
-          text: asBilingual(payload.text),
+          latex: latexOf(payload) || undefined,
+          text: stepTextOf(payload),
           index: typeof payload.index === "number" ? payload.index : stepIndex,
         });
         continue;
       }
 
-      if (action.type === "render_graph") {
+      if (type === "render_graph") {
         state.graph = asGraph(payload);
         state.graphStartedAt = abs;
         continue;
       }
 
-      if (action.type === "highlight_point") {
+      if (type === "highlight_point") {
         state.highlights.push(asHighlight(payload));
       }
     }
@@ -299,12 +328,19 @@ export function formatClock(seconds: number) {
 }
 
 export function parseLessonTimeline(input: unknown) {
+  if (isSceneDocument(input)) {
+    const timeline = timelineFromScenes(input);
+    return lessonTimelineSchema.safeParse(timeline);
+  }
   return lessonTimelineSchema.safeParse(input);
 }
 
 export function hasRenderGraph(timeline: LessonTimeline) {
   return timeline.segments.some((segment) =>
-    segment.canvas.actions.some((action) => action.type === "render_graph"),
+    segment.canvas.actions.some((action) => {
+      const type = normalizedActionType(action.type);
+      return type === "render_graph";
+    }),
   );
 }
 
@@ -312,7 +348,7 @@ export function hasStepByStep(timeline: LessonTimeline) {
   return timeline.segments.some(
     (segment) =>
       segment.phase === "real_example" &&
-      segment.canvas.actions.some((action) => action.type === "show_step"),
+      segment.canvas.actions.some((action) => normalizedActionType(action.type) === "show_step"),
   );
 }
 

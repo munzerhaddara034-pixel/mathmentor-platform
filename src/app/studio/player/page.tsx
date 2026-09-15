@@ -37,9 +37,9 @@ function StudioPlayerInner() {
   return (
     <main className="shell">
       <p className="muted">
-        <Link href="/studio/script">مولّد السكربت</Link>
+        <Link href="/studio/script">Script editor</Link>
         {" · "}
-        <Link href="/lessons/interactive">عرض الدوال الأسية</Link>
+        <Link href="/lessons/interactive">Official exam demo</Link>
       </p>
       {ready ? <InteractiveLessonPlayer timeline={timeline} /> : <p>Loading generated script…</p>}
     </main>

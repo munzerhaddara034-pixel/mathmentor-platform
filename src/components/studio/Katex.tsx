@@ -4,6 +4,7 @@ import katex from "katex";
 import { useMemo } from "react";
 import "katex/dist/katex.min.css";
 
+/** npm KaTeX (`renderToString`) — SSR-safe. Optional CDN: katex@0.16.8 on jsDelivr. */
 export function Katex({
   tex,
   display = false,

@@ -1,35 +1,36 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { DerivedCanvasState, LessonLanguage } from "@/lib/studio/timeline";
-import { graphIsAnimating, pickText } from "@/lib/studio/timeline";
-import { FunctionGraph } from "./FunctionGraph";
+import type { DerivedCanvasState } from "@/lib/studio/timeline";
+import type { LessonLocale } from "@/lib/studio/i18n";
+import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
+import { graphIsAnimating } from "@/lib/studio/timeline";
+import { DesmosGraph } from "./DesmosGraph";
 import { Katex } from "./Katex";
 
 type Props = {
   state: DerivedCanvasState;
-  language: LessonLanguage;
+  language: LessonLocale;
   currentTime: number;
 };
 
 export function MathCanvas({ state, language, currentTime }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const animating = graphIsAnimating(state, currentTime, 5);
-  const graphProgress = state.graphStartedAt == null
-    ? 1
-    : Math.max(0.05, Math.min(1, (currentTime - state.graphStartedAt) / 5));
+  const graphProgress =
+    state.graphStartedAt == null ? 1 : Math.max(0.05, Math.min(1, (currentTime - state.graphStartedAt) / 5));
 
   useEffect(() => {
     boardRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [state.steps.length, state.equations.length]);
 
   return (
-    <section className="studio-canvas-panel" aria-label={language === "ar" ? "السبورة الذكية" : "Smart board"}>
-      <p className="eyebrow">{language === "ar" ? "السبورة الذكية" : "Dynamic math canvas"}</p>
-      <h2>{language === "ar" ? "رسم · معادلات · خطوات" : "Graphs · equations · steps"}</h2>
+    <section className="studio-canvas-panel" aria-label={pickText(STUDIO_UI.canvas, language)}>
+      <p className="eyebrow">{pickText(STUDIO_UI.canvas, language)}</p>
+      <h2>{pickText(STUDIO_UI.canvasSub, language)}</h2>
       <div ref={boardRef} className={`studio-board ${animating ? "drawing" : ""}`}>
         {state.equations.length === 0 && !state.graph && state.steps.length === 0 ? (
-          <p className="muted">{language === "ar" ? "بانتظار بداية الدرس…" : "Waiting for the lesson clock…"}</p>
+          <p className="muted">{pickText(STUDIO_UI.waiting, language)}</p>
         ) : null}
 
         {state.equations.map((equation, index) => (
@@ -40,12 +41,7 @@ export function MathCanvas({ state, language, currentTime }: Props) {
         ))}
 
         {state.graph ? (
-          <FunctionGraph
-            spec={state.graph}
-            highlights={state.highlights}
-            language={language}
-            progress={graphProgress}
-          />
+          <DesmosGraph spec={state.graph} highlights={state.highlights} language={language} progress={graphProgress} />
         ) : null}
 
         {state.highlights

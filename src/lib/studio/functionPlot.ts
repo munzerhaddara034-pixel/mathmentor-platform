@@ -74,10 +74,12 @@ export function niceDomain(values: number[], fallback: [number, number]): [numbe
   return [min - pad, max + pad];
 }
 
-export function defaultGraphTitle(spec: GraphPayload): { ar: string; en: string } {
-  if (spec.title) return spec.title;
-  if (spec.kind === "argand") {
-    return { ar: "المستوى العقدي", en: "Argand plane" };
+export function defaultGraphTitle(spec: GraphPayload): { en: string; fr: string } {
+  if (spec.title) {
+    return { en: spec.title.en, fr: spec.title.fr || spec.title.en };
   }
-  return { ar: spec.fn ? `y = ${spec.fn}` : "الرسم", en: spec.fn ? `y = ${spec.fn}` : "Graph" };
+  if (spec.kind === "argand") {
+    return { en: "Argand plane", fr: "Plan d’Argand" };
+  }
+  return { en: spec.fn ? `y = ${spec.fn}` : "Graph", fr: spec.fn ? `y = ${spec.fn}` : "Graphe" };
 }

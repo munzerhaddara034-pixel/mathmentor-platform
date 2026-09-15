@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import type { GraphPayload, HighlightKind, HighlightPayload, LessonLanguage } from "@/lib/studio/timeline";
+import type { GraphPayload, HighlightKind, HighlightPayload } from "@/lib/studio/timeline";
+import type { LessonLocale } from "@/lib/studio/i18n";
+import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import { compileFunction, defaultGraphTitle, sampleFn } from "@/lib/studio/functionPlot";
-import { pickText } from "@/lib/studio/timeline";
 
 type Props = {
   spec: GraphPayload;
   highlights: HighlightPayload[];
-  language: LessonLanguage;
+  language: LessonLocale;
   progress: number;
 };
 
@@ -87,9 +88,9 @@ export function FunctionGraph({ spec, highlights, language, progress }: Props) {
       <div className="studio-graph-head">
         <strong>{pickText(title, language)}</strong>
         <span className="studio-legend">
-          <i className="lg root" /> {language === "ar" ? "جذور" : "Roots"}
-          <i className="lg asy" /> {language === "ar" ? "تقارب" : "Asymptotes"}
-          <i className="lg ext" /> {language === "ar" ? "نهايات" : "Extrema"}
+          <i className="lg root" /> {pickText(STUDIO_UI.roots, language)}
+          <i className="lg asy" /> {pickText(STUDIO_UI.asymptotes, language)}
+          <i className="lg ext" /> {pickText(STUDIO_UI.extrema, language)}
         </span>
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={pickText(title, language)}>

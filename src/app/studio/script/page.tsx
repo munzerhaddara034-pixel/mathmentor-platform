@@ -1,33 +1,36 @@
 "use client";
 
+import { officialExamSceneDocument } from "@/lib/studio/seedLesson";
 import { parseLessonTimeline, TIMELINE_STORAGE_KEY, type LessonTimeline } from "@/lib/studio/timeline";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 const TRACKS = [
-  { id: "brevet", label: "Brevet · شهادة متوسطة" },
-  { id: "ls", label: "LS · علوم الحياة" },
-  { id: "gs", label: "GS · علوم عامة" },
-  { id: "se", label: "SE · اجتماع واقتصاد" },
-  { id: "lh", label: "LH · آداب وإنسانيات" },
-  { id: "s1", label: "S1 · أولى ثانوي" },
+  { id: "brevet", label: "Brevet" },
+  { id: "ls", label: "LS · Life Sciences" },
+  { id: "gs", label: "GS · General Sciences" },
+  { id: "se", label: "SE · Sociology & Economics" },
+  { id: "lh", label: "LH · Literature" },
+  { id: "s1", label: "S1" },
   { id: "eb7", label: "EB7" },
   { id: "eb8", label: "EB8" },
   { id: "sat", label: "SAT Math" },
 ] as const;
 
+const SEEDED_JSON = JSON.stringify(officialExamSceneDocument, null, 2);
+
 export default function StudioScriptPage() {
   const router = useRouter();
   const [topic, setTopic] = useState("Exponential Functions");
   const [track, setTrack] = useState("ls");
-  const [language, setLanguage] = useState<"ar" | "en">("en");
-  const [grade, setGrade] = useState("Grade 12 LS");
+  const [language, setLanguage] = useState<"en" | "fr">("en");
+  const [grade, setGrade] = useState("Terminale LS / GS / SE");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [source, setSource] = useState<"openai" | "template" | "">("");
+  const [source, setSource] = useState<"openai" | "template" | "seed">("seed");
   const [warning, setWarning] = useState("");
-  const [jsonText, setJsonText] = useState("");
+  const [jsonText, setJsonText] = useState(SEEDED_JSON);
   const [pedagogy, setPedagogy] = useState<{
     phases: string[];
     hasRenderGraph: boolean;
@@ -80,27 +83,28 @@ export default function StudioScriptPage() {
       setError("Fix the JSON before opening the player.");
       return;
     }
-    window.sessionStorage.setItem(TIMELINE_STORAGE_KEY, JSON.stringify(parsed.data));
+    window.sessionStorage.setItem(TIMELINE_STORAGE_KEY, JSON.stringify(JSON.parse(jsonText)));
     router.push("/studio/player?src=session");
   };
 
   return (
-    <main className="shell" dir="rtl">
+    <main className="shell">
       <p className="eyebrow">Studio · AI video script</p>
-      <h1>مولّد سكربت الدرس الشارح</h1>
+      <h1>Lesson script editor</h1>
       <p className="muted">
-        يُفرض الهيكل الرباعي للامتحانات اللبنانية: مقدمة، قاعدة ورسم، مثال محلول، خطأ شائع. الناتج JSON يُفتح مباشرة في
-        السبورة الذكية.
+        Default sample: <code>leb-term-func-01</code> (EN + FR scenes, KaTeX + Desmos). Generate a four-phase official-exam
+        script, edit the JSON, then open the interactive player. Local preview:{" "}
+        <code>http://127.0.0.1:3001/studio/script</code>
       </p>
 
       <section className="card" style={{ marginTop: 20 }}>
         <div className="grid two">
           <label>
-            الموضوع
+            Topic
             <input value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="Exponential Functions" />
           </label>
           <label>
-            المسار / الشهادة
+            Track / certificate
             <select value={track} onChange={(event) => setTrack(event.target.value)}>
               {TRACKS.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -110,31 +114,39 @@ export default function StudioScriptPage() {
             </select>
           </label>
           <label>
-            الصف
+            Grade
             <input value={grade} onChange={(event) => setGrade(event.target.value)} />
           </label>
           <label>
-            لغة السكربت الأساسية
-            <select value={language} onChange={(event) => setLanguage(event.target.value as "ar" | "en")}>
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
+            Script language default
+            <select value={language} onChange={(event) => setLanguage(event.target.value as "en" | "fr")}>
+              <option value="en">English (default)</option>
+              <option value="fr">Français</option>
             </select>
           </label>
         </div>
         <div className="row">
           <button className="btn dark" type="button" disabled={busy} onClick={() => void generate()}>
-            {busy ? "جارٍ التوليد…" : "توليد السكربت"}
+            {busy ? "Generating…" : "Generate four-phase script"}
           </button>
-          <button className="btn" type="button" onClick={() => setTopic("Complex Numbers")}>
-            عيّنة: أعداد مركبة
+          <button
+            className="btn"
+            type="button"
+            onClick={() => {
+              setJsonText(SEEDED_JSON);
+              setSource("seed");
+              setPedagogy(null);
+            }}
+          >
+            Reload seeded lesson
           </button>
           <Link className="btn" href="/lessons/interactive">
-            عرض الدوال الأسية
+            Open player demo
           </Link>
         </div>
         {source ? (
           <p className="muted" style={{ marginTop: 12 }}>
-            المصدر: {source === "openai" ? "OpenAI" : "قالب حتمي (بدون مفتاح LLM)"}
+            Source: {source === "openai" ? "OpenAI" : source === "seed" ? "seeded leb-term-func-01 scenes" : "EN+FR template (no LLM key)"}
           </p>
         ) : null}
         {warning ? <p className="muted">{warning}</p> : null}
@@ -147,29 +159,27 @@ export default function StudioScriptPage() {
         ) : null}
       </section>
 
-      {jsonText ? (
-        <section className="card" style={{ marginTop: 20 }}>
-          <h2>السكربت قابل للتعديل</h2>
-          {parsed && "success" in parsed && !parsed.success ? (
-            <p className="error">JSON لا يطابق مخطط الخط الزمني.</p>
-          ) : (
-            <p className="success">المخطط صالح — يمكن فتح المشغّل.</p>
-          )}
-          <textarea
-            value={jsonText}
-            onChange={(event) => setJsonText(event.target.value)}
-            style={{ minHeight: 420, fontFamily: "ui-monospace, monospace", fontSize: 13, direction: "ltr", textAlign: "left" }}
-          />
-          <div className="row">
-            <button className="btn dark" type="button" onClick={openPlayer}>
-              Open in Interactive Player
-            </button>
-            <Link className="btn" href="/studio/player?lesson=exponential">
-              Demo exponential
-            </Link>
-          </div>
-        </section>
-      ) : null}
+      <section className="card" style={{ marginTop: 20 }}>
+        <h2>Editable script (EN + FR)</h2>
+        {parsed && "success" in parsed && parsed.success ? (
+          <p className="success">Schema valid — you can open the player.</p>
+        ) : (
+          <p className="error">JSON does not match the scene document or LessonTimeline schema.</p>
+        )}
+        <textarea
+          value={jsonText}
+          onChange={(event) => setJsonText(event.target.value)}
+          style={{ minHeight: 420, fontFamily: "ui-monospace, monospace", fontSize: 13, direction: "ltr", textAlign: "left" }}
+        />
+        <div className="row">
+          <button className="btn dark" type="button" onClick={openPlayer}>
+            Open in Interactive Player
+          </button>
+          <Link className="btn" href="/studio/player?lesson=leb-term-func-01">
+            Play seeded scenes
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

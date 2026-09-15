@@ -1,30 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LessonLanguage, LessonPhase, LessonTimeline } from "@/lib/studio/timeline";
-import {
-  canvasStateAt,
-  formatClock,
-  graphIsAnimating,
-  pickText,
-  segmentAt,
-} from "@/lib/studio/timeline";
+import type { LessonPhase, LessonTimeline } from "@/lib/studio/timeline";
+import type { LessonLocale } from "@/lib/studio/i18n";
+import { pickText, STUDIO_UI, toLessonLocale } from "@/lib/studio/i18n";
+import { canvasStateAt, formatClock, graphIsAnimating, segmentAt } from "@/lib/studio/timeline";
 import { AvatarPlayer } from "./AvatarPlayer";
 import { MathCanvas } from "./MathCanvas";
 
-const PHASE_LABEL: Record<LessonPhase, { ar: string; en: string }> = {
-  introduction: { ar: "1. تعريف الفكرة", en: "1. Concept definition" },
-  rule_graph: { ar: "2. القاعدة والرسم", en: "2. Rule & graph" },
-  real_example: { ar: "3. مثال محلول", en: "3. Worked example" },
-  common_mistake: { ar: "4. خطأ شائع", en: "4. Common mistake" },
-};
-
 const SPEEDS = [0.75, 1, 1.25, 1.5];
 
-function pickVoice(language: LessonLanguage) {
+function pickVoice(language: LessonLocale) {
   const voices = window.speechSynthesis.getVoices();
-  if (language === "ar") {
-    return voices.find((voice) => voice.lang.toLowerCase().startsWith("ar"));
+  if (language === "fr") {
+    return voices.find((voice) => voice.lang.toLowerCase().startsWith("fr"));
   }
   const english = voices.filter((voice) => voice.lang.replace("_", "-").toLowerCase().startsWith("en"));
   return (
@@ -39,20 +28,23 @@ export function InteractiveLessonPlayer({
   initialLanguage,
 }: {
   timeline: LessonTimeline;
-  initialLanguage?: LessonLanguage;
+  initialLanguage?: LessonLocale;
 }) {
-  const [uiLanguage, setUiLanguage] = useState<LessonLanguage>(initialLanguage ?? timeline.language);
+  const [uiLanguage, setUiLanguage] = useState<LessonLocale>(
+    initialLanguage ?? toLessonLocale(timeline.defaultLanguage ?? timeline.language),
+  );
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const lastTick = useRef<number | null>(null);
-  const spokenSegment = useRef<string | null>(null);
+  const spokenKey = useRef<string | null>(null);
 
   const segment = segmentAt(timeline, currentTime);
   const canvas = useMemo(() => canvasStateAt(timeline, currentTime), [timeline, currentTime]);
   const animatingGraph = graphIsAnimating(canvas, currentTime, 5);
   const frozen = Boolean(segment && (segment.avatar.state === "paused" || animatingGraph));
   const speaking = Boolean(playing && segment && segment.avatar.state === "speaking" && !frozen);
+  const instructor = timeline.instructor ?? "Prof. Munzer Al-Tarah";
 
   useEffect(() => {
     if (!playing) {
@@ -79,28 +71,30 @@ export function InteractiveLessonPlayer({
   }, [playing, speed, timeline.durationSec]);
 
   const speakSegment = useCallback(
-    (id: string | undefined, text: string) => {
+    (id: string | undefined, language: LessonLocale, text: string) => {
       if (!("speechSynthesis" in window) || !id) return;
-      if (spokenSegment.current === id) return;
-      spokenSegment.current = id;
+      const key = `${id}:${language}`;
+      if (spokenKey.current === key) return;
+      spokenKey.current = key;
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = uiLanguage === "ar" ? "ar-SA" : "en-US";
+      utterance.lang = language === "fr" ? "fr-FR" : "en-US";
       utterance.rate = Math.min(1.4, Math.max(0.7, speed * 0.9));
-      const voice = pickVoice(uiLanguage);
+      const voice = pickVoice(language);
       if (voice) utterance.voice = voice;
       window.speechSynthesis.speak(utterance);
     },
-    [speed, uiLanguage],
+    [speed],
   );
 
   useEffect(() => {
-    if (!playing || !segment || frozen) {
+    if (!playing || !segment) {
       if (!playing && "speechSynthesis" in window) window.speechSynthesis.cancel();
-      if (!playing) spokenSegment.current = null;
+      if (!playing) spokenKey.current = null;
       return;
     }
-    speakSegment(segment.id, pickText(segment.narration, uiLanguage));
+    if (frozen) return;
+    speakSegment(segment.id, uiLanguage, pickText(segment.narration, uiLanguage));
   }, [frozen, playing, segment, speakSegment, uiLanguage]);
 
   useEffect(() => {
@@ -109,43 +103,37 @@ export function InteractiveLessonPlayer({
     };
   }, []);
 
+  const toggleLanguage = () => {
+    setUiLanguage((current) => (current === "en" ? "fr" : "en"));
+    spokenKey.current = null;
+    if (playing && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  };
+
   const seek = (time: number) => {
     setCurrentTime(Math.max(0, Math.min(timeline.durationSec, time)));
-    spokenSegment.current = null;
+    spokenKey.current = null;
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
   };
 
   const progressPct = (currentTime / timeline.durationSec) * 100;
+  const phaseLabel = (phase: LessonPhase, label?: { en: string; fr?: string }) =>
+    label ? pickText(label, uiLanguage) : pickText(STUDIO_UI.phases[phase], uiLanguage);
 
   return (
-    <div className="studio-player" dir={uiLanguage === "ar" ? "rtl" : "ltr"}>
+    <div className="studio-player" dir="ltr" lang={uiLanguage}>
       <header className="studio-head">
         <div>
-          <p className="eyebrow">مشغل الدروس الشارحة والسبورة الذكية</p>
+          <p className="eyebrow">{pickText(STUDIO_UI.eyebrow, uiLanguage)}</p>
           <h1>{pickText(timeline.title, uiLanguage)}</h1>
           <p className="muted">
-            {timeline.grade ? `${timeline.grade} · ` : ""}
-            {timeline.topic ?? ""}
-            {" · "}
-            {languageToggleHint(uiLanguage)}
+            {instructor}
+            {timeline.grade ? ` · ${timeline.grade}` : ""}
+            {timeline.topic ? ` · ${timeline.topic}` : ""}
           </p>
         </div>
-        <div className="row" style={{ marginTop: 0 }}>
-          <button
-            className={`btn ${uiLanguage === "ar" ? "dark" : ""}`}
-            type="button"
-            onClick={() => setUiLanguage("ar")}
-          >
-            AR
-          </button>
-          <button
-            className={`btn ${uiLanguage === "en" ? "dark" : ""}`}
-            type="button"
-            onClick={() => setUiLanguage("en")}
-          >
-            EN
-          </button>
-        </div>
+        <button className="btn dark studio-lang-toggle" type="button" onClick={toggleLanguage}>
+          {uiLanguage === "en" ? STUDIO_UI.switchToFrench : STUDIO_UI.switchToEnglish}
+        </button>
       </header>
 
       <div className="studio-phases">
@@ -156,7 +144,7 @@ export function InteractiveLessonPlayer({
             className={`phase-chip ${segment?.id === item.id ? "active" : ""}`}
             onClick={() => seek(item.start + 0.05)}
           >
-            {pickText(PHASE_LABEL[item.phase], uiLanguage)}
+            {phaseLabel(item.phase, item.label)}
           </button>
         ))}
       </div>
@@ -171,11 +159,12 @@ export function InteractiveLessonPlayer({
           videoUrl={timeline.media?.videoUrl}
           audioUrl={timeline.media?.audioUrl}
           poster={timeline.media?.poster ?? "/teachers/munzer.jpg?v=4"}
+          teacherName={instructor}
         />
         <MathCanvas state={canvas} language={uiLanguage} currentTime={currentTime} />
       </div>
 
-      <div className="studio-caption">
+      <div className="studio-caption" aria-live="polite">
         <p>{segment ? pickText(segment.narration, uiLanguage) : ""}</p>
       </div>
 
@@ -188,7 +177,7 @@ export function InteractiveLessonPlayer({
             setPlaying((value) => !value);
           }}
         >
-          {playing ? (uiLanguage === "ar" ? "إيقاف مؤقت" : "Pause") : uiLanguage === "ar" ? "تشغيل" : "Play"}
+          {playing ? pickText(STUDIO_UI.pause, uiLanguage) : pickText(STUDIO_UI.play, uiLanguage)}
         </button>
         <button
           className="btn"
@@ -198,10 +187,10 @@ export function InteractiveLessonPlayer({
             seek(0);
           }}
         >
-          {uiLanguage === "ar" ? "من البداية" : "Restart"}
+          {pickText(STUDIO_UI.restart, uiLanguage)}
         </button>
         <label className="studio-speed">
-          {uiLanguage === "ar" ? "السرعة" : "Speed"}
+          {pickText(STUDIO_UI.speed, uiLanguage)}
           <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
             {SPEEDS.map((value) => (
               <option key={value} value={value}>
@@ -220,7 +209,7 @@ export function InteractiveLessonPlayer({
           max={timeline.durationSec}
           step={0.1}
           value={currentTime}
-          aria-label={uiLanguage === "ar" ? "شريط الزمن" : "Seek"}
+          aria-label={pickText(STUDIO_UI.seek, uiLanguage)}
           onChange={(event) => seek(Number(event.target.value))}
         />
       </div>
@@ -229,8 +218,4 @@ export function InteractiveLessonPlayer({
       </div>
     </div>
   );
-}
-
-function languageToggleHint(language: LessonLanguage) {
-  return language === "ar" ? "النص على الشاشة: عربي (بدّل إلى EN)" : "On-screen text: English (switch to AR)";
 }
