@@ -1,0 +1,292 @@
+{
+  "id": "g12-gs-differential",
+  "track": "grade-12",
+  "certificate": "GS",
+  "topic": "differential",
+  "title": "Differential equations",
+  "arabicTitle": "المعادلات التفاضلية",
+  "contestMinutes": 25,
+  "passScore": 50,
+  "sourceModels": [
+    "GS-All.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "first-order",
+      "title": "First order",
+      "arabicTitle": "الرتبة الأولى"
+    },
+    {
+      "id": "second-order",
+      "title": "Second order",
+      "arabicTitle": "الرتبة الثانية"
+    },
+    {
+      "id": "linear",
+      "title": "Linear non-homogeneous",
+      "arabicTitle": "خطية غير متجانسة"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "differential",
+      "file": "content/banks/g12-gs/differential.json",
+      "title": "Differential equations",
+      "arabicTitle": "المعادلات التفاضلية",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-gs-de-x-01",
+      "slice": "first-order",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "exp-growth"
+      },
+      "stem": "The differential equation y'=2y has solutions of the form:",
+      "choices": [
+        "\\(y=Ce^{2x}\\)",
+        "\\(y=C e^{-2x}\\)",
+        "\\(y=2x+C\\)",
+        "\\(y=C/x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(y=Ce^{2x}\\)",
+      "solutionSketch": [
+        "Separable: dy/y=2 dx ⇒ ln|y|=2x+k."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "y'=2y"
+    },
+    {
+      "id": "g12-gs-de-x-02",
+      "slice": "first-order",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "ivp"
+      },
+      "stem": "A particular solution of y'+y=0 with y(0)=3 is:",
+      "choices": [
+        "\\(y=3e^x\\)",
+        "\\(y=3e^{-x}\\)",
+        "\\(y=3\\)",
+        "\\(y=e^{-3x}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(y=3e^{-x}\\)",
+      "solutionSketch": [
+        "General Ce^{-x}; C=3."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "y'+y=0,\\ y(0)=3"
+    },
+    {
+      "id": "g12-gs-de-x-03",
+      "slice": "second-order",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "char-pm1"
+      },
+      "stem": "For y''−y=0 the characteristic roots are ±1, so the general solution is:",
+      "choices": [
+        "\\(Ae^x+Be^{-x}\\)",
+        "\\(Ae^{x}+Be^{x}\\)",
+        "\\(A\\cos x+B\\sin x\\)",
+        "\\(Ax+B\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(Ae^x+Be^{-x}\\)",
+      "solutionSketch": [
+        "Distinct real roots ±1."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "y''-y=0"
+    },
+    {
+      "id": "g12-gs-de-x-04",
+      "slice": "second-order",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "harmonic"
+      },
+      "stem": "y''+4y=0 has characteristic r²+4=0, so r=±2i and the general solution is:",
+      "choices": [
+        "\\(e^{2x}(A\\cos x+B\\sin x)\\)",
+        "\\(A\\cos 2x+B\\sin 2x\\)",
+        "\\(A e^{2x}+B e^{-2x}\\)",
+        "\\(Ax+B\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(A\\cos 2x+B\\sin 2x\\)",
+      "solutionSketch": [
+        "Pure imaginary ±2i → cos(2x), sin(2x)."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "y''+4y=0"
+    },
+    {
+      "id": "g12-gs-de-x-05",
+      "slice": "linear",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "undetermined"
+      },
+      "stem": "A particular solution of y'−y=e^{2x} may be sought as ke^{2x}. Then k equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(1/2\\)",
+        "\\(2\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "2k e^{2x} − k e^{2x}=e^{2x} ⇒ k=1."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "y'-y=e^{2x}"
+    },
+    {
+      "id": "g12-gs-de-x-06",
+      "slice": "linear",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "affine-de"
+      },
+      "stem": "The equation y'+2y=4 has equilibrium y=2. Solutions tend to 2 as x→+∞ because the homogeneous factor is e^{-2x}. The general solution is:",
+      "choices": [
+        "\\(y=2+Ce^{-2x}\\)",
+        "\\(y=2+Ce^{2x}\\)",
+        "\\(y=4+Ce^{-2x}\\)",
+        "\\(y=Ce^{-2x}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(y=2+Ce^{-2x}\\)",
+      "solutionSketch": [
+        "Particular y=2; homogeneous Ce^{-2x}."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "y'+2y=4"
+    },
+    {
+      "id": "g12-gs-de-x-07",
+      "slice": "second-order",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "char"
+      },
+      "stem": "If y=e^{rx} solves y''+3y'+2y=0 then r satisfies:",
+      "choices": [
+        "\\(r^2+3r+2=0\\)",
+        "\\(r^2-3r+2=0\\)",
+        "\\(r+3=0\\)",
+        "\\(r^2+2=0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(r^2+3r+2=0\\)",
+      "solutionSketch": [
+        "Substitute: (r²+3r+2)e^{rx}=0."
+      ],
+      "bareme": 2,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "r^2+3r+2=0"
+    },
+    {
+      "id": "g12-gs-de-x-08",
+      "slice": "first-order",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "const"
+      },
+      "stem": "The solutions of y'=0 are:",
+      "choices": [
+        "\\(y=x+C\\)",
+        "\\(y=C\\)",
+        "\\(y=e^{Cx}\\)",
+        "\\(y=0\\) only"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(y=C\\)",
+      "solutionSketch": [
+        "Zero derivative: constant functions."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "y'=0"
+    }
+  ]
+}

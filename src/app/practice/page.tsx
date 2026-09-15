@@ -31,6 +31,21 @@ export default function PracticeHubPage() {
       <p className="muted">مسابقة الشهادة حسب الموضوع، أو تدريب درس واحد. الأسئلة بمستوى النماذج اللبنانية لا قوالب تعريف.</p>
 
       <section className="card" style={{ marginTop: 8 }}>
+        <h2>محرّك الامتحانات الكامل</h2>
+        <p className="muted">
+          تصفح حسب الفرع (Brevet / LS / GS / SE / LH) والسنة والدورة والموضوع، ثم ادخل ورقة متعددة المسائل مع مؤقت وباريم وتصدير PDF.
+        </p>
+        <div className="row">
+          <Link className="btn dark" href="/exams">
+            فتح بنك الامتحانات
+          </Link>
+          <Link className="btn" href="/exams/play?pack=paper-LS-2024-ordinary">
+            نموذج علوم الحياة 2024 عادية
+          </Link>
+        </div>
+      </section>
+
+      <section className="card" style={{ marginTop: 8 }}>
         <h2>مسابقات الشهادة حسب الموضوع</h2>
         <p className="muted">أربعة فروع للشهادة: علوم الحياة، اجتماع واقتصاد، علوم عامة، والشهادة المتوسطة. البنود أكاديمية أصلية بأسلوب النماذج، وليست نسخاً من دورات رسمية.</p>
 
@@ -79,6 +94,18 @@ export default function PracticeHubPage() {
           </p>
         ))}
         {grouped.brevet.map((card) => (
+          <BankCard key={card.id} card={card} />
+        ))}
+
+        <h3 style={{ marginTop: 24 }}>صف 12 · آداب وإنسانيات</h3>
+        <p className="muted">مسابقة الآداب مسودة بأسلوب رسمي: دوال، متتاليات، احتمالات، وهندسة تحليلية خفيفة. ليست أوراقاً رسمية منسوخة.</p>
+        {grouped.lh[0]?.contestTopics?.map((topic) => (
+          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+            {topic.arabicTitle ?? topic.title}
+            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
+          </p>
+        ))}
+        {grouped.lh.map((card) => (
           <BankCard key={card.id} card={card} />
         ))}
       </section>
@@ -146,6 +173,8 @@ function BankCard({
             ? "أسلوب نماذج العلوم العامة. البنود أكاديمية أصلية وليست نماذج منسوخة."
             : card.certificate === "Brevet"
               ? "أسلوب الشهادة المتوسطة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+              : card.certificate === "LH"
+                ? "مسودة آداب وإنسانيات بأسلوب رسمي. البنود أكاديمية أصلية وليست نماذج منسوخة."
               : null;
   return (
     <article className="card" style={{ marginTop: 12 }}>

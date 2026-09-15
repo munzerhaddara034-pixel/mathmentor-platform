@@ -92,6 +92,8 @@ export type ProgressEntry = {
 export type QuizKind = "mcq" | "tf";
 export type Difficulty = 1 | 2 | 3 | 4;
 
+export type SessionKind = "ordinary" | "extraordinary";
+
 export type QuizQuestion = {
   id: string;
   lessonId: string;
@@ -103,6 +105,17 @@ export type QuizQuestion = {
   options: string[];
   correctIndex: number;
   steps: string[];
+  /** Official-style barème points for this item (integer). */
+  points?: number;
+  partId?: string;
+  partLabel?: string;
+  solution?: string[];
+  styleYear?: number;
+  sessionKind?: SessionKind;
+  catalogTopic?: string;
+  sourceKind?: string;
+  styleTag?: string;
+  verbatimPastPaper?: boolean;
 };
 
 export type ExamPaper = {

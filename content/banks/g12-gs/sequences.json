@@ -1,0 +1,315 @@
+{
+  "id": "g12-gs-sequences",
+  "track": "grade-12",
+  "certificate": "GS",
+  "topic": "sequences",
+  "title": "Sequences",
+  "arabicTitle": "المتتاليات",
+  "contestMinutes": 20,
+  "passScore": 50,
+  "sourceModels": [
+    "GS-All.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "arith",
+      "title": "Arithmetic",
+      "arabicTitle": "حسابية"
+    },
+    {
+      "id": "limit",
+      "title": "Limits",
+      "arabicTitle": "النهايات"
+    },
+    {
+      "id": "recur",
+      "title": "Recurrence",
+      "arabicTitle": "تراجعية"
+    },
+    {
+      "id": "closed",
+      "title": "Closed form",
+      "arabicTitle": "الشكل الصريح"
+    },
+    {
+      "id": "mono",
+      "title": "Monotone convergence",
+      "arabicTitle": "الرتابة والتقارب"
+    },
+    {
+      "id": "sum",
+      "title": "Series",
+      "arabicTitle": "السلاسل"
+    },
+    {
+      "id": "complex-seq",
+      "title": "Complex sequences",
+      "arabicTitle": "متتاليات مركبة"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "sequences",
+      "file": "content/banks/g12-gs/sequences.json",
+      "title": "Sequences",
+      "arabicTitle": "المتتاليات",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-gs-seq-01",
+      "slice": "arith",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "arith"
+      },
+      "stem": "u_n=7−2n is arithmetic. u_0 and the common difference are:",
+      "choices": [
+        "\\(7\\) and \\(-2\\)",
+        "\\(7\\) and \\(2\\)",
+        "\\(-2\\) and \\(7\\)",
+        "\\(5\\) and \\(-2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(7\\) and \\(-2\\)",
+      "solutionSketch": [
+        "u_0=7.",
+        "d=u_{n+1}−u_n=−2."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=7-2n"
+    },
+    {
+      "id": "g12-gs-seq-02",
+      "slice": "limit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "rat-0"
+      },
+      "stem": "lim_{n→∞} n/(n²+1) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(1/2\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "Divide by n²: (1/n)/(1+1/n²) → 0."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\frac{n}{n^2+1}"
+    },
+    {
+      "id": "g12-gs-seq-03",
+      "slice": "recur",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "fixed-pt"
+      },
+      "stem": "u_{n+1}=(1/2)u_n+1, u_0=0. The fixed point ℓ=(1/2)ℓ+1 is:",
+      "choices": [
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(1/2\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "ℓ/2=1 so ℓ=2."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_{n+1}=\\frac12 u_n+1"
+    },
+    {
+      "id": "g12-gs-seq-04",
+      "slice": "closed",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "affine-closed"
+      },
+      "stem": "Set v_n=u_n−2 for u_{n+1}=(1/2)u_n+1, u_0=0. Then v_n=−2·(1/2)^n, so u_4 equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(1.5\\)",
+        "\\(1.875\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(1.875\\)",
+      "solutionSketch": [
+        "v_4=−2/16=−1/8.",
+        "u_4=2−1/8=15/8=1.875."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=2-2\\cdot(1/2)^n"
+    },
+    {
+      "id": "g12-gs-seq-05",
+      "slice": "mono",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "reciprocal-type"
+      },
+      "stem": "u_0=1, u_{n+1}=u_n/(1+u_n). Then (u_n) is positive, decreasing, and lim u_n equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(1/2\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "If ℓ=ℓ/(1+ℓ) then ℓ²=0 so ℓ=0.",
+        "u_{n+1}<u_n because 1/(1+u_n)<1."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_{n+1}=\\frac{u_n}{1+u_n}"
+    },
+    {
+      "id": "g12-gs-seq-06",
+      "slice": "complex-seq",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "mod-1"
+      },
+      "stem": "The sequence z_n=(1+i)^n / 2^{n/2} in C has modulus:",
+      "choices": [
+        "\\(1\\)",
+        "\\(√2\\)",
+        "\\(2^{n/2}\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "|1+i|=√2, so |z_n|=(√2)^n / 2^{n/2}=1."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "z_n=\\frac{(1+i)^n}{2^{n/2}}"
+    },
+    {
+      "id": "g12-gs-seq-07",
+      "slice": "sum",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "partial-geo"
+      },
+      "stem": "∑_{k=1}^{n} (1/2)^k = 1 − (1/2)^n. As n→∞ the sum tends to:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "Geometric: q=1/2, first term 1/2, infinite sum=1."
+      ],
+      "bareme": 2,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\sum_{k=1}^{n}(1/2)^k"
+    },
+    {
+      "id": "g12-gs-seq-08",
+      "slice": "limit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "e-limit"
+      },
+      "stem": "lim_{n→∞} (1+1/n)^n equals e. A numerical sandwich around e is closest to:",
+      "choices": [
+        "\\(2.0\\)",
+        "\\(2.7\\)",
+        "\\(3.5\\)",
+        "\\(1.5\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(2.7\\)",
+      "solutionSketch": [
+        "e≈2.718 so 2.7 is the listed neighbour."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\left(1+\\frac1n\\right)^n"
+    }
+  ]
+}

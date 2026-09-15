@@ -2,14 +2,15 @@
 
 Certificate practice is split **by topic**, not by dumping a whole session PDF into one quiz.
 
-Four certificate branches are live on `/practice`:
+Five certificate branches feed `/exams` (full papers + topic drills) and `/practice`:
 
 | Code | Arabic | Folder | Banks |
 | --- | --- | --- | --- |
 | **Brevet** | الشهادة المتوسطة | `brevet/` | numbers, algebra, word_problems, geometry, coordinate |
-| **LS** | علوم الحياة | `g12-ls/` | mcq_mixed, space_geometry, probability, functions |
-| **SE** | اجتماع واقتصاد | `g12-se/` | mcq_mixed, probability, functions |
-| **GS** | العلوم العامة | `g12-gs/` | mcq_mixed, space_geometry, probability, complex, functions |
+| **LS** | علوم الحياة | `g12-ls/` | mcq_mixed, space_geometry, probability, functions, **sequences** |
+| **SE** | اجتماع واقتصاد | `g12-se/` | mcq_mixed, probability, functions, **sequences** |
+| **GS** | العلوم العامة | `g12-gs/` | mcq_mixed, space_geometry, probability, complex, functions, **sequences**, **differential** |
+| **LH** | آداب وإنسانيات | `g12-lh/` | functions, sequences, probability, analytic_geometry (**scaffold**) |
 
 Official packs on Munzer’s PC (not committed; do not photocopy into Git):
 
@@ -101,13 +102,17 @@ Each file also stores `contestTopics` for that certificate, with `implemented: t
 python3 scripts/build-g12-banks.py      # LS remaining + SE + GS
 python3 scripts/build-brevet-banks.py   # Brevet
 python3 scripts/merge-session-style-functions.py  # LS Functions extras
+python3 scripts/build-exam-scaffold-banks.py      # sequences, DE extra, LH scaffold
 ```
 
 Register new files in `src/lib/topicBanks.ts` (`import` + `topicBanks` array + `CERTIFICATE_ORDER`). Then `npm run build`.
 
 ## Student URLs
 
-Hub: `/practice` (grouped Brevet / LS / SE / GS).
+Exam engine hub: `/exams` (filter by certificate × year/session × topic).  
+Play: `/exams/play?pack=paper-LS-2024-ordinary`  
+Printable PDF: `/exams/print?pack=paper-LS-2024-ordinary&mode=paper`  
+Legacy topic hub: `/practice` (grouped Brevet / LS / SE / GS / LH).
 
 Contest (16 questions, easy→hard): `/practice/take?bank=<id>&mode=contest`  
 Full-bank training: `/practice/take?bank=<id>&mode=free`
@@ -118,14 +123,22 @@ Full-bank training: `/practice/take?bank=<id>&mode=free`
 | `g12-ls-space-geometry` | LS space geometry |
 | `g12-ls-probability` | LS probability |
 | `g12-ls-functions` | LS functions |
+| `g12-ls-sequences` | LS sequences |
 | `g12-se-mcq-mixed` | SE mixed MCQ |
 | `g12-se-probability` | SE probability |
 | `g12-se-functions` | SE functions |
+| `g12-se-sequences` | SE sequences |
 | `g12-gs-mcq-mixed` | GS mixed MCQ |
 | `g12-gs-space-geometry` | GS space geometry |
 | `g12-gs-probability` | GS probability |
 | `g12-gs-complex` | GS complex numbers |
 | `g12-gs-functions` | GS functions |
+| `g12-gs-sequences` | GS sequences |
+| `g12-gs-differential` | GS differential equations |
+| `g12-lh-functions` | LH functions (scaffold) |
+| `g12-lh-sequences` | LH sequences (scaffold) |
+| `g12-lh-probability` | LH probability (scaffold) |
+| `g12-lh-analytic-geometry` | LH analytic geometry (scaffold) |
 | `brevet-numbers` | Brevet numbers |
 | `brevet-algebra` | Brevet algebra |
 | `brevet-word-problems` | Brevet word problems |

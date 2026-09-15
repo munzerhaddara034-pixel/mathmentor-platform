@@ -1,21 +1,29 @@
-import type { Difficulty, GradeTrack, QuizQuestion } from "./types";
+import type { Difficulty, GradeTrack, QuizQuestion, SessionKind } from "./types";
 import lsFunctionsBankJson from "../../content/banks/g12-ls/functions.json";
 import lsSpaceBankJson from "../../content/banks/g12-ls/space-geometry.json";
 import lsProbabilityBankJson from "../../content/banks/g12-ls/probability.json";
 import lsMcqBankJson from "../../content/banks/g12-ls/mcq-mixed.json";
+import lsSequencesBankJson from "../../content/banks/g12-ls/sequences.json";
 import seFunctionsBankJson from "../../content/banks/g12-se/functions.json";
 import seProbabilityBankJson from "../../content/banks/g12-se/probability.json";
 import seMcqBankJson from "../../content/banks/g12-se/mcq-mixed.json";
+import seSequencesBankJson from "../../content/banks/g12-se/sequences.json";
 import gsFunctionsBankJson from "../../content/banks/g12-gs/functions.json";
 import gsSpaceBankJson from "../../content/banks/g12-gs/space-geometry.json";
 import gsProbabilityBankJson from "../../content/banks/g12-gs/probability.json";
 import gsComplexBankJson from "../../content/banks/g12-gs/complex.json";
 import gsMcqBankJson from "../../content/banks/g12-gs/mcq-mixed.json";
+import gsSequencesBankJson from "../../content/banks/g12-gs/sequences.json";
+import gsDifferentialBankJson from "../../content/banks/g12-gs/differential.json";
 import numbersBankJson from "../../content/banks/brevet/numbers.json";
 import algebraBankJson from "../../content/banks/brevet/algebra.json";
 import wordProblemsBankJson from "../../content/banks/brevet/word_problems.json";
 import geometryBankJson from "../../content/banks/brevet/geometry.json";
 import coordinateBankJson from "../../content/banks/brevet/coordinate.json";
+import lhFunctionsBankJson from "../../content/banks/g12-lh/functions.json";
+import lhSequencesBankJson from "../../content/banks/g12-lh/sequences.json";
+import lhProbabilityBankJson from "../../content/banks/g12-lh/probability.json";
+import lhAnalyticBankJson from "../../content/banks/g12-lh/analytic-geometry.json";
 
 export type BankDifficulty = "easy" | "medium" | "hard";
 
@@ -36,6 +44,13 @@ export type TopicBankQuestion = {
   answer: string;
   solutionSketch: string[];
   lessonId?: string;
+  /** Official-style barème (marks). */
+  bareme?: number;
+  points?: number;
+  styleYear?: number;
+  session?: SessionKind | string;
+  styleTag?: string;
+  verbatimPastPaper?: boolean;
 };
 
 export type TopicBankSlice = {
@@ -67,6 +82,7 @@ export type TopicBank = {
   passScore: number;
   sourceModels: string[];
   styleNote?: string;
+  verbatimPastPaper?: boolean;
   slices: TopicBankSlice[];
   order?: string;
   contestTopics?: ContestPaperTopic[];
@@ -79,19 +95,27 @@ export const topicBanks: TopicBank[] = [
   lsSpaceBankJson as TopicBank,
   lsProbabilityBankJson as TopicBank,
   lsFunctionsBankJson as TopicBank,
+  lsSequencesBankJson as TopicBank,
   seMcqBankJson as TopicBank,
   seProbabilityBankJson as TopicBank,
   seFunctionsBankJson as TopicBank,
+  seSequencesBankJson as TopicBank,
   gsMcqBankJson as TopicBank,
   gsSpaceBankJson as TopicBank,
   gsProbabilityBankJson as TopicBank,
   gsComplexBankJson as TopicBank,
   gsFunctionsBankJson as TopicBank,
+  gsSequencesBankJson as TopicBank,
+  gsDifferentialBankJson as TopicBank,
   numbersBankJson as TopicBank,
   algebraBankJson as TopicBank,
   wordProblemsBankJson as TopicBank,
   geometryBankJson as TopicBank,
   coordinateBankJson as TopicBank,
+  lhFunctionsBankJson as TopicBank,
+  lhSequencesBankJson as TopicBank,
+  lhProbabilityBankJson as TopicBank,
+  lhAnalyticBankJson as TopicBank,
 ];
 
 export function getTopicBank(id: string): TopicBank | undefined {
@@ -104,7 +128,15 @@ export function bankDifficultyToLevel(difficulty: BankDifficulty): Difficulty {
   return 4;
 }
 
+export function defaultBareme(difficulty: BankDifficulty): number {
+  if (difficulty === "easy") return 1;
+  if (difficulty === "medium") return 2;
+  return 3;
+}
+
 export function bankItemToQuizQuestion(item: TopicBankQuestion, lessonId: string): QuizQuestion {
+  const points = item.bareme ?? item.points ?? defaultBareme(item.difficulty);
+  const session = item.session === "extraordinary" || item.session === "ordinary" ? item.session : undefined;
   return {
     id: item.id,
     lessonId: item.lessonId ?? lessonId,
@@ -115,6 +147,14 @@ export function bankItemToQuizQuestion(item: TopicBankQuestion, lessonId: string
     options: item.choices,
     correctIndex: item.answerIndex,
     steps: item.solutionSketch,
+    solution: item.solutionSketch,
+    points,
+    styleYear: item.styleYear,
+    sessionKind: session,
+    catalogTopic: undefined,
+    sourceKind: item.source?.kind,
+    styleTag: item.styleTag ?? (item.styleYear && session ? `style:official-${item.styleYear}-${session}` : undefined),
+    verbatimPastPaper: item.verbatimPastPaper === true,
   };
 }
 
@@ -188,14 +228,22 @@ export function listTopicBankCards() {
 }
 
 const CERTIFICATE_ORDER: Record<string, string[]> = {
-  LS: ["g12-ls-mcq-mixed", "g12-ls-space-geometry", "g12-ls-probability", "g12-ls-functions"],
-  SE: ["g12-se-mcq-mixed", "g12-se-probability", "g12-se-functions"],
+  LS: [
+    "g12-ls-mcq-mixed",
+    "g12-ls-space-geometry",
+    "g12-ls-probability",
+    "g12-ls-functions",
+    "g12-ls-sequences",
+  ],
+  SE: ["g12-se-mcq-mixed", "g12-se-probability", "g12-se-functions", "g12-se-sequences"],
   GS: [
     "g12-gs-mcq-mixed",
     "g12-gs-space-geometry",
     "g12-gs-probability",
     "g12-gs-complex",
     "g12-gs-functions",
+    "g12-gs-sequences",
+    "g12-gs-differential",
   ],
   Brevet: [
     "brevet-numbers",
@@ -204,6 +252,7 @@ const CERTIFICATE_ORDER: Record<string, string[]> = {
     "brevet-geometry",
     "brevet-coordinate",
   ],
+  LH: ["g12-lh-functions", "g12-lh-sequences", "g12-lh-probability", "g12-lh-analytic-geometry"],
 };
 
 function orderCards(cards: ReturnType<typeof listTopicBankCards>, ids: string[]) {
@@ -232,5 +281,24 @@ export function groupTopicBankCards() {
       cards.filter((card) => card.certificate === "Brevet"),
       CERTIFICATE_ORDER.Brevet,
     ),
+    lh: orderCards(
+      cards.filter((card) => card.certificate === "LH"),
+      CERTIFICATE_ORDER.LH,
+    ),
   };
+}
+
+/** Merge GS functions DE slice with the dedicated differential scaffold. */
+export function differentialPool(): TopicBankQuestion[] {
+  const extra = getTopicBank("g12-gs-differential")?.questions ?? [];
+  const fromFunctions = (getTopicBank("g12-gs-functions")?.questions ?? []).filter((item) => item.slice === "de");
+  const fromMixed = (getTopicBank("g12-gs-mcq-mixed")?.questions ?? []).filter((item) => item.slice === "de");
+  const seen = new Set<string>();
+  const merged: TopicBankQuestion[] = [];
+  for (const item of [...extra, ...fromFunctions, ...fromMixed]) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    merged.push(item);
+  }
+  return merged;
 }

@@ -29,10 +29,10 @@ const ARABIC_TRACK: Record<string, string> = {
 };
 
 const PRACTICE_HREF: Record<string, string> = {
-  "grade-9": "/practice/take?bank=brevet-geometry&mode=contest",
-  "grade-12": "/practice/take?bank=g12-ls-functions&mode=contest",
-  sat: "/practice",
-  "grade-11": "/practice",
+  "grade-9": "/exams",
+  "grade-12": "/exams",
+  sat: "/exams",
+  "grade-11": "/exams",
   "grade-7": "/practice",
   "grade-8": "/practice",
 };
