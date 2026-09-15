@@ -2,15 +2,15 @@
 
 import { useEffect } from "react";
 import { MathTex } from "@/components/MathTex";
-import type { NoteBlock } from "@/lib/grade12LsLimits";
+import type { NoteBlock } from "@/lib/lessonNotes";
 
-export function LessonNotes({ blocks }: { blocks: NoteBlock[] }) {
+export function LessonNotes({ blocks, dir = "ltr" }: { blocks: NoteBlock[]; dir?: "ltr" | "rtl" }) {
   useEffect(() => {
     void window.MathJax?.typesetPromise?.();
   }, [blocks]);
 
   return (
-    <article className="lesson-notes" dir="rtl">
+    <article className="lesson-notes" dir={dir}>
       {blocks.map((block, index) => {
         const key = `${block.type}-${index}`;
         if (block.type === "h2") return <h2 key={key}>{block.text}</h2>;

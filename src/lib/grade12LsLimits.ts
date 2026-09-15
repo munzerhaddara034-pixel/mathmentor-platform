@@ -1,16 +1,10 @@
+import type { NoteBlock } from "./lessonNotes";
 import type { StoryboardScene } from "./types";
+
+export type { NoteBlock } from "./lessonNotes";
 
 export const GRADE_12_LS_LIMITS_LESSON_ID = "grade-12-ch1";
 export const GRADE_12_LS_LIMITS_VIDEO_URL = "/videos/grade-12-ls-limits-intro.mp4";
-
-export type NoteBlock =
-  | { type: "h2"; text: string }
-  | { type: "h3"; text: string }
-  | { type: "p"; text: string }
-  | { type: "math"; tex: string }
-  | { type: "ul"; items: string[] }
-  | { type: "example"; title: string; given: string; tex?: string; steps: string[]; result: string }
-  | { type: "mistake"; title: string; wrong: string; right: string };
 
 export const grade12LsLimitsObjectives = [
   "أن يميّز الطالب بين قيمة الدالة عند نقطة وبين نهاية الدالة عند هذه النقطة.",

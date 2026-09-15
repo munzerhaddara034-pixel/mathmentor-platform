@@ -69,18 +69,35 @@ npm start
 
 DRM الحقيقي يحتاج حساب CDN مدفوع. المشغّل المحلي يضع علامة مائية فقط.
 
-**لكل درس** يمكن تعيين `videoUrl` على عنصر الدرس في `src/lib/academyLessons.ts` (انظر وحدة النهايات). المشغّل في `/classroom/[id]` يختار بالترتيب:
+**لكل درس** يمكن تعيين `videoUrl` (English, default) و`videoUrlFr` في `src/lib/academyLessons.ts`. The classroom player shows a single **EN | FR** control: one click swaps the audio track and every on-screen board/caption together. Default is English.
+
+المشغّل في `/classroom/[id]` و`/watch/[id]` يختار بالترتيب:
 
 1. رابط يوتيوب (`youtube.com/watch` أو `youtu.be`) → تضمين
-2. ملف مباشر: `/videos/....mp4` تحت `public/videos/`
+2. ملف مباشر: `/videos/....mp4` تحت `public/videos/` (English file on `videoUrl`, French file on `videoUrlFr`)
 3. Bunny / Vimeo / Wistia إذا كان الرابط من تلك الشبكات، أو عبر متغيرات البيئة أعلاه كاحتياطي عام
-4. اللوح التفاعلي (storyboard) **فقط** إذا لم يوجد أي رابط — لا ندّعي أن الفيديو سُجّل
+4. اللوح التفاعلي (storyboard) **فقط** إذا لم يوجد أي رابط — لا ندّعي أن الفيديو سُجّل. The board fallback also follows EN | FR.
 
 ---
 
+## Classroom videos (Professor Munzer)
+
+Teaching language for the new explainers is **English** (spoken + board). Students switch to **French** with one EN | FR click: audio and on-screen writing change together. The teacher on camera is Professor Munzer (`public/teachers/munzer.jpg` plus teaching poses). Style is hook → one idea → worked example → common mistake → recap — not a bullet list of objectives.
+
+| Lesson | Watch | Classroom | EN / FR files |
+| --- | --- | --- | --- |
+| Grade 12 LS · Continuity | `/lessons/grade-12-ls-continuity` · `/watch/grade-12-ch2` | `/classroom/grade-12-ch2` | `public/videos/grade-12-ls-continuity-en.mp4` / `-fr.mp4` |
+| Grade 12 LS · Derivatives intro | `/lessons/grade-12-ls-derivatives` · `/watch/grade-12-ch3` | `/classroom/grade-12-ch3` | `public/videos/grade-12-ls-derivatives-en.mp4` / `-fr.mp4` |
+| Brevet geometry · Thales | `/lessons/brevet-geometry` · `/watch/grade-9-ch4` | `/classroom/grade-9-ch4` | `public/videos/brevet-geometry-thales-en.mp4` / `-fr.mp4` |
+| Grade 12 LS · Limits (earlier unit) | `/lessons/grade-12-ls-ch1` | `/classroom/grade-12-ch1` | `public/videos/grade-12-ls-limits-intro.mp4` |
+
+Specs live in `content/lessons/*/video.json` so a later live recording can replace the mp4 without rewriting the player. Rebuild both languages with `npm run video:lessons`.
+
+Index of wired videos: `/lessons`.
+
 ## وحدة النهايات التجريبية (صف 12 علوم الحياة)
 
-المحتوى الجاهز للبيع في هذا الإصدار هو **النهايات**، مدخل باب الدوال (نهاية، استمرار، مشتقة):
+المحتوى الجاهز يشمل **النهايات** ثم فيديوهات **الاستمرار** و**المشتقة** و**طاليس**:
 
 | ماذا | أين |
 | --- | --- |
@@ -92,10 +109,6 @@ DRM الحقيقي يحتاج حساب CDN مدفوع. المشغّل المحل
 | مسابقة **علوم عامة** — أسئلة مختلطة، هندسة فضاء، احتمالات، أعداد مركبة، دوال | `/practice` أو `/practice/take?bank=g12-gs-functions&mode=contest` |
 | مسابقة **المتوسط** — الأعداد، الجبر، المسائل اللفظية، الهندسة، الهندسة التحليلية | `/practice` أو `/practice/take?bank=brevet-numbers&mode=contest` |
 | نصوص منطوقة لثلاثة دروس (للتسجيل الحي لاحقاً) | `content/grade-12-ls-limits/` |
-
-التدريب الحر لدرس النهايات يعرض شريحة النهايات. امتحان الدرس يسحب 12 سؤالاً بمزيج صعوبة. مسابقات الشهادة تستخدم بنك الموضوع مرتّباً سهل→صعب.
-
-لا توجد تسجيلات MP4 لباقي الصفوف بعد. الأستاذ يضع الملف أو رابط يوتيوب كما في القسم التالي.
 
 ---
 
@@ -163,8 +176,8 @@ content/banks/brevet/coordinate.json
 ## كيف يضيف منذر فيديو مسجّلاً أو رابط يوتيوب
 
 1. **يوتيوب:** انسخ رابط المشاهدة، ثم ضع `videoUrl: "https://www.youtube.com/watch?v=VIDEO_ID"` على الدرس في `src/lib/academyLessons.ts` (نفس الشكل المستخدم في درس النهايات).
-2. **ملف MP4 من تصوير الصف:** احفظ الملف في `public/videos/` باسم واضح، مثلاً `grade-12-ls-continuity.mp4`، ثم:
-   `videoUrl: "/videos/grade-12-ls-continuity.mp4"`
+2. **ملف MP4 من تصوير الصف:** احفظ الملف الإنجليزي في `public/videos/` باسم واضح، مثلاً `grade-12-ls-continuity-en.mp4`، ثم:
+   `videoUrl: "/videos/grade-12-ls-continuity-en.mp4"` and `videoUrlFr: "/videos/grade-12-ls-continuity-fr.mp4"`. The player default is English; FR swaps audio + board text together.
 3. **Bunny / Vimeo / Wistia:** ضع رابط التضمين في `videoUrl`، أو اضبط متغيرات البيئة إذا كان البث عامّاً للمنصة.
 4. أعد تشغيل `npm run dev`. صفحة الصف تشغّل الملف الحقيقي ولا تعود إلى اللوح إلا إذا حُذف الرابط.
 
@@ -181,13 +194,13 @@ content/banks/brevet/coordinate.json
    - `content/grade-12-ls-limits/02-one-sided-infinity-spoken-ar.md`
    - `content/grade-12-ls-limits/03-indeterminate-squeeze-spoken-ar.md`
 2. إن كان التصوير الحي جاهزاً: سجّل الدرس، ضع الـ MP4 في `public/videos/`، اربط `videoUrl` كما أعلاه. هذا هو المسار الأفضل.
-3. إن لم يُسجَّل بعد وتريد مسودة شرح على اللوح (كالوحدة التجريبية): انسخ `content/grade-12-ls-limits/intro-video.json`، غيّر المشاهد (`hook` / `idea` / `example` / `mistake` / `recap`)، ثم:
+3. إن لم يُسجَّل بعد وتريد مسودة شرح على اللوح: انسخ `content/lessons/grade-12-ls-continuity/video.json`، اكتب `narration_en` / `narration_fr` و`caption_en` / `caption_fr` و`board_en` / `board_fr` (مشاهد `hook` / `idea` / `example` / `mistake` / `recap`)، ثم:
    ```bash
-   python3 -m pip install pillow arabic-reshaper
-   python3 scripts/render-lesson-video.py content/grade-12-ls-limits/intro-video.json public/videos/YOUR-LESSON.mp4
+   python3 -m pip install pillow arabic-reshaper edge-tts
+   python3 scripts/render-lesson-video.py content/lessons/YOUR-LESSON/video.json --both
    ```
-   أو: `npm run video:limits` لإعادة توليد فيديو النهايات.
-   العربية تُرسم من اليمين بعد `arabic_reshaper` فقط — لا تستخدم `python-bidi` بعد إعادة التشكيل (يعكس الحروف مرتين). اجعل سطور الرياضيات لاتينية والسطور العربية منفصلة حتى لا تنكسر الحروف.
+   أو: `npm run video:lessons` لإعادة توليد الاستمرار والمشتقة وطاليس (EN+FR). `npm run video:limits` يعيد فيديو النهايات.
+   Default teaching language is English. `--lang fr` (or `--both`) writes the French file with French TTS and French board text. Live sample recordings from the professor can replace the mp4 paths without changing the EN | FR player.
 4. اكتب الملخص العربي للطلاب (أهداف، شرح، أمثلة، أخطاء) وأضف 30+ سؤالاً **بمستوى الامتحان اللبناني** لا أسئلة مفردات. اربطها في `src/lib/quizBank.ts` كما في `grade12LsLimitsQuestions.ts`.
 5. `npm run build` قبل الدمج.
 
@@ -214,7 +227,12 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 | `/` | الصفحة الرئيسية |
 | `/classroom` | فيديوهات الصفوف |
 | `/classroom/grade-12-ch1` | وحدة النهايات (فيديو + ملخص عربي) |
-| `/lessons/grade-12-ls-ch1` | نفس الوحدة من مسار الدروس |
+| `/lessons` | فهرس فيديوهات الشرح |
+| `/lessons/grade-12-ls-ch1` | نفس وحدة النهايات |
+| `/lessons/grade-12-ls-continuity` | الاستمرار — EN default, FR toggle |
+| `/lessons/grade-12-ls-derivatives` | المشتقة — EN default, FR toggle |
+| `/lessons/brevet-geometry` | طاليس / هندسة Brevet — EN default, FR toggle |
+| `/watch/[id]` | مسار مشاهدة عام (مثلاً `/watch/grade-12-ch2`) |
 | `/student` | دردشة الطالب ورفع صورة/ملف |
 | `/practice` | تمارين واختبارات (MathJax) |
 | `/quiz/[lessonId]` | اختبار الدرس |

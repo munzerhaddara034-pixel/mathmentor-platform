@@ -3,8 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { StoryboardScene } from "@/lib/types";
 
-function pickEnglishVoice() {
-  const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith("en"));
+function pickVoice(lang: "en" | "fr") {
+  const prefix = lang === "fr" ? "fr" : "en";
+  const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(prefix));
+  if (lang === "fr") {
+    return voices.find((voice) => /henri|thomas|paul|claude/i.test(voice.name)) || voices[0];
+  }
   return (
     voices.find((voice) => /en-US/i.test(voice.lang) && /david|mark|guy|ryan|george|andrew/i.test(voice.name)) ||
     voices.find((voice) => /en-US/i.test(voice.lang)) ||
@@ -16,10 +20,12 @@ export function ClassroomStudio({
   scenes,
   heading,
   watermark = "طالب المنصة · 76532421",
+  lang = "en",
 }: {
   scenes: StoryboardScene[];
   heading: string;
   watermark?: string;
+  lang?: "en" | "fr";
 }) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -27,11 +33,11 @@ export function ClassroomStudio({
   const indexRef = useRef(0);
 
   useEffect(() => {
-    const remember = () => pickEnglishVoice();
+    const remember = () => pickVoice(lang);
     remember();
     window.speechSynthesis.addEventListener("voiceschanged", remember);
     return () => window.speechSynthesis.removeEventListener("voiceschanged", remember);
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     indexRef.current = index;
@@ -58,9 +64,9 @@ export function ClassroomStudio({
     const scene = scenes[index];
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(scene.narration);
-    utterance.lang = "en-US";
+    utterance.lang = lang === "fr" ? "fr-FR" : "en-US";
     utterance.rate = 0.9;
-    const voice = pickEnglishVoice();
+    const voice = pickVoice(lang);
     if (voice) utterance.voice = voice;
     utterance.onend = () => {
       if (indexRef.current < scenes.length - 1) setIndex((value) => value + 1);
@@ -71,7 +77,7 @@ export function ClassroomStudio({
       utterance.onend = null;
       window.speechSynthesis.cancel();
     };
-  }, [playing, index, scenes]);
+  }, [playing, index, scenes, lang]);
 
   if (!scenes.length) return null;
   const scene = scenes[index];
@@ -123,7 +129,7 @@ export function ClassroomStudio({
           Stop
         </button>
         <span className="muted">
-          Scene {index + 1} / {scenes.length} · English voice · writing on the board
+          Scene {index + 1} / {scenes.length} · {lang === "fr" ? "voix FR" : "English voice"} · writing on the board
         </span>
       </div>
     </div>

@@ -18,6 +18,9 @@ export default function HomePage() {
           <Link href="/classroom" className="btn">
             Classroom studio
           </Link>
+          <Link href="/lessons" className="ghost-btn">
+            Watch lessons
+          </Link>
           <Link href="/practice" className="ghost-btn">
             بنك الأسئلة
           </Link>

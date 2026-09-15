@@ -5,6 +5,8 @@ import { LessonVideoPlayer } from "@/components/LessonVideoPlayer";
 import { academyLessons, classroomScenes, getAcademyLesson, type AcademyLesson } from "@/lib/academyLessons";
 import { grade12LsLimitsNotes, GRADE_12_LS_LIMITS_LESSON_ID } from "@/lib/grade12LsLimits";
 import { isLessonUnlocked, PASS_SCORE } from "@/lib/gating";
+import { DEFAULT_LESSON_LANG, type LessonLang } from "@/lib/lessonNotes";
+import { copyForLang, getVideoLessonPack, notesForPack, scenesForPack } from "@/lib/videoLessons";
 import { watermarkText } from "@/lib/videoSecurity";
 import type { ProgressEntry, StoreData } from "@/lib/types";
 import Link from "next/link";
@@ -15,9 +17,10 @@ export default function ClassroomLessonPage() {
   const params = useParams<{ id: string }>();
   const [custom, setCustom] = useState<AcademyLesson[]>([]);
   const [progress, setProgress] = useState<ProgressEntry[]>([]);
-  const [studentName, setStudentName] = useState("طالب المنصة");
+  const [studentName, setStudentName] = useState("Academy student");
   const [phone, setPhone] = useState("76532421");
   const [saved, setSaved] = useState(false);
+  const [lang, setLang] = useState<LessonLang>(DEFAULT_LESSON_LANG);
 
   useEffect(() => {
     void fetch("/api/content")
@@ -66,54 +69,67 @@ export default function ClassroomLessonPage() {
   };
 
   const watermark = watermarkText(studentName, phone);
+  const pack = getVideoLessonPack(lesson.id);
   const hasPilotNotes = lesson.id === GRADE_12_LS_LIMITS_LESSON_ID;
+  const copy = pack ? copyForLang(pack, lang) : null;
+  const pageDir = pack ? "ltr" : "rtl";
 
   return (
-    <main className="shell protected-lesson" dir="rtl" onContextMenu={(event) => event.preventDefault()}>
+    <main className="shell protected-lesson" dir={pageDir} onContextMenu={(event) => event.preventDefault()}>
       <p className="eyebrow">
-        {lesson.gradeLabel} · {lesson.arabicTitle}
+        {pack ? copy?.trackLabel : lesson.gradeLabel} · {pack ? copy?.title : lesson.arabicTitle}
       </p>
       <h1>
-        الفصل {lesson.chapter} · {lesson.arabicTitle}
+        {pack ? copy?.title : `الفصل ${lesson.chapter} · ${lesson.arabicTitle}`}
       </h1>
       <p className="muted">{lesson.idea}</p>
       <div className="grid two">
         <label>
-          اسمك على الفيديو
+          Name on the video
           <input value={studentName} onChange={(event) => setStudentName(event.target.value)} />
         </label>
         <label>
-          رقم هاتفك للعلامة المائية
+          Phone for the watermark
           <input value={phone} onChange={(event) => setPhone(event.target.value)} />
         </label>
       </div>
       <LessonVideoPlayer
         videoUrl={lesson.videoUrl}
+        videoUrlFr={lesson.videoUrlFr}
         heading={`${lesson.gradeLabel} · Ch. ${lesson.chapter}`}
-        scenes={classroomScenes(lesson)}
+        scenes={pack ? scenesForPack(pack, lang, lesson) : classroomScenes(lesson, lang)}
+        scenesFr={pack?.fallbackFr}
         watermark={watermark}
+        lang={lang}
+        onLangChange={setLang}
       />
       {!lesson.videoUrl ? (
         <p className="muted" style={{ marginTop: 8 }}>
-          لا يوجد ملف فيديو مسجّل لهذا الدرس بعد. يُعرض اللوح التفاعلي إلى أن يضع الأستاذ رابط يوتيوب أو ملفاً في{" "}
-          <code>public/videos/</code>.
+          No recorded file for this lesson yet. The interactive board plays until a YouTube link or a file in{" "}
+          <code>public/videos/</code> is set.
         </p>
       ) : null}
-      {hasPilotNotes ? <LessonNotes blocks={grade12LsLimitsNotes} /> : null}
+      {pack ? <LessonNotes blocks={notesForPack(pack, lang)} dir="ltr" /> : null}
+      {hasPilotNotes ? <LessonNotes blocks={grade12LsLimitsNotes} dir="rtl" /> : null}
       <div className="row" style={{ marginTop: 20 }}>
         <Link className="btn dark" href={`/practice/take?lessonId=${lesson.id}&mode=exam`}>
-          امتحان الدرس (70% لفتح التالي)
+          {copy?.exam ?? "Lesson exam (70% to unlock next)"}
         </Link>
-        <Link className="btn" href={`/practice/take?lessonId=${lesson.id}&mode=free`}>
-          تدريب النهايات
+        <Link className="btn" href={pack?.practiceHref ?? `/practice/take?lessonId=${lesson.id}&mode=free`}>
+          {copy?.practice ?? "Practice"}
         </Link>
+        {pack ? (
+          <Link className="btn" href={pack.contestHref}>
+            {copy?.contestLabel}
+          </Link>
+        ) : null}
         {hasPilotNotes ? (
           <Link className="btn" href="/practice/take?bank=g12-ls-functions&mode=contest">
             مسابقة الدوال
           </Link>
         ) : null}
         <button className="btn ok" type="button" onClick={() => void complete()}>
-          {saved ? "Saved to your path" : "I finished this lesson"}
+          {saved ? copy?.saved ?? "Saved to your path" : copy?.finished ?? "I finished this lesson"}
         </button>
         {next ? (
           nextOpen || thisPassed ? (
@@ -121,12 +137,17 @@ export default function ClassroomLessonPage() {
               Next chapter
             </Link>
           ) : (
-            <span className="muted">الدرس التالي مقفل حتى نجاح الاختبار</span>
+            <span className="muted">Next lesson unlocks after a passing quiz</span>
           )
         ) : null}
         <Link className="btn" href={`/resources/print/${lesson.id}`}>
-          ملخص / ورقة عمل
+          Notes / worksheet
         </Link>
+        {pack ? (
+          <Link className="btn" href={pack.watchPath}>
+            Watch route
+          </Link>
+        ) : null}
         <Link className="btn" href="/student">
           Ask in chat
         </Link>

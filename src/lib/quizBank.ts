@@ -1,4 +1,7 @@
 import { academyLessons } from "./academyLessons";
+import { brevetThalesQuestions } from "./brevetGeometryQuestions";
+import { grade12LsContinuityQuestions } from "./grade12LsContinuityQuestions";
+import { grade12LsDerivativesQuestions } from "./grade12LsDerivativesQuestions";
 import { grade12LsLimitsQuestions } from "./grade12LsLimitsQuestions";
 import { getTopicBank, quizQuestionsForBank } from "./topicBanks";
 import type { Difficulty, QuizQuestion } from "./types";
@@ -19,6 +22,9 @@ function q(
 
 const extra: QuizQuestion[] = [
   ...grade12LsLimitsQuestions,
+  ...grade12LsContinuityQuestions,
+  ...grade12LsDerivativesQuestions,
+  ...brevetThalesQuestions,
   q("grade-9-ch3", 1, 1, "The unique solution of x+y=5 and x-y=1 is:", ["(2,3)", "(3,2)", "(4,1)", "(1,4)"], 1, ["Add the equations: $2x=6$ so $x=3$.", "Then $3+y=5$ so $y=2$."]),
   q("grade-9-ch5", 1, 2, "Slope of f(x)=-x+3 is:", ["3", "1", "0", "-1"], 3, ["In $f(x)=ax+b$, $a$ is the slope.", "Here $a=-1$."], "f(x)=-x+3"),
   q("grade-7-ch4", 1, 1, "Solve x+5=12.", ["5", "7", "17", "12"], 1, ["Subtract 5 from both sides.", "$x=7$. Check: $7+5=12$."]),
