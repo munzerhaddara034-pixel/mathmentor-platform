@@ -26,7 +26,9 @@ export default function Grade12LsChapter1Page() {
       <LessonNotes blocks={grade12LsLimitsNotes} />
       <article className="card" style={{ marginTop: 24 }}>
         <h3>بعد هذا الفيديو</h3>
-        <p className="muted">تدريب النهايات، أو مسابقة موضوع الدوال (نهاية ثم استمرار ثم مشتقة) مرتّبة سهل فمتوسط فصعب.</p>
+        <p className="muted">
+          تدريب النهايات، أو مسابقة المسألة الرابعة (دراسة الدوال: نهاية، استمرار، مشتقة، جدول تغيرات، تقارب، دالة عكسية) مرتّبة سهل فمتوسط فصعب. البنود بأسلوب النماذج وليست نسخاً من دورة رسمية.
+        </p>
         <div className="row">
           <Link href={`/practice/take?lessonId=${GRADE_12_LS_LIMITS_LESSON_ID}&mode=free`} className="btn dark">
             تدريب النهايات

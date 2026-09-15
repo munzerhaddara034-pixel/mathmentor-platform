@@ -29,6 +29,16 @@ export type TopicBankSlice = {
   note?: string;
 };
 
+/** Typical Lebanese Grade 12 LS paper: I mixed MCQ, II space geometry, III probability, IV functions analysis. */
+export type ContestPaperTopic = {
+  id: string;
+  file: string | null;
+  title: string;
+  arabicTitle?: string;
+  note?: string;
+  implemented?: boolean;
+};
+
 export type TopicBank = {
   id: string;
   track: GradeTrack | string;
@@ -43,6 +53,7 @@ export type TopicBank = {
   styleNote?: string;
   slices: TopicBankSlice[];
   order?: string;
+  contestTopics?: ContestPaperTopic[];
   nextTopicFiles?: string[];
   questions: TopicBankQuestion[];
 };
@@ -89,7 +100,7 @@ export function quizQuestionsForSlice(bankId: string, slice: string, lessonId?: 
     .map((item) => bankItemToQuizQuestion(item, fallback));
 }
 
-/** Keep easy → medium → hard. Within a band, round-robin slices so Limits stays first but continuity/derivatives appear. */
+/** Keep easy → medium → hard. Within a band, round-robin slices so Limits stays first and later Problem-IV slices still appear. */
 export function contestFromBank(
   bankId: string,
   counts: { easy: number; medium: number; hard: number } = { easy: 5, medium: 7, hard: 4 },
@@ -136,5 +147,7 @@ export function listTopicBankCards() {
     contestMinutes: bank.contestMinutes,
     passScore: bank.passScore,
     slices: bank.slices,
+    contestTopics: bank.contestTopics ?? [],
+    styleNote: bank.styleNote,
   }));
 }

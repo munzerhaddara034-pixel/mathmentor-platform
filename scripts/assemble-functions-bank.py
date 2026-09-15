@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Assemble content/banks/g12-ls/functions.json (easy → medium → hard)."""
+"""Bootstrap-only assembler for content/banks/g12-ls/functions.json.
+
+Do NOT re-run this after session-style items exist: it rebuilds from
+/tmp/limits-quiz.json + hardcoded extras and would drop variation /
+asymptotes / inverse slices.
+
+To add official-session-style items, edit and run:
+  python3 scripts/merge-session-style-functions.py
+"""
 
 from __future__ import annotations
 

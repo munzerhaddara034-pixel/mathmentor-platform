@@ -33,8 +33,16 @@ export default function PracticeHubPage() {
       <section className="card" style={{ marginTop: 8 }}>
         <h2>مسابقات الشهادة حسب الموضوع</h2>
         <p className="muted">
-          تُقسَّم نماذج علوم الحياة إلى نحو أربعة بنوك. التجريبي: <strong>الدوال</strong> (النهايات أولاً، ثم الاستمرار، ثم المشتقات)، مرتّب سهل → صعب.
+          نموذج علوم الحياة الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم <strong>دراسة الدوال</strong>. المنفَّذ الآن هو المسألة الرابعة.
         </p>
+        {topicCards
+          .find((card) => card.id === "g12-ls-functions")
+          ?.contestTopics?.map((topic) => (
+            <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+              {topic.arabicTitle ?? topic.title}
+              {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
+            </p>
+          ))}
         {topicCards.map((card) => (
           <article key={card.id} className="card" style={{ marginTop: 12 }}>
             <span className="badge">{card.certificate}</span>
@@ -44,6 +52,7 @@ export default function PracticeHubPage() {
             <p className="muted">
               {card.questionCount} سؤالاً · {card.slices.map((slice) => slice.arabicTitle).join(" · ")} · المسابقة {card.contestMinutes} دقيقة
             </p>
+            {card.styleNote ? <p className="muted">{card.id === "g12-ls-functions" ? "أسلوب المسألة الرابعة في نماذج علوم الحياة، بنود أكاديمية أصلية وليست نماذج منسوخة." : card.styleNote}</p> : null}
             <div className="row">
               <Link className="btn dark" href={`/practice/take?bank=${card.id}&mode=contest`}>
                 مسابقة {card.arabicTitle}
