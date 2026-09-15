@@ -118,8 +118,10 @@ export function QuizEngine({
   };
 
   const clock = useMemo(() => {
-    const m = Math.floor(secondsLeft / 60);
+    const h = Math.floor(secondsLeft / 3600);
+    const m = Math.floor((secondsLeft % 3600) / 60);
     const s = secondsLeft % 60;
+    if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
     return `${m}:${s.toString().padStart(2, "0")}`;
   }, [secondsLeft]);
 
@@ -137,12 +139,17 @@ export function QuizEngine({
         <div className={`result-hero ${result.passed ? "pass" : "fail"}`}>
           <p className="eyebrow">{result.passed ? "أحسنت" : "حاول مرة أخرى"}</p>
           <h2>
-            {result.earned} / {result.totalPoints}
+            <span className="num-ltr">
+              {result.earned} / {result.totalPoints}
+            </span>
             <span className="result-bareme-unit"> علامة</span>
           </h2>
           <p>
-            الباريم {result.percent}% · {result.score} إجابة صحيحة من {questions.length} · الوقت{" "}
-            {Math.floor(result.elapsedSec / 60)}:{String(result.elapsedSec % 60).padStart(2, "0")} · النجاح من {passScore}%
+            الباريم <span className="num-ltr">{result.percent}%</span> · {result.score} إجابة صحيحة من {questions.length} · الوقت{" "}
+            <span className="num-ltr">
+              {Math.floor(result.elapsedSec / 60)}:{String(result.elapsedSec % 60).padStart(2, "0")}
+            </span>{" "}
+            · النجاح من {passScore}%
           </p>
         </div>
         {pack ? (
@@ -190,7 +197,9 @@ export function QuizEngine({
                     </td>
                     <td>{max}</td>
                     <td>
-                      {earned} / {max}
+                      <span className="num-ltr">
+                        {earned} / {max}
+                      </span>
                     </td>
                   </tr>
                 );
@@ -201,7 +210,7 @@ export function QuizEngine({
                 </td>
                 <td>{result.totalPoints}</td>
                 <td>
-                  <strong>
+                  <strong className="num-ltr">
                     {result.earned} / {result.totalPoints}
                   </strong>
                 </td>
@@ -220,7 +229,10 @@ export function QuizEngine({
                 <span className={`badge ${ok ? "approved" : "rejected"}`}>{ok ? "صح" : "خطأ"}</span>
                 {item.partLabel ? <span className="badge">{item.partLabel}</span> : null}
                 <span className="badge">
-                  الباريم {ok ? pts : 0} / {pts}
+                  الباريم{" "}
+                  <span className="num-ltr">
+                    {ok ? pts : 0} / {pts}
+                  </span>
                 </span>
               </div>
               <p>
@@ -242,11 +254,6 @@ export function QuizEngine({
     );
   }
 
-  const visibleIndexes =
-    activePart === "all"
-      ? questions.map((_, i) => i)
-      : questions.map((item, i) => ((item.partId ?? "") === activePart ? i : -1)).filter((i) => i >= 0);
-
   return (
     <section className="quiz-engine" dir="rtl">
       <div className="quiz-toolbar">
@@ -256,7 +263,14 @@ export function QuizEngine({
         <p className="muted">
           سؤال {index + 1} / {questions.length}
           {question ? ` · صعوبة ${difficultyLabel[question.difficulty]}` : ""} · أُجيب {answered}
-          {timed ? ` · الوقت ${clock}` : " · تدريب حر"}
+          {timed ? (
+            <>
+              {" "}
+              · الوقت <span className="num-ltr">{clock}</span>
+            </>
+          ) : (
+            " · تدريب حر"
+          )}
           {question?.points != null ? ` · ${question.points} عل.` : ""}
         </p>
         {examParts.length > 1 ? (
@@ -351,9 +365,9 @@ export function QuizEngine({
         </button>
       </div>
       <div className="quiz-dots">
-        {(visibleIndexes.length ? visibleIndexes : questions.map((_, i) => i)).map((i) => (
+        {questions.map((item, i) => (
           <button
-            key={questions[i]?.id ?? i}
+            key={item.id}
             type="button"
             className={`dot ${i === index ? "current" : ""} ${answers[i] != null ? "done" : ""} ${flagged[i] ? "flag" : ""}`}
             onClick={() => setIndex(i)}

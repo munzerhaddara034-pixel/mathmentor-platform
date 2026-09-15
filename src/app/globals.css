@@ -479,6 +479,11 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .result-item-head { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .result-bareme-unit { font-size: 0.55em; font-weight: 700; margin-inline-start: 8px; }
+.num-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
 .bareme-table { margin-top: 18px; }
 .exam-disclaimer-inline { margin-top: 12px; }
 

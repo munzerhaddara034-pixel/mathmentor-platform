@@ -103,7 +103,10 @@ export function ExamPaperSheet({
                   {mode === "solutions" ? (
                     <div className="exam-solution">
                       <p>
-                        <strong>الباريم:</strong> {ok ? item.points ?? 1 : 0} / {item.points ?? 1}
+                        <strong>الباريم:</strong>{" "}
+                        <span className="num-ltr">
+                          {ok ? item.points ?? 1 : 0} / {item.points ?? 1}
+                        </span>
                         {picked == null ? " · بدون إجابة" : ok ? " · إجابة صحيحة" : " · إجابة خاطئة"}
                       </p>
                       <p>
