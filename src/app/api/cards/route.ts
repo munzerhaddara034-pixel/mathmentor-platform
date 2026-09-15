@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
+import { requireRole } from "@/lib/auth/server";
 import { createScratchCards, readStore } from "@/lib/store";
 
 export async function GET() {
+  const gate = await requireRole(["teacher"]);
+  if (!gate.ok) return gate.error;
   const store = await readStore();
   return NextResponse.json({ cards: store.scratchCards, entitlements: store.entitlements });
 }
 
 export async function POST(request: Request) {
+  const gate = await requireRole(["teacher"]);
+  if (!gate.ok) return gate.error;
   const body = (await request.json()) as {
     code?: string;
     planId?: string;

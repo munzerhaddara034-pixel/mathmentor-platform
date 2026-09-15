@@ -7,7 +7,7 @@ export function ChatWidget() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<{ role: "user" | "bot"; text: string }[]>([
-    { role: "bot", text: "أهلاً بك في منصة الأستاذ منذر حدارة. كيف أساعدك؟" },
+    { role: "bot", text: "أهلاً بك. أنا «مساعد الأستاذ منذر». اسأل عن درس، تمرين، أو طريقة الاشتراك." },
   ]);
 
   const send = async () => {
@@ -31,8 +31,8 @@ export function ChatWidget() {
       {open ? (
         <div className="chat-panel">
           <header>
-            <strong>مساعد المنصة</strong>
-            <button type="button" onClick={() => setOpen(false)}>
+            <strong>مساعد الأستاذ منذر</strong>
+            <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق المساعد">
               ×
             </button>
           </header>
@@ -57,7 +57,7 @@ export function ChatWidget() {
         </div>
       ) : null}
       <button className="chat-fab" type="button" onClick={() => setOpen((value) => !value)}>
-        مساعد
+        مساعد الأستاذ منذر
       </button>
     </div>
   );
