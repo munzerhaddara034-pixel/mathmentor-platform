@@ -15,8 +15,8 @@ export default function ClassroomIndexPage() {
       .then((store: StoreData) => setProgress(store.progress ?? []));
   }, []);
 
-  return (
-    <main className="shell">
+    return (
+    <main className="shell" dir="ltr">
       <p className="eyebrow">Classroom studio</p>
       <h1>Every grade. Every chapter. Professor at the board.</h1>
       <p className="muted">Open the lesson, then the quiz. The next chapter unlocks at 70%. Bilingual videos use one EN | FR click for voice and board together.</p>
