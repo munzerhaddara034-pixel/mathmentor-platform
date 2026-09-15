@@ -46,6 +46,9 @@ export function botReply(question: string) {
   const hit = academyLessons.find((lesson) => q.includes(lesson.title.toLowerCase()) || question.includes(lesson.arabicTitle) || q.includes(`ch${lesson.chapter}`));
   if (hit || q.includes("شرح") || q.includes("حل") || q.includes("نهاي") || q.includes("limit") || q.includes("معادل")) {
     const lesson = hit ?? academyLessons.find((item) => item.id === "grade-12-ch1")!;
+    if (lesson.id === "grade-12-ch1") {
+      return `حسب وحدة النهايات (صف 12 علوم الحياة):\n1) النهاية هي الاقتراب لا قيمة النقطة.\n2) إن ظهر 0/0 فلا تقل «غير موجودة» — حلّل أو عقّل ثم أعد أخذ النهاية.\n3) مثال: lim (x²−4)/(x−2) عندما x→2 تساوي 4 بعد اختزال (x−2).\n4) في اللانهاية خذ الحد المسيطر. √(x²)=|x| وليس x في −∞.\nافتح /classroom/grade-12-ch1 للفيديو والملخص، ثم /practice للتدريب.`;
+    }
     return `حسب محتوى الأستاذ منذر — ${lesson.gradeLabel} / ${lesson.title}:\n1) المعطى\n2) القانون: ${lesson.board}\n3) التنفيذ: ${lesson.example}\n4) الناتج: ${lesson.exampleBoard}\n5) تحقق بالتعويض.\nإذا أردت المزيد افتح الصف ثم اختبار الدرس. إن لم يكفِ اترك اسمك ورقم 76532… ليتم التواصل.`;
   }
   return `أنا مساعد منصة الأستاذ منذر حدارة.\n${kb.split("\n").slice(0, 8).join("\n")}\nسؤالك: «${question}». إن لم أستطع إغلاقه، اترك اسمك ورقم هاتفك (المنصة: 76532421) لإدارة الأستاذ.`;

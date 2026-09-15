@@ -1,9 +1,11 @@
 "use client";
 
-import { ClassroomStudio } from "@/components/ClassroomStudio";
+import { LessonNotes } from "@/components/LessonNotes";
+import { LessonVideoPlayer } from "@/components/LessonVideoPlayer";
 import { academyLessons, classroomScenes, getAcademyLesson, type AcademyLesson } from "@/lib/academyLessons";
+import { grade12LsLimitsNotes, GRADE_12_LS_LIMITS_LESSON_ID } from "@/lib/grade12LsLimits";
 import { isLessonUnlocked, PASS_SCORE } from "@/lib/gating";
-import { videoSecurity, hostedEmbedSrc, watermarkText } from "@/lib/videoSecurity";
+import { watermarkText } from "@/lib/videoSecurity";
 import type { ProgressEntry, StoreData } from "@/lib/types";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -63,17 +65,18 @@ export default function ClassroomLessonPage() {
     setSaved(true);
   };
 
+  const watermark = watermarkText(studentName, phone);
+  const hasPilotNotes = lesson.id === GRADE_12_LS_LIMITS_LESSON_ID;
+
   return (
     <main className="shell protected-lesson" dir="rtl" onContextMenu={(event) => event.preventDefault()}>
       <p className="eyebrow">
-        {lesson.gradeLabel} · مشغّل {videoSecurity.provider} · علامة مائية متحركة
+        {lesson.gradeLabel} · {lesson.arabicTitle}
       </p>
       <h1>
-        Chapter {lesson.chapter} · {lesson.title}
+        الفصل {lesson.chapter} · {lesson.arabicTitle}
       </h1>
-      <p className="muted">
-        {lesson.title}. No direct download. Bunny / Vimeo OTT / Wistia connect through environment variables when available.
-      </p>
+      <p className="muted">{lesson.idea}</p>
       <div className="grid two">
         <label>
           اسمك على الفيديو
@@ -84,17 +87,19 @@ export default function ClassroomLessonPage() {
           <input value={phone} onChange={(event) => setPhone(event.target.value)} />
         </label>
       </div>
-      {hostedEmbedSrc() ? (
-        <div className="secure-embed">
-          <iframe title="Protected video" src={hostedEmbedSrc()} allow="autoplay; fullscreen" allowFullScreen />
-          <span className="dynamic-watermark">{watermarkText(studentName, phone)}</span>
-        </div>
-      ) : null}
-      <ClassroomStudio
+      <LessonVideoPlayer
+        videoUrl={lesson.videoUrl}
         heading={`${lesson.gradeLabel} · Ch. ${lesson.chapter}`}
         scenes={classroomScenes(lesson)}
-        watermark={watermarkText(studentName, phone)}
+        watermark={watermark}
       />
+      {!lesson.videoUrl ? (
+        <p className="muted" style={{ marginTop: 8 }}>
+          لا يوجد ملف فيديو مسجّل لهذا الدرس بعد. يُعرض اللوح التفاعلي إلى أن يضع الأستاذ رابط يوتيوب أو ملفاً في{" "}
+          <code>public/videos/</code>.
+        </p>
+      ) : null}
+      {hasPilotNotes ? <LessonNotes blocks={grade12LsLimitsNotes} /> : null}
       <div className="row" style={{ marginTop: 20 }}>
         <Link className="btn dark" href={`/practice/take?lessonId=${lesson.id}&mode=exam`}>
           امتحان الدرس (70% لفتح التالي)

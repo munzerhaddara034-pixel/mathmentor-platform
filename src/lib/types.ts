@@ -222,4 +222,5 @@ export type AcademyLessonRecord = {
   board: string;
   example: string;
   exampleBoard: string;
+  videoUrl?: string;
 };

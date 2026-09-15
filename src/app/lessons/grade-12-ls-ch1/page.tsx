@@ -1,30 +1,38 @@
 "use client";
 
-import { TeacherLessonPlayer } from "@/components/TeacherLessonPlayer";
+import { LessonNotes } from "@/components/LessonNotes";
+import { LessonVideoPlayer } from "@/components/LessonVideoPlayer";
+import { classroomScenes, getAcademyLesson } from "@/lib/academyLessons";
+import { GRADE_12_LS_LIMITS_LESSON_ID, GRADE_12_LS_LIMITS_VIDEO_URL, grade12LsLimitsNotes } from "@/lib/grade12LsLimits";
 import { grade12LsCh1Scenes } from "@/lib/grade12LsCh1";
 import Link from "next/link";
 
 export default function Grade12LsChapter1Page() {
+  const lesson = getAcademyLesson(GRADE_12_LS_LIMITS_LESSON_ID);
   return (
-    <main className="shell">
-      <p className="eyebrow">Grade 12 · Life Sciences</p>
-      <h1>Chapter 1 · Functions: Limits</h1>
+    <main className="shell" dir="rtl">
+      <p className="eyebrow">صف 12 · علوم الحياة</p>
+      <h1>وحدة النهايات</h1>
       <p className="muted">
-        Opening lesson. You see the teacher’s picture, the written English on the board and captions, and you hear the explanation in English.
+        فيديو شرح حقيقي (أسلوب صف: افتتاح، فكرة واحدة، مثال محلول، خطأ شائع، خلاصة) ثم الملخص العربي وبنك الأسئلة.
+        لا يوجد ادّعاء أن كل دروس الصفوف الأخرى مصوّرة بعد.
       </p>
-      <TeacherLessonPlayer scenes={grade12LsCh1Scenes} language="en" />
+      <LessonVideoPlayer
+        videoUrl={lesson?.videoUrl ?? GRADE_12_LS_LIMITS_VIDEO_URL}
+        heading="صف 12 علوم الحياة · النهايات"
+        scenes={lesson ? classroomScenes(lesson) : grade12LsCh1Scenes}
+        watermark="طالب المنصة · 76532421"
+      />
+      <LessonNotes blocks={grade12LsLimitsNotes} />
       <article className="card" style={{ marginTop: 24 }}>
-        <h3>After this video</h3>
-        <p className="muted">
-          Continuity and the derivative come next in the same chapter. Solutions stay in the professor queue until
-          approved.
-        </p>
+        <h3>بعد هذا الفيديو</h3>
+        <p className="muted">تدريب حر على 30+ سؤالاً بمستوى الشهادة، أو امتحان يفتح الفصل التالي عند 70%.</p>
         <div className="row">
-          <Link href="/student" className="btn dark">
-            Student desk
+          <Link href={`/practice/take?lessonId=${GRADE_12_LS_LIMITS_LESSON_ID}&mode=free`} className="btn dark">
+            تدريب النهايات
           </Link>
-          <Link href="/professor" className="btn">
-            Professor review
+          <Link href={`/classroom/${GRADE_12_LS_LIMITS_LESSON_ID}`} className="btn">
+            صفحة الصف
           </Link>
         </div>
       </article>

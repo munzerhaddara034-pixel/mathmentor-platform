@@ -36,7 +36,9 @@ export default function ClassroomIndexPage() {
                   return open ? (
                     <Link key={lesson.id} href={`/classroom/${lesson.id}`} className="card" style={{ margin: 0 }}>
                       <span className="badge">Chapter {lesson.chapter}</span>
-                      <h3>{lesson.title}</h3>
+                      {lesson.videoUrl ? <span className="badge approved">فيديو</span> : null}
+                      <h3>{lesson.arabicTitle || lesson.title}</h3>
+                      <p className="muted">{lesson.title}</p>
                     </Link>
                   ) : (
                     <div key={lesson.id} className="card" style={{ margin: 0, opacity: 0.55 }}>

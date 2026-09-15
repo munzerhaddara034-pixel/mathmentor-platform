@@ -241,6 +241,42 @@ textarea { min-height: 120px; resize: vertical; }
 .doc-watermark.alt { inset: auto 8% 12% auto; transform: rotate(12deg); }
 .secure-embed { position: relative; border-radius: 20px; overflow: hidden; margin-top: 16px; background: #000; }
 .secure-embed iframe { width: 100%; min-height: 320px; border: 0; }
+.lesson-media-frame {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  margin-top: 16px;
+  background: #000;
+  min-height: 320px;
+}
+.lesson-media {
+  display: block;
+  width: 100%;
+  min-height: 360px;
+  max-height: 640px;
+  background: #000;
+  border: 0;
+}
+.lesson-notes {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 28px 26px;
+  margin-top: 28px;
+  line-height: 1.75;
+}
+.lesson-notes h2 { margin-top: 28px; }
+.lesson-notes h3 { margin-top: 18px; }
+.lesson-notes ul { padding-inline-start: 22px; }
+.note-example, .note-mistake {
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+.note-example { background: #fffdf7; border: 1px dashed #d9aa53; }
+.note-mistake { background: #fff5f3; border: 1px solid #f1c6b8; }
+.note-result { font-weight: 800; color: #1f7a4d; }
+.math-block { overflow-x: auto; margin: 12px 0; font-size: 1.15em; }
 .option-grid { display: grid; gap: 10px; margin-top: 16px; }
 @media (min-width: 700px) { .option-grid { grid-template-columns: 1fr 1fr; } }
 .option-btn {

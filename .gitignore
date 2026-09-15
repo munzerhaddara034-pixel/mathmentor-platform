@@ -8,3 +8,4 @@ public/uploads
 .env*.local
 *.zip
 .DS_Store
+tsconfig.tsbuildinfo

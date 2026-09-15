@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "video:limits": "python3 scripts/render-lesson-video.py content/grade-12-ls-limits/intro-video.json public/videos/grade-12-ls-limits-intro.mp4"
   },
   "dependencies": {
     "next": "^15.5.2",

@@ -11,8 +11,8 @@ export default function ResourcesPage() {
         {resourceFiles.map((file) => (
           <article className="card" key={file.id}>
             <span className="badge">{file.kind}</span>
-            <h2>{file.title}</h2>
-            <p className="muted">{file.kind}</p>
+            <h2>{file.arabicTitle || file.title}</h2>
+            <p className="muted">{file.title}</p>
             <Link className="btn dark" href={file.href}>
               عرض محمي
             </Link>

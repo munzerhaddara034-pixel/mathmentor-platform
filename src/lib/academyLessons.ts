@@ -1,4 +1,5 @@
 import type { GradeTrack, StoryboardScene } from "./types";
+import { GRADE_12_LS_LIMITS_LESSON_ID, grade12LsLimitsFallbackScenes } from "./grade12LsLimits";
 
 export type AcademyLesson = {
   id: string;
@@ -11,6 +12,7 @@ export type AcademyLesson = {
   board: string;
   example: string;
   exampleBoard: string;
+  videoUrl?: string;
 };
 
 function L(
@@ -23,8 +25,9 @@ function L(
   board: string,
   example: string,
   exampleBoard: string,
+  extra: Partial<Pick<AcademyLesson, "videoUrl">> = {},
 ): AcademyLesson {
-  return { id: `${track}-ch${chapter}`, track, gradeLabel, chapter, title, arabicTitle, idea, board, example, exampleBoard };
+  return { id: `${track}-ch${chapter}`, track, gradeLabel, chapter, title, arabicTitle, idea, board, example, exampleBoard, ...extra };
 }
 
 export const academyLessons: AcademyLesson[] = [
@@ -59,7 +62,7 @@ export const academyLessons: AcademyLesson[] = [
   L("grade-11", "S1 / Grade 11", 5, "Vectors in the plane", "المتجهات في المستوى", "A vector has direction and length. Addition is tip-to-tail.", "u + v,  k·u", "|(3,4)|.", "5"),
   L("grade-11", "S1 / Grade 11", 6, "Analytic geometry", "الهندسة التحليلية", "A line has equation y = mx + p or ax + by + c = 0.", "m = (y2−y1)/(x2−x1)", "Slope through (0,1) and (2,5).", "m = 2"),
 
-  L("grade-12", "Grade 12 LS", 1, "Functions: limits, continuity, derivative", "الدوال: نهاية، استمرار، مشتقة", "First we approach, then we ask if the value matches, then we measure slope.", "lim, continuity, f'(x)", "lim x→2 (x²−4)/(x−2).", "4"),
+  L("grade-12", "Grade 12 LS", 1, "Limits of functions", "النهايات", "النهاية هي القيمة التي تقترب منها f(x) عندما يقترب x من a، حتى إن لم تكن f معرّفة عند a.", "lim_{x→a} f(x)=L\n0/0 → حلّل أو عقّل\nفي ∞ خذ الحد المسيطر", "احسب lim_{x→2} (x²−4)/(x−2)", "4 بعد اختزال (x−2) حيث x≠2", { videoUrl: "/videos/grade-12-ls-limits-intro.mp4" }),
   L("grade-12", "Grade 12 LS", 2, "Inverse functions", "الدوال العكسية", "An inverse undoes a function. Graphs reflect over y = x.", "f(f⁻¹(x)) = x", "If f(x)=2x, f⁻¹(x).", "x/2"),
   L("grade-12", "Grade 12 LS", 3, "Trigonometric functions", "الدوال المثلثية", "Sine and cosine oscillate between −1 and 1.", "period 2π", "sin(π/2).", "1"),
   L("grade-12", "Grade 12 LS", 4, "Vector and mixed products", "الجداء المتجهي والمختلط", "The cross product is perpendicular to both vectors.", "|u × v| = |u||v|sinθ", "i × j.", "k"),
@@ -93,6 +96,7 @@ export function getAcademyLesson(id: string, extra: AcademyLesson[] = []) {
 }
 
 export function classroomScenes(lesson: AcademyLesson): StoryboardScene[] {
+  if (lesson.id === GRADE_12_LS_LIMITS_LESSON_ID) return grade12LsLimitsFallbackScenes;
   const next = `Chapter ${lesson.chapter + 1} of ${lesson.gradeLabel}`;
   return [
     {

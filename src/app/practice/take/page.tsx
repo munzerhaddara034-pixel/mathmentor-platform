@@ -17,6 +17,7 @@ function TakeQuizInner() {
   useEffect(() => {
     const query = new URLSearchParams({ lessonId, pack: "1" });
     if (examId) query.set("examId", examId);
+    else if (mode === "exam") query.set("limit", "12");
     void fetch(`/api/quiz?${query.toString()}`)
       .then((response) => response.json())
       .then((data: { questions?: QuizQuestion[]; exam?: ExamPaper }) => {

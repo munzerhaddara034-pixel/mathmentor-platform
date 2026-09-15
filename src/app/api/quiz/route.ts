@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { nextAdaptiveQuestion, questionsForLesson } from "@/lib/quizBank";
+import { nextAdaptiveQuestion, questionsForLesson, sampleExamQuestions } from "@/lib/quizBank";
 import { addProgress, addQuizAttempt, readStore } from "@/lib/store";
 import { createId } from "@/lib/ids";
 import type { Difficulty } from "@/lib/types";
@@ -17,6 +17,8 @@ export async function GET(request: Request) {
       if (exam?.questionIds.length) pack = pack.filter((item) => exam.questionIds.includes(item.id));
       return NextResponse.json({ questions: pack, exam });
     }
+    const limit = Number(url.searchParams.get("limit") ?? "0");
+    if (limit > 0) pack = sampleExamQuestions(pack, limit);
     return NextResponse.json({ questions: pack });
   }
   const used = url.searchParams.get("used")?.split(",").filter(Boolean) ?? [];
