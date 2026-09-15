@@ -1,0 +1,10 @@
+node_modules
+.next
+data/store.json
+data/uploads
+public/uploads
+.env
+.env.local
+.env*.local
+*.zip
+.DS_Store

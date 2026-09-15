@@ -1,0 +1,99 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "wouter";
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, RotateCcw, Trophy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { grade9MockExam, calculateMockExamResult } from "../../../shared/mockExam";
+
+const languageKey = "mathmentor-student-language";
+
+type Language = "en" | "ar";
+
+export default function Grade9MockExam() {
+  const [language, setLanguage] = useState<Language>(() => (localStorage.getItem(languageKey) === "ar" ? "ar" : "en"));
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [secondsLeft, setSecondsLeft] = useState(grade9MockExam.durationSeconds);
+  const [submitted, setSubmitted] = useState(false);
+
+  const isArabic = language === "ar";
+  const question = grade9MockExam.questions[currentIndex];
+  const result = useMemo(() => calculateMockExamResult(answers), [answers]);
+  const answeredCount = Object.keys(answers).length;
+  const minutes = Math.floor(secondsLeft / 60).toString().padStart(2, "0");
+  const seconds = (secondsLeft % 60).toString().padStart(2, "0");
+  const timeWarning = secondsLeft <= 120;
+
+  useEffect(() => {
+    localStorage.setItem(languageKey, language);
+    document.documentElement.dir = isArabic ? "rtl" : "ltr";
+    document.documentElement.lang = isArabic ? "ar" : "en";
+    return () => {
+      document.documentElement.dir = "ltr";
+      document.documentElement.lang = "en";
+    };
+  }, [isArabic, language]);
+
+  useEffect(() => {
+    if (submitted || secondsLeft <= 0) return;
+    const timer = window.setInterval(() => setSecondsLeft((value: number) => Math.max(0, value - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [secondsLeft, submitted]);
+
+  useEffect(() => {
+    if (secondsLeft === 0 && !submitted) setSubmitted(true);
+  }, [secondsLeft, submitted]);
+
+  const selectAnswer = (optionIndex: number) => {
+    if (submitted) return;
+    setAnswers((current) => ({ ...current, [question.id]: optionIndex }));
+  };
+
+  const restart = () => {
+    setCurrentIndex(0);
+    setAnswers({});
+    setSecondsLeft(grade9MockExam.durationSeconds);
+    setSubmitted(false);
+  };
+
+  const copy = isArabic
+    ? { back: "العودة إلى الأكاديمية", label: "اختبار تجريبي", title: grade9MockExam.arabicTitle, desc: "اختبر جاهزيتك في الجبر والهندسة والإحصاء والاحتمالات.", time: "الوقت المتبقي", answered: "تمت الإجابة", submit: "تسليم الاختبار", previous: "السؤال السابق", next: "السؤال التالي", question: "السؤال", of: "من", result: "نتيجتك النهائية", review: "مراجعة الأداء", retry: "إعادة الاختبار", correct: "إجابات صحيحة", unanswered: "أسئلة بلا إجابة", source: grade9MockExam.arabicSourceNote, warning: "اقترب الوقت من الانتهاء" }
+    : { back: "Back to academy", label: "Mock assessment", title: grade9MockExam.title, desc: "Check your readiness across algebra, geometry, statistics, probability, and more.", time: "Time remaining", answered: "Answered", submit: "Submit exam", previous: "Previous question", next: "Next question", question: "Question", of: "of", result: "Your final result", review: "Performance review", retry: "Try again", correct: "Correct answers", unanswered: "Unanswered", source: grade9MockExam.sourceNote, warning: "Time is nearly up" };
+
+  if (submitted) {
+    return (
+      <main dir={isArabic ? "rtl" : "ltr"} className="min-h-screen bg-[#f7f7f4] px-4 py-6 text-[#15233b] sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-4xl">
+          <Link href="/" className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#5e6a7e] transition-colors hover:text-[#c58e2d]">{isArabic ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}{copy.back}</Link>
+          <Card className="overflow-hidden rounded-[2rem] border-0 bg-[#14233e] text-white shadow-2xl">
+            <CardHeader className="border-b border-white/10 px-6 py-8 sm:px-10">
+              <div className="mb-3 flex items-center gap-3 text-[#edbd5f]"><Trophy size={22} /><span className="text-xs font-bold uppercase tracking-[0.22em]">{copy.review}</span></div>
+              <CardTitle className="font-serif text-4xl tracking-tight sm:text-5xl">{copy.result}</CardTitle>
+              <CardDescription className="max-w-2xl text-base leading-7 text-slate-300">{copy.source}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-6 px-6 py-8 sm:grid-cols-[1fr_1.4fr] sm:px-10">
+              <div className="flex flex-col items-center justify-center rounded-3xl bg-white/10 p-8 text-center"><div className="font-serif text-7xl text-[#edbd5f]">{result.percentage}%</div><div className="mt-2 text-sm text-slate-300">{result.correct} / {result.total} {copy.correct}</div></div>
+              <div className="space-y-6">
+                <div><div className="mb-2 flex justify-between text-sm text-slate-300"><span>{copy.correct}</span><strong className="text-white">{result.correct}</strong></div><Progress value={result.percentage} className="h-3 bg-white/15" /></div>
+                <div className="grid grid-cols-2 gap-3"><div className="rounded-2xl bg-white/10 p-4"><div className="text-2xl font-semibold text-white">{result.answered}</div><div className="text-xs text-slate-300">{copy.answered}</div></div><div className="rounded-2xl bg-white/10 p-4"><div className="text-2xl font-semibold text-white">{result.total - result.answered}</div><div className="text-xs text-slate-300">{copy.unanswered}</div></div></div>
+                <Button onClick={restart} className="h-12 w-full rounded-full bg-[#edbd5f] font-bold text-[#14233e] hover:bg-[#f5cd7d]"><RotateCcw className="me-2" size={17} />{copy.retry}</Button>
+              </div>
+            </CardContent>
+          </Card>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">{grade9MockExam.questions.map((item: (typeof grade9MockExam.questions)[number], index: number) => { const selected = answers[item.id]; const correct = selected === item.correctIndex; return <Card key={item.id} className="rounded-3xl border-[#e4e6e0] bg-white"><CardContent className="p-5"><div className="mb-2 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-[#8c98a9]"><span>{copy.question} {index + 1}</span>{correct ? <CheckCircle2 className="text-emerald-600" size={18} /> : <span className="text-amber-700">{selected === undefined ? copy.unanswered : "Review"}</span>}</div><p className="font-semibold leading-6">{isArabic ? item.arabicPrompt : item.prompt}</p>{selected !== undefined && <p className="mt-3 text-sm leading-6 text-[#5e6a7e]">{isArabic ? item.arabicExplanation : item.explanation}</p>}</CardContent></Card>; })}</div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main dir={isArabic ? "rtl" : "ltr"} className="min-h-screen bg-[#f7f7f4] px-4 py-6 text-[#15233b] sm:px-6 lg:px-10">
+      <div className="mx-auto max-w-5xl">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4"><Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-[#5e6a7e] transition-colors hover:text-[#c58e2d]">{isArabic ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}{copy.back}</Link><button onClick={() => setLanguage(isArabic ? "en" : "ar")} className="rounded-full border border-[#d9dcd4] bg-white px-4 py-2 text-sm font-bold shadow-sm transition hover:-translate-y-0.5 hover:border-[#c58e2d]">{isArabic ? "English" : "العربية"}</button></div>
+        <section className="mb-8 grid gap-6 lg:grid-cols-[1fr_240px] lg:items-end"><div><div className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#b07820]">{copy.label}</div><h1 className="max-w-3xl font-serif text-4xl leading-tight tracking-tight sm:text-6xl">{copy.title}</h1><p className="mt-4 max-w-2xl text-base leading-7 text-[#657184]">{copy.desc}</p></div><div className={`rounded-3xl p-5 text-center shadow-lg ${timeWarning ? "bg-[#8c3f35] text-white" : "bg-[#14233e] text-white"}`}><Clock3 className="mx-auto mb-2" size={20} /><div className="text-xs font-bold uppercase tracking-widest opacity-70">{copy.time}</div><div className="mt-1 font-mono text-4xl font-bold tracking-wider">{minutes}:{seconds}</div>{timeWarning && <div className="mt-2 text-xs font-semibold">{copy.warning}</div>}</div></section>
+        <Card className="rounded-[2rem] border-0 bg-white shadow-xl shadow-[#15233b]/5"><CardHeader className="border-b border-[#edf0eb] px-6 py-5 sm:px-8"><div className="flex flex-wrap items-center justify-between gap-3"><div className="text-sm font-bold text-[#5e6a7e]">{copy.question} {currentIndex + 1} {copy.of} {grade9MockExam.questions.length}</div><div className="text-sm font-semibold text-[#b07820]">{answeredCount} / {grade9MockExam.questions.length} {copy.answered}</div></div><Progress value={((currentIndex + 1) / grade9MockExam.questions.length) * 100} className="mt-4 h-2" /></CardHeader><CardContent className="px-6 py-7 sm:px-8 sm:py-10"><div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#b07820]">{question.skill}</div><h2 className="max-w-3xl font-serif text-2xl leading-snug sm:text-4xl">{isArabic ? question.arabicPrompt : question.prompt}</h2><div className="mt-8 grid gap-3">{question.options.map((option: string, index: number) => { const selected = answers[question.id] === index; return <button key={option} onClick={() => selectAnswer(index)} className={`flex min-h-14 items-center gap-4 rounded-2xl border px-4 py-3 text-start font-semibold transition duration-200 hover:-translate-y-0.5 hover:border-[#c58e2d] hover:shadow-md ${selected ? "border-[#c58e2d] bg-[#fff5df] text-[#7c5516]" : "border-[#e5e8e2] bg-[#fbfcfa]"}`}><span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${selected ? "bg-[#edbd5f] text-[#14233e]" : "bg-[#eef0eb] text-[#657184]"}`}>{String.fromCharCode(65 + index)}</span><span>{option}</span></button>; })}</div><div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-[#edf0eb] pt-6"><Button variant="outline" disabled={currentIndex === 0} onClick={() => setCurrentIndex((value) => Math.max(0, value - 1))} className="rounded-full border-[#d9dcd4]">{isArabic ? <ArrowRight className="me-2" size={16} /> : <ArrowLeft className="me-2" size={16} />}{copy.previous}</Button>{currentIndex === grade9MockExam.questions.length - 1 ? <Button onClick={() => setSubmitted(true)} className="rounded-full bg-[#14233e] px-6 text-white hover:bg-[#243b60]">{copy.submit}<CheckCircle2 className="ms-2" size={16} /></Button> : <Button onClick={() => setCurrentIndex((value) => Math.min(grade9MockExam.questions.length - 1, value + 1))} className="rounded-full bg-[#edbd5f] px-6 font-bold text-[#14233e] hover:bg-[#f5cd7d]">{copy.next}{isArabic ? <ArrowLeft className="ms-2" size={16} /> : <ArrowRight className="ms-2" size={16} />}</Button>}</div></CardContent></Card>
+      </div>
+    </main>
+  );
+}

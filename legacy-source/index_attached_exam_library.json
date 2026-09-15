@@ -1,0 +1,343 @@
+{
+  "results": [
+    {
+      "input": "Ahmad_Damaj_exam_final_SE_2026_fr(1).pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "Ahmad_Damaj_exam_final_SE_eng_2026(1).pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "Ahmad_Damaj_final_SG_2026_ang.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "GS",
+        "difficulty": "advanced",
+        "file_name": "Ahmad_Damaj_final_SG_2026_ang.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 4,
+        "question_formats": "computation; proof; graph interpretation; multiple choice",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "probability; complex numbers; geometric transformations; functions; calculus"
+      },
+      "error": ""
+    },
+    {
+      "input": "Ahmad_Damaj_final_SG_2026_fr.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "GS",
+        "difficulty": "advanced",
+        "file_name": "Ahmad_Damaj_final_SG_2026_fr.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "French",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 4,
+        "question_formats": "computation; proof; graph interpretation; geometric construction",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "probability; complex numbers; transformations; functions; derivatives; integrals"
+      },
+      "error": ""
+    },
+    {
+      "input": "Ahmad_Damaj_final_barja_sv_2026_ang.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "LS",
+        "difficulty": "intermediate",
+        "file_name": "Ahmad_Damaj_final_barja_sv_2026_ang.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 2,
+        "question_formats": "computation; proof; graph interpretation",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "exponentials; logarithms; probability; limits; derivatives; integrals"
+      },
+      "error": ""
+    },
+    {
+      "input": "Ahmad_Damaj_final_barja_sv_2026_fr.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "LS",
+        "difficulty": "advanced",
+        "file_name": "Ahmad_Damaj_final_barja_sv_2026_fr.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "French",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 2,
+        "question_formats": "computation; proof; graph interpretation",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "functions; probability; derivatives"
+      },
+      "error": ""
+    },
+    {
+      "input": "E2-S2S-25-26(1).pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "E2-SG-25-26.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "E2-SV-25-26.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "LS",
+        "difficulty": "intermediate",
+        "file_name": "E2-SV-25-26.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "French",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 2,
+        "question_formats": "computation; graph interpretation",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "functions; derivatives; limits"
+      },
+      "error": ""
+    },
+    {
+      "input": "ES2-S-MathsExamenFinal-25-26.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "ES3-SV-MathExamenFinal-2025-2026.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "LS",
+        "difficulty": "advanced",
+        "file_name": "ES3-SV-MathExamenFinal-2025-2026.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "French",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 2,
+        "question_formats": "multiple choice; computation; proof; graph interpretation",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "functions; probability; derivatives; integrals; logarithms"
+      },
+      "error": ""
+    },
+    {
+      "input": "Exam5.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "LS",
+        "difficulty": "advanced",
+        "file_name": "Exam5.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 3,
+        "question_formats": "computation; proof; graph interpretation; multiple choice",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "functions; derivatives; integrals; inverse functions; probability"
+      },
+      "error": ""
+    },
+    {
+      "input": "Examterm2forgrade12GScorrect.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "Examterm2forgrade12LS.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "LS",
+        "difficulty": "intermediate",
+        "file_name": "Examterm2forgrade12LS.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 2,
+        "question_formats": "multiple choice; computation; probability distribution; proof; graph interpretation; area calculation",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "logarithmic functions; exponential functions; probability; random variables; derivatives; integrals; inverse functions"
+      },
+      "error": ""
+    },
+    {
+      "input": "Examterm2forgrade12SE.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "SE",
+        "difficulty": "intermediate",
+        "file_name": "Examterm2forgrade12SE.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 3,
+        "question_formats": "computation; proof; graph interpretation; multiple-choice questions",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "statistics; calculus; probability; logarithmic and exponential functions"
+      },
+      "error": ""
+    },
+    {
+      "input": "FinalWorksheet.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "GS",
+        "difficulty": "advanced",
+        "file_name": "FinalWorksheet.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 4,
+        "question_formats": "computation; proof; graph interpretation",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "functions; probability; space geometry; derivatives; limits"
+      },
+      "error": ""
+    },
+    {
+      "input": "FinalexamLS.pdf",
+      "output": {
+        "academic_year": "unknown",
+        "branch": "LS",
+        "difficulty": "advanced",
+        "file_name": "FinalexamLS.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 2,
+        "question_formats": "computation; multiple choice; proof",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "functions; probability; combinatorics; derivatives; integrals; logarithms"
+      },
+      "error": ""
+    },
+    {
+      "input": "Finalexamforgrade9.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "unknown",
+        "difficulty": "intermediate",
+        "file_name": "Finalexamforgrade9.pdf",
+        "grade": "Grade 9",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 3,
+        "question_formats": "computation; proof; multiple choice",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "algebra; arithmetic; geometry; probability"
+      },
+      "error": ""
+    },
+    {
+      "input": "Finalexamforthelifesciencesclass2026.pdf",
+      "output": {
+        "academic_year": "2025-2026",
+        "branch": "LS",
+        "difficulty": "advanced",
+        "file_name": "Finalexamforthelifesciencesclass2026.pdf",
+        "grade": "Grade 12",
+        "has_corrections": "",
+        "language": "English",
+        "life_sciences_relevance": "useful: Grade 12 LS pattern",
+        "page_count": 2,
+        "question_formats": "computation; proof; graph interpretation",
+        "rights_note": "reference only; do not reproduce",
+        "skill_areas": "functions; probability; integrals"
+      },
+      "error": ""
+    },
+    {
+      "input": "G11-S-MathFinalExam-25-26.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "G12-LS-MathFinalExam-2025-2026.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "G12-SE-MathFinalExam-2025-2026.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "G12finalLS26.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "Grade11Final2026.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "LAS-MathFinalExam-Grade6.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "LAS-MathFinalExam-Grade7.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "LAS-MathFinalExam-Grade8.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "LAS-MathFinalExam-Grade9-(1).pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "LS-Finalexam.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "Math(ES)Sample1.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "NDMC-S3SV-EX2-2526-allégé.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "NDMC_S3SE_EX2_2526.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "S.VExamenFinal2025-2026.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    },
+    {
+      "input": "SV-Examenfinal.pdf",
+      "output": {},
+      "error": "creditNotEnough"
+    }
+  ]
+}
