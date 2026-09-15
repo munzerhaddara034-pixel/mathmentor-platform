@@ -47,7 +47,7 @@ NUM = [
         ["\\(3/4\\)", "\\(9/12\\)", "\\(6/8\\)", "\\(2/3\\)"],
         0,
         ["Divide numerator and denominator by 6: 18/24 = 3/4.", "Trap: stopping at 9/12, which is not irreducible."],
-        latex="18/24=3/4",
+        latex="18/24",
         tag="irreducible-basic",
     ),
     item(
@@ -69,7 +69,7 @@ NUM = [
         ["\\(13/14\\)", "\\(30/45\\)", "\\(2/3\\)", "\\(1/3\\)"],
         2,
         ["Cancel 5 and 10, then 3 and 9: 3/5 × 10/9 = 2/3."],
-        latex="\\frac{3}{5}\\times\\frac{10}{9}=\\frac{2}{3}",
+        latex="\\frac{3}{5}\\times\\frac{10}{9}",
         tag="multiply-cancel",
     ),
     item(
@@ -80,7 +80,7 @@ NUM = [
         ["\\(7.2\\times 10^3\\)", "\\(72\\times 10^2\\)", "\\(7.2\\times 10^2\\)", "\\(0.72\\times 10^4\\)"],
         0,
         ["7200 = 7.2 × 10^3. Trap: 72 × 10² is not in scientific notation because |a| ≥ 10."],
-        latex="7200=7.2\\times 10^3",
+        latex="7200",
         tag="sci-integer",
     ),
     item(
@@ -91,7 +91,7 @@ NUM = [
         ["\\(8.1\\times 10^{-2}\\)", "\\(8.1\\times 10^{-3}\\)", "\\(81\\times 10^{-4}\\)", "\\(0.81\\times 10^{-2}\\)"],
         1,
         ["Move the point three places: 0.0081 = 8.1 × 10^{−3}."],
-        latex="0.0081=8.1\\times 10^{-3}",
+        latex="0.0081",
         tag="sci-decimal",
     ),
     item(
@@ -102,7 +102,7 @@ NUM = [
         ["9", "8", "18", "3"],
         0,
         ["9² = 81, so √81 = 9. Trap: taking half of 81."],
-        latex="\\sqrt{81}=9",
+        latex="\\sqrt{81}",
         tag="perfect-square",
     ),
     item(
@@ -113,7 +113,7 @@ NUM = [
         ["\\(10\\sqrt{2}\\)", "\\(4\\sqrt{5}\\)", "\\(2\\sqrt{5}\\)", "\\(5\\sqrt{2}\\)"],
         2,
         ["√20 = √(4×5) = 2√5."],
-        latex="\\sqrt{20}=2\\sqrt{5}",
+        latex="\\sqrt{20}",
         tag="simplify-radical",
     ),
     item(
@@ -124,7 +124,7 @@ NUM = [
         ["12", "32", "64", "128"],
         2,
         ["2^6 = 64. Trap: 2^5 = 32 or 6×2 = 12."],
-        latex="2^6=64",
+        latex="2^6",
         tag="power-eval",
     ),
     item(
@@ -135,7 +135,7 @@ NUM = [
         ["\\(10^5\\)", "\\(10^3\\)", "\\(10^{-4}\\)", "\\(1\\)"],
         1,
         ["Add the exponents: 10^{4+(−1)} = 10^3."],
-        latex="10^4\\times 10^{-1}=10^3",
+        latex="10^4\\times 10^{-1}",
         tag="power-product",
     ),
     item(
@@ -160,7 +160,7 @@ NUM = [
         ["\\(3\\)", "\\(6/14\\)", "\\(17/24\\)", "\\(17/48\\)"],
         2,
         ["Common denominator 24: 21/24 − 4/24 = 17/24.", "Trap: subtracting numerators and denominators separately."],
-        latex="\\frac{7}{8}-\\frac{1}{6}=\\frac{17}{24}",
+        latex="\\frac{7}{8}-\\frac{1}{6}",
         tag="subtract-unlike",
     ),
     item(
@@ -218,7 +218,7 @@ NUM = [
         ["\\(7\\sqrt{2}\\)", "\\(3\\sqrt{2}\\)", "\\(\\sqrt{42}\\)", "\\(3\\sqrt{8}\\)"],
         1,
         ["√50 = 5√2 and √8 = 2√2, so 5√2 − 2√2 = 3√2.", "Trap: adding the coefficients (7√2)."],
-        latex="\\sqrt{50}-\\sqrt{8}=3\\sqrt{2}",
+        latex="\\sqrt{50}-\\sqrt{8}",
         tag="combine-radicals",
     ),
     item(
@@ -229,7 +229,7 @@ NUM = [
         ["\\(\\sqrt{39}\\)", "\\(5\\sqrt{6}\\)", "\\(5\\sqrt{3}\\)", "\\(3\\sqrt{3}\\)"],
         2,
         ["√27 = 3√3 and √12 = 2√3, so 3√3 + 2√3 = 5√3.", "Trap: √27 + √12 = √39."],
-        latex="\\sqrt{27}+\\sqrt{12}=5\\sqrt{3}",
+        latex="\\sqrt{27}+\\sqrt{12}",
         tag="add-radicals",
     ),
     item(
@@ -240,7 +240,7 @@ NUM = [
         ["4", "\\(4\\sqrt{2}\\)", "\\(8\\sqrt{2}\\)", "\\(\\sqrt{2}\\)"],
         1,
         ["8/√2 × √2/√2 = 8√2 / 2 = 4√2."],
-        latex="\\frac{8}{\\sqrt{2}}=4\\sqrt{2}",
+        latex="\\frac{8}{\\sqrt{2}}",
         tag="rationalize",
     ),
     item(
@@ -251,7 +251,7 @@ NUM = [
         ["\\(5^{11}\\)", "5", "25", "125"],
         3,
         ["Subtract exponents: 5^{7−4} = 5^3 = 125.", "Trap: adding the exponents (5^{11})."],
-        latex="5^7/5^4=5^3",
+        latex="5^7/5^4",
         tag="power-quotient",
     ),
     item(
@@ -262,7 +262,7 @@ NUM = [
         ["9", "\\(2\\times 3^8\\)", "\\(8\\times 3^8\\)", "\\(3^{10}\\)"],
         2,
         ["Factor 3^8: 3^{10} − 3^8 = 3^8(3² − 1) = 8 × 3^8.", "Trap: writing 3^{10−8} = 9."],
-        latex="3^{10}-3^8=8\\times 3^8",
+        latex="3^{10}-3^8",
         tag="factor-power-diff",
     ),
     item(
@@ -273,7 +273,7 @@ NUM = [
         ["\\(2^{19}\\)", "32", "64", "14"],
         1,
         ["2^{12−7} = 2^5 = 32."],
-        latex="2^{12}/2^7=2^5",
+        latex="2^{12}/2^7",
         tag="power-divide",
     ),
     item(
@@ -298,7 +298,7 @@ NUM = [
         ["\\(2/3\\)", "\\(15/14\\)", "\\(14/15\\)", "\\(2/5\\)"],
         2,
         ["12/35 × 49/18 = (12×7)/(5×18) = 84/90 = 14/15.", "Trap: inverting the first fraction instead of the second."],
-        latex="\\frac{12}{35}\\div\\frac{18}{49}=\\frac{14}{15}",
+        latex="\\frac{12}{35}\\div\\frac{18}{49}",
         tag="divide-fractions",
     ),
     item(
@@ -342,7 +342,7 @@ NUM = [
         ["\\(4+\\sqrt{5}\\)", "\\(9+4\\sqrt{5}\\)", "\\(9+\\sqrt{5}\\)", "\\(4+4\\sqrt{5}\\)"],
         1,
         ["(2+√5)² = 4 + 4√5 + 5 = 9 + 4√5.", "Trap: forgetting 2×2×√5 or dropping 5."],
-        latex="(2+\\sqrt{5})^2=9+4\\sqrt{5}",
+        latex="(2+\\sqrt{5})^2",
         tag="expand-binomial-radical",
     ),
     item(
@@ -353,7 +353,7 @@ NUM = [
         ["10", "\\(\\sqrt{21}\\)", "4", "\\(4\\sqrt{21}\\)"],
         2,
         ["Difference of squares: 7 − 3 = 4.", "Trap: adding 7+3 or writing √21."],
-        latex="(\\sqrt{7}-\\sqrt{3})(\\sqrt{7}+\\sqrt{3})=4",
+        latex="(\\sqrt{7}-\\sqrt{3})(\\sqrt{7}+\\sqrt{3})",
         tag="diff-squares-radicals",
     ),
     item(
@@ -364,7 +364,7 @@ NUM = [
         ["\\(9\\sqrt{5}\\)", "\\(5\\sqrt{5}\\)", "0", "\\(\\sqrt{5}\\)"],
         3,
         ["√80 = 4√5 and 2√20 = 4√5, so 4√5 − 4√5 + √5 = √5.", "Trap: adding all three as 9√5."],
-        latex="\\sqrt{80}-2\\sqrt{20}+\\sqrt{5}=\\sqrt{5}",
+        latex="\\sqrt{80}-2\\sqrt{20}+\\sqrt{5}",
         tag="collect-sqrt5",
     ),
     item(
@@ -378,7 +378,7 @@ NUM = [
             "(x + 1/x)² = x² + 2 + 1/x² = 8, so x² + 1/x² = 6.",
             "Trap: leaving 8, or adding 2 instead of subtracting (10), or squaring 8.",
         ],
-        latex="x^2+\\frac{1}{x^2}=6",
+        latex="\\left(x+\\frac{1}{x}\\right)^2=8",
         tag="identity-x-plus-1x",
     ),
     item(
@@ -389,7 +389,7 @@ NUM = [
         ["1", "\\(2/5\\)", "\\(5/2\\)", "\\((2/5)^{2n+1}\\)"],
         1,
         ["(2/5)^{n+1} × (5/2)^n = (2/5) × [(2/5)×(5/2)]^n = 2/5.", "Trap: cancelling everything to 1."],
-        latex="\\left(\\frac{2}{5}\\right)^{n+1}\\left(\\frac{5}{2}\\right)^n=\\frac{2}{5}",
+        latex="\\left(\\frac{2}{5}\\right)^{n+1}\\left(\\frac{5}{2}\\right)^n",
         tag="reciprocal-powers",
     ),
     item(
@@ -400,7 +400,7 @@ NUM = [
         ["16", "\\(2\\times 4^{10}\\)", "\\(15\\times 4^{10}\\)", "\\(4^{12}\\)"],
         2,
         ["4^{12} − 4^{10} = 4^{10}(4² − 1) = 15 × 4^{10}.", "Trap: 4^{12−10} = 16."],
-        latex="4^{12}-4^{10}=15\\times 4^{10}",
+        latex="4^{12}-4^{10}",
         tag="factor-power-4",
     ),
 ]
@@ -863,7 +863,7 @@ COORD = [
         ["\\(a\\times a'=1\\)", "\\(a\\times a'=-1\\)", "\\(a=a'\\)", "\\(a+a'=0\\)"],
         1,
         ["The product of the slopes of two perpendicular lines is −1."],
-        latex="a\\times a'=-1",
+        latex="a\\times a'",
         tag="perp-product",
     ),
     item(
@@ -927,7 +927,7 @@ COORD = [
         ["\\(y=2x+2\\)", "\\(y=\\frac{1}{2}x\\)", "\\(y=4x+2\\)", "\\(y=\\frac{1}{2}x+2\\)"],
         3,
         ["a(AB) = (6−2)/(8−0) = 1/2. Through (0 ; 2): y = (1/2)x + 2."],
-        latex="y=\\frac{1}{2}x+2",
+        latex="A(0;2),\\ B(8;6)",
         tag="equation-AB",
     ),
     item(
@@ -993,7 +993,7 @@ COORD = [
             "Through I: y − 5 = −(x − 3), hence y = −x + 8.",
             "Trap: the line (AB) itself, y = x + 2.",
         ],
-        latex="y=-x+8",
+        latex="A(1;3),\\ B(5;7)",
         tag="perp-bisector-eq",
     ),
     item(
@@ -1060,7 +1060,7 @@ COORD = [
             "a(AB) = (−2 − 1)/(4 − (−2)) = −3/6 = −1/2.",
             "y − 1 = −(1/2)(x + 2) = −x/2 − 1, so y = −(1/2)x.",
         ],
-        latex="y=-\\frac{1}{2}x",
+        latex="A(-2;1),\\ B(4;-2)",
         tag="equation-through-origin",
     ),
     item(
@@ -1103,7 +1103,7 @@ COORD = [
         ["\\(y=3x-1\\)", "\\(y=-3x-1\\)", "\\(y=\\frac{1}{3}x+2\\)", "\\(y=-3x+5\\)"],
         3,
         ["Perpendicular slope −3. Then y − 2 = −3(x − 1), so y = −3x + 5."],
-        latex="y=-3x+5",
+        latex="A(1;2),\\ y=\\frac{1}{3}x",
         tag="perp-through-A",
     ),
     item(
@@ -1130,7 +1130,7 @@ COORD = [
             "I(2 ; 2). Slope of AB is 1/2, so the perpendicular slope is −2.",
             "y − 2 = −2(x − 2), hence y = −2x + 6.",
         ],
-        latex="y=-2x+6",
+        latex="A(0;1),\\ B(4;3)",
         tag="pb-hard",
     ),
     item(
