@@ -1,0 +1,1 @@
+ALTER TABLE `exam_attempts` ADD `reviewSnapshot` text NOT NULL;

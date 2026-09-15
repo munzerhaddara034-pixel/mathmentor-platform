@@ -1,0 +1,39 @@
+{
+  "results": [
+    {
+      "input": "/home/ubuntu/mathmentor-platform/research/grade-9-certificate-model-1-draft-input.json",
+      "output": {
+        "draft_file": "https://private-us-east-1.manuscdn.com/sessionFile/vsmqEwNuPGSz7aux0jNKhr/sandbox/MzJYPWLvzG4JkOGpdEHG9q_1788758952827_na1fn_L2hvbWUvdWJ1bnR1L21hdGhtZW50b3ItcGxhdGZvcm0vcmVzZWFyY2gvZ3JhZGUtOS1jZXJ0aWZpY2F0ZS1tb2RlbC0xLWRyYWZ0LW91dHB1dA.json?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvdnNtcUV3TnVQR1N6N2F1eDBqTktoci9zYW5kYm94L016SllQV0x2ekc0SmtPR3BkRUhHOXFfMTc4ODc1ODk1MjgyN19uYTFmbl9MMmh2YldVdmRXSjFiblIxTDIxaGRHaHRaVzUwYjNJdGNHeGhkR1p2Y20wdmNtVnpaV0Z5WTJndlozSmhaR1V0T1MxalpYSjBhV1pwWTJGMFpTMXRiMlJsYkMweExXUnlZV1owTFc5MWRIQjFkQS5qc29uIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzkwODEyODAwfX19XX0_\u0026Key-Pair-Id=K2QY5QTL8JSY6C\u0026Signature=MEUCIQDUUtKVlMG0EcH4KuM4fWhzzWeRTP2I0EToJZ4z4l2PaAIgSIIf5Rw0rknEh3t8GULM25sgnnXLdwJfrzjQM5gnsS0_"
+      },
+      "error": ""
+    },
+    {
+      "input": "/home/ubuntu/mathmentor-platform/research/grade-12-life-sciences-model-1-draft-input.json",
+      "output": {
+        "draft_file": "https://private-us-east-1.manuscdn.com/sessionFile/iDwEDa4hyVr7VCgkaNAZGi/sandbox/XRStrdQNBUFZB3sugJUdWz_1788758961799_na1fn_L2hvbWUvdWJ1bnR1L21hdGhtZW50b3ItcGxhdGZvcm0vcmVzZWFyY2gvZ3JhZGUtMTItbGlmZS1zY2llbmNlcy1tb2RlbC0xLWRyYWZ0.json?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvaUR3RURhNGh5VnI3VkNna2FOQVpHaS9zYW5kYm94L1hSU3RyZFFOQlVGWkIzc3VnSlVkV3pfMTc4ODc1ODk2MTc5OV9uYTFmbl9MMmh2YldVdmRXSjFiblIxTDIxaGRHaHRaVzUwYjNJdGNHeGhkR1p2Y20wdmNtVnpaV0Z5WTJndlozSmhaR1V0TVRJdGJHbG1aUzF6WTJsbGJtTmxjeTF0YjJSbGJDMHhMV1J5WVdaMC5qc29uIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzkwODEyODAwfX19XX0_\u0026Key-Pair-Id=K2QY5QTL8JSY6C\u0026Signature=MEYCIQCOua4oBMdvIhVNCQkOExUBXbKSoe5JqnB8zopigAQCXwIhAOMASFR0fWiCTZ4RhJ6tBYqzfzc261KyWZakOd0taLkR"
+      },
+      "error": ""
+    },
+    {
+      "input": "/home/ubuntu/mathmentor-platform/research/grade-12-general-sciences-model-1-draft-input.json",
+      "output": {
+        "draft_file": "https://private-us-east-1.manuscdn.com/sessionFile/LUuEL5HTeklCKKhM1kcYia/sandbox/L3oK57vPFy131ZhoQ0GJyr_1788758948008_na1fn_L2hvbWUvdWJ1bnR1L21hdGhtZW50b3ItcGxhdGZvcm0vcmVzZWFyY2gvZ3JhZGUtMTItZ2VuZXJhbC1zY2llbmNlcy1tb2RlbC0xLWRyYWZ0cw.json?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvTFV1RUw1SFRla2xDS0toTTFrY1lpYS9zYW5kYm94L0wzb0s1N3ZQRnkxMzFaaG9RMEdKeXJfMTc4ODc1ODk0ODAwOF9uYTFmbl9MMmh2YldVdmRXSjFiblIxTDIxaGRHaHRaVzUwYjNJdGNHeGhkR1p2Y20wdmNtVnpaV0Z5WTJndlozSmhaR1V0TVRJdFoyVnVaWEpoYkMxelkybGxibU5sY3kxdGIyUmxiQzB4TFdSeVlXWjBjdy5qc29uIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzkwODEyODAwfX19XX0_\u0026Key-Pair-Id=K2QY5QTL8JSY6C\u0026Signature=MEYCIQDM93TiIU7oqGzqgXW0QsKtHleQsGiOqNZyTPEER~n~zgIhAOKybaVXNVPLT9fyik1B-4wPkluu0MOQwEHhL-6KxWP2"
+      },
+      "error": ""
+    },
+    {
+      "input": "/home/ubuntu/mathmentor-platform/research/grade-12-sociology-economics-model-1-draft-input.json",
+      "output": {
+        "draft_file": "https://private-us-east-1.manuscdn.com/sessionFile/8aftaqW7CEsJcH4FOB7Mli/sandbox/vwLjuqKjYCBZSutMMe2CSA_1788758941423_na1fn_L2hvbWUvdWJ1bnR1L21hdGhtZW50b3ItcGxhdGZvcm0vcmVzZWFyY2gvZ3JhZGUtMTItc29jaW9sb2d5LWVjb25vbWljcy1tb2RlbC0xLWRyYWZ0LW91dHB1dA.json?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvOGFmdGFxVzdDRXNKY0g0Rk9CN01saS9zYW5kYm94L3Z3TGp1cUtqWUNCWlN1dE1NZTJDU0FfMTc4ODc1ODk0MTQyM19uYTFmbl9MMmh2YldVdmRXSjFiblIxTDIxaGRHaHRaVzUwYjNJdGNHeGhkR1p2Y20wdmNtVnpaV0Z5WTJndlozSmhaR1V0TVRJdGMyOWphVzlzYjJkNUxXVmpiMjV2YldsamN5MXRiMlJsYkMweExXUnlZV1owTFc5MWRIQjFkQS5qc29uIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzkwODEyODAwfX19XX0_\u0026Key-Pair-Id=K2QY5QTL8JSY6C\u0026Signature=MEUCIQDxBvkQBd11khGFIMadJDaas9-6LObq5WCsWQPY0TNm6wIgWTbS6IQIuvyOQUR3rbm2zwZTGyoEQikBzQPrkETMSRQ_"
+      },
+      "error": ""
+    },
+    {
+      "input": "/home/ubuntu/mathmentor-platform/research/sat-math-model-1-draft-input.json",
+      "output": {
+        "draft_file": "https://private-us-east-1.manuscdn.com/sessionFile/Xvc4yRalzPgC2OokG0kZiW/sandbox/psyRCn1qbTAShfpPNY0sD2_1788758940773_na1fn_L2hvbWUvdWJ1bnR1L21hdGhtZW50b3ItcGxhdGZvcm0vcmVzZWFyY2gvc2F0LW1hdGgtbW9kZWwtMS1kcmFmdHM.json?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvWHZjNHlSYWx6UGdDMk9va0cwa1ppVy9zYW5kYm94L3BzeVJDbjFxYlRBU2hmcFBOWTBzRDJfMTc4ODc1ODk0MDc3M19uYTFmbl9MMmh2YldVdmRXSjFiblIxTDIxaGRHaHRaVzUwYjNJdGNHeGhkR1p2Y20wdmNtVnpaV0Z5WTJndmMyRjBMVzFoZEdndGJXOWtaV3d0TVMxa2NtRm1kSE0uanNvbiIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5MDgxMjgwMH19fV19\u0026Key-Pair-Id=K2QY5QTL8JSY6C\u0026Signature=MEYCIQDAwh9y~gVsqHOpBgjDBVqg0rgcaNnsgVKPgN-vGc636gIhAKQPUruUOgZSaEBtsRX7LP9G3hA64yMzZxGNal3XOxwI"
+      },
+      "error": ""
+    }
+  ]
+}
