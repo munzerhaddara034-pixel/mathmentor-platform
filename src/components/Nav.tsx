@@ -13,6 +13,7 @@ export function Nav() {
         </span>
       </Link>
       <nav className="links">
+        <Link href="/lessons">الدروس</Link>
         <Link href="/practice">الاختبارات</Link>
         <Link href="/bank">بنك الأستاذ</Link>
         <Link href="/classroom">الصف</Link>

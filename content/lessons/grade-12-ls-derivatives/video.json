@@ -1,0 +1,102 @@
+{
+  "id": "grade-12-ls-derivatives",
+  "title_en": "Derivative at a point",
+  "title_fr": "Nombre dérivé",
+  "course_label_en": "Grade 12 LS · Derivatives intro",
+  "course_label_fr": "Terminale SV · Nombre dérivé",
+  "width": 1280,
+  "height": 720,
+  "caption_height": 128,
+  "teacher_photo": "public/teachers/munzer.jpg",
+  "default_pose": "talk",
+  "poses": {
+    "talk": "public/teachers/munzer-board-talk.jpg",
+    "point": "public/teachers/munzer-board-point.jpg"
+  },
+  "board_region": [0.48, 0.10, 0.97, 0.72],
+  "style": "hook → one idea → worked example → common mistake → recap",
+  "outputs": {
+    "en": "public/videos/grade-12-ls-derivatives-en.mp4",
+    "fr": "public/videos/grade-12-ls-derivatives-fr.mp4"
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "duration": 10,
+      "phase": "hook",
+      "pose": "talk",
+      "narration_en": "Average speed from 1 to 2 is a slope between two points. That is not the speed at the instant t equals 1. If you box the average and call it f prime of 1, the exam will take the mark.",
+      "narration_fr": "La vitesse moyenne de 1 à 2 est une pente entre deux points. Ce n'est pas la vitesse à l'instant t égal 1. Si vous encadrez la moyenne et l'appelez f prime de 1, l'examen reprend le point.",
+      "caption_en": "Average rate from 1 to 2 is not the derivative at 1.",
+      "caption_fr": "Le taux moyen de 1 à 2 n'est pas le nombre dérivé en 1.",
+      "board_math": ["[f(2) − f(1)] / (2 − 1)", "This is average slope.", "Not f'(1)."],
+      "board_en": ["Instantaneous rate needs a limit."],
+      "board_fr": ["Le taux instantané demande une limite."]
+    },
+    {
+      "id": "idea",
+      "duration": 12,
+      "phase": "idea",
+      "pose": "talk",
+      "narration_en": "The derivative at a is the limit of the difference quotient. You slide the second point toward a. If that limit of slopes exists, its value is f prime of a: the slope of the tangent.",
+      "narration_fr": "Le nombre dérivé en a est la limite du taux d'accroissement. On fait glisser le second point vers a. Si cette limite de pentes existe, sa valeur est f prime de a : la pente de la tangente.",
+      "caption_en": "f'(a) is the limit of slopes as the second point approaches a.",
+      "caption_fr": "f'(a) est la limite des pentes quand le second point s'approche de a.",
+      "board_math": ["f'(a) = lim h→0  [f(a+h) − f(a)] / h", "slope of the tangent at a"],
+      "board_en": ["The derivative is a limit. Treat it like one."],
+      "board_fr": ["La dérivée est une limite. On la traite comme telle."]
+    },
+    {
+      "id": "example-setup",
+      "duration": 12,
+      "phase": "example",
+      "pose": "point",
+      "narration_en": "Take f of x equals x squared, and a equals 2. Write f of 2 plus h minus f of 2, over h. That is 4h plus h squared, over h. For h not zero, this simplifies to 4 plus h.",
+      "narration_fr": "Prenons f de x égal x carré, et a égal 2. Écrivons f de 2 plus h moins f de 2, sur h. Cela fait 4h plus h carré, sur h. Pour h non nul, cela se simplifie en 4 plus h.",
+      "caption_en": "For f(x)=x² at 2, the difference quotient becomes 4 + h.",
+      "caption_fr": "Pour f(x)=x² en 2, le taux d'accroissement devient 4 + h.",
+      "board_math": ["f(x) = x² ,  a = 2", "[(2+h)² − 4] / h", "= (4 + 4h + h² − 4) / h", "= 4 + h    (h ≠ 0)"],
+      "board_en": ["Cancel h only where h is not zero."],
+      "board_fr": ["On simplifie h seulement si h n'est pas nul."]
+    },
+    {
+      "id": "example-limit",
+      "duration": 10,
+      "phase": "example",
+      "pose": "point",
+      "narration_en": "Now let h go to zero. 4 plus h goes to 4. So f prime of 2 is 4. The tangent at 2 has slope 4. A quick check with the power rule: 2x at 2 is also 4. Same number, two stories.",
+      "narration_fr": "Maintenant h tend vers zéro. 4 plus h tend vers 4. Donc f prime de 2 vaut 4. La tangente en 2 a pour pente 4. Contrôle avec la règle des puissances : 2x en 2 vaut aussi 4. Même nombre, deux récits.",
+      "caption_en": "h → 0 gives f'(2) = 4. Power rule 2x agrees.",
+      "caption_fr": "h → 0 donne f'(2) = 4. La règle 2x le confirme.",
+      "board_math": ["lim h→0 (4 + h) = 4", "f'(2) = 4", "check: (x²)' = 2x → 4"],
+      "board_en": ["Definition first, shortcut second."],
+      "board_fr": ["D'abord la définition, ensuite le raccourci."]
+    },
+    {
+      "id": "mistake",
+      "duration": 12,
+      "phase": "mistake",
+      "pose": "talk",
+      "narration_en": "Do not write f prime of 2 equals f of 2. The height is 4, the slope is also 4 here by accident of x squared. For 5x minus 4, the height at 0 is minus 4, the slope is 5. And |x| is continuous at 0 but the left and right difference quotients disagree, so no derivative.",
+      "narration_fr": "N'écrivez pas f prime de 2 égal f de 2. Ici la hauteur vaut 4 et la pente aussi, par accident de x carré. Pour 5x moins 4, la hauteur en 0 vaut moins 4, la pente vaut 5. Et |x| est continue en 0 mais les taux à gauche et à droite diffèrent : pas de dérivée.",
+      "caption_en": "Trap: f'(a) = f(a). Height is not slope. |x| has no derivative at 0.",
+      "caption_fr": "Piège : f'(a) = f(a). La hauteur n'est pas la pente. |x| n'a pas de dérivée en 0.",
+      "board_math": ["f'(a)  is not  f(a)", "|x| : continuous at 0", "left slope −1, right slope +1"],
+      "board_en": ["No two-sided limit of slopes ⇒ no f'(0)."],
+      "board_fr": ["Pas de limite des pentes des deux côtés ⇒ pas de f'(0)."]
+    },
+    {
+      "id": "recap",
+      "duration": 10,
+      "phase": "recap",
+      "pose": "talk",
+      "narration_en": "Write the difference quotient. Simplify for h not zero. Take the limit. If the two-sided limit exists, that number is the derivative. Next you will use it to read increasing and decreasing from the sign of f prime.",
+      "narration_fr": "Écrivez le taux d'accroissement. Simplifiez pour h non nul. Passez à la limite. Si la limite des deux côtés existe, ce nombre est le nombre dérivé. Ensuite on lira croissance et décroissance au signe de f prime.",
+      "caption_en": "Quotient, simplify, limit. That number is f'(a).",
+      "caption_fr": "Taux, simplification, limite. Ce nombre est f'(a).",
+      "board_math": ["1) write [f(a+h)−f(a)] / h", "2) simplify, h ≠ 0", "3) lim h→0"],
+      "board_en": ["Next: sign of f' and the table of variations."],
+      "board_fr": ["Ensuite : signe de f' et tableau de variations."]
+    }
+  ]
+}

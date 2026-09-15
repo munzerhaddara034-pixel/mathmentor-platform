@@ -1,0 +1,102 @@
+{
+  "id": "brevet-geometry-thales",
+  "title_en": "Thales in a triangle",
+  "title_fr": "Thalès dans un triangle",
+  "course_label_en": "Brevet · Geometry",
+  "course_label_fr": "Brevet · Géométrie",
+  "width": 1280,
+  "height": 720,
+  "caption_height": 128,
+  "teacher_photo": "public/teachers/munzer.jpg",
+  "default_pose": "talk",
+  "poses": {
+    "talk": "public/teachers/munzer-board-talk.jpg",
+    "point": "public/teachers/munzer-board-point.jpg"
+  },
+  "board_region": [0.48, 0.10, 0.97, 0.72],
+  "style": "hook → one idea → worked example → common mistake → recap",
+  "outputs": {
+    "en": "public/videos/brevet-geometry-thales-en.mp4",
+    "fr": "public/videos/brevet-geometry-thales-fr.mp4"
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "duration": 10,
+      "phase": "hook",
+      "pose": "talk",
+      "narration_en": "In triangle ABC, DE is parallel to BC, with D on AB and E on AC. The paper gives AD over AB equals 2 fifths. Students often answer AE over AC equals 3 fifths, mixing the remaining segment with the whole side. That mix is the classic Brevet trap.",
+      "narration_fr": "Dans le triangle ABC, DE est parallèle à BC, D sur AB et E sur AC. On donne AD sur AB égal à 2 cinquièmes. Les élèves répondent souvent AE sur AC égal à 3 cinquièmes, en mélangeant le segment restant et le côté entier. C'est le piège classique du Brevet.",
+      "caption_en": "DE ∥ BC and AD/AB = 2/5. What is AE/AC? Not 3/5.",
+      "caption_fr": "DE ∥ BC et AD/AB = 2/5. Que vaut AE/AC ? Pas 3/5.",
+      "board_math": ["(DE) // (BC)", "AD / AB = 2/5", "AE / AC  =  ?"],
+      "board_en": ["Do not swap the leftover for the whole side."],
+      "board_fr": ["On ne remplace pas le reste par le côté entier."]
+    },
+    {
+      "id": "idea",
+      "duration": 12,
+      "phase": "idea",
+      "pose": "talk",
+      "narration_en": "Thales says: a line parallel to one side cuts the other two sides in the same ratio. If you write the ratio on the whole side AB, you must write the same ratio on the whole side AC. Same writing on both legs.",
+      "narration_fr": "Thalès dit : une droite parallèle à un côté coupe les deux autres côtés dans le même rapport. Si vous écrivez le rapport sur le côté entier AB, vous devez écrire le même rapport sur le côté entier AC. Même écriture sur les deux côtés.",
+      "caption_en": "Parallel to one side ⇒ the same ratio on both legs.",
+      "caption_fr": "Parallèle à un côté ⇒ le même rapport sur les deux autres.",
+      "board_math": ["(DE) // (BC)", "AD/AB = AE/AC = DE/BC"],
+      "board_en": ["Copy the same form on both sides."],
+      "board_fr": ["On recopie la même forme des deux côtés."]
+    },
+    {
+      "id": "example-compute",
+      "duration": 12,
+      "phase": "example",
+      "pose": "point",
+      "narration_en": "AD over AB is 2 fifths, so AE over AC is also 2 fifths. If AC is 20 centimetres, AE is 8. The parallel also gives DE over BC equal to 2 fifths, when the question asks for the small segment.",
+      "narration_fr": "AD sur AB vaut 2 cinquièmes, donc AE sur AC vaut aussi 2 cinquièmes. Si AC mesure 20 centimètres, AE mesure 8. Le parallèle donne aussi DE sur BC égal à 2 cinquièmes, si on demande le petit segment.",
+      "caption_en": "Same ratio: AE = (2/5)×20 = 8 cm.",
+      "caption_fr": "Même rapport : AE = (2/5)×20 = 8 cm.",
+      "board_math": ["AE / AC = 2/5", "AC = 20 cm", "AE = 8 cm"],
+      "board_en": ["Write the parallel first, then the equality."],
+      "board_fr": ["On écrit d'abord le parallèle, puis l'égalité."]
+    },
+    {
+      "id": "example-other-form",
+      "duration": 11,
+      "phase": "example",
+      "pose": "point",
+      "narration_en": "If the exam writes the other form, AD over DB, that is not 2 fifths. From AD over AB equals 2 fifths, the leftover DB over AB is 3 fifths, so AD over DB is 2 over 3. Read which writing they used before you copy a fraction.",
+      "narration_fr": "Si l'examen écrit l'autre forme, AD sur DB, ce n'est pas 2 cinquièmes. De AD sur AB égal à 2 cinquièmes, le reste DB sur AB vaut 3 cinquièmes, donc AD sur DB vaut 2 sur 3. Lisez l'écriture avant de recopier une fraction.",
+      "caption_en": "AD/AB = 2/5 does not mean AD/DB = 2/5. That one is 2/3.",
+      "caption_fr": "AD/AB = 2/5 ne veut pas dire AD/DB = 2/5. Celui-là vaut 2/3.",
+      "board_math": ["AD/AB = 2/5", "DB/AB = 3/5", "AD/DB = 2/3"],
+      "board_en": ["Whole side and remaining segment are different writings."],
+      "board_fr": ["Côté entier et segment restant : deux écritures différentes."]
+    },
+    {
+      "id": "mistake",
+      "duration": 11,
+      "phase": "mistake",
+      "pose": "talk",
+      "narration_en": "Never apply Thales unless the parallel is given or proved. And never mix AD over AB with AD over DB in the same chain. If you need the intercept theorem the other way: equal ratios plus the points aligned can prove the parallel. That is the converse, a different sentence.",
+      "narration_fr": "On n'applique pas Thalès sans le parallèle, donné ou démontré. Et on ne mélange pas AD sur AB avec AD sur DB dans la même chaîne. Si vous devez prouver le parallèle : rapports égaux et points alignés, c'est la réciproque, une autre phrase.",
+      "caption_en": "Trap: mixing AD/AB with AD/DB, or using Thales without the parallel.",
+      "caption_fr": "Piège : mélanger AD/AB et AD/DB, ou utiliser Thalès sans le parallèle.",
+      "board_math": ["Need (DE)//(BC) first", "AD/AB  ≠  AD/DB", "converse: equal ratios ⇒ //"],
+      "board_en": ["Hypothesis first. Then the matching ratio."],
+      "board_fr": ["D'abord l'hypothèse. Ensuite le rapport adapté."]
+    },
+    {
+      "id": "recap",
+      "duration": 10,
+      "phase": "recap",
+      "pose": "talk",
+      "narration_en": "Write the parallel. Copy the same ratio on both legs, in the same form the question used. If they used the whole side, stay on the whole side. Next Brevet geometry skill: similar triangles, which is the same idea with angles equal.",
+      "narration_fr": "Écrivez le parallèle. Recopiez le même rapport sur les deux côtés, dans la même forme que la question. S'ils ont utilisé le côté entier, restez sur le côté entier. Compétence suivante : triangles semblables, la même idée avec les angles égaux.",
+      "caption_en": "Parallel, then the same ratio, in the same writing. Check the leftover.",
+      "caption_fr": "Parallèle, puis le même rapport, dans la même écriture. Vérifiez le reste.",
+      "board_math": ["1) write (DE)//(BC)", "2) same ratio, same form", "3) check leftover vs whole"],
+      "board_en": ["High-yield Brevet move. Do it slowly once."],
+      "board_fr": ["Geste à haut rendement au Brevet. Une fois, lentement."]
+    }
+  ]
+}

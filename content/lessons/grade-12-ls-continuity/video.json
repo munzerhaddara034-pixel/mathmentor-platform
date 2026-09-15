@@ -1,0 +1,115 @@
+{
+  "id": "grade-12-ls-continuity",
+  "title_en": "Continuity at a point",
+  "title_fr": "Continuité en un point",
+  "course_label_en": "Grade 12 LS · Continuity",
+  "course_label_fr": "Terminale SV · Continuité",
+  "width": 1280,
+  "height": 720,
+  "caption_height": 128,
+  "teacher_photo": "public/teachers/munzer.jpg",
+  "default_pose": "talk",
+  "poses": {
+    "talk": "public/teachers/munzer-board-talk.jpg",
+    "point": "public/teachers/munzer-board-point.jpg"
+  },
+  "board_region": [0.48, 0.10, 0.97, 0.72],
+  "style": "hook → one idea → worked example → common mistake → recap",
+  "outputs": {
+    "en": "public/videos/grade-12-ls-continuity-en.mp4",
+    "fr": "public/videos/grade-12-ls-continuity-fr.mp4"
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "duration": 10,
+      "phase": "hook",
+      "pose": "talk",
+      "narration_en": "Look at this piecewise function. Both sides approach 2, so the limit exists. Many students stop there and write: continuous at 1. That sentence costs a mark.",
+      "narration_fr": "Regardez cette fonction définie par morceaux. Les deux côtés tendent vers 2, donc la limite existe. Beaucoup d'élèves s'arrêtent et écrivent : continue en 1. Cette phrase coûte un point.",
+      "caption_en": "The limit exists. Does that mean the function is continuous at 1?",
+      "caption_fr": "La limite existe. Est-ce que la fonction est continue en 1 ?",
+      "board_math": ["x < 1 :  f(x) = x + 1", "x = 1 :  f(1) = 3", "x > 1 :  f(x) = 2x"],
+      "board_en": ["Both one-sided limits equal 2.", "Students write: continuous. Not yet."],
+      "board_fr": ["Les deux limites à gauche et à droite valent 2.", "On écrit trop vite : continue. Pas encore."]
+    },
+    {
+      "id": "idea",
+      "duration": 11,
+      "phase": "idea",
+      "pose": "talk",
+      "narration_en": "Continuity at a is three conditions together, not one. The function must be defined at a, the two-sided limit must exist, and those two numbers must be equal. Miss any one, and it is not continuous there.",
+      "narration_fr": "La continuité en a, ce sont trois conditions ensemble, pas une seule. La fonction doit être définie en a, la limite des deux côtés doit exister, et ces deux nombres doivent être égaux. Il en manque une : ce n'est pas continu.",
+      "caption_en": "Continuous at a means: defined, limit exists, and they match.",
+      "caption_fr": "Continue en a signifie : définie, limite existante, et les deux égales.",
+      "board_math": ["f continuous at a  ⇔", "1)  f(a) exists", "2)  lim x→a f(x) exists", "3)  lim = f(a)"],
+      "board_en": ["All three. Not two out of three."],
+      "board_fr": ["Les trois ensemble. Pas deux sur trois."]
+    },
+    {
+      "id": "example-sides",
+      "duration": 12,
+      "phase": "example",
+      "pose": "point",
+      "narration_en": "Left of 1 we use x plus 1, so we approach 2. Right of 1 we use 2x, so we also approach 2. The two-sided limit is 2. That is only condition two.",
+      "narration_fr": "À gauche de 1 on utilise x plus 1, on tend vers 2. À droite on utilise 2x, on tend aussi vers 2. La limite des deux côtés vaut 2. Ce n'est que la deuxième condition.",
+      "caption_en": "Left: x+1 → 2. Right: 2x → 2. The limit is 2.",
+      "caption_fr": "Gauche : x+1 → 2. Droite : 2x → 2. La limite vaut 2.",
+      "board_math": ["lim x→1−  (x+1) = 2", "lim x→1+  2x = 2", "lim x→1 f(x) = 2"],
+      "board_en": ["The limit exists. Keep going."],
+      "board_fr": ["La limite existe. On continue."]
+    },
+    {
+      "id": "example-value",
+      "duration": 11,
+      "phase": "example",
+      "pose": "point",
+      "narration_en": "Now the third check: f of 1 is 3, not 2. Defined, limit exists, but they are not equal. There is a jump in the graph. Not continuous at 1.",
+      "narration_fr": "Troisième contrôle : f de 1 vaut 3, pas 2. Définie, limite existante, mais elles ne sont pas égales. Un saut sur le graphe. Pas continue en 1.",
+      "caption_en": "f(1) = 3, but the limit is 2. Not continuous at 1.",
+      "caption_fr": "f(1) = 3, mais la limite vaut 2. Pas continue en 1.",
+      "board_math": ["f(1) = 3", "lim = 2  ≠  f(1)", "not continuous at 1"],
+      "board_en": ["A hole or a jump breaks continuity."],
+      "board_fr": ["Un trou ou un saut casse la continuité."]
+    },
+    {
+      "id": "example-glue",
+      "duration": 11,
+      "phase": "example",
+      "pose": "point",
+      "narration_en": "Exam version: glue the pieces with a parameter. If f is x squared on the left of 1, and k on the right, continuity forces k to equal 1. Do not copy 2 from the derivative of x squared.",
+      "narration_fr": "Version d'examen : on colle les morceaux avec un paramètre. Si f vaut x carré à gauche de 1, et k à droite, la continuité impose k égal à 1. On ne recopie pas 2, la dérivée de x carré.",
+      "caption_en": "To glue x² to the constant k at 1, take k = 1.",
+      "caption_fr": "Pour coller x² à la constante k en 1, on prend k = 1.",
+      "board_math": ["x < 1 :  x²  →  1", "x ≥ 1 :  k", "k = 1"],
+      "board_en": ["Match the limit, not the slope."],
+      "board_fr": ["On égale la limite, pas la pente."]
+    },
+    {
+      "id": "mistake",
+      "duration": 11,
+      "phase": "mistake",
+      "pose": "talk",
+      "narration_en": "Two traps. First: the limit exists, so it is continuous. No. The values must match. Second: f is defined at a, so it is continuous. Also no. Continuity is not the same as differentiability either. |x| is continuous at 0, and not differentiable there.",
+      "narration_fr": "Deux pièges. Premier : la limite existe, donc c'est continu. Non. Les valeurs doivent coïncider. Second : f est définie en a, donc continue. Non plus. Continuité n'est pas dérivabilité. |x| est continue en 0, et non dérivable.",
+      "caption_en": "Trap: “limit exists ⇒ continuous.” The values still have to match.",
+      "caption_fr": "Piège : « limite existante ⇒ continu ». Les valeurs doivent encore coïncider.",
+      "board_math": ["limit exists  ≠  continuous", "|x| is continuous at 0", "but not differentiable at 0"],
+      "board_en": ["Defined, limit, equality. Then stop."],
+      "board_fr": ["Définie, limite, égalité. Puis on s'arrête."]
+    },
+    {
+      "id": "recap",
+      "duration": 10,
+      "phase": "recap",
+      "pose": "talk",
+      "narration_en": "Three checks at a: is f of a written? Do left and right limits agree? Do they equal f of a? If yes, we may later ask for the derivative, which is itself a limit. Next lesson: that limit of slopes.",
+      "narration_fr": "Trois contrôles en a : f de a est-il écrit ? Les limites à gauche et à droite sont-elles égales ? Valent-elles f de a ? Si oui, on pourra ensuite demander le nombre dérivé, qui est lui-même une limite. Leçon suivante : cette limite de pentes.",
+      "caption_en": "Defined. Limit exists. They are equal. Next: the derivative as a limit.",
+      "caption_fr": "Définie. Limite existante. Égales. Ensuite : le nombre dérivé comme limite.",
+      "board_math": ["1) f(a)", "2) lim x→a f(x)", "3) they are equal"],
+      "board_en": ["Next: derivative = limit of slopes."],
+      "board_fr": ["Ensuite : dérivée = limite de pentes."]
+    }
+  ]
+}

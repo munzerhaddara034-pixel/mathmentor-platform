@@ -44,6 +44,7 @@ export type ContentDraft = {
   storyboard: StoryboardScene[];
   printableSolution: string;
   videoUrl?: string;
+  videoUrlFr?: string;
   status: ReviewStatus;
   professorNote?: string;
   reviewedAt?: string;
@@ -223,4 +224,5 @@ export type AcademyLessonRecord = {
   example: string;
   exampleBoard: string;
   videoUrl?: string;
+  videoUrlFr?: string;
 };

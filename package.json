@@ -10,7 +10,11 @@
     "build": "next build",
     "start": "next start",
     "banks:g12": "python3 scripts/build-g12-banks.py",
-    "video:limits": "python3 scripts/render-lesson-video.py content/grade-12-ls-limits/intro-video.json public/videos/grade-12-ls-limits-intro.mp4"
+    "video:limits": "python3 scripts/render-lesson-video.py content/grade-12-ls-limits/intro-video.json public/videos/grade-12-ls-limits-intro.mp4 --lang ar",
+    "video:continuity": "python3 scripts/render-lesson-video.py content/lessons/grade-12-ls-continuity/video.json --both",
+    "video:derivatives": "python3 scripts/render-lesson-video.py content/lessons/grade-12-ls-derivatives/video.json --both",
+    "video:brevet-geometry": "python3 scripts/render-lesson-video.py content/lessons/brevet-geometry-thales/video.json --both",
+    "video:lessons": "npm run video:continuity && npm run video:derivatives && npm run video:brevet-geometry"
   },
   "dependencies": {
     "next": "^15.5.2",

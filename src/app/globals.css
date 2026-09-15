@@ -279,6 +279,43 @@ textarea { min-height: 120px; resize: vertical; }
 .math-block { overflow-x: auto; margin: 12px 0; font-size: 1.15em; }
 .option-grid { display: grid; gap: 10px; margin-top: 16px; }
 @media (min-width: 700px) { .option-grid { grid-template-columns: 1fr 1fr; } }
+.lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+}
+.lang-toggle button {
+  border: 0;
+  background: transparent;
+  padding: 8px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--muted);
+}
+.lang-toggle button[aria-pressed="true"] {
+  background: var(--navy);
+  color: var(--gold);
+}
+.lang-toggle button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.lesson-media-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.lang-toggle-overlay {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  box-shadow: 0 8px 24px rgba(16, 33, 61, 0.28);
+}
 .option-btn {
   border: 1px solid var(--line); background: #fff; border-radius: 16px; padding: 14px; cursor: pointer; text-align: right;
 }

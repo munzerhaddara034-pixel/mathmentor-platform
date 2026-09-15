@@ -1,5 +1,27 @@
 import type { GradeTrack, StoryboardScene } from "./types";
+import {
+  BREVET_GEOMETRY_LESSON_ID,
+  BREVET_GEOMETRY_VIDEO_EN,
+  BREVET_GEOMETRY_VIDEO_FR,
+  brevetGeometryFallbackEn,
+  brevetGeometryFallbackFr,
+} from "./brevetGeometryThales";
+import {
+  GRADE_12_LS_CONTINUITY_LESSON_ID,
+  GRADE_12_LS_CONTINUITY_VIDEO_EN,
+  GRADE_12_LS_CONTINUITY_VIDEO_FR,
+  grade12LsContinuityFallbackEn,
+  grade12LsContinuityFallbackFr,
+} from "./grade12LsContinuity";
+import {
+  GRADE_12_LS_DERIVATIVES_LESSON_ID,
+  GRADE_12_LS_DERIVATIVES_VIDEO_EN,
+  GRADE_12_LS_DERIVATIVES_VIDEO_FR,
+  grade12LsDerivativesFallbackEn,
+  grade12LsDerivativesFallbackFr,
+} from "./grade12LsDerivatives";
 import { GRADE_12_LS_LIMITS_LESSON_ID, grade12LsLimitsFallbackScenes } from "./grade12LsLimits";
+import type { LessonLang } from "./lessonNotes";
 
 export type AcademyLesson = {
   id: string;
@@ -13,6 +35,7 @@ export type AcademyLesson = {
   example: string;
   exampleBoard: string;
   videoUrl?: string;
+  videoUrlFr?: string;
 };
 
 function L(
@@ -25,7 +48,7 @@ function L(
   board: string,
   example: string,
   exampleBoard: string,
-  extra: Partial<Pick<AcademyLesson, "videoUrl">> = {},
+  extra: Partial<Pick<AcademyLesson, "videoUrl" | "videoUrlFr">> = {},
 ): AcademyLesson {
   return { id: `${track}-ch${chapter}`, track, gradeLabel, chapter, title, arabicTitle, idea, board, example, exampleBoard, ...extra };
 }
@@ -49,7 +72,7 @@ export const academyLessons: AcademyLesson[] = [
   L("grade-9", "EB9 / Brevet", 1, "Real numbers and algebra", "الأعداد الحقيقية والجبر", "We work on the real line with signs, powers, and order.", "ℝ : … negatives, 0, positives", "Compare √2 and 1.4.", "√2 > 1.4"),
   L("grade-9", "EB9 / Brevet", 2, "Polynomial expressions", "العبارات كثيرات الحدود", "Expand with distributivity; factor with a common factor.", "a(b+c) = ab + ac", "Expand 3(x+4).", "3x + 12"),
   L("grade-9", "EB9 / Brevet", 3, "First-degree systems", "جمل الدرجة الأولى", "Two lines meet at one point when the system has a unique solution.", "ax + by = c\ndx + ey = f", "x + y = 5, x − y = 1.", "x = 3, y = 2"),
-  L("grade-9", "EB9 / Brevet", 4, "Thales and similar triangles", "طاليس والتشابه", "A line parallel to one side of a triangle cuts the other two sides proportionally.", "AM/AB = AN/AC", "If AM/AB = 1/2, then AN = AC/2.", "Midline is parallel and half."),
+  L("grade-9", "EB9 / Brevet", 4, "Thales and similar triangles", "طاليس والتشابه", "A line parallel to one side of a triangle cuts the other two sides in the same ratio. Stay in the writing of the question: whole side with whole side.", "If (DE)//(BC) then AD/AB = AE/AC = DE/BC", "AD/AB = 2/5 and AC = 20 cm. Find AE.", "AE = 8 cm. AD/DB = 2/3, not 2/5.", { videoUrl: BREVET_GEOMETRY_VIDEO_EN, videoUrlFr: BREVET_GEOMETRY_VIDEO_FR }),
   L("grade-9", "EB9 / Brevet", 5, "Linear functions", "الدوال الخطية", "Graph is a straight line. Slope is rise over run.", "f(x) = ax + b\na = slope", "f(x) = −x + 3, slope?", "a = −1"),
   L("grade-9", "EB9 / Brevet", 6, "Statistics", "الإحصاء", "Organize data, then read center and spread.", "Mean, median, mode", "Median of 2, 5, 9.", "Median = 5"),
   L("grade-9", "EB9 / Brevet", 7, "Right-triangle trigonometry", "حساب مثلثات القائم", "Sine, cosine, tangent are ratios of sides.", "sin = opp/hyp\ncos = adj/hyp\ntan = opp/adj", "In a 3-4-5 triangle, sin of the angle opposite 3.", "3/5"),
@@ -63,8 +86,8 @@ export const academyLessons: AcademyLesson[] = [
   L("grade-11", "S1 / Grade 11", 6, "Analytic geometry", "الهندسة التحليلية", "A line has equation y = mx + p or ax + by + c = 0.", "m = (y2−y1)/(x2−x1)", "Slope through (0,1) and (2,5).", "m = 2"),
 
   L("grade-12", "Grade 12 LS", 1, "Limits of functions", "النهايات", "النهاية هي القيمة التي تقترب منها f(x) عندما يقترب x من a، حتى إن لم تكن f معرّفة عند a.", "lim_{x→a} f(x)=L\n0/0 → حلّل أو عقّل\nفي ∞ خذ الحد المسيطر", "احسب lim_{x→2} (x²−4)/(x−2)", "4 بعد اختزال (x−2) حيث x≠2", { videoUrl: "/videos/grade-12-ls-limits-intro.mp4" }),
-  L("grade-12", "Grade 12 LS", 2, "Inverse functions", "الدوال العكسية", "An inverse undoes a function. Graphs reflect over y = x.", "f(f⁻¹(x)) = x", "If f(x)=2x, f⁻¹(x).", "x/2"),
-  L("grade-12", "Grade 12 LS", 3, "Trigonometric functions", "الدوال المثلثية", "Sine and cosine oscillate between −1 and 1.", "period 2π", "sin(π/2).", "1"),
+  L("grade-12", "Grade 12 LS", 2, "Continuity of a function", "الاستمرار", "f is continuous at a when it is defined at a, the two-sided limit exists, and those two numbers are equal.", "defined + limit exists + they match", "f(x)=x+1 (x<1), f(1)=3, f(x)=2x (x>1). Continuous at 1?", "No: limit 2 ≠ f(1)=3", { videoUrl: GRADE_12_LS_CONTINUITY_VIDEO_EN, videoUrlFr: GRADE_12_LS_CONTINUITY_VIDEO_FR }),
+  L("grade-12", "Grade 12 LS", 3, "Derivative at a point", "المشتقة", "The derivative at a is the limit of slopes: [f(a+h)−f(a)]/h as h→0. Average rate is not f'(a).", "f'(a)=lim [f(a+h)−f(a)]/h", "f(x)=x². Find f'(2) from the definition.", "4. Difference quotient → 4+h → 4.", { videoUrl: GRADE_12_LS_DERIVATIVES_VIDEO_EN, videoUrlFr: GRADE_12_LS_DERIVATIVES_VIDEO_FR }),
   L("grade-12", "Grade 12 LS", 4, "Vector and mixed products", "الجداء المتجهي والمختلط", "The cross product is perpendicular to both vectors.", "|u × v| = |u||v|sinθ", "i × j.", "k"),
   L("grade-12", "Grade 12 LS", 5, "Lines and planes in space", "المستقيم والمستوي في الفضاء", "A plane needs a point and a normal vector.", "ax+by+cz+d=0", "Normal of x+2y−z=0.", "(1,2,−1)"),
   L("grade-12", "Grade 12 LS", 6, "Complex numbers", "الأعداد المركبة", "A complex number is a + bi. The modulus is the length.", "|a+bi| = √(a²+b²)", "|3−4i|.", "5"),
@@ -95,8 +118,17 @@ export function getAcademyLesson(id: string, extra: AcademyLesson[] = []) {
   return extra.concat(academyLessons).find((lesson) => lesson.id === id);
 }
 
-export function classroomScenes(lesson: AcademyLesson): StoryboardScene[] {
+export function classroomScenes(lesson: AcademyLesson, lang: LessonLang = "en"): StoryboardScene[] {
   if (lesson.id === GRADE_12_LS_LIMITS_LESSON_ID) return grade12LsLimitsFallbackScenes;
+  if (lesson.id === GRADE_12_LS_CONTINUITY_LESSON_ID) {
+    return lang === "fr" ? grade12LsContinuityFallbackFr : grade12LsContinuityFallbackEn;
+  }
+  if (lesson.id === GRADE_12_LS_DERIVATIVES_LESSON_ID) {
+    return lang === "fr" ? grade12LsDerivativesFallbackFr : grade12LsDerivativesFallbackEn;
+  }
+  if (lesson.id === BREVET_GEOMETRY_LESSON_ID) {
+    return lang === "fr" ? brevetGeometryFallbackFr : brevetGeometryFallbackEn;
+  }
   const next = `Chapter ${lesson.chapter + 1} of ${lesson.gradeLabel}`;
   return [
     {

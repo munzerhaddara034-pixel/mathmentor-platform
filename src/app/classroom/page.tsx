@@ -3,6 +3,7 @@
 import { academyLessons, gradeGroups } from "@/lib/academyLessons";
 import { isLessonUnlocked, trackProgressPercent } from "@/lib/gating";
 import type { ProgressEntry, StoreData } from "@/lib/types";
+import { featuredWatchCards } from "@/lib/videoLessons";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -18,7 +19,20 @@ export default function ClassroomIndexPage() {
     <main className="shell">
       <p className="eyebrow">Classroom studio</p>
       <h1>Every grade. Every chapter. Professor at the board.</h1>
-      <p className="muted">افتح الدرس ثم الاختبار. الدرس التالي يُفتح بعد 70%.</p>
+      <p className="muted">Open the lesson, then the quiz. The next chapter unlocks at 70%. Bilingual videos use one EN | FR click for voice and board together.</p>
+      <section className="card" style={{ marginTop: 20 }}>
+        <h2>Watch now</h2>
+        <p className="muted">Professor Munzer on camera. English default, French toggle on the new explainers.</p>
+        <div className="grid two">
+          {featuredWatchCards().map((card) => (
+            <Link key={card.href} href={card.href} className="card" style={{ margin: 0 }}>
+              {card.bilingual ? <span className="badge approved">EN | FR</span> : <span className="badge approved">Video</span>}
+              <h3>{card.titleEn}</h3>
+              <p className="muted">{card.titleFr}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
       {gradeGroups.map((group) => {
         const percent = trackProgressPercent(group.track, progress);
         return (
@@ -36,7 +50,7 @@ export default function ClassroomIndexPage() {
                   return open ? (
                     <Link key={lesson.id} href={`/classroom/${lesson.id}`} className="card" style={{ margin: 0 }}>
                       <span className="badge">Chapter {lesson.chapter}</span>
-                      {lesson.videoUrl ? <span className="badge approved">فيديو</span> : null}
+                      {lesson.videoUrlFr ? <span className="badge approved">EN | FR</span> : lesson.videoUrl ? <span className="badge approved">فيديو</span> : null}
                       <h3>{lesson.arabicTitle || lesson.title}</h3>
                       <p className="muted">{lesson.title}</p>
                     </Link>
