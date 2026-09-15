@@ -8,6 +8,7 @@ export type SessionUser = {
   role: UserRole;
   linkedStudentId?: string | null;
   track?: string | null;
+  phone?: string | null;
 };
 
 export type AuthUser = SessionUser & {
@@ -22,6 +23,7 @@ export const DEMO_ACCOUNTS = [
     password: "student123",
     name: "سارة حدارة",
     track: "grade-12",
+    phone: "76532421",
   },
   {
     role: "teacher" as const,
@@ -29,6 +31,7 @@ export const DEMO_ACCOUNTS = [
     password: "teacher123",
     name: "الأستاذ منذر حدارة",
     track: null,
+    phone: "76532421",
   },
   {
     role: "parent" as const,
@@ -36,6 +39,7 @@ export const DEMO_ACCOUNTS = [
     password: "parent123",
     name: "أم سارة",
     track: null,
+    phone: "76532421",
   },
 ];
 

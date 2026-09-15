@@ -14,6 +14,9 @@ import {
   type ExamPackMeta,
 } from "@/lib/examCatalog";
 import type { SessionKind } from "@/lib/types";
+import { canAccessExamCertificate } from "@/lib/access";
+import { useWatchAccess } from "@/components/SecurePlayerShell";
+import { RedeemButton } from "@/components/RedeemModal";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
@@ -30,6 +33,7 @@ export default function ExamsCatalogPage() {
   const [year, setYear] = useState<number | "">(2024);
   const [session, setSession] = useState<SessionKind | "">("");
   const [topic, setTopic] = useState<CatalogTopicId | "">("");
+  const { user, entitlements } = useWatchAccess();
 
   const packs = useMemo(
     () =>
@@ -51,6 +55,9 @@ export default function ExamsCatalogPage() {
       <p className="eyebrow">بنك الامتحانات الرسمية · أسلوب النماذج اللبنانية</p>
       <h1>الامتحانات والتمارين</h1>
       <p className="muted">{PRACTICE_DISCLAIMER}</p>
+      <div className="row">
+        <RedeemButton label="تفعيل كود الامتحانات" />
+      </div>
 
       <section className="card exam-filters">
         <h2>تصفية الكتالوج</h2>
@@ -124,8 +131,10 @@ export default function ExamsCatalogPage() {
         <p className="muted">ورقة متعددة المسائل بعلامة 20 وباريم، مع مؤقت كالمسابقة الرسمية.</p>
         {papers.length ? (
           <div className="grid two">
-            {papers.map((pack) => (
-              <article className="card exam-pack-card" key={pack.id}>
+            {papers.map((pack) => {
+              const open = canAccessExamCertificate(pack.certificate, entitlements, user?.role);
+              return (
+              <article className="card exam-pack-card" key={pack.id} style={open ? undefined : { opacity: 0.65 }}>
                 <span className="badge">{pack.certificate}</span>
                 <span className="badge">{pack.styleTag}</span>
                 <h3>{pack.arabicTitle}</h3>
@@ -140,15 +149,22 @@ export default function ExamsCatalogPage() {
                   ))}
                 </ul>
                 <div className="row">
-                  <Link className="btn dark" href={playHref(pack)}>
-                    ابدأ الامتحان
-                  </Link>
-                  <Link className="btn" href={printHref(pack)}>
-                    ورقة PDF
-                  </Link>
+                  {open ? (
+                    <>
+                      <Link className="btn dark" href={playHref(pack)}>
+                        ابدأ الامتحان
+                      </Link>
+                      <Link className="btn" href={printHref(pack)}>
+                        ورقة PDF
+                      </Link>
+                    </>
+                  ) : (
+                    <span className="muted">يحتاج كود الفرع (صف 12 أو المتوسطة حسب الشهادة)</span>
+                  )}
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p className="muted">لا نماذج كاملة بهذه التصفية. جرّب فرعاً آخر أو أزل السنة.</p>
@@ -160,23 +176,32 @@ export default function ExamsCatalogPage() {
         <p className="muted">الدوال، الأعداد المركبة، الاحتمالات، الهندسة التحليلية، المتتاليات، المعادلات التفاضلية.</p>
         {drills.length ? (
           <div className="grid two">
-            {drills.map((pack) => (
-              <article className="card exam-pack-card" key={pack.id}>
+            {drills.map((pack) => {
+              const open = canAccessExamCertificate(pack.certificate, entitlements, user?.role);
+              return (
+              <article className="card exam-pack-card" key={pack.id} style={open ? undefined : { opacity: 0.65 }}>
                 <span className="badge">{pack.certificate}</span>
                 <h3>{pack.arabicTitle}</h3>
                 <p className="muted">
                   {pack.questionCount} سؤالاً · {pack.durationMinutes} دقيقة · بنوك موجودة في content/banks
                 </p>
                 <div className="row">
-                  <Link className="btn dark" href={playHref(pack)}>
-                    تدريب الموضوع
-                  </Link>
-                  <Link className="btn" href={printHref(pack)}>
-                    ورقة PDF
-                  </Link>
+                  {open ? (
+                    <>
+                      <Link className="btn dark" href={playHref(pack)}>
+                        تدريب الموضوع
+                      </Link>
+                      <Link className="btn" href={printHref(pack)}>
+                        ورقة PDF
+                      </Link>
+                    </>
+                  ) : (
+                    <span className="muted">مقفلة — فعّل كود الفرع أولاً</span>
+                  )}
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p className="muted">

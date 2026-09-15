@@ -24,7 +24,7 @@ export default async function SubscribePage() {
               دفع إلكتروني / واتساب
             </a>
             <p className="muted" style={{ marginTop: 8 }}>
-              بطاقة مصرفية: تُربط لاحقاً (Stripe / local gateway). أو اشترِ بطاقة كشط من مكتب معتمد.
+              بطاقة مصرفية: تُربط لاحقاً (Stripe / local gateway). أو اشترِ بطاقة كشط من مكتب معتمد ثم أدخل كوداً من 12 خانة على حسابك.
             </p>
             <Link className="btn" href="/redeem">
               تفعيل بطاقة كشط

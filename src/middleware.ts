@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { readSessionFromCookieValue, SESSION_COOKIE } from "@/lib/auth/session";
 
 const AUTH_PREFIXES = ["/dashboard", "/profile", "/student"];
-const TEACHER_PREFIXES = ["/professor", "/assistant"];
+const TEACHER_PREFIXES = ["/professor", "/assistant", "/admin"];
 
 function matches(pathname: string, prefixes: string[]) {
   return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
@@ -46,6 +46,8 @@ export const config = {
     "/professor/:path*",
     "/assistant",
     "/assistant/:path*",
+    "/admin",
+    "/admin/:path*",
     "/login",
     "/signup",
   ],

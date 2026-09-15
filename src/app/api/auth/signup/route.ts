@@ -12,6 +12,7 @@ export async function POST(request: Request) {
     password?: string;
     role?: string;
     track?: string;
+    phone?: string;
     linkedStudentEmail?: string;
   };
   const email = body.email?.trim() ?? "";
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     password,
     role,
     track: body.track || (role === "student" ? "grade-12" : null),
+    phone: body.phone,
     linkedStudentEmail: body.linkedStudentEmail,
   });
   if (!created.ok) {

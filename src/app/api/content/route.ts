@@ -3,5 +3,6 @@ import { readStore } from "@/lib/store";
 
 export async function GET() {
   const store = await readStore();
-  return NextResponse.json(store);
+  const { scratchCards: _cards, entitlements: _ents, ...publicStore } = store;
+  return NextResponse.json({ ...publicStore, scratchCards: [], entitlements: [] });
 }

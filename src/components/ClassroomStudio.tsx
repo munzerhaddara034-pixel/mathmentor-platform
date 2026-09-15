@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { StoryboardScene } from "@/lib/types";
+import { FloatingWatermark } from "@/components/FloatingWatermark";
+import { chaptersFromScenes } from "@/lib/access";
 
 function pickVoice(lang: "en" | "fr") {
   const prefix = lang === "fr" ? "fr" : "en";
@@ -21,11 +23,13 @@ export function ClassroomStudio({
   heading,
   watermark = "طالب المنصة · 76532421",
   lang = "en",
+  speed = 1,
 }: {
   scenes: StoryboardScene[];
   heading: string;
   watermark?: string;
   lang?: "en" | "fr";
+  speed?: number;
 }) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -65,7 +69,7 @@ export function ClassroomStudio({
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(scene.narration);
     utterance.lang = lang === "fr" ? "fr-FR" : "en-US";
-    utterance.rate = 0.9;
+    utterance.rate = Math.min(Math.max(0.75 * speed, 0.6), 2);
     const voice = pickVoice(lang);
     if (voice) utterance.voice = voice;
     utterance.onend = () => {
@@ -77,18 +81,18 @@ export function ClassroomStudio({
       utterance.onend = null;
       window.speechSynthesis.cancel();
     };
-  }, [playing, index, scenes, lang]);
+  }, [playing, index, scenes, lang, speed]);
 
   if (!scenes.length) return null;
   const scene = scenes[index];
+  const chapters = chaptersFromScenes(scenes);
 
   return (
     <div className="classroom video-secure" onContextMenu={(event) => event.preventDefault()}>
       <div className="classroom-view">
         <img className="students-photo" src="/classroom/students.jpg" alt="Students watching the board" draggable={false} />
         <p className="classroom-tag">Protected classroom · no download</p>
-        <span className="dynamic-watermark">{watermark}</span>
-        <span className="dynamic-watermark delay">{watermark}</span>
+        <FloatingWatermark text={watermark} />
       </div>
       <div className="stage-row">
         <div className="teacher-col">
@@ -129,9 +133,26 @@ export function ClassroomStudio({
           Stop
         </button>
         <span className="muted">
-          Scene {index + 1} / {scenes.length} · {lang === "fr" ? "voix FR" : "English voice"} · writing on the board
+          Scene {index + 1} / {scenes.length} · {lang === "fr" ? "voix FR" : "English voice"} · {speed}x · writing on the board
         </span>
       </div>
+      {chapters.length > 1 ? (
+        <div className="chapter-rail" dir="ltr">
+          <p className="chapter-rail-label">{lang === "fr" ? "Chapitres" : "فصول الدرس"}</p>
+          <div className="chapter-chips">
+            {chapters.map((chapter, chapterIndex) => (
+              <button
+                key={chapter.id}
+                type="button"
+                className={`chapter-chip ${chapterIndex === index ? "active" : ""}`}
+                onClick={() => setIndex(chapterIndex)}
+              >
+                {chapterIndex + 1}. {chapter.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

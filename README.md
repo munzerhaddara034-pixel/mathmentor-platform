@@ -60,8 +60,8 @@ npm start
 
 | الدور | البريد | كلمة المرور | بعد الدخول |
 | --- | --- | --- | --- |
-| طالب | `student@mathmentor.lb` | `student123` | [`/dashboard`](http://localhost:3000/dashboard) لوحة الطالب (تقدم، تذكير امتحانات، الدورات، ومساعد الأستاذ منذر) |
-| أستاذ / إدارة | `teacher@mathmentor.lb` | `teacher123` | [`/dashboard`](http://localhost:3000/dashboard) إحصائيات وأكواد التفعيل · [`/professor`](http://localhost:3000/professor) |
+| طالب | `student@mathmentor.lb` | `student123` | [`/dashboard`](http://localhost:3000/dashboard) لوحة الطالب (تقدم، تذكير امتحانات، الدورات، تفعيل كود 12 خانة، ومساعد الأستاذ منذر) |
+| أستاذ / إدارة | `teacher@mathmentor.lb` | `teacher123` | [`/admin`](http://localhost:3000/admin) توليد الأكواد ومتابعة الاستخدام وإدارة الدروس/البنوك · [`/dashboard`](http://localhost:3000/dashboard) · [`/professor`](http://localhost:3000/professor) |
 | ولي أمر | `parent@mathmentor.lb` | `parent123` | [`/dashboard`](http://localhost:3000/dashboard) متابعة الطالب المرتبط (سارة) |
 
 - تسجيل الدخول: [`/login`](http://localhost:3000/login) · حساب جديد: [`/signup`](http://localhost:3000/signup) · الملف: [`/profile`](http://localhost:3000/profile)
@@ -84,7 +84,7 @@ npm start
 | `NEXT_PUBLIC_VIMEO_OTT_URL` | لا | رابط تضمين Vimeo OTT |
 | `NEXT_PUBLIC_WISTIA_ID` | لا | معرّف Wistia |
 
-DRM الحقيقي يحتاج حساب CDN مدفوع. المشغّل المحلي يضع علامة مائية فقط.
+DRM الحقيقي يحتاج حساب CDN مدفوع. المشغّل المحلي يضع **علامة مائية متحركة** (الاسم + رقم الهاتف من جلسة الطالب) وتحكماً في السرعة 0.75x–2x وفصولاً داخل الدرس. هذا **ليس** حماية غير قابلة للكسر — الغاية منع لقطة شاشة ساكنة وإغلاق المشاهدة بدون دخول طالب.
 
 **لكل درس** يمكن تعيين `videoUrl` (English, default) و`videoUrlFr` في `src/lib/academyLessons.ts`. The classroom player shows a single **EN | FR** control: one click swaps the audio track and every on-screen board/caption together. Default is English.
 
@@ -251,7 +251,16 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 
 - كتالوج الكتب/النماذج اللبنانية
 - درس الصف 12 علوم الحياة — النهايات (فصل 1)
-- أكواد تجريبية: `MUNZER-GOLD-9A`، `MUNZER-G12-7K`، `BREVET-29-MX`
+- أكواد تفعيل تجريبية **غير مستخدمة** (12 خانة، تُحفظ لكل مستخدم في `data/auth.db` وليس في `store.json`):
+
+| الكود | يفتح |
+| --- | --- |
+| `MMUNLOCKALL1` | المنصة كاملة |
+| `MMG12CERTIF1` | الصفوف 11–12 |
+| `MMBREVETPATH` | الصفوف 7–9 / المتوسطة |
+| `MMCONTCH2LS1` | وحدة الاستمرار فقط (`grade-12-ch2`) |
+
+توليد دفعات جديدة (حتى 100) من [`/admin`](http://localhost:3000/admin) بحساب الأستاذ. واجهة `/api/cards` للمعلّم فقط. التفعيل من [`/redeem`](http://localhost:3000/redeem) أو نافذة الكود في لوحة الطالب، ويلزم تسجيل دخول طالب.
 
 لا ترفع `.env` أو بطاقات حقيقية أو ملفات الطلاب.
 
@@ -268,7 +277,7 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 | `/profile` | الملف الشخصي وشارة الدور |
 | `/classroom` | فيديوهات الصفوف |
 | `/classroom/grade-12-ch1` | وحدة النهايات (فيديو + ملخص عربي) |
-| `/lessons` | فهرس فيديوهات الشرح |
+| `/lessons` | فهرس فيديوهات الشرح (المعاينة الفصل 1؛ الباقي بكود) |
 | `/lessons/grade-12-ls-ch1` | نفس وحدة النهايات |
 | `/lessons/grade-12-ls-continuity` | الاستمرار — EN default, FR toggle |
 | `/lessons/grade-12-ls-derivatives` | المشتقة — EN default, FR toggle |
@@ -283,7 +292,8 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 | `/bank` | بنك أسئلة الأستاذ والامتحانات |
 | `/professor` | المكتبة، التوليد، طابور الاعتماد |
 | `/assistant` | موظف الذكاء الاصطناعي (نص أو صوت) |
-| `/redeem` | تفعيل بطاقة الطالب |
+| `/admin` | لوحة الإدارة (أستاذ): توليد أكواد، جدول الاستخدام، تشغيل/إيقاف الدروس والبنوك |
+| `/redeem` | تفعيل بطاقة 12 خانة على حساب الطالب |
 | `/subscribe` | الرسوم وواتساب |
 | `/leaderboard` | لوحة المتصدرين |
 | `/resources` | ملخصات محمية (بدون تحميل PDF خام) |
@@ -295,7 +305,8 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 ## ملاحظات التجريب / Demo notes
 
 - المنصة تعمل بدون `OPENAI_API_KEY` (ردود محلية).
-- حسابات التجربة في الجدول أعلاه؛ كود تجريبي كامل المنصة: `MUNZER-GOLD-9A` من صفحة `/redeem`.
+- حسابات التجربة في الجدول أعلاه. أكواد تجريبية غير مستخدمة: `MMUNLOCKALL1` (المنصة كاملة)، `MMG12CERTIF1` (11–12)، `MMBREVETPATH` (7–9)، `MMCONTCH2LS1` (وحدة الاستمرار). الفصل الأول من كل صف معاينة مجانية بعد تسجيل دخول الطالب (العلامة المائية تظهر الاسم والهاتف).
+- مشاهدة `/lessons/...` و`/watch/...` و`/classroom/[id]` تتطلب طالباً مسجّلاً (أو أستاذاً للمعاينة). بدون جلسة يظهر طلب الدخول ولا يُشغَّل الفيديو.
 - المحتوى المولَّد يبقى في طابور الأستاذ حتى الاعتماد.
 - مجلدات `legacy/` و`legacy-source/` أرشيف للكود السابق وليست جزءاً من تطبيق Next.
 

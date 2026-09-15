@@ -1,6 +1,7 @@
 "use client";
 
 import { QuizEngine } from "@/components/QuizEngine";
+import { PremiumExamGate } from "@/components/PremiumExamGate";
 import { assembleBankExam, assembleExam } from "@/lib/examCatalog";
 import { getTopicBank } from "@/lib/topicBanks";
 import type { ExamPaper, QuizQuestion } from "@/lib/types";
@@ -55,6 +56,11 @@ function TakeQuizInner() {
     (mode === "contest" && bank ? `مسابقة ${bank.arabicTitle}` : mode === "exam" ? "امتحان رسمي" : "تدريب حر");
 
   return (
+    <PremiumExamGate
+      certificate={assembled?.pack.certificate ?? bank?.certificate}
+      track={bank && (mode === "contest" || mode === "exam") ? String(bank.track) : undefined}
+      lessonId={!assembled && !bank ? lessonIdParam : undefined}
+    >
     <main className="shell" dir="rtl">
       <p className="eyebrow">
         {assembled
@@ -93,6 +99,7 @@ function TakeQuizInner() {
         <p className="muted">جارٍ تجهيز الأسئلة…</p>
       )}
     </main>
+    </PremiumExamGate>
   );
 }
 

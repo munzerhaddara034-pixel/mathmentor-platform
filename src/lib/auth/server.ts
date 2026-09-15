@@ -17,6 +17,7 @@ export async function getSession(): Promise<SessionUser | null> {
     role: session.role,
     linkedStudentId: session.linkedStudentId,
     track: session.track,
+    phone: session.phone,
   };
 }
 
@@ -34,6 +35,7 @@ export async function setSessionCookie(user: SessionUser) {
     role: user.role,
     linkedStudentId: user.linkedStudentId,
     track: user.track,
+    phone: user.phone,
   });
   const jar = await cookies();
   jar.set(SESSION_COOKIE, token, sessionCookieOptions());

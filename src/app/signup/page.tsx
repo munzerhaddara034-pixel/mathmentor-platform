@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("student");
   const [linkedStudentEmail, setLinkedStudentEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -26,7 +27,7 @@ export default function SignupPage() {
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role, linkedStudentEmail }),
+      body: JSON.stringify({ name, email, password, role, linkedStudentEmail, phone }),
     });
     const payload = (await response.json()) as { error?: string };
     setBusy(false);
@@ -63,6 +64,12 @@ export default function SignupPage() {
               autoComplete="new-password"
             />
           </label>
+          {role === "student" ? (
+            <label>
+              رقم الهاتف (يظهر على الفيديو)
+              <input value={phone} onChange={(event) => setPhone(event.target.value)} dir="ltr" placeholder="76532421" required />
+            </label>
+          ) : null}
           <label>
             الدور
             <select value={role} onChange={(event) => setRole(event.target.value as UserRole)}>
