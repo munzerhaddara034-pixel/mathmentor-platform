@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { roleLabel, type SessionUser } from "@/lib/auth/types";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -46,17 +46,32 @@ function linksFor(user: SessionUser | null) {
 
 export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(initialUser);
   const links = linksFor(user);
+
+  useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/auth/me", { credentials: "include" })
+      .then((response) => response.json())
+      .then((payload: { user?: SessionUser | null }) => {
+        if (!cancelled) setUser(payload.user ?? null);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
     setOpen(false);
-    router.push("/");
-    router.refresh();
+    window.location.assign("/");
   };
 
   return (

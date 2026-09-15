@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
 import { DEMO_ACCOUNTS } from "@/lib/auth/types";
 
 function LoginForm() {
-  const router = useRouter();
   const search = useSearchParams();
   const next = search.get("next") || "/dashboard";
   const [email, setEmail] = useState("student@mathmentor.lb");
@@ -29,8 +28,7 @@ function LoginForm() {
       setError(payload.error ?? "تعذر الدخول");
       return;
     }
-    router.push(next.startsWith("/") ? next : "/dashboard");
-    router.refresh();
+    window.location.assign(next.startsWith("/") ? next : "/dashboard");
   };
 
   return (

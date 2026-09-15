@@ -16,7 +16,8 @@
   color-scheme: light;
 }
 
-[data-theme="dark"] {
+[data-theme="dark"],
+html.theme-dark {
   --navy: #0c1524;
   --gold: #e3bc6a;
   --gold-soft: #3a2f1a;
@@ -127,7 +128,8 @@ button, input, select, textarea {
   background: var(--gold-soft);
   color: #aa7c2c;
 }
-[data-theme="dark"] .role-badge { color: var(--gold); }
+[data-theme="dark"] .role-badge,
+html.theme-dark .role-badge { color: var(--gold); }
 .role-badge.large { font-size: 14px; padding: 6px 14px; }
 .hero {
   background: var(--navy); color: white; border-radius: 28px; padding: 48px 36px;

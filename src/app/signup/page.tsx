@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { USER_ROLES, type UserRole } from "@/lib/auth/types";
 
@@ -12,7 +11,6 @@ const ROLE_COPY: Record<UserRole, string> = {
 };
 
 export default function SignupPage() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,8 +34,7 @@ export default function SignupPage() {
       setError(payload.error ?? "تعذر إنشاء الحساب");
       return;
     }
-    router.push("/dashboard");
-    router.refresh();
+    window.location.assign("/dashboard");
   };
 
   return (

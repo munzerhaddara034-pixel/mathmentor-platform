@@ -54,14 +54,18 @@ export function buildRoleDashboard(user: SessionUser): RoleDashboard {
       const course = catalog.find((item) => item.track === enrollment.track);
       if (!course) return null;
       const computed = trackProgressPercent(course.track, progress);
-      const percent = computed || enrollment.progress;
+      const lessons = course.lessons.map((lesson) => ({
+        ...lesson,
+        percent: percentByLesson.get(lesson.id) ?? 0,
+      }));
+      const lessonAvg = lessons.length
+        ? Math.round(lessons.reduce((sum, lesson) => sum + lesson.percent, 0) / lessons.length)
+        : 0;
+      const percent = Math.max(computed, enrollment.progress, lessonAvg);
       return {
         ...course,
         percent,
-        lessons: course.lessons.map((lesson) => ({
-          ...lesson,
-          percent: percentByLesson.get(lesson.id) ?? 0,
-        })),
+        lessons,
       };
     })
     .filter((item): item is DashboardCourse => Boolean(item));
