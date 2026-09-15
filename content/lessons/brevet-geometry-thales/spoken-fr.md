@@ -6,6 +6,8 @@ Une idée. Une parallèle à un côté coupe les deux autres dans le même rappo
 
 Exemple. AE/AC = 2/5. Si AC = 20 cm, AE = 8. L'autre forme AD/DB vaut 2/3, pas 2/5.
 
+Graphe. Triangle ABC, DE parallèle à BC. Le petit triangle ADE est une copie à l'échelle ; le rapport reste 2/5.
+
 Erreur. Mélanger AD/AB et AD/DB, ou invoquer Thalès sans le parallèle.
 
 Bilan. Écrire le parallèle, recopier le même rapport, vérifier le reste.

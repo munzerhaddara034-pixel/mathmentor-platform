@@ -6,6 +6,8 @@ One idea. A line parallel to one side cuts the other two in the same ratio. Copy
 
 Worked example. AE/AC = 2/5. If AC = 20 cm, AE = 8. The leftover form AD/DB is 2/3, not 2/5.
 
+Graph. Triangle ABC, DE parallel to BC. Small triangle ADE is a scaled copy; the ratio on both legs stays 2/5.
+
 Common mistake. Mixing AD/AB with AD/DB, or quoting Thales without the parallel.
 
 Recap. Write the parallel, copy the same ratio in the same form, check leftover versus whole side.

@@ -6,6 +6,8 @@ One idea. f'(a) is the limit of [f(a+h)−f(a)]/h. If that limit of slopes exist
 
 Worked example. f(x)=x² at 2. The quotient becomes 4+h, then 4. Power rule 2x agrees.
 
+Graph. Parabola y=x². Tangent at (2,4) has slope 4 — the same number as the limit.
+
 Common mistake. f'(a) is not f(a). |x| is continuous at 0 and has no derivative there.
 
 Recap. Write the quotient, simplify, take the limit. Next: sign of f' and the table of variations.
