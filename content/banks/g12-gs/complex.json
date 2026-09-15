@@ -1,0 +1,882 @@
+{
+  "id": "g12-gs-complex",
+  "track": "grade-12",
+  "certificate": "GS",
+  "topic": "complex",
+  "title": "Complex numbers",
+  "arabicTitle": "الأعداد المركبة",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "GS-All.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 GS (علوم عامة) official sessions (GS-All.pdf): exponential form, geometric loci, z↦z', similitudes. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "algebraic",
+      "title": "Algebraic and exponential form",
+      "arabicTitle": "الشكل الجبري والأسّي"
+    },
+    {
+      "id": "geometry",
+      "title": "Geometric interpretation",
+      "arabicTitle": "التفسير الهندسي"
+    },
+    {
+      "id": "transform",
+      "title": "Transformations z ↦ z'",
+      "arabicTitle": "التحويلات"
+    },
+    {
+      "id": "triangles",
+      "title": "Triangles and similitudes",
+      "arabicTitle": "المثلثات والتشابهات"
+    },
+    {
+      "id": "equations",
+      "title": "Equations in C",
+      "arabicTitle": "المعادلات في C"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-gs/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-gs/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-gs/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "complex",
+      "file": "content/banks/g12-gs/complex.json",
+      "title": "IV · Complex numbers",
+      "arabicTitle": "رابعاً · الأعداد المركبة",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-gs/functions.json",
+      "title": "V · Functions analysis",
+      "arabicTitle": "خامساً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-gs-cx-al-01",
+      "slice": "algebraic",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mod-1i"
+      },
+      "stem": "The modulus of z=1+i is:",
+      "choices": [
+        "\\(\\sqrt{2}\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(i\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\sqrt{2}\\)",
+      "solutionSketch": [
+        "√(1+1)=√2."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-02",
+      "slice": "algebraic",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "arg-i-gs"
+      },
+      "stem": "A measure of arg(i) is:",
+      "choices": [
+        "\\(\\pi/2\\)",
+        "\\(0\\)",
+        "\\(\\pi\\)",
+        "\\(\\pi/4\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\pi/2\\)",
+      "solutionSketch": [
+        "i=e^{iπ/2}."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-03",
+      "slice": "algebraic",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "e-i-pi"
+      },
+      "stem": "e^{iπ} equals:",
+      "choices": [
+        "\\(-1\\)",
+        "\\(1\\)",
+        "\\(i\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-1\\)",
+      "solutionSketch": [
+        "Euler."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-04",
+      "slice": "algebraic",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "re-exp"
+      },
+      "stem": "If z=2 e^{iπ/3} then Re(z) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(\\sqrt{3}\\)",
+        "\\(2\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "2 cos(π/3)=2·1/2=1."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-ge-01",
+      "slice": "geometry",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "circle-centre-E"
+      },
+      "stem": "If |z−z_E|=5, the point M of affix z describes:",
+      "choices": [
+        "the circle of centre E and radius 5",
+        "a line",
+        "a point",
+        "the empty set"
+      ],
+      "answerIndex": 0,
+      "answer": "the circle of centre E and radius 5",
+      "solutionSketch": [
+        "Definition of a circle."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-ge-02",
+      "slice": "geometry",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "circle-r2"
+      },
+      "stem": "The points of affixes 2e^{iθ} for θ real describe:",
+      "choices": [
+        "the circle of centre O and radius 2",
+        "the line Re z=2",
+        "a spiral",
+        "the origin"
+      ],
+      "answerIndex": 0,
+      "answer": "the circle of centre O and radius 2",
+      "solutionSketch": [
+        "Modulus constant 2."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-01",
+      "slice": "transform",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mediator-ratio-1"
+      },
+      "stem": "|z'|=|z−a|/|z−b| is the ratio of distances from M to A and to B. If |z'|=1 then M describes:",
+      "choices": [
+        "the mediator of [AB], deprived of B",
+        "the circle of diameter [AB]",
+        "the line (AB)",
+        "a point"
+      ],
+      "answerIndex": 0,
+      "answer": "the mediator of [AB], deprived of B",
+      "solutionSketch": [
+        "|z−a|=|z−b|."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-03",
+      "slice": "transform",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "conjugate-reflect"
+      },
+      "stem": "If z'= \\bar z, the map M↦M' is:",
+      "choices": [
+        "the reflection across (Ox)",
+        "a rotation",
+        "a translation",
+        "a dilation of ratio −1"
+      ],
+      "answerIndex": 0,
+      "answer": "the reflection across (Ox)",
+      "solutionSketch": [
+        "Conjugation."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-10",
+      "slice": "transform",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dilation-2"
+      },
+      "stem": "If z' = 2z, the map M↦M' is the dilation of centre O and ratio:",
+      "choices": [
+        "\\(2\\)",
+        "\\(1/2\\)",
+        "\\(-2\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "Homothety of ratio 2 at the origin."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-02",
+      "slice": "triangles",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "right-at-B"
+      },
+      "stem": "If triangle ABC is right-angled at B, then the complex number (c−b)/(a−b) is:",
+      "choices": [
+        "pure imaginary",
+        "real",
+        "of modulus 2",
+        "equal to 1"
+      ],
+      "answerIndex": 0,
+      "answer": "pure imaginary",
+      "solutionSketch": [
+        "arg((c−b)/(a−b))=±π/2."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-04",
+      "slice": "triangles",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "equilateral-arg"
+      },
+      "stem": "Three points of equal modulus 2 lie on the circle of centre O and radius 2. If also arg((c−a)/(b−a))=π/3 and |b−a|=|c−a|, the triangle is:",
+      "choices": [
+        "equilateral",
+        "right-angled only",
+        "impossible",
+        "degenerate"
+      ],
+      "answerIndex": 0,
+      "answer": "equilateral",
+      "solutionSketch": [
+        "Equal sides from A and angle π/3."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-eq-01",
+      "slice": "equations",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sqrt-1"
+      },
+      "stem": "The square roots of 1 are:",
+      "choices": [
+        "\\(1\\) and \\(-1\\)",
+        "\\(i\\) and \\(-i\\)",
+        "\\(1\\) only",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\) and \\(-1\\)",
+      "solutionSketch": [
+        "z²=1."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-eq-02",
+      "slice": "equations",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "z4-minus-z"
+      },
+      "stem": "z^4−z=0 ⇔ z(z³−1)=0. The real solutions are:",
+      "choices": [
+        "\\(0\\) and \\(1\\)",
+        "\\(0\\) only",
+        "\\(1\\) only",
+        "\\(-1\\) and \\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\) and \\(1\\)",
+      "solutionSketch": [
+        "z=0 or z³=1 (real cube root 1)."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-05",
+      "slice": "algebraic",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "angle-u-AB"
+      },
+      "stem": "z_B−z_A with z_A=1, z_B=3/2 + i √3/2. Then z_B−z_A=1/2 + i √3/2 = e^{iπ/3}. A measure of (u; AB) is:",
+      "choices": [
+        "\\(\\pi/3\\)",
+        "\\(\\pi/6\\)",
+        "\\(\\pi/2\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\pi/3\\)",
+      "solutionSketch": [
+        "Argument of z_B−z_A."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-06",
+      "slice": "algebraic",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "i-exp"
+      },
+      "stem": "z= −sin θ + i cos θ = e^{i(π/2+θ)}. This identity holds because i e^{iθ}=:",
+      "choices": [
+        "\\(-\\sin\\theta+i\\cos\\theta\\)",
+        "\\(\\cos\\theta+i\\sin\\theta\\)",
+        "\\(\\sin\\theta-i\\cos\\theta\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-\\sin\\theta+i\\cos\\theta\\)",
+      "solutionSketch": [
+        "i(cos θ + i sin θ)= i cos θ − sin θ."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-ge-03",
+      "slice": "geometry",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "B-on-C"
+      },
+      "stem": "B belongs to the circle of centre A and radius 1 because |z_B−z_A|=1. With the previous values |e^{iπ/3}|=1, so:",
+      "choices": [
+        "B ∈ (C)",
+        "B=A",
+        "B=O",
+        "AB=2"
+      ],
+      "answerIndex": 0,
+      "answer": "B ∈ (C)",
+      "solutionSketch": [
+        "Radius 1."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-ge-04",
+      "slice": "geometry",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "pure-imag-zprime"
+      },
+      "stem": "If |z|=4 and z'=(z−4)/(z+4) with y≠0, then z' is:",
+      "choices": [
+        "pure imaginary",
+        "real",
+        "of modulus 4",
+        "equal to z"
+      ],
+      "answerIndex": 0,
+      "answer": "pure imaginary",
+      "solutionSketch": [
+        "M on the circle of diameter? |z|=4 deprived of ±4: the image is the imaginary axis deprived of 0."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-ge-07",
+      "slice": "geometry",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "cube-roots-triangle"
+      },
+      "stem": "The points A, B, C of affixes 2, 2e^{i 2π/3} and 2e^{i 4π/3} are the vertices of:",
+      "choices": [
+        "an equilateral triangle inscribed in the circle of centre O and radius 2",
+        "a right triangle",
+        "a line",
+        "a square"
+      ],
+      "answerIndex": 0,
+      "answer": "an equilateral triangle inscribed in the circle of centre O and radius 2",
+      "solutionSketch": [
+        "Three cube roots of 8, equally spaced on |z|=2."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-05",
+      "slice": "transform",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "set-unit-zprime"
+      },
+      "stem": "Let z'=(z−5)/(z−1) with z≠1. If |z'|=1, the point M of affix z describes:",
+      "choices": [
+        "the mediator of [AB] deprived of A, where A(1) and B(5)",
+        "the circle |z|=1",
+        "the point 5",
+        "the real axis"
+      ],
+      "answerIndex": 0,
+      "answer": "the mediator of [AB] deprived of A, where A(1) and B(5)",
+      "solutionSketch": [
+        "|z−5|=|z−1| ⇒ Re(z)=3, and z≠1."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-07",
+      "slice": "transform",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "line-to-parabola"
+      },
+      "stem": "When M varies on y=x, z=x+ix, then z'=f(z) of a quadratic maps (d) to a parabola (typical GS). The image of a line by z↦z² is generally:",
+      "choices": [
+        "a parabola (or a degenerate conic)",
+        "always a circle",
+        "always a line",
+        "a single point"
+      ],
+      "answerIndex": 0,
+      "answer": "a parabola (or a degenerate conic)",
+      "solutionSketch": [
+        "Classical: z² maps lines not through 0 to parabolas in suitable coordinates."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-06",
+      "slice": "triangles",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "EFG-equilateral"
+      },
+      "stem": "z'=(z_G−z_E)/(z_F−z_E)=e^{iπ/3} and |z_F−z_E|=|z_G−z_E| together prove that triangle EFG is:",
+      "choices": [
+        "equilateral",
+        "right-angled at E",
+        "isosceles but not equilateral",
+        "of angle π/6 at E"
+      ],
+      "answerIndex": 0,
+      "answer": "equilateral",
+      "solutionSketch": [
+        "Ratio of equal moduli and argument π/3 ⇒ equilateral."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-eq-03",
+      "slice": "equations",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sqrt-minus5-12i"
+      },
+      "stem": "Square roots of −5+12i: seek (x+iy)²=−5+12i.  x²−y²=−5, 2xy=12 so xy=6. Then (x,y)=(2,3) or (−2,−3), because 4−9=−5. So the square roots are:",
+      "choices": [
+        "\\(2+3i\\) and \\(-2-3i\\)",
+        "\\(3+2i\\) and \\(-3-2i\\)",
+        "\\(1+i\\)",
+        "\\(12i\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2+3i\\) and \\(-2-3i\\)",
+      "solutionSketch": [
+        "Verify (2+3i)²=4+12i−9=−5+12i."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-eq-04",
+      "slice": "equations",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "vieta-sum"
+      },
+      "stem": "f(z)=z²−(4+5i)z+(7i−1). The roots are the square-root companions after discriminant. If the square roots of −5+12i are ±(2+3i), one can finish the quadratic. The sum of the roots is:",
+      "choices": [
+        "\\(4+5i\\)",
+        "\\(7i-1\\)",
+        "\\(0\\)",
+        "\\(2+3i\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(4+5i\\)",
+      "solutionSketch": [
+        "Vieta: sum = 4+5i."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-07",
+      "slice": "algebraic",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "set-re-zprime-0"
+      },
+      "stem": "If z=x+iy and z'=(z−4)/(z+4) (z≠−4), then Re(z')=0 iff x²+y²=16. So M describes:",
+      "choices": [
+        "the circle of centre O and radius 4, deprived of A(−4;0)",
+        "the line x=4",
+        "the imaginary axis",
+        "the empty set"
+      ],
+      "answerIndex": 0,
+      "answer": "the circle of centre O and radius 4, deprived of A(−4;0)",
+      "solutionSketch": [
+        "|z|=4, z≠−4."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-08",
+      "slice": "algebraic",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mod-after-sum"
+      },
+      "stem": "The exponential form of z=−√3 + e^{iπ/6} is e^{i 5π/6}, because z=−√3/2 + i/2. Then |z| equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(\\sqrt{3}\\)",
+        "\\(2\\)",
+        "\\(1/2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "√(3/4+1/4)=1."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-al-09",
+      "slice": "algebraic",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "demoivre-z5"
+      },
+      "stem": "If z = 2(cos(π/5) + i sin(π/5)), then z^5 equals:",
+      "choices": [
+        "\\(-32\\)",
+        "\\(32\\)",
+        "\\(2\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-32\\)",
+      "solutionSketch": [
+        "De Moivre: 2^5 (cos π + i sin π)=32(−1)=−32."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-ge-05",
+      "slice": "geometry",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "same-circle-NL"
+      },
+      "stem": "Let z=4 e^{iθ} and z_1=4 e^{i 3θ}. Then |z| and |z_1| satisfy:",
+      "choices": [
+        "\\(|z_1|=|z|=4\\)",
+        "\\(z_1=0\\)",
+        "\\(z=1\\)",
+        "\\(\\theta=0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(|z_1|=|z|=4\\)",
+      "solutionSketch": [
+        "Both moduli equal 4, so N and L lie on the same circle of centre O and radius 4."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-ge-06",
+      "slice": "geometry",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "z-minus-conj"
+      },
+      "stem": "If (1−i√3)^n is the conjugate of (1+i√3)^n, then Z=(1+i√3)^n − (1−i√3)^n is:",
+      "choices": [
+        "pure imaginary (twice i times the imaginary part)",
+        "real",
+        "of modulus 1",
+        "zero"
+      ],
+      "answerIndex": 0,
+      "answer": "pure imaginary (twice i times the imaginary part)",
+      "solutionSketch": [
+        "z − \\bar z = 2i Im(z)."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-09",
+      "slice": "transform",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "S-circ-S"
+      },
+      "stem": "If S is a direct similitude of angle π/2, then S∘S is a dilation of:",
+      "choices": [
+        "negative ratio (homothety of ratio −k²) about the centre of S",
+        "ratio 1 and angle 0",
+        "translation",
+        "identity always"
+      ],
+      "answerIndex": 0,
+      "answer": "negative ratio (homothety of ratio −k²) about the centre of S",
+      "solutionSketch": [
+        "h=S∘S has angle π, hence is a homothety of negative ratio."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-tr-08",
+      "slice": "triangles",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "similitude-equilateral"
+      },
+      "stem": "A direct similitude S maps A to B and B to C in a direct equilateral triangle ABC. An angle and the ratio of S are:",
+      "choices": [
+        "ratio 1 and angle \\(2\\pi/3\\)",
+        "ratio 2 and angle \\(\\pi/2\\)",
+        "ratio 1 and angle 0",
+        "ratio 1/2 and angle \\(\\pi\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "ratio 1 and angle \\(2\\pi/3\\)",
+      "solutionSketch": [
+        "|B−A|=|C−B| so k=1; arg((c−b)/(b−a))=2π/3 for a direct equilateral (exterior). For equilateral direct ABC, arg((b−a)/(c−a))? S(A)=B, S(B)=C so (S(B)−S(A))/(B−A)=(C−B)/(B−A) has argument the angle of S.",
+        "In equilateral, (C−B)/(B−A)=e^{i 2π/3} or e^{−i 2π/3} according to orientation. Direct: e^{i 2π/3}."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-eq-05",
+      "slice": "equations",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "hyperbola-nature"
+      },
+      "stem": "When M' varies on the y-axis, z' is pure imaginary, and for f(z)=z²−(4+5i)z+7i−1 this constraint on (x,y) is a hyperbola. A hyperbola is the set of points where:",
+      "choices": [
+        "||MF|-|MF'|| is constant (or a quadratic with xy or x²−y² terms)",
+        "x²+y² is constant",
+        "y=x²",
+        "x=constant"
+      ],
+      "answerIndex": 0,
+      "answer": "||MF|-|MF'|| is constant (or a quadratic with xy or x²−y² terms)",
+      "solutionSketch": [
+        "GS papers ask nature, asymptotes and vertices after expanding x'=0."
+      ]
+    },
+    {
+      "id": "g12-gs-cx-eq-06",
+      "slice": "equations",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "inverse-similitude"
+      },
+      "stem": "The inverse similitude S^{−1} has complex form obtained by solving z'=az+b for z. If S(z)=ω z with |ω|=1, ω≠1, then S^{−1}(z)=:",
+      "choices": [
+        "\\(\\bar\\omega z\\)",
+        "\\(\\omega z\\)",
+        "\\(-z\\)",
+        "\\(z+1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\bar\\omega z\\)",
+      "solutionSketch": [
+        "ω · S^{−1}=Id ⇒ S^{−1}(z)=ω^{−1} z= \\bar ω z on the unit circle."
+      ]
+    }
+  ]
+}

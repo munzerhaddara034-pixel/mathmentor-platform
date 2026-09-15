@@ -1,0 +1,831 @@
+{
+  "id": "g12-gs-probability",
+  "track": "grade-12",
+  "certificate": "GS",
+  "topic": "probability",
+  "title": "Probability",
+  "arabicTitle": "الاحتمالات",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "GS-All.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 GS (علوم عامة) official sessions (GS-All.pdf): urns, independence, binomial, two-stage experiments. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "counting",
+      "title": "Counting",
+      "arabicTitle": "العد"
+    },
+    {
+      "id": "conditional",
+      "title": "Conditional probability",
+      "arabicTitle": "الاحتمال الشرطي"
+    },
+    {
+      "id": "random_var",
+      "title": "Random variables",
+      "arabicTitle": "المتغيرات العشوائية"
+    },
+    {
+      "id": "independence",
+      "title": "Independence",
+      "arabicTitle": "الاستقلال"
+    },
+    {
+      "id": "two_stage",
+      "title": "Two-stage experiments",
+      "arabicTitle": "التجارب على مرحلتين"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-gs/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-gs/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-gs/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "complex",
+      "file": "content/banks/g12-gs/complex.json",
+      "title": "IV · Complex numbers",
+      "arabicTitle": "رابعاً · الأعداد المركبة",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-gs/functions.json",
+      "title": "V · Functions analysis",
+      "arabicTitle": "خامساً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-gs-pr-ct-01",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "C9-2"
+      },
+      "stem": "An urn contains 9 balls. Two balls are drawn simultaneously. The number of possible draws is:",
+      "choices": [
+        "\\(C_9^2=36\\)",
+        "\\(18\\)",
+        "\\(81\\)",
+        "\\(9\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(C_9^2=36\\)",
+      "solutionSketch": [
+        "C(9,2)=36."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ct-02",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "both-odd-gs"
+      },
+      "stem": "P(both odd numbers) with 6 odd balls among 9 is:",
+      "choices": [
+        "\\(\\dfrac{15}{36}\\)",
+        "\\(\\dfrac{6}{9}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{2}{9}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{15}{36}\\)",
+      "solutionSketch": [
+        "C(6,2)/C(9,2)=15/36."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ct-03",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "C92-num"
+      },
+      "stem": "C(9,2) equals:",
+      "choices": [
+        "36",
+        "18",
+        "72",
+        "9"
+      ],
+      "answerIndex": 0,
+      "answer": "36",
+      "solutionSketch": [
+        "9×8/2=36."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-cd-01",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "cond-div"
+      },
+      "stem": "P(A/B)=P(A∩B)/P(B) provided P(B)>0. If P(A∩B)=1/12 and P(B)=1/4, then P(A/B)=:",
+      "choices": [
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{12}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(3\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "(1/12)/(1/4)=1/3."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-cd-02",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "not-indep-easy"
+      },
+      "stem": "If P(A)=15/36 and P(B)=9/36 then P(A)P(B)=135/1296. Compared with P(A∩B)=3/36=108/1296, one concludes A and B are:",
+      "choices": [
+        "not independent",
+        "independent",
+        "equal",
+        "disjoint"
+      ],
+      "answerIndex": 0,
+      "answer": "not independent",
+      "solutionSketch": [
+        "135≠108."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-rv-01",
+      "slice": "random_var",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "binomial-0"
+      },
+      "stem": "A fair coin is tossed 3 times. Let X be the number of heads. Then X follows a binomial law B(3; 1/2) and P(X=0)=:",
+      "choices": [
+        "\\(\\dfrac{1}{8}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{8}\\)",
+      "solutionSketch": [
+        "(1/2)^3=1/8."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-rv-02",
+      "slice": "random_var",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "bernoulli-E"
+      },
+      "stem": "E(X)=∑ x_i p_i. If X=0 or 1 with P(X=1)=p, then E(X)=:",
+      "choices": [
+        "\\(p\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(p^2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(p\\)",
+      "solutionSketch": [
+        "Bernoulli expectation."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-rv-03",
+      "slice": "random_var",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sum-pi"
+      },
+      "stem": "If X takes 1,2,3,4,5 each with probability 2/25 and 0 with probability 3/5, then ∑p_i equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(3/5\\)",
+        "\\(2/5\\)",
+        "\\(7/5\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "15/25+10/25=1."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-in-01",
+      "slice": "independence",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "indep-def"
+      },
+      "stem": "Events A,B are independent iff P(A∩B)=P(A)P(B). If this fails they are:",
+      "choices": [
+        "not independent",
+        "certain",
+        "impossible",
+        "complementary"
+      ],
+      "answerIndex": 0,
+      "answer": "not independent",
+      "solutionSketch": [
+        "Definition."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-in-02",
+      "slice": "independence",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-A-given-B-indep"
+      },
+      "stem": "If A and B are independent, then P(A/B)=:",
+      "choices": [
+        "\\(P(A)\\)",
+        "\\(P(B)\\)",
+        "\\(1\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(P(A)\\)",
+      "solutionSketch": [
+        "The definition rewritten."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ts-01",
+      "slice": "two_stage",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "same-colour-9"
+      },
+      "stem": "Three white, three black, three red balls numbered 1,2,3 each. P(same colour) for two simultaneous draws is:",
+      "choices": [
+        "\\(\\dfrac{9}{36}=\\dfrac{1}{4}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{3}{9}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{9}{36}=\\dfrac{1}{4}\\)",
+      "solutionSketch": [
+        "3×C(3,2)=9, over 36."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ts-02",
+      "slice": "two_stage",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "F-and-B"
+      },
+      "stem": "A tourist chooses France with probability 0.25 and full-board with probability 0.60 independently. P(France and full-board)=:",
+      "choices": [
+        "\\(0.15\\)",
+        "\\(0.85\\)",
+        "\\(0.60\\)",
+        "\\(0.25\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.15\\)",
+      "solutionSketch": [
+        "0.25×0.60=0.15."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ct-04",
+      "slice": "counting",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-D"
+      },
+      "stem": "Favourable outcomes for two odd balls of different colours: 12. Total 36. P=:",
+      "choices": [
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{12}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{12}{9}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "12/36=1/3."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ct-05",
+      "slice": "counting",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-green-gs"
+      },
+      "stem": "P(two green from 4 green among 7)=C(4,2)/C(7,2)=:",
+      "choices": [
+        "\\(\\dfrac{2}{7}\\)",
+        "\\(\\dfrac{4}{7}\\)",
+        "\\(\\dfrac{6}{7}\\)",
+        "\\(\\dfrac{1}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{2}{7}\\)",
+      "solutionSketch": [
+        "6/21=2/7."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-cd-03",
+      "slice": "conditional",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "A-given-B"
+      },
+      "stem": "P(A∩B)=3/36, P(B)=9/36, so P(A/B)=:",
+      "choices": [
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(\\dfrac{3}{36}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "3/9=1/3."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-cd-04",
+      "slice": "conditional",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "B-given-A"
+      },
+      "stem": "P(A∩B)=P(both odd and same colour)=3/36=1/12. P(A)=15/36. Then P(B/A)=:",
+      "choices": [
+        "\\(\\dfrac{1}{5}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{12}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{5}\\)",
+      "solutionSketch": [
+        "(1/12)/(15/36)=(1/12)×(36/15)=3/15=1/5."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-rv-04",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "B3-X2"
+      },
+      "stem": "X∼B(3;1/2). Then P(X=2)=C(3,2)(1/2)^3=:",
+      "choices": [
+        "\\(\\dfrac{3}{8}\\)",
+        "\\(\\dfrac{1}{8}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{3}{4}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{8}\\)",
+      "solutionSketch": [
+        "3/8."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-rv-05",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "var-indicator"
+      },
+      "stem": "A die is rolled. X=1 if multiple of 3, else 0. Var(X)=E(X²)−[E(X)]²=p−p² with p=1/3, so Var(X)=:",
+      "choices": [
+        "\\(\\dfrac{2}{9}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{9}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{2}{9}\\)",
+      "solutionSketch": [
+        "(1/3)(2/3)=2/9."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-in-03",
+      "slice": "independence",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "D-given-C"
+      },
+      "stem": "P(C)=P(different colours)=27/36=3/4. P(D)=P(different colours and two odds)=12/36=1/3. Then P(D/C)=:",
+      "choices": [
+        "\\(\\dfrac{4}{9}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(\\dfrac{1}{12}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{4}{9}\\)",
+      "solutionSketch": [
+        "(1/3)/(3/4)=4/9."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-in-04",
+      "slice": "independence",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "subset-not-indep"
+      },
+      "stem": "If A⊂B and P(A)>0, P(B)<1, then P(A∩B)=P(A)≠P(A)P(B), so A and B are:",
+      "choices": [
+        "not independent",
+        "independent",
+        "disjoint",
+        "equiprobable"
+      ],
+      "answerIndex": 0,
+      "answer": "not independent",
+      "solutionSketch": [
+        "Unless P(B)=1."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ts-03",
+      "slice": "two_stage",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "200-EX"
+      },
+      "stem": "X is the amount paid with six possible (destination, board) pairs. E(X) is the average receipt per voyager. If the agency serves 200 voyagers, an estimate of the total sum is:",
+      "choices": [
+        "\\(200\\,E(X)\\)",
+        "\\(E(X)/200\\)",
+        "\\(E(X)\\)",
+        "\\(200\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(200\\,E(X)\\)",
+      "solutionSketch": [
+        "Linearity / law of large numbers estimate."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ts-04",
+      "slice": "two_stage",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sum70-gs"
+      },
+      "stem": "Two bills, one from each pocket, independent. P(sum=70 000)=P(20k from right)×P(50k from left)=(3/4)(3/5)=:",
+      "choices": [
+        "\\(\\dfrac{9}{20}\\)",
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{3}{5}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{9}{20}\\)",
+      "solutionSketch": [
+        "Product of independent draws."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ct-06",
+      "slice": "counting",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "count-diff-colour"
+      },
+      "stem": "The number of ways to draw two balls of different colours from 3 white + 3 black + 3 red is C(9,2)−3 C(3,2), which equals:",
+      "choices": [
+        "\\(27\\)",
+        "\\(36\\)",
+        "\\(9\\)",
+        "\\(6\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(27\\)",
+      "solutionSketch": [
+        "Three unordered colour pairs {W,B},{W,R},{B,R}, each 3×3=9, total 27."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-cd-05",
+      "slice": "conditional",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "indep-bayes-collapse"
+      },
+      "stem": "A customer chose full-board (P(B)=0.6). Destinations independent. P(Italy|B)=P(I)=0.35. This uses:",
+      "choices": [
+        "independence of B and I",
+        "Bayes with unknown P(I|B)≠P(I)",
+        "the fact that Italy is the mode",
+        "P(B|I)=1"
+      ],
+      "answerIndex": 0,
+      "answer": "independence of B and I",
+      "solutionSketch": [
+        "Independence is the key."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-cd-06",
+      "slice": "conditional",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "interpret-12"
+      },
+      "stem": "Two balls drawn have different colours. P(they carry two odd numbers)=4/9 as above. Equivalently this is C(2,1)^3 / 27? Odd per colour: 2. Different colours and both odd: 3 colour-pairs × 2×2=12, over 27: 12/27=4/9. The 12 favourable pairs are:",
+      "choices": [
+        "the mixed-colour odd-odd pairs",
+        "all 36 pairs",
+        "the 3 same-colour odd pairs",
+        "the even-even pairs"
+      ],
+      "answerIndex": 0,
+      "answer": "the mixed-colour odd-odd pairs",
+      "solutionSketch": [
+        "12/27=4/9."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-rv-06",
+      "slice": "random_var",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "binomial-mean"
+      },
+      "stem": "X∼B(n;p). If n=3, p=1/2, then E(X)=np=:",
+      "choices": [
+        "\\(\\dfrac{3}{2}\\)",
+        "\\(3\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{2}\\)",
+      "solutionSketch": [
+        "3/2."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-rv-07",
+      "slice": "random_var",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "binomial-var"
+      },
+      "stem": "Var(X) for X∼B(3;1/2) equals np(1−p)=:",
+      "choices": [
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(\\dfrac{3}{2}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(3\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{4}\\)",
+      "solutionSketch": [
+        "3·(1/2)·(1/2)=3/4."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-in-05",
+      "slice": "independence",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dependent-gap"
+      },
+      "stem": "P(A)=15/36, P(B)=9/36, P(A)P(B)=135/1296 and P(A∩B)=108/1296. The absolute difference is 27/1296=1/48. Therefore:",
+      "choices": [
+        "A and B are dependent",
+        "rounding error only",
+        "P(A∩B) was miscomputed as 3/36",
+        "they must be redefined"
+      ],
+      "answerIndex": 0,
+      "answer": "A and B are dependent",
+      "solutionSketch": [
+        "A genuine gap: 3 colours × 1 pair of odd balls =3, not 15×9/36."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ts-05",
+      "slice": "two_stage",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "six-values-X"
+      },
+      "stem": "Let X be the voyage price. P(X=1 500 000)=P(F∩ full-board)=0.15. This is one atom of the law of X. The number of distinct values of X is:",
+      "choices": [
+        "6",
+        "3",
+        "2",
+        "200"
+      ],
+      "answerIndex": 0,
+      "answer": "6",
+      "solutionSketch": [
+        "3 destinations × 2 board types, all prices distinct in the table."
+      ]
+    },
+    {
+      "id": "g12-gs-pr-ts-06",
+      "slice": "two_stage",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "S-cap-R"
+      },
+      "stem": "A man chooses a pocket with P(R)=2/3 then draws two bills from 4 right-pocket bills (1×100k, 3×20k). P(S∩R) if S is «sum < 90 000» and P(S/R)=C(3,2)/C(4,2)=1/2, equals:",
+      "choices": [
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{2}{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{6}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "(2/3)(1/2)=1/3. Two 20k bills sum to 40k<90k; any draw including the 100k is ≥120k."
+      ]
+    }
+  ]
+}

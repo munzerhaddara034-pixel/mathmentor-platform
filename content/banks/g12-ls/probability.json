@@ -1,0 +1,883 @@
+{
+  "id": "g12-ls-probability",
+  "track": "grade-12",
+  "certificate": "LS",
+  "topic": "probability",
+  "title": "Probability",
+  "arabicTitle": "الاحتمالات",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "LS all sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 LS official sessions (LS all sessions.pdf): Problem III wording — counting, conditional probability, Bayes, random variables. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "counting",
+      "title": "Counting",
+      "arabicTitle": "العد"
+    },
+    {
+      "id": "conditional",
+      "title": "Conditional probability",
+      "arabicTitle": "الاحتمال الشرطي"
+    },
+    {
+      "id": "total_bayes",
+      "title": "Total probability and Bayes",
+      "arabicTitle": "الاحتمال الكلي وبايز"
+    },
+    {
+      "id": "random_var",
+      "title": "Random variables",
+      "arabicTitle": "المتغيرات العشوائية"
+    },
+    {
+      "id": "two_stage",
+      "title": "Two-stage experiments",
+      "arabicTitle": "التجارب على مرحلتين"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-ls/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-ls/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-ls/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-ls/functions.json",
+      "title": "IV · Functions analysis",
+      "arabicTitle": "رابعاً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-ls-pr-ct-01",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "combinations"
+      },
+      "stem": "The number of possible groups of 3 children that can be formed from 7 distinct children is:",
+      "choices": [
+        "\\(C_7^3=35\\)",
+        "\\(7^3=343\\)",
+        "\\(7\\times 6\\times 5=210\\)",
+        "\\(3^7\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(C_7^3=35\\)",
+      "solutionSketch": [
+        "Unordered groups: C(7,3)=35. Trap: counting arrangements P(7,3)=210."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ct-02",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "urn-simultaneous"
+      },
+      "stem": "An urn contains 5 distinct balls. The number of ways to draw 2 balls simultaneously is:",
+      "choices": [
+        "\\(10\\)",
+        "\\(20\\)",
+        "\\(25\\)",
+        "\\(5\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(10\\)",
+      "solutionSketch": [
+        "C(5,2)=10."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ct-03",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "club-pairs"
+      },
+      "stem": "From a club of 50 students, two representatives are chosen at random. The number of possible choices is:",
+      "choices": [
+        "\\(C_{50}^2=1225\\)",
+        "\\(50^2=2500\\)",
+        "\\(50\\times 49=2450\\)",
+        "\\(2^{50}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(C_{50}^2=1225\\)",
+      "solutionSketch": [
+        "Unordered pairs: C(50,2)=1225. Trap: 50×49 ordered pairs."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-cd-01",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "cond-def"
+      },
+      "stem": "If P(M)=0.06 and P(F∩M)=0.051, then P(F/M) equals:",
+      "choices": [
+        "\\(0.85\\)",
+        "\\(0.051\\)",
+        "\\(0.06\\)",
+        "\\(0.111\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.85\\)",
+      "solutionSketch": [
+        "P(F/M)=P(F∩M)/P(M)=0.051/0.06=0.85."
+      ],
+      "latex": "P(F/M)=\\dfrac{P(F\\cap M)}{P(M)}"
+    },
+    {
+      "id": "g12-ls-pr-cd-02",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "independent-product"
+      },
+      "stem": "Events A and B are independent with P(A)=1/3 and P(B)=1/2. Then P(A∩B) equals:",
+      "choices": [
+        "\\(\\dfrac{1}{6}\\)",
+        "\\(\\dfrac{5}{6}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{6}\\)",
+      "solutionSketch": [
+        "Independence: P(A∩B)=P(A)P(B)=1/6."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-cd-03",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "product-rule"
+      },
+      "stem": "If P(A)=0.4 and P(B/A)=0.25, then P(A∩B) equals:",
+      "choices": [
+        "\\(0.1\\)",
+        "\\(0.65\\)",
+        "\\(1.6\\)",
+        "\\(0.15\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.1\\)",
+      "solutionSketch": [
+        "P(A∩B)=P(A)P(B/A)=0.4×0.25=0.1."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-tb-01",
+      "slice": "total_bayes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "and-two-steps"
+      },
+      "stem": "A fair coin is tossed. Then a fair die is rolled only if the coin shows heads. The probability of obtaining both heads and a 6 is:",
+      "choices": [
+        "\\(\\dfrac{1}{12}\\)",
+        "\\(\\dfrac{1}{6}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{7}{12}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{12}\\)",
+      "solutionSketch": [
+        "P(H∩6)=P(H)P(6|H)=(1/2)(1/6)=1/12."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-tb-02",
+      "slice": "total_bayes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "intersection-from-cond"
+      },
+      "stem": "P(R)=2/3, P(L)=1/3 and P(S/R)=1/2. Then P(S∩R) equals:",
+      "choices": [
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{2}{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{6}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "P(S∩R)=P(R)P(S/R)=(2/3)(1/2)=1/3."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-rv-01",
+      "slice": "random_var",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-coins-X"
+      },
+      "stem": "A fair coin is tossed twice. Let X be the number of heads. Then P(X=1) equals:",
+      "choices": [
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{2}\\)",
+      "solutionSketch": [
+        "Outcomes HT, TH among {HH,HT,TH,TT}, so 2/4=1/2."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-rv-02",
+      "slice": "random_var",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-value-X"
+      },
+      "stem": "A discrete random variable X takes the values 0 and 1 with P(X=0)=2/5. Then P(X=1) equals:",
+      "choices": [
+        "\\(\\dfrac{3}{5}\\)",
+        "\\(\\dfrac{2}{5}\\)",
+        "\\(1\\)",
+        "\\(\\dfrac{1}{5}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{5}\\)",
+      "solutionSketch": [
+        "The probabilities sum to 1."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ts-01",
+      "slice": "two_stage",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "simple-urn"
+      },
+      "stem": "A bag contains 3 red and 2 blue balls. One ball is drawn at random. The probability that it is red is:",
+      "choices": [
+        "\\(\\dfrac{3}{5}\\)",
+        "\\(\\dfrac{2}{5}\\)",
+        "\\(\\dfrac{3}{2}\\)",
+        "\\(\\dfrac{1}{5}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{5}\\)",
+      "solutionSketch": [
+        "Equiprobable: 3/5."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ts-02",
+      "slice": "two_stage",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "girl-of-F2"
+      },
+      "stem": "Two families are chosen with equal probability; then one child is chosen at random from the chosen family. Family F2 has 1 girl among 3 children. The probability of the event A: «the chosen child is a girl of F2» is:",
+      "choices": [
+        "\\(\\dfrac{1}{6}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{4}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{6}\\)",
+      "solutionSketch": [
+        "P(A)=P(F2)×(1/3)=(1/2)×(1/3)=1/6."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ct-04",
+      "slice": "counting",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "exactly-one-girl"
+      },
+      "stem": "A family has 4 children (2 girls, 2 boys) and another has 3 children (1 girl, 2 boys). The probability of having exactly one girl among 3 children chosen at random from these 7 is:",
+      "choices": [
+        "\\(\\dfrac{18}{35}\\)",
+        "\\(\\dfrac{3}{7}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{12}{35}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{18}{35}\\)",
+      "solutionSketch": [
+        "3 girls and 4 boys in all. Favourable: C(3,1)C(4,2)=3×6=18, total C(7,3)=35."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ct-05",
+      "slice": "counting",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-boys"
+      },
+      "stem": "Two students are chosen from 32 boys and 18 girls. The probability that both are boys is:",
+      "choices": [
+        "\\(\\dfrac{C_{32}^2}{C_{50}^2}\\)",
+        "\\(\\left(\\dfrac{32}{50}\\right)^2\\)",
+        "\\(\\dfrac{32}{50}\\times\\dfrac{32}{49}\\)",
+        "\\(\\dfrac{2}{50}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_{32}^2}{C_{50}^2}\\)",
+      "solutionSketch": [
+        "Without replacement, unordered: C(32,2)/C(50,2). Trap: with-replacement square."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-cd-04",
+      "slice": "conditional",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "club-cond"
+      },
+      "stem": "A club has 20 boys and 10 girls in the 1st secondary year, and 12 boys and 8 girls in the 2nd. A student is chosen at random. P(the student is a boy | 2nd year) equals:",
+      "choices": [
+        "\\(0.60\\)",
+        "\\(0.64\\)",
+        "\\(0.50\\)",
+        "\\(0.24\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.60\\)",
+      "solutionSketch": [
+        "12 boys among 20 students of the 2nd year: 12/20=0.60."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-cd-05",
+      "slice": "conditional",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "both-first-given-boys"
+      },
+      "stem": "Among 32 boys, 20 are in the 1st year. Two boys are chosen at random. The probability they are both in the 1st year, knowing that both are boys, is:",
+      "choices": [
+        "\\(\\dfrac{C_{20}^2}{C_{32}^2}\\)",
+        "\\(\\dfrac{20}{32}\\)",
+        "\\(\\dfrac{C_{20}^2}{C_{50}^2}\\)",
+        "\\(\\dfrac{20\\times 19}{50\\times 49}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_{20}^2}{C_{32}^2}\\)",
+      "solutionSketch": [
+        "Conditioned on both being boys, the sample space is the 32 boys: C(20,2)/C(32,2)."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-tb-03",
+      "slice": "total_bayes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "right-pocket"
+      },
+      "stem": "A man has in his right pocket 1 bill of 100 000 LL and 3 bills of 20 000 LL. He draws one bill at random from that pocket. The probability that the bill is 20 000 LL is:",
+      "choices": [
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(\\dfrac{3}{5}\\)",
+        "\\(\\dfrac{1}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{4}\\)",
+      "solutionSketch": [
+        "4 bills, 3 of them 20 000 LL."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-tb-04",
+      "slice": "total_bayes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "bayes-M-given-F"
+      },
+      "stem": "Given P(M)=0.06, P(F)=0.4 and P(F/M)=0.85, then P(M/F) equals:",
+      "choices": [
+        "\\(0.1275\\)",
+        "\\(0.051\\)",
+        "\\(0.85\\)",
+        "\\(0.34\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.1275\\)",
+      "solutionSketch": [
+        "P(M∩F)=0.06×0.85=0.051, P(M/F)=0.051/0.4=0.1275."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-tb-05",
+      "slice": "total_bayes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "total-S"
+      },
+      "stem": "P(R)=2/3, P(L)=1/3, P(S/R)=1/2, P(S/L)=1/5. Then P(S) equals:",
+      "choices": [
+        "\\(\\dfrac{2}{5}\\)",
+        "\\(\\dfrac{7}{15}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{11}{30}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{2}{5}\\)",
+      "solutionSketch": [
+        "P(S)=(2/3)(1/2)+(1/3)(1/5)=1/3+1/15=2/5."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-rv-03",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "product-zero"
+      },
+      "stem": "Two balls are drawn simultaneously from an urn of 5 balls numbered 0,0,0,1,2. Let X be the product of the two numbers. Then P(X=0) equals:",
+      "choices": [
+        "\\(\\dfrac{9}{10}\\)",
+        "\\(\\dfrac{3}{5}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{3}{10}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{9}{10}\\)",
+      "solutionSketch": [
+        "Total C(5,2)=10. Product 0 iff at least one 0: C(3,2)+C(3,1)C(2,1)=3+6=9, so 9/10.",
+        "Trap: drawing with replacement 3/5."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-rv-04",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "indicator-expectation"
+      },
+      "stem": "A fair die is rolled. Let X be 1 if the face is a multiple of 3, and 0 otherwise. Then E(X) equals:",
+      "choices": [
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(1\\)",
+        "\\(\\dfrac{2}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "P(X=1)=P({3,6})=1/3, so E(X)=1/3."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-rv-05",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "support-of-X"
+      },
+      "stem": "Let X be the number of girls among 3 children chosen from 3 girls and 4 boys. The possible values of X are:",
+      "choices": [
+        "\\(0,1,2,3\\)",
+        "\\(1,2,3\\)",
+        "\\(0,1,2\\)",
+        "\\(3\\) only"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0,1,2,3\\)",
+      "solutionSketch": [
+        "There are 3 girls and 4 boys, so X can be 0,1,2 or 3."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ts-03",
+      "slice": "two_stage",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sum-70000"
+      },
+      "stem": "He draws at random one bill from a right pocket (1×100 000 and 3×20 000) and one from a left pocket (3×50 000 and 2×20 000). P(the sum equals 70 000 LL) is:",
+      "choices": [
+        "\\(\\dfrac{9}{20}\\)",
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{6}{20}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{9}{20}\\)",
+      "solutionSketch": [
+        "70 000 = 20 000 + 50 000. P=(3/4)×(3/5)=9/20."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ts-04",
+      "slice": "two_stage",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-small-bills"
+      },
+      "stem": "A pocket is chosen with P(R)=2/3, then two bills are drawn from the right pocket of 4 bills (1 of 100 000 and 3 of 20 000). P(the two bills are both 20 000 LL | R) equals:",
+      "choices": [
+        "\\(\\dfrac{C_3^2}{C_4^2}=\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(\\left(\\dfrac{3}{4}\\right)^2\\)",
+        "\\(\\dfrac{1}{4}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_3^2}{C_4^2}=\\dfrac{1}{2}\\)",
+      "solutionSketch": [
+        "C(3,2)/C(4,2)=3/6=1/2."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ct-06",
+      "slice": "counting",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "same-colour-7"
+      },
+      "stem": "Two balls from 7 (1 red, 2 yellow, 4 green). The probability they have the same colour is:",
+      "choices": [
+        "\\(\\dfrac{C_2^2+C_4^2}{C_7^2}=\\dfrac{7}{21}\\)",
+        "\\(\\dfrac{C_2^2+C_4^2+C_1^2}{C_7^2}\\)",
+        "\\(\\dfrac{4}{7}\\)",
+        "\\(\\dfrac{2}{7}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_2^2+C_4^2}{C_7^2}=\\dfrac{7}{21}\\)",
+      "solutionSketch": [
+        "Same colour: two yellow C(2,2)=1 or two green C(4,2)=6; red cannot pair with itself. Total 7/21=1/3.",
+        "C(1,2) is 0, not 1."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-cd-06",
+      "slice": "conditional",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "italy-given-fullboard"
+      },
+      "stem": "With P(F)=0.25, P(I)=0.35, P(T)=0.40 and P(B|destination)=0.60 for each destination, the probability that a full-board customer chose Italy is:",
+      "choices": [
+        "\\(0.35\\)",
+        "\\(0.21\\)",
+        "\\(0.60\\)",
+        "\\(0.145\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.35\\)",
+      "solutionSketch": [
+        "P(B)=0.60, P(I/B)=P(B∩I)/P(B)=0.21/0.60=0.35.",
+        "Because B is independent of the destination, P(I/B)=P(I)."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-tb-06",
+      "slice": "total_bayes",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "voyage-intersection"
+      },
+      "stem": "A customer chooses France, Italy or Turkey with probabilities 0.25, 0.35 and 0.40. Independently, 60% choose full-board. Then P(full-board ∩ Italy) equals:",
+      "choices": [
+        "\\(0.21\\)",
+        "\\(0.35\\)",
+        "\\(0.60\\)",
+        "\\(0.145\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.21\\)",
+      "solutionSketch": [
+        "P(B∩I)=0.35×0.60=0.21."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-tb-07",
+      "slice": "total_bayes",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "F1-given-girl"
+      },
+      "stem": "A family is chosen at random from F1 (2 girls, 2 boys) and F2 (1 girl, 2 boys), then one child at random. Let C: «girl» and D: «from F1 knowing the child is a girl». Then P(D)=P(F1/C) equals:",
+      "choices": [
+        "\\(\\dfrac{3}{5}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{2}{3}\\)",
+        "\\(\\dfrac{1}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{5}\\)",
+      "solutionSketch": [
+        "P(C∩F1)=(1/2)(2/4)=1/4, P(C∩F2)=(1/2)(1/3)=1/6, P(C)=1/4+1/6=5/12.",
+        "P(F1/C)=(1/4)/(5/12)=3/5."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-rv-06",
+      "slice": "random_var",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-X-2"
+      },
+      "stem": "From 7 children (3 girls, 4 boys) a group of 3 is chosen at random. Let X be the number of girls. Then P(X=2) equals:",
+      "choices": [
+        "\\(\\dfrac{12}{35}\\)",
+        "\\(\\dfrac{4}{35}\\)",
+        "\\(\\dfrac{18}{35}\\)",
+        "\\(\\dfrac{1}{7}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{12}{35}\\)",
+      "solutionSketch": [
+        "P(X=2)=C(3,2)C(4,1)/C(7,3)=12/35.",
+        "Trap: 18/35 is P(X=1)."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-rv-07",
+      "slice": "random_var",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "red-and-green"
+      },
+      "stem": "A bag contains one red ball numbered n, two yellow balls numbered −5 and four green balls numbered 4. Two balls are drawn simultaneously. The probability of drawing one red and one green is:",
+      "choices": [
+        "\\(\\dfrac{4}{21}\\)",
+        "\\(\\dfrac{8}{21}\\)",
+        "\\(\\dfrac{4}{7}\\)",
+        "\\(\\dfrac{1}{7}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{4}{21}\\)",
+      "solutionSketch": [
+        "C(1,1)C(4,1)/C(7,2)=4/21."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ts-05",
+      "slice": "two_stage",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "odd-same-colour"
+      },
+      "stem": "Two balls are drawn simultaneously from 9 balls (3 white, 3 black, 3 red numbered 1,2,3 in each colour). Let A: «both numbers odd» and B: «same colour». Then P(A∩B) equals:",
+      "choices": [
+        "\\(\\dfrac{1}{12}\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{C_3^2}{C_9^2}\\)",
+        "\\(\\dfrac{1}{4}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{12}\\)",
+      "solutionSketch": [
+        "Each colour has two odd-numbered balls. A∩B: the two odd balls of one colour, 3 colours.",
+        "Favourable 3, total C(9,2)=36, so 3/36=1/12.",
+        "Trap: 1/4 is P(same colour)."
+      ]
+    },
+    {
+      "id": "g12-ls-pr-ts-06",
+      "slice": "two_stage",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-X-lt-100000"
+      },
+      "stem": "X is the sum drawn from one right-pocket bill (values 100 000 or 20 000 with probs 1/4, 3/4) and one left-pocket bill (50 000 or 20 000 with probs 3/5, 2/5). Then P(X < 100 000) equals:",
+      "choices": [
+        "\\(\\dfrac{3}{4}\\)",
+        "\\(\\dfrac{17}{20}\\)",
+        "\\(\\dfrac{9}{20}\\)",
+        "\\(\\dfrac{1}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{4}\\)",
+      "solutionSketch": [
+        "Possible sums: 150000 (1/4)(3/5)=3/20; 120000 (1/4)(2/5)=2/20; 70000 (3/4)(3/5)=9/20; 40000 (3/4)(2/5)=6/20.",
+        "X<100000: 70000 and 40000, probability 9/20+6/20=15/20=3/4."
+      ]
+    }
+  ]
+}

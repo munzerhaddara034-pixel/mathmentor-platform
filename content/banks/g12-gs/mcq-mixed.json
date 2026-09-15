@@ -1,0 +1,881 @@
+{
+  "id": "g12-gs-mcq-mixed",
+  "track": "grade-12",
+  "certificate": "GS",
+  "topic": "mcq_mixed",
+  "title": "Mixed MCQ",
+  "arabicTitle": "أسئلة مختلطة",
+  "contestMinutes": 20,
+  "passScore": 70,
+  "sourceModels": [
+    "GS-All.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 GS (علوم عامة) official sessions (GS-All.pdf): Problem I table — DE, logs, complex, space, probability. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "complex",
+      "title": "Complex numbers",
+      "arabicTitle": "الأعداد المركبة"
+    },
+    {
+      "id": "de",
+      "title": "Differential equations",
+      "arabicTitle": "المعادلات التفاضلية"
+    },
+    {
+      "id": "functions",
+      "title": "Functions and logs",
+      "arabicTitle": "الدوال واللوغاريتم"
+    },
+    {
+      "id": "space",
+      "title": "Space geometry",
+      "arabicTitle": "هندسة الفضاء"
+    },
+    {
+      "id": "probability",
+      "title": "Probability",
+      "arabicTitle": "الاحتمالات"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-gs/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-gs/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-gs/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "complex",
+      "file": "content/banks/g12-gs/complex.json",
+      "title": "IV · Complex numbers",
+      "arabicTitle": "رابعاً · الأعداد المركبة",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-gs/functions.json",
+      "title": "V · Functions analysis",
+      "arabicTitle": "خامساً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-gs-mc-cx-01",
+      "slice": "complex",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "i-exp-form"
+      },
+      "stem": "The exponential form of i is:",
+      "choices": [
+        "\\(e^{i\\pi/2}\\)",
+        "\\(e^{i\\pi}\\)",
+        "\\(e^{0}\\)",
+        "\\(e^{i\\pi/4}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(e^{i\\pi/2}\\)",
+      "solutionSketch": [
+        "Standard."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-cx-02",
+      "slice": "complex",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mod-1-isqrt3"
+      },
+      "stem": "|1+i√3| equals:",
+      "choices": [
+        "\\(2\\)",
+        "\\(1\\)",
+        "\\(\\sqrt{3}\\)",
+        "\\(4\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "√(1+3)=2."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-cx-03",
+      "slice": "complex",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "arg-minus"
+      },
+      "stem": "arg(e^{iθ})=θ (mod 2π). Then arg(e^{−iθ})=:",
+      "choices": [
+        "\\(-\\theta\\)",
+        "\\(\\theta\\)",
+        "\\(\\pi\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-\\theta\\)",
+      "solutionSketch": [
+        "Conjugate on the unit circle."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-de-01",
+      "slice": "de",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mcq-DE"
+      },
+      "stem": "The particular solution of y'−y/2=0 with y(−2)=1 is:",
+      "choices": [
+        "\\(y=e^{x/2+1}\\)",
+        "\\(y=-2e^{x/2}\\)",
+        "\\(y=2\\cos x-\\sin x\\)",
+        "\\(y=x^2-3\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(y=e^{x/2+1}\\)",
+      "solutionSketch": [
+        "y=A e^{x/2}, A e^{−1}=1, A=e."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-de-02",
+      "slice": "de",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "r2-4r-5"
+      },
+      "stem": "A characteristic equation r²−4r−5=0 has roots:",
+      "choices": [
+        "\\(5\\) and \\(-1\\)",
+        "\\(4\\) and \\(1\\)",
+        "\\(2\\) and \\(2\\)",
+        "\\(0\\) and \\(4\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(5\\) and \\(-1\\)",
+      "solutionSketch": [
+        "(r−5)(r+1)=0."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-01",
+      "slice": "functions",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "period-mcq"
+      },
+      "stem": "The period of f(x)=2 sin(π x + 2) is:",
+      "choices": [
+        "\\(2\\)",
+        "\\(\\pi\\)",
+        "\\(2\\pi\\)",
+        "\\(\\pi/2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "2π/π=2."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-02",
+      "slice": "functions",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "fprime-ln-3x"
+      },
+      "stem": "If f(x)=ln x − 3x then f'(x)=:",
+      "choices": [
+        "\\(1/x-3\\)",
+        "\\(-3/x\\)",
+        "\\(3/x\\)",
+        "\\(1/x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1/x-3\\)",
+      "solutionSketch": [
+        "Differentiate termwise."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-03",
+      "slice": "functions",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "exp-ln-simplify"
+      },
+      "stem": "e^{½ ln 9 − ln(1/3)} equals:",
+      "choices": [
+        "\\(9\\)",
+        "\\(e^3\\)",
+        "\\(6\\)",
+        "\\(e^{3/2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(9\\)",
+      "solutionSketch": [
+        "½ ln 9 − ln(1/3)= ln 3 + ln 3= ln 9."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-sp-01",
+      "slice": "space",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mcq-normal-gs"
+      },
+      "stem": "A normal to x+2y−2z+3=0 is:",
+      "choices": [
+        "\\((1;2;-2)\\)",
+        "\\((1;2;2)\\)",
+        "\\((3;0;0)\\)",
+        "\\((1;-2;2)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;2;-2)\\)",
+      "solutionSketch": [
+        "Read coefficients."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-sp-02",
+      "slice": "space",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "idotj-gs"
+      },
+      "stem": "i · j in a direct orthonormal system equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(k\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "Orthogonal."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-pr-01",
+      "slice": "probability",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "C92-mcq"
+      },
+      "stem": "C(9,2) equals:",
+      "choices": [
+        "36",
+        "18",
+        "72",
+        "9"
+      ],
+      "answerIndex": 0,
+      "answer": "36",
+      "solutionSketch": [
+        "36."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-pr-02",
+      "slice": "probability",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "complement-gs"
+      },
+      "stem": "P(A)+P(Ā)=:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\)",
+        "P(A)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "Complement."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-cx-04",
+      "slice": "complex",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "cos-arccos"
+      },
+      "stem": "cos²(arccos x) for x in [−1;1] equals:",
+      "choices": [
+        "\\(x^2\\)",
+        "\\(1+x\\)",
+        "\\(x/2\\)",
+        "\\((1+x)^2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x^2\\)",
+      "solutionSketch": [
+        "cos(arccos x)=x, then square. Official distractors used ½(1+x) from cos(2α)."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-cx-05",
+      "slice": "complex",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "z-plus-iz-gs"
+      },
+      "stem": "If |z|=2 then |z+ i z|=:",
+      "choices": [
+        "\\(2\\sqrt{2}\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(\\sqrt{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\sqrt{2}\\)",
+      "solutionSketch": [
+        "|1+i|·2=2√2."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-de-03",
+      "slice": "de",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "part-DE-exp"
+      },
+      "stem": "The general solution of y''−3y'+2y=0 is y=C1 e^{x}+C2 e^{2x}. A particular solution with y(0)=1, y'(0)=0 is:",
+      "choices": [
+        "\\(y=2e^{x}-e^{2x}\\)",
+        "\\(y=e^{x}\\)",
+        "\\(y=e^{2x}\\)",
+        "\\(y=0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(y=2e^{x}-e^{2x}\\)",
+      "solutionSketch": [
+        "C1+C2=1, C1+2C2=0 ⇒ C1=2, C2=−1."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-de-04",
+      "slice": "de",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "const-sol"
+      },
+      "stem": "y''+3y'+2y=2, particular constant solution y=:",
+      "choices": [
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(0\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "2y=2."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-04",
+      "slice": "functions",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mcq-2ln"
+      },
+      "stem": "2 ln x = ln(2x) has:",
+      "choices": [
+        "one root only",
+        "2 roots",
+        "no roots",
+        "3 roots"
+      ],
+      "answerIndex": 0,
+      "answer": "one root only",
+      "solutionSketch": [
+        "x=2."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-05",
+      "slice": "functions",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "F-ln"
+      },
+      "stem": "An antiderivative of ln x is:",
+      "choices": [
+        "\\(x\\ln x-x\\)",
+        "\\(1/x\\)",
+        "\\((\\ln x)^2/2\\)",
+        "\\(x\\ln x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x\\ln x-x\\)",
+      "solutionSketch": [
+        "By parts."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-06",
+      "slice": "functions",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "trap-half-angle"
+      },
+      "stem": "cos²(arccos x)=x², not (1+x)/2. The trap (1+x)/2 is:",
+      "choices": [
+        "cos²(α/2) with x=cos α",
+        "sin x",
+        "1",
+        "x"
+      ],
+      "answerIndex": 0,
+      "answer": "cos²(α/2) with x=cos α",
+      "solutionSketch": [
+        "Half-angle formula misapplied."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-sp-03",
+      "slice": "space",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "planes-perp-mcq"
+      },
+      "stem": "Planes x+2y−2z+3=0 and 2x+y+2z=0 are perpendicular because N·N'=:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(4\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "2+2−4=0."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-sp-04",
+      "slice": "space",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "meet-mcq"
+      },
+      "stem": "Direction of x=t+1, y=−t+2, z=2t is collinear to (1;−1;2). The line meets x−y−2z−5=0 at t=−3, the point:",
+      "choices": [
+        "\\((-2;5;-6)\\)",
+        "\\((1;2;0)\\)",
+        "\\((0;1;1)\\)",
+        "\\((4;-1;2)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((-2;5;-6)\\)",
+      "solutionSketch": [
+        "Computed substitution."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-pr-03",
+      "slice": "probability",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "p-same-mcq"
+      },
+      "stem": "P(same colour) for 3+3+3 balls, two draws, is:",
+      "choices": [
+        "\\(1/4\\)",
+        "\\(1/3\\)",
+        "\\(1/2\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1/4\\)",
+      "solutionSketch": [
+        "9/36=1/4."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-pr-04",
+      "slice": "probability",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "at-least-one"
+      },
+      "stem": "X∼B(3;1/2), P(X≥1)=1−P(X=0)=:",
+      "choices": [
+        "\\(7/8\\)",
+        "\\(1/8\\)",
+        "\\(1/2\\)",
+        "\\(3/8\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(7/8\\)",
+      "solutionSketch": [
+        "1−1/8=7/8."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-cx-06",
+      "slice": "complex",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "arg-minus-sin"
+      },
+      "stem": "z=−sin θ + i cos θ equals e^{i(π/2+θ)}. An argument is:",
+      "choices": [
+        "\\(\\pi/2+\\theta\\)",
+        "\\(\\pi/2-\\theta\\)",
+        "\\(\\theta\\)",
+        "\\(-\\theta\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\pi/2+\\theta\\)",
+      "solutionSketch": [
+        "As proved by expanding i e^{iθ}."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-cx-07",
+      "slice": "complex",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "Z-not-real"
+      },
+      "stem": "If Z=(1+i√3)^n − (1−i√3)^n then Z is pure imaginary. The statement «Z is real» is:",
+      "choices": [
+        "false",
+        "true",
+        "true only for even n",
+        "true only for n=0"
+      ],
+      "answerIndex": 0,
+      "answer": "false",
+      "solutionSketch": [
+        "z−\\bar z is always pure imaginary."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-de-05",
+      "slice": "de",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "slope-ln2"
+      },
+      "stem": "The particular solution of y''−3y'+2y=0 with f(x)=2e^x−e^{2x} is tangent at ln 2 to a line of slope f'(ln 2). f'(x)=2e^x−2e^{2x}, f'(ln 2)=2·2−2·4=4−8=−4. The slope is:",
+      "choices": [
+        "\\(-4\\)",
+        "\\(0\\)",
+        "\\(2\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-4\\)",
+      "solutionSketch": [
+        "Direct substitution."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-de-06",
+      "slice": "de",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "shift-z"
+      },
+      "stem": "z=y−1 transforms y''+3y'+2y=2 into z''+3z'+2z=0. This substitution is:",
+      "choices": [
+        "a shift by the constant particular solution",
+        "a derivation",
+        "a Laplace transform",
+        "illegal"
+      ],
+      "answerIndex": 0,
+      "answer": "a shift by the constant particular solution",
+      "solutionSketch": [
+        "Standard reduction of a non-homogeneous linear DE with constant RHS."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-07",
+      "slice": "functions",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "g-of-0"
+      },
+      "stem": "g(x)=ln(1+√(1−x)) on a suitable interval is an inverse expression in a GS paper. Then g(0)=ln 2. This value is:",
+      "choices": [
+        "\\(\\ln 2\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(e\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\ln 2\\)",
+      "solutionSketch": [
+        "√1=1, ln(2)."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-fn-08",
+      "slice": "functions",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "unique-root-ln"
+      },
+      "stem": "f(x)=ln x + x − b on (0;+∞) has f'=1/x+1>0, lim_0 f=−∞, lim_{+∞} f=+∞, so f(x)=0 has:",
+      "choices": [
+        "a unique positive root",
+        "no root",
+        "two roots",
+        "infinitely many roots"
+      ],
+      "answerIndex": 0,
+      "answer": "a unique positive root",
+      "solutionSketch": [
+        "Strict increase from −∞ to +∞."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-sp-05",
+      "slice": "space",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "d2-sum"
+      },
+      "stem": "d1=d2=4, perpendicular planes, d to the intersection line is 4√2. Then d² equals:",
+      "choices": [
+        "32",
+        "16",
+        "8",
+        "4"
+      ],
+      "answerIndex": 0,
+      "answer": "32",
+      "solutionSketch": [
+        "16+16=32."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-sp-06",
+      "slice": "space",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "skew-mcq"
+      },
+      "stem": "The mixed product AB·(AG∧GF) ≠ 0 means (AB) and (d) (through G,F) are:",
+      "choices": [
+        "skew",
+        "parallel",
+        "intersecting",
+        "the same line"
+      ],
+      "answerIndex": 0,
+      "answer": "skew",
+      "solutionSketch": [
+        "Non-coplanar."
+      ]
+    },
+    {
+      "id": "g12-gs-mc-pr-05",
+      "slice": "probability",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "indep-no"
+      },
+      "stem": "P(A∩B)=1/12, P(A)P(B)=(15/36)(9/36)=15/144=5/48, and 1/12=4/48. Independent?",
+      "choices": [
+        "no",
+        "yes",
+        "cannot decide",
+        "only if A=B"
+      ],
+      "answerIndex": 0,
+      "answer": "no",
+      "solutionSketch": [
+        "4/48 ≠ 5/48."
+      ]
+    }
+  ]
+}

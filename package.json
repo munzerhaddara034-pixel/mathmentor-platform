@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "banks:g12": "python3 scripts/build-g12-banks.py",
     "video:limits": "python3 scripts/render-lesson-video.py content/grade-12-ls-limits/intro-video.json public/videos/grade-12-ls-limits-intro.mp4"
   },
   "dependencies": {

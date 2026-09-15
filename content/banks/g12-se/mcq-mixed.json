@@ -1,0 +1,867 @@
+{
+  "id": "g12-se-mcq-mixed",
+  "track": "grade-12",
+  "certificate": "SE",
+  "topic": "mcq_mixed",
+  "title": "Mixed MCQ",
+  "arabicTitle": "أسئلة مختلطة",
+  "contestMinutes": 20,
+  "passScore": 70,
+  "sourceModels": [
+    "SE_All Sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 SE (اجتماع واقتصاد) official sessions (SE_All Sessions.pdf): Problem I table — logs, finance, limits, demand, statistics. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "logs",
+      "title": "Logarithms",
+      "arabicTitle": "اللوغاريتم"
+    },
+    {
+      "id": "finance",
+      "title": "Financial mathematics",
+      "arabicTitle": "الرياضيات المالية"
+    },
+    {
+      "id": "limits",
+      "title": "Limits and calculus",
+      "arabicTitle": "النهايات والحساب"
+    },
+    {
+      "id": "demand",
+      "title": "Demand and elasticity",
+      "arabicTitle": "الطلب والمرونة"
+    },
+    {
+      "id": "stats",
+      "title": "Statistics",
+      "arabicTitle": "الإحصاء"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-se/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-se/probability.json",
+      "title": "II · Probability & statistics",
+      "arabicTitle": "ثانياً · الاحتمالات والإحصاء",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-se/functions.json",
+      "title": "III · Functions & economic analysis",
+      "arabicTitle": "ثالثاً · الدوال والتحليل الاقتصادي",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-se-mc-lg-01",
+      "slice": "logs",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dom-ln"
+      },
+      "stem": "The domain of f(x)=ln(2x−5) is:",
+      "choices": [
+        "\\(]5/2;+\\infty[\\)",
+        "\\(]0;+\\infty[\\)",
+        "\\(]-\\infty;5/2[\\)",
+        "\\(\\mathbb{R}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(]5/2;+\\infty[\\)",
+      "solutionSketch": [
+        "2x−5>0 ⇒ x>5/2."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lg-02",
+      "slice": "logs",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ln-eq-mcq"
+      },
+      "stem": "The solution of ln(x−1)=−1 is:",
+      "choices": [
+        "\\(1+e^{-1}\\)",
+        "\\(0\\)",
+        "\\(e^{-1}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1+e^{-1}\\)",
+      "solutionSketch": [
+        "x−1=e^{−1}."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lg-03",
+      "slice": "logs",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ln-simplify"
+      },
+      "stem": "ln(a^3)−ln(e a)+2 ln(1/a) for a>0 equals:",
+      "choices": [
+        "\\(-1\\)",
+        "\\(4\\ln a-1\\)",
+        "\\(1\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-1\\)",
+      "solutionSketch": [
+        "3 ln a − (1+ln a) + 2(−ln a)=3 ln a −1 −ln a −2 ln a=−1."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lg-04",
+      "slice": "logs",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dom-ln-exp"
+      },
+      "stem": "The domain of f(x)=ln(e^x − e) is:",
+      "choices": [
+        "\\(]1;+\\infty[\\)",
+        "\\(]0;+\\infty[\\)",
+        "\\([1;+\\infty[\\)",
+        "\\(\\mathbb{R}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(]1;+\\infty[\\)",
+      "solutionSketch": [
+        "e^x − e > 0 ⇒ x>1. Open interval."
+      ]
+    },
+    {
+      "id": "g12-se-mc-fn-01",
+      "slice": "finance",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "annual-depr"
+      },
+      "stem": "A car purchased for 200 million LL, scrap 60, lifetime 10 years, constant annual depreciation. The annual depreciation is:",
+      "choices": [
+        "14 million LL",
+        "20 million LL",
+        "6 million LL",
+        "26 million LL"
+      ],
+      "answerIndex": 0,
+      "answer": "14 million LL",
+      "solutionSketch": [
+        "(200−60)/10=14."
+      ]
+    },
+    {
+      "id": "g12-se-mc-fn-02",
+      "slice": "finance",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "monthly-rate"
+      },
+      "stem": "The monthly interest rate corresponding to 6% annual compounded monthly is:",
+      "choices": [
+        "\\(0.5\\%\\)",
+        "\\(6\\%\\)",
+        "\\(0.06\\%\\)",
+        "\\(12\\%\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.5\\%\\)",
+      "solutionSketch": [
+        "6/12=0.5%."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lm-01",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "lim-minus-inf"
+      },
+      "stem": "If f(x)=e^x/(e^x−x), then lim_{x→−∞} f(x) equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(-\\infty\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "e^x→0, −x→+∞, denominator → +∞, numerator →0+."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lm-02",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "deriv-ln-plus-inv"
+      },
+      "stem": "The derivative of f(x)=ln(3x+1)+x^{−1} on ]−1/3; +∞[ is:",
+      "choices": [
+        "\\(\\dfrac{3}{3x+1}-\\dfrac{1}{x^2}\\)",
+        "\\(\\dfrac{3x}{3x+1}\\)",
+        "\\(\\dfrac{3x+2}{3x+1}\\)",
+        "\\(\\dfrac{3x+4}{3x+1}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{3x+1}-\\dfrac{1}{x^2}\\)",
+      "solutionSketch": [
+        "(ln(3x+1))'=3/(3x+1) and (1/x)'=−1/x^2."
+      ]
+    },
+    {
+      "id": "g12-se-mc-dm-01",
+      "slice": "demand",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "antideriv-ln"
+      },
+      "stem": "f defined on ]0;+∞[ by f(x)=ln x. An antiderivative of f is:",
+      "choices": [
+        "\\(x\\ln x-x\\)",
+        "\\(x-x\\ln x\\)",
+        "\\((\\ln x)^2/2\\)",
+        "\\(1/x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x\\ln x-x\\)",
+      "solutionSketch": [
+        "Integration by parts."
+      ]
+    },
+    {
+      "id": "g12-se-mc-dm-02",
+      "slice": "demand",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "horiz-1-demand"
+      },
+      "stem": "The line y=1 is an asymptote to the curve of f(x)=1+e^{−2x+1} on [0;+∞[ because:",
+      "choices": [
+        "\\(f(x)\\to 1\\) as \\(x\\to+\\infty\\)",
+        "f(0)=1",
+        "f'=0",
+        "f is linear"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(f(x)\\to 1\\) as \\(x\\to+\\infty\\)",
+      "solutionSketch": [
+        "The exponential term vanishes at +∞."
+      ]
+    },
+    {
+      "id": "g12-se-mc-st-01",
+      "slice": "stats",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "G-xbar"
+      },
+      "stem": "The centre of gravity G of a data set (x_i; y_i) has abscissa:",
+      "choices": [
+        "\\(\\bar x\\)",
+        "the median of x",
+        "0",
+        "x_1"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\bar x\\)",
+      "solutionSketch": [
+        "x̄ is the mean of the x_i."
+      ]
+    },
+    {
+      "id": "g12-se-mc-st-02",
+      "slice": "stats",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "r-negative-sales"
+      },
+      "stem": "If r=−0.98 for a time series of new-car sales, the number of cars sold:",
+      "choices": [
+        "tends to decrease as the year rank increases",
+        "tends to increase",
+        "is constant",
+        "is independent of the year"
+      ],
+      "answerIndex": 0,
+      "answer": "tends to decrease as the year rank increases",
+      "solutionSketch": [
+        "Strong negative correlation."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lg-05",
+      "slice": "logs",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ln-diff-eq"
+      },
+      "stem": "The solution of ln x − ln(2x−5)=ln 3 is:",
+      "choices": [
+        "\\(3\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(5\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "ln(x/(2x−5))=ln 3 ⇒ x=3(2x−5) ⇒ x=6x−15 ⇒ 5x=15 ⇒ x=3. Check 2x−5=1>0."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lg-06",
+      "slice": "logs",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "deriv-trap"
+      },
+      "stem": "If f(x)=ln(3x+1)+1/x, a wrong table choice for f' is 3x/(3x+1). The correct f' is:",
+      "choices": [
+        "\\(\\dfrac{3}{3x+1}-\\dfrac{1}{x^2}\\)",
+        "\\(\\dfrac{3x}{3x+1}\\)",
+        "\\(\\dfrac{3x+2}{3x+1}\\)",
+        "\\(\\dfrac{3x+4}{3x+1}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{3x+1}-\\dfrac{1}{x^2}\\)",
+      "solutionSketch": [
+        "Do not combine over a single denominator without the −1/x^2 term."
+      ]
+    },
+    {
+      "id": "g12-se-mc-fn-03",
+      "slice": "finance",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "t-116"
+      },
+      "stem": "After t years of constant depreciation 14 million/year from 200 million, the value 116 million occurs at t=:",
+      "choices": [
+        "6",
+        "5",
+        "7",
+        "8"
+      ],
+      "answerIndex": 0,
+      "answer": "6",
+      "solutionSketch": [
+        "200−14t=116 ⇒ t=6."
+      ]
+    },
+    {
+      "id": "g12-se-mc-fn-04",
+      "slice": "finance",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "n-payments"
+      },
+      "stem": "Nabil borrows 20 000 000 LL for 5 years at 6% compounded monthly. The number of monthly payments is:",
+      "choices": [
+        "60",
+        "5",
+        "12",
+        "6"
+      ],
+      "answerIndex": 0,
+      "answer": "60",
+      "solutionSketch": [
+        "5×12=60."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lm-03",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "maint-3y"
+      },
+      "stem": "The maintenance cost during the first three years for rate e^{0.5 t} is ∫_0^3 e^{0.5 t} dt =:",
+      "choices": [
+        "\\(2(e^{1.5}-1)\\)",
+        "\\(e^{1.5}\\)",
+        "\\(3e^{0.5}\\)",
+        "\\(0.5 e^{1.5}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2(e^{1.5}-1)\\)",
+      "solutionSketch": [
+        "2 e^{0.5 t} from 0 to 3 = 2(e^{1.5}−1)≈6.963, a typical table distractor."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lm-04",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "above-asymptote"
+      },
+      "stem": "The curve of f(x)=1+e^{−2x+1} is above the line y=1 on [0;+∞[ because:",
+      "choices": [
+        "\\(e^{-2x+1}>0\\)",
+        "f'(x)>0",
+        "f(0)<1",
+        "f is linear"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(e^{-2x+1}>0\\)",
+      "solutionSketch": [
+        "The exponential is always positive."
+      ]
+    },
+    {
+      "id": "g12-se-mc-dm-03",
+      "slice": "demand",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "demand-x1"
+      },
+      "stem": "For demand f(x)=1+e^{−2x+1}, the number of demanded units at a unit price of 1000 LL (x=1) is, in thousands:",
+      "choices": [
+        "\\(1+e^{-1}\\)",
+        "\\(1+e\\)",
+        "\\(e^{2}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1+e^{-1}\\)",
+      "solutionSketch": [
+        "f(1)=1+e^{−1}."
+      ]
+    },
+    {
+      "id": "g12-se-mc-dm-04",
+      "slice": "demand",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "E-formula-se"
+      },
+      "stem": "E(x)= −x f'(x)/f(x) for f(x)=1+e^{−2x+1}. Then f'(x)=−2e^{−2x+1}, so E(x)=:",
+      "choices": [
+        "\\(\\dfrac{2x e^{-2x+1}}{1+e^{-2x+1}}\\)",
+        "\\(2x\\)",
+        "\\(1\\)",
+        "\\(x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{2x e^{-2x+1}}{1+e^{-2x+1}}\\)",
+      "solutionSketch": [
+        "−x(−2e^{…})/f = 2x e^{−2x+1}/(1+e^{−2x+1})."
+      ]
+    },
+    {
+      "id": "g12-se-mc-st-03",
+      "slice": "stats",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "pct-decrease"
+      },
+      "stem": "Percentage decrease of sales from 1.2 to 0.9 (tens of thousands) is:",
+      "choices": [
+        "\\(25\\%\\)",
+        "\\(30\\%\\)",
+        "\\(75\\%\\)",
+        "\\(0.3\\%\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(25\\%\\)",
+      "solutionSketch": [
+        "(1.2−0.9)/1.2=0.25."
+      ]
+    },
+    {
+      "id": "g12-se-mc-st-04",
+      "slice": "stats",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "m-from-G"
+      },
+      "stem": "If y=−0.674x+m passes through G(3.5; 2.533), m≈:",
+      "choices": [
+        "4.892",
+        "−2.359",
+        "2.533",
+        "0.674"
+      ],
+      "answerIndex": 0,
+      "answer": "4.892",
+      "solutionSketch": [
+        "m=ȳ+0.674 x̄=2.533+2.359=4.892."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lg-07",
+      "slice": "logs",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "deriv-ln-exp-e"
+      },
+      "stem": "f(x)=ln(e^x − e) is defined on ]1;+∞[. Then f'(x) equals:",
+      "choices": [
+        "\\(\\dfrac{e^x}{e^x-e}\\)",
+        "\\(1\\)",
+        "\\(\\dfrac{1}{e^x-e}\\)",
+        "\\(e^x-e\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{e^x}{e^x-e}\\)",
+      "solutionSketch": [
+        "Chain rule."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lg-08",
+      "slice": "logs",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "2ln-eq"
+      },
+      "stem": "The equation 2 ln x = ln(2x) on (0;+∞) has:",
+      "choices": [
+        "one root only",
+        "2 roots",
+        "no roots",
+        "3 roots"
+      ],
+      "answerIndex": 0,
+      "answer": "one root only",
+      "solutionSketch": [
+        "ln(x^2)=ln(2x) ⇒ x^2=2x, x=2 (x=0 excluded). Check: ln4=ln4."
+      ]
+    },
+    {
+      "id": "g12-se-mc-fn-05",
+      "slice": "finance",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "customs-total"
+      },
+      "stem": "Customs rate per car rises from $1000 to $1600 while the number of cars sold falls by 40%. The total customs amount:",
+      "choices": [
+        "decreases, because 1.6×0.6=0.96<1",
+        "increases",
+        "stays the same",
+        "triples"
+      ],
+      "answerIndex": 0,
+      "answer": "decreases, because 1.6×0.6=0.96<1",
+      "solutionSketch": [
+        "New total = 1.6 × 0.6 of the old total = 96%."
+      ]
+    },
+    {
+      "id": "g12-se-mc-fn-06",
+      "slice": "finance",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "PV-less-than-nominal"
+      },
+      "stem": "The present value of 20 monthly payments of 75 000 LL at monthly rate 0.005 is 75 000 (1−1.005^{−20})/0.005. This quantity is:",
+      "choices": [
+        "less than 20×75 000=1 500 000 LL",
+        "equal to 1 500 000 LL",
+        "greater than 1 573 436 LL",
+        "negative"
+      ],
+      "answerIndex": 0,
+      "answer": "less than 20×75 000=1 500 000 LL",
+      "solutionSketch": [
+        "Discounting makes the present value strictly less than the undiscounted total."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lm-05",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "int-ln-1-e"
+      },
+      "stem": "An antiderivative of ln x is x ln x − x. Then ∫_1^e ln x dx equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(e\\)",
+        "\\(0\\)",
+        "\\(e-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "[x ln x − x]_1^e = (e−e)−(0−1)=1."
+      ]
+    },
+    {
+      "id": "g12-se-mc-lm-06",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "area-ln"
+      },
+      "stem": "f(x)=ln x on (0;+∞). The area between (C), the x-axis and x=1, x=e equals 1. This area is:",
+      "choices": [
+        "\\(\\int_1^e \\ln x\\,dx=1\\)",
+        "\\(e\\)",
+        "infinite",
+        "ln e − ln 1=0"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\int_1^e \\ln x\\,dx=1\\)",
+      "solutionSketch": [
+        "Computed primitive x ln x − x."
+      ]
+    },
+    {
+      "id": "g12-se-mc-dm-05",
+      "slice": "demand",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "never-elastic"
+      },
+      "stem": "If E(x) has a maximum 0.567 < 1 on [0.1; 3], then a value of x for which the demand is elastic:",
+      "choices": [
+        "does not exist on this interval",
+        "is x=0.784",
+        "is every x",
+        "is x=0.1 only"
+      ],
+      "answerIndex": 0,
+      "answer": "does not exist on this interval",
+      "solutionSketch": [
+        "Elastic means E>1. The table never exceeds 0.567."
+      ]
+    },
+    {
+      "id": "g12-se-mc-dm-06",
+      "slice": "demand",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "elastic-at-0.5"
+      },
+      "stem": "Is the demand f(x)=1+e^{−2x+1} elastic at x=0.5? With E(x)=2x e^{−2x+1}/(1+e^{−2x+1}) one finds E(0.5)=1/2<1, so the demand is:",
+      "choices": [
+        "not elastic",
+        "elastic",
+        "unit elastic",
+        "undefined"
+      ],
+      "answerIndex": 0,
+      "answer": "not elastic",
+      "solutionSketch": [
+        "E(0.5)=2·0.5·e^{0}/(1+e^{0})=1/(1+1)=1/2<1."
+      ]
+    },
+    {
+      "id": "g12-se-mc-st-05",
+      "slice": "stats",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "estimate-2022"
+      },
+      "stem": "Estimating y=−0.674x+4.892 at year rank x=7 (if 2016 had rank 1, 2022 has rank 7) gives y≈:",
+      "choices": [
+        "0.174",
+        "4.892",
+        "7",
+        "−0.674"
+      ],
+      "answerIndex": 0,
+      "answer": "0.174",
+      "solutionSketch": [
+        "−0.674×7+4.892=0.174 (tens of thousands of cars)."
+      ]
+    },
+    {
+      "id": "g12-se-mc-st-06",
+      "slice": "stats",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "model-limits"
+      },
+      "stem": "If a model y=−0.674x+4.892 remains valid, the first year rank with y<0 (impossible sales) would already show the model:",
+      "choices": [
+        "must be restricted to a validity interval",
+        "is exact forever",
+        "has r=1",
+        "passes through the origin"
+      ],
+      "answerIndex": 0,
+      "answer": "must be restricted to a validity interval",
+      "solutionSketch": [
+        "Linear extrapolation of a decreasing series eventually leaves the realistic range."
+      ]
+    }
+  ]
+}
