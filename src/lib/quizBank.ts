@@ -1,5 +1,6 @@
 import { academyLessons } from "./academyLessons";
 import { grade12LsLimitsQuestions } from "./grade12LsLimitsQuestions";
+import { getTopicBank, quizQuestionsForBank } from "./topicBanks";
 import type { Difficulty, QuizQuestion } from "./types";
 
 function q(
@@ -26,7 +27,16 @@ const extra: QuizQuestion[] = [
 
 const TEMPLATE_SKIP_THRESHOLD = 10;
 
+function getIfTopicBank(bankId: string) {
+  return getTopicBank(bankId);
+}
+
 export function questionsForLesson(lessonId: string, custom: QuizQuestion[] = []): QuizQuestion[] {
+  const bankId = lessonId.startsWith("bank:") ? lessonId.slice("bank:".length) : lessonId;
+  if (getIfTopicBank(bankId)) {
+    const fromCustom = custom.filter((item) => item.lessonId === lessonId || item.lessonId === bankId);
+    return [...fromCustom, ...quizQuestionsForBank(bankId)];
+  }
   const lesson = academyLessons.find((item) => item.id === lessonId);
   const fromExtra = extra.filter((item) => item.lessonId === lessonId);
   const fromCustom = custom.filter((item) => item.lessonId === lessonId);

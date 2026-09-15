@@ -105,8 +105,13 @@ export default function ClassroomLessonPage() {
           امتحان الدرس (70% لفتح التالي)
         </Link>
         <Link className="btn" href={`/practice/take?lessonId=${lesson.id}&mode=free`}>
-          تدريب حر
+          تدريب النهايات
         </Link>
+        {hasPilotNotes ? (
+          <Link className="btn" href="/practice/take?bank=g12-ls-functions&mode=contest">
+            مسابقة الدوال
+          </Link>
+        ) : null}
         <button className="btn ok" type="button" onClick={() => void complete()}>
           {saved ? "Saved to your path" : "I finished this lesson"}
         </button>

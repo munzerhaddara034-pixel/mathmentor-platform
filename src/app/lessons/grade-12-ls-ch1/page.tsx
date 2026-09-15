@@ -26,10 +26,13 @@ export default function Grade12LsChapter1Page() {
       <LessonNotes blocks={grade12LsLimitsNotes} />
       <article className="card" style={{ marginTop: 24 }}>
         <h3>بعد هذا الفيديو</h3>
-        <p className="muted">تدريب حر على 30+ سؤالاً بمستوى الشهادة، أو امتحان يفتح الفصل التالي عند 70%.</p>
+        <p className="muted">تدريب النهايات، أو مسابقة موضوع الدوال (نهاية ثم استمرار ثم مشتقة) مرتّبة سهل فمتوسط فصعب.</p>
         <div className="row">
           <Link href={`/practice/take?lessonId=${GRADE_12_LS_LIMITS_LESSON_ID}&mode=free`} className="btn dark">
             تدريب النهايات
+          </Link>
+          <Link href="/practice/take?bank=g12-ls-functions&mode=contest" className="btn">
+            مسابقة الدوال
           </Link>
           <Link href={`/classroom/${GRADE_12_LS_LIMITS_LESSON_ID}`} className="btn">
             صفحة الصف
