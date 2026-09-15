@@ -73,6 +73,14 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
   scenes: officialExamSceneDocument.scenes,
   events: [
     {
+      at: 40,
+      type: "fade_equation",
+      latex: "f(x)=(x-1)e^x",
+      payload: {
+        caption: L("On the board", "Au tableau"),
+      },
+    },
+    {
       at: 42.5,
       type: "render_graph",
       latex: "f(x)=(x-1)e^x",
@@ -84,6 +92,16 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
         asymptotes: [{ y: 0 }],
       },
       payload: {},
+    },
+    {
+      at: 45,
+      type: "highlight_point",
+      payload: {
+        kind: "extrema",
+        x: 0,
+        y: -1,
+        label: L("Minimum (0, −1)", "Minimum (0, −1)"),
+      },
     },
   ],
   segments: [

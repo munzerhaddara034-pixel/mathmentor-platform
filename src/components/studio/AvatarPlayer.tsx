@@ -62,21 +62,16 @@ export function AvatarPlayer({
     const video = videoRef.current;
     if (!video || !videoUrl) return;
 
-    const emitTime = () => onTimeRef.current?.(video.currentTime);
     const emitEnded = () => onEndedRef.current?.();
     const emitError = () => onErrorRef.current?.();
     const emitMeta = () => {
       if (Number.isFinite(video.duration) && video.duration > 0) onDurationRef.current?.(video.duration);
     };
 
-    video.addEventListener("timeupdate", emitTime);
-    video.addEventListener("seeked", emitTime);
     video.addEventListener("ended", emitEnded);
     video.addEventListener("error", emitError);
     video.addEventListener("loadedmetadata", emitMeta);
     return () => {
-      video.removeEventListener("timeupdate", emitTime);
-      video.removeEventListener("seeked", emitTime);
       video.removeEventListener("ended", emitEnded);
       video.removeEventListener("error", emitError);
       video.removeEventListener("loadedmetadata", emitMeta);
@@ -87,9 +82,19 @@ export function AvatarPlayer({
     const video = videoRef.current;
     if (!video || !videoUrl) return;
     video.playbackRate = playbackRate;
-    if (playing && video.paused) void video.play().catch(() => undefined);
-    if (!playing && !video.paused) video.pause();
-  }, [playing, playbackRate, videoUrl]);
+    // After a short clip hands the clock to RAF, keep looping so pan/zoom
+    // on the canvas does not sit on a frozen last frame (audio stays up).
+    video.loop = !clockMaster;
+    if (playing) {
+      const pastEnd =
+        video.ended ||
+        (Number.isFinite(video.duration) && video.duration > 0 && video.currentTime >= video.duration - 0.05);
+      if (!clockMaster && pastEnd) video.currentTime = 0;
+      if (video.paused) void video.play().catch(() => undefined);
+    } else if (!video.paused) {
+      video.pause();
+    }
+  }, [playing, playbackRate, videoUrl, clockMaster]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -101,6 +106,7 @@ export function AvatarPlayer({
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoUrl || clockMaster) return;
+    if (Number.isFinite(video.duration) && video.duration > 0 && currentTime >= video.duration - 0.02) return;
     const drift = Math.abs(video.currentTime - currentTime);
     if (drift > 0.35) video.currentTime = currentTime;
   }, [clockMaster, currentTime, videoUrl]);
@@ -137,6 +143,14 @@ export function AvatarPlayer({
             playsInline
             controls={false}
             disablePictureInPicture
+            onTimeUpdate={(event) => {
+              if (!clockMaster) return;
+              onTimeRef.current?.(event.currentTarget.currentTime);
+            }}
+            onSeeked={(event) => {
+              if (!clockMaster) return;
+              onTimeRef.current?.(event.currentTarget.currentTime);
+            }}
             onContextMenu={(event) => event.preventDefault()}
           />
         ) : (

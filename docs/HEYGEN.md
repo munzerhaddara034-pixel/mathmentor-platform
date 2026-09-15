@@ -143,7 +143,7 @@ There is no SQLite in this project.
 
 When `timeline.media.videoUrl` is set:
 
-- Left panel: `<video src={videoUrl}>`
-- Right panel: KaTeX (and site-wide MathJax) + **Function Plot** SVG (`src/lib/studio/functionPlot.ts`). Desmos is optional if `NEXT_PUBLIC_DESMOS_API_KEY` is set.
-- Canvas `currentTime` is driven by `video.currentTime` (`timeupdate`) while the clip is playing.
+- **Left** panel: interactive math canvas (KaTeX fade-in + Function Plot SVG; Desmos if `NEXT_PUBLIC_DESMOS_API_KEY` is set).
+- **Right** panel: `<video src={videoUrl}>` (HeyGen when available, else local `/studio/demo-avatar.mp4`). On phones the video stacks **on top**.
+- Canvas `currentTime` is driven by `video.ontimeupdate` / `seeked`. A short clip **loops** after it ends so pan/zoom does not pause audio while RAF continues the lesson clock.
 - EN/FR toggle is unchanged.

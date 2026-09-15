@@ -68,8 +68,8 @@ export const STUDIO_UI = {
     fr: "La vidéo HeyGen est l’horloge : le tableau suit video.currentTime.",
   },
   demoVideoHint: {
-    en: "Local placeholder video (no HeyGen key). Canvas follows the video, then continues on the silent timeline.",
-    fr: "Vidéo locale de démo (pas de clé HeyGen). Le tableau suit la vidéo, puis continue en silence.",
+    en: "Local placeholder clip (no HeyGen key). Canvas follows video.currentTime, then the clip loops while the lesson clock continues — pan/zoom does not pause audio.",
+    fr: "Clip local de démo (pas de clé HeyGen). Le tableau suit video.currentTime, puis le clip boucle pendant que l’horloge continue — zoom/pan ne coupe pas l’audio.",
   },
   syncClock: { en: "sync player (video → canvas)", fr: "lecteur sync (vidéo → tableau)" },
   interactHint: {

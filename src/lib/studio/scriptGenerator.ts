@@ -464,7 +464,7 @@ Return ONE JSON object only, matching this schema:
         "actions": [
           {
             "at": number,
-            "type": "show_equation" | "render_graph" | "highlight_point" | "show_step" | "clear",
+            "type": "show_equation" | "fade_equation" | "render_graph" | "highlight_point" | "show_step" | "clear",
             "payload": {
               "latex": string,
               "math_latex": string,

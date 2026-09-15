@@ -342,6 +342,20 @@ function stepTextOf(payload: Record<string, unknown>) {
   );
 }
 
+function highlightKey(item: HighlightPayload) {
+  return `${item.kind ?? ""}:${item.x ?? ""}:${item.y ?? ""}:${item.axis ?? ""}:${item.value ?? ""}`;
+}
+
+function mergeHighlights(state: DerivedCanvasState, items: HighlightPayload[]) {
+  const seen = new Set(state.highlights.map(highlightKey));
+  for (const item of items) {
+    const key = highlightKey(item);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    state.highlights.push(item);
+  }
+}
+
 function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: number, stepIndex: number): number {
   const lifted = liftTimelineEvent(action) as CanvasAction;
   const type = normalizedActionType(lifted.type);
@@ -368,7 +382,7 @@ function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: numbe
       });
     }
     const bundled = parseHighlightsBundle(payload.highlights);
-    if (bundled.length) state.highlights.push(...bundled);
+    if (bundled.length) mergeHighlights(state, bundled);
     return stepIndex;
   }
 
@@ -387,7 +401,7 @@ function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: numbe
     state.graph = asGraph(payload);
     state.graphStartedAt = abs;
     const bundled = parseHighlightsBundle(payload.highlights);
-    if (bundled.length) state.highlights.push(...bundled);
+    if (bundled.length) mergeHighlights(state, bundled);
     const latex = latexOf(payload);
     if (latex && !state.equations.some((item) => item.latex === latex)) {
       state.equations.push({
@@ -402,8 +416,8 @@ function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: numbe
 
   if (type === "highlight_point") {
     const bundled = parseHighlightsBundle(payload.highlights);
-    if (bundled.length) state.highlights.push(...bundled);
-    else state.highlights.push(asHighlight(payload));
+    if (bundled.length) mergeHighlights(state, bundled);
+    else mergeHighlights(state, [asHighlight(payload)]);
   }
   return stepIndex;
 }

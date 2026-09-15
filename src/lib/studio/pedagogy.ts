@@ -66,7 +66,7 @@ export function ensurePedagogy(timeline: LessonTimeline): LessonTimeline {
   };
 
   const rule = next.segments.find((segment) => segment.phase === "rule_graph")!;
-  if (!rule.canvas.actions.some((action) => action.type === "render_graph")) {
+  if (!hasRenderGraph(next)) {
     rule.canvas.actions.push({
       at: Math.min(8, Math.max(1, rule.end - rule.start - 2)),
       type: "render_graph",

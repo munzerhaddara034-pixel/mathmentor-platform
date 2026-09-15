@@ -73,7 +73,7 @@ Flat event fields are lifted into `payload` (backward compatible with `{ at, typ
 }
 ```
 
-`leb-term-func-01` / `/lessons/interactive` seeds this at 42.5s (fade-in limit, then graph + highlights). Wheel or pinch to zoom, drag to pan, hover for `(x, f(x))` — playback continues.
+`leb-term-func-01` / `/lessons/interactive` seeds a fade at 40s, `render_graph` at 42.5s (roots / extrema / asymptotes), then `highlight_point` at 45s. Wheel or pinch to zoom, drag to pan, hover for `(x, f(x))` — playback continues. If the attached clip is shorter than the lesson (local demo mp4), it **loops** after handing the clock to RAF so audio stays up while you inspect the graph.
 
 ## Seeded lesson
 
