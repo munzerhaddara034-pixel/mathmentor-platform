@@ -1,0 +1,307 @@
+{
+  "id": "g12-se-sequences",
+  "track": "grade-12",
+  "certificate": "SE",
+  "topic": "sequences",
+  "title": "Sequences (economic models)",
+  "arabicTitle": "المتتاليات والنماذج الاقتصادية",
+  "contestMinutes": 20,
+  "passScore": 50,
+  "sourceModels": [
+    "SE_All Sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "finance",
+      "title": "Finance",
+      "arabicTitle": "مالية"
+    },
+    {
+      "id": "arith",
+      "title": "Arithmetic",
+      "arabicTitle": "حسابية"
+    },
+    {
+      "id": "limit",
+      "title": "Limits",
+      "arabicTitle": "النهايات"
+    },
+    {
+      "id": "sum",
+      "title": "Series / PV",
+      "arabicTitle": "السلاسل"
+    },
+    {
+      "id": "closed",
+      "title": "Equilibria",
+      "arabicTitle": "التوازن"
+    },
+    {
+      "id": "geo",
+      "title": "Geometric growth",
+      "arabicTitle": "نمو هندسي"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "sequences",
+      "file": "content/banks/g12-se/sequences.json",
+      "title": "Sequences",
+      "arabicTitle": "المتتاليات",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-se-seq-01",
+      "slice": "finance",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "compound"
+      },
+      "stem": "A capital C is multiplied by 1.05 each year. After n years it equals:",
+      "choices": [
+        "\\(C+1.05n\\)",
+        "\\(C(1.05)^n\\)",
+        "\\(C^{1.05n}\\)",
+        "\\(1.05C+n\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(C(1.05)^n\\)",
+      "solutionSketch": [
+        "Geometric growth with ratio 1.05."
+      ],
+      "bareme": 1,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "C(1.05)^n"
+    },
+    {
+      "id": "g12-se-seq-02",
+      "slice": "arith",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "salary"
+      },
+      "stem": "A salary starts at 800 and increases by 40 each year. Year n (n starting at 0) is:",
+      "choices": [
+        "\\(800·40^n\\)",
+        "\\(800+40n\\)",
+        "\\(840n\\)",
+        "\\(800/40n\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(800+40n\\)",
+      "solutionSketch": [
+        "Arithmetic sequence: u_n=800+40n."
+      ],
+      "bareme": 1,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=800+40n"
+    },
+    {
+      "id": "g12-se-seq-03",
+      "slice": "limit",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "decay"
+      },
+      "stem": "u_n=100(0.8)^n is a decaying geometric sequence. lim u_n equals:",
+      "choices": [
+        "\\(100\\)",
+        "\\(80\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "|q|=0.8<1 so q^n→0."
+      ],
+      "bareme": 2,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=100(0.8)^n"
+    },
+    {
+      "id": "g12-se-seq-04",
+      "slice": "sum",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "perpetuity"
+      },
+      "stem": "The present value of a perpetuity of 1 each year at rate 10% is ∑_{k=1}^{∞} 1/(1.1)^k which equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(10\\)",
+        "\\(11\\)",
+        "\\(0.1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(10\\)",
+      "solutionSketch": [
+        "First term a=1/1.1, ratio q=1/1.1, sum=a/(1−q)=10."
+      ],
+      "bareme": 2,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\sum_{k=1}^{\\infty}(1.1)^{-k}"
+    },
+    {
+      "id": "g12-se-seq-05",
+      "slice": "closed",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "stock"
+      },
+      "stem": "Inventory: u_{n+1}=0.6 u_n + 20, u_0=100. The equilibrium stock is:",
+      "choices": [
+        "\\(20\\)",
+        "\\(32\\)",
+        "\\(50\\)",
+        "\\(100\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(50\\)",
+      "solutionSketch": [
+        "ℓ=0.6ℓ+20 ⇒ 0.4ℓ=20 ⇒ ℓ=50."
+      ],
+      "bareme": 3,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_{n+1}=0.6u_n+20"
+    },
+    {
+      "id": "g12-se-seq-06",
+      "slice": "geo",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "doubling"
+      },
+      "stem": "An investment of 1000 grows 8% per year. The smallest integer n with 1000(1.08)^n ≥ 2000 is the smallest n satisfying (1.08)^n≥2. Since ln2/ln(1.08)≈9.01, that n equals:",
+      "choices": [
+        "\\(8\\)",
+        "\\(9\\)",
+        "\\(10\\)",
+        "\\(12\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(10\\)",
+      "solutionSketch": [
+        "ln2/ln(1.08)≈9.01 so n=10 because (1.08)^9≈1.999<2 and (1.08)^10>2."
+      ],
+      "bareme": 3,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "1000(1.08)^n\\ge 2000"
+    },
+    {
+      "id": "g12-se-seq-07",
+      "slice": "arith",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "nth-term"
+      },
+      "stem": "The 5th term of 12, 15, 18, … is:",
+      "choices": [
+        "\\(21\\)",
+        "\\(24\\)",
+        "\\(27\\)",
+        "\\(30\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(24\\)",
+      "solutionSketch": [
+        "d=3, u_5=12+4·3=24 (if first term is u_1)."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=12+3(n-1)"
+    },
+    {
+      "id": "g12-se-seq-08",
+      "slice": "limit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "index"
+      },
+      "stem": "A price index u_n=200 + 30/n. As n→∞ the index tends to:",
+      "choices": [
+        "\\(0\\)",
+        "\\(30\\)",
+        "\\(200\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(200\\)",
+      "solutionSketch": [
+        "30/n→0 so limit 200."
+      ],
+      "bareme": 1,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=200+\\frac{30}{n}"
+    }
+  ]
+}

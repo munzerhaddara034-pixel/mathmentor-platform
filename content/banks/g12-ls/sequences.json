@@ -1,0 +1,312 @@
+{
+  "id": "g12-ls-sequences",
+  "track": "grade-12",
+  "certificate": "LS",
+  "topic": "sequences",
+  "title": "Sequences",
+  "arabicTitle": "المتتاليات",
+  "contestMinutes": 20,
+  "passScore": 50,
+  "sourceModels": [
+    "LS all sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "arith",
+      "title": "Arithmetic",
+      "arabicTitle": "حسابية"
+    },
+    {
+      "id": "geo",
+      "title": "Geometric",
+      "arabicTitle": "هندسية"
+    },
+    {
+      "id": "limit",
+      "title": "Limits of sequences",
+      "arabicTitle": "نهاية المتتالية"
+    },
+    {
+      "id": "recur",
+      "title": "Recurrence",
+      "arabicTitle": "علاقات تراجعية"
+    },
+    {
+      "id": "closed",
+      "title": "Closed form",
+      "arabicTitle": "الشكل الصريح"
+    },
+    {
+      "id": "sum",
+      "title": "Sums",
+      "arabicTitle": "المجموع"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "sequences",
+      "file": "content/banks/g12-ls/sequences.json",
+      "title": "Sequences",
+      "arabicTitle": "المتتاليات",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-ls-seq-01",
+      "slice": "arith",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "arith-d"
+      },
+      "stem": "The sequence defined by u_n = 3n − 1 is arithmetic. Its common difference is:",
+      "choices": [
+        "\\(3\\)",
+        "\\(2\\)",
+        "\\(-1\\)",
+        "\\(3n\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "u_{n+1} − u_n = 3(n+1)−1 − (3n−1) = 3.",
+        "Common difference d = 3."
+      ],
+      "bareme": 1,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=3n-1"
+    },
+    {
+      "id": "g12-ls-seq-02",
+      "slice": "geo",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "geo-q"
+      },
+      "stem": "The sequence v_n = 2·(1/2)^n is geometric. Its common ratio is:",
+      "choices": [
+        "\\(2\\)",
+        "\\(1/2\\)",
+        "\\(-1/2\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1/2\\)",
+      "solutionSketch": [
+        "v_{n+1}/v_n = (1/2)^{n+1}/(1/2)^n = 1/2.",
+        "Ratio q = 1/2."
+      ],
+      "bareme": 1,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "v_n=2\\cdot(1/2)^n"
+    },
+    {
+      "id": "g12-ls-seq-03",
+      "slice": "limit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "rat-lim"
+      },
+      "stem": "Let u_n = (2n+1)/(n+4). Then lim_{n→∞} u_n equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1/4\\)",
+        "\\(2\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "Divide by n: (2+1/n)/(1+4/n) → 2/1 = 2."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=\\frac{2n+1}{n+4}"
+    },
+    {
+      "id": "g12-ls-seq-04",
+      "slice": "recur",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "linear-recur"
+      },
+      "stem": "u_0=1 and u_{n+1}=2u_n+1. Then u_1 and u_2 are:",
+      "choices": [
+        "\\(2\\) then \\(5\\)",
+        "\\(3\\) then \\(7\\)",
+        "\\(1\\) then \\(3\\)",
+        "\\(3\\) then \\(5\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\) then \\(7\\)",
+      "solutionSketch": [
+        "u_1=2·1+1=3.",
+        "u_2=2·3+1=7."
+      ],
+      "bareme": 2,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_{n+1}=2u_n+1,\\ u_0=1"
+    },
+    {
+      "id": "g12-ls-seq-05",
+      "slice": "closed",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "closed-form"
+      },
+      "stem": "The closed form of u_{n+1}=2u_n+1, u_0=1 is u_n=2^{n+1}−1. Then u_3 equals:",
+      "choices": [
+        "\\(7\\)",
+        "\\(15\\)",
+        "\\(8\\)",
+        "\\(16\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(15\\)",
+      "solutionSketch": [
+        "u_3=2^{4}−1=16−1=15.",
+        "Check: 1, 3, 7, 15."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=2^{n+1}-1"
+    },
+    {
+      "id": "g12-ls-seq-06",
+      "slice": "sum",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "arith-sum"
+      },
+      "stem": "The sum S_n=1+2+…+n equals n(n+1)/2. Then S_10 equals:",
+      "choices": [
+        "\\(45\\)",
+        "\\(55\\)",
+        "\\(100\\)",
+        "\\(110\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(55\\)",
+      "solutionSketch": [
+        "10·11/2=55."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "S_n=\\frac{n(n+1)}{2}"
+    },
+    {
+      "id": "g12-ls-seq-07",
+      "slice": "limit",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "nested-sqrt"
+      },
+      "stem": "u_{n+1}=√(2+u_n), u_0=0. The sequence increases and is bounded by 2, so it converges to ℓ with ℓ=√(2+ℓ). Then ℓ equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(√2\\)",
+        "\\(2\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "ℓ²=2+ℓ ⇒ ℓ²−ℓ−2=0 ⇒ (ℓ−2)(ℓ+1)=0.",
+        "ℓ≥0 so ℓ=2."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_{n+1}=\\sqrt{2+u_n}"
+    },
+    {
+      "id": "g12-ls-seq-08",
+      "slice": "geo",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "geo-series"
+      },
+      "stem": "The infinite geometric sum ∑_{k=0}^{∞} (1/3)^k equals:",
+      "choices": [
+        "\\(1/3\\)",
+        "\\(1/2\\)",
+        "\\(3/2\\)",
+        "\\(3\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(3/2\\)",
+      "solutionSketch": [
+        "|q|<1 so sum=1/(1−q)=1/(1−1/3)=3/2."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\sum_{k=0}^{\\infty}(1/3)^k"
+    }
+  ]
+}

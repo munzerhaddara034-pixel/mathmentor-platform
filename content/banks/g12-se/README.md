@@ -7,5 +7,6 @@ Topic banks patterned on `SE_All Sessions.pdf` (not photocopied). Economics / an
 | `mcq-mixed.json` | أسئلة مختلطة | **seeded** |
 | `probability.json` | الاحتمالات والإحصاء | **seeded** |
 | `functions.json` | الدوال والتحليل الاقتصادي | **seeded** |
+| `sequences.json` | المتتاليات والنماذج الاقتصادية | **scaffold** |
 
 Rebuild: `python3 scripts/build-g12-banks.py`

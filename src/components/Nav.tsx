@@ -11,7 +11,7 @@ function linksFor(user: SessionUser | null) {
     return [
       { href: "/", label: "الرئيسية" },
       { href: "/lessons", label: "الدروس" },
-      { href: "/practice", label: "الاختبارات" },
+      { href: "/exams", label: "الامتحانات" },
       { href: "/classroom", label: "الصف" },
       { href: "/subscribe", label: "الاشتراك" },
     ];
@@ -23,21 +23,21 @@ function linksFor(user: SessionUser | null) {
       { href: "/assistant", label: "الموظف" },
       { href: "/bank", label: "بنك الأستاذ" },
       { href: "/lessons", label: "الدروس" },
-      { href: "/practice", label: "الاختبارات" },
+      { href: "/exams", label: "الامتحانات" },
     ];
   }
   if (user.role === "parent") {
     return [
       { href: "/dashboard", label: "لوحة ولي الأمر" },
       { href: "/lessons", label: "الدروس" },
-      { href: "/practice", label: "الاختبارات" },
+      { href: "/exams", label: "الامتحانات" },
       { href: "/profile", label: "ملفي" },
     ];
   }
   return [
     { href: "/dashboard", label: "لوحة الطالب" },
     { href: "/lessons", label: "الدروس" },
-    { href: "/practice", label: "الاختبارات" },
+    { href: "/exams", label: "الامتحانات" },
     { href: "/classroom", label: "الصف" },
     { href: "/student", label: "دردشة" },
     { href: "/profile", label: "ملفي" },
@@ -91,7 +91,7 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
           <Link
             key={link.href}
             href={link.href}
-            className={pathname === link.href ? "active" : undefined}
+            className={pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href)) ? "active" : undefined}
             onClick={() => setOpen(false)}
           >
             {link.label}

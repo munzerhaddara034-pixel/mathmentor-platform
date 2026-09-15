@@ -1,0 +1,328 @@
+{
+  "id": "g12-lh-analytic-geometry",
+  "track": "grade-12",
+  "certificate": "LH",
+  "topic": "analytic_geometry",
+  "title": "Analytic geometry (LH)",
+  "arabicTitle": "الهندسة التحليلية — آداب وإنسانيات",
+  "contestMinutes": 20,
+  "passScore": 50,
+  "sourceModels": [
+    "LH official-style scaffold"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "line",
+      "title": "Lines",
+      "arabicTitle": "المستقيمات"
+    },
+    {
+      "id": "mid",
+      "title": "Midpoint",
+      "arabicTitle": "المنتصف"
+    },
+    {
+      "id": "eq",
+      "title": "Equations",
+      "arabicTitle": "المعادلات"
+    },
+    {
+      "id": "dist",
+      "title": "Distance",
+      "arabicTitle": "المسافة"
+    },
+    {
+      "id": "perp",
+      "title": "Perpendicular",
+      "arabicTitle": "التعامد"
+    },
+    {
+      "id": "align",
+      "title": "Alignment",
+      "arabicTitle": "الاستقامة"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "functions",
+      "file": "content/banks/g12-lh/functions.json",
+      "title": "I · Functions",
+      "arabicTitle": "أولاً · الدوال",
+      "implemented": true
+    },
+    {
+      "id": "sequences",
+      "file": "content/banks/g12-lh/sequences.json",
+      "title": "II · Sequences",
+      "arabicTitle": "ثانياً · المتتاليات",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-lh/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "analytic-geometry",
+      "file": "content/banks/g12-lh/analytic-geometry.json",
+      "title": "Analytic geometry",
+      "arabicTitle": "الهندسة التحليلية",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-lh-ag-01",
+      "slice": "line",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "slope"
+      },
+      "stem": "The slope of the line through A(0,1) and B(2,5) is:",
+      "choices": [
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "(5−1)/(2−0)=2."
+      ],
+      "bareme": 1,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "m=\\frac{y_B-y_A}{x_B-x_A}"
+    },
+    {
+      "id": "g12-lh-ag-02",
+      "slice": "mid",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "mid"
+      },
+      "stem": "The midpoint of A(2,4) and B(6,0) is:",
+      "choices": [
+        "\\((4,2)\\)",
+        "\\((8,4)\\)",
+        "\\((2,2)\\)",
+        "\\((4,4)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((4,2)\\)",
+      "solutionSketch": [
+        "((2+6)/2,(4+0)/2)=(4,2)."
+      ],
+      "bareme": 1,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "I=\\left(\\frac{x_A+x_B}{2},\\frac{y_A+y_B}{2}\\right)"
+    },
+    {
+      "id": "g12-lh-ag-03",
+      "slice": "eq",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "eq"
+      },
+      "stem": "An equation of the line of slope 2 through (0,1) is:",
+      "choices": [
+        "\\(y=2x\\)",
+        "\\(y=2x+1\\)",
+        "\\(y=x+2\\)",
+        "\\(y=2x-1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(y=2x+1\\)",
+      "solutionSketch": [
+        "y−1=2(x−0)."
+      ],
+      "bareme": 2,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "y=2x+1"
+    },
+    {
+      "id": "g12-lh-ag-04",
+      "slice": "dist",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "dist"
+      },
+      "stem": "The distance AB for A(0,0), B(3,4) is:",
+      "choices": [
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(5\\)",
+        "\\(7\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(5\\)",
+      "solutionSketch": [
+        "√(9+16)=5."
+      ],
+      "bareme": 2,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "AB=\\sqrt{3^2+4^2}"
+    },
+    {
+      "id": "g12-lh-ag-05",
+      "slice": "perp",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "perp"
+      },
+      "stem": "A line of slope 2 has perpendicular slope:",
+      "choices": [
+        "\\(2\\)",
+        "\\(-2\\)",
+        "\\(1/2\\)",
+        "\\(-1/2\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(-1/2\\)",
+      "solutionSketch": [
+        "Product of slopes = −1 ⇒ m'=−1/2."
+      ],
+      "bareme": 3,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "m\\cdot m'=-1"
+    },
+    {
+      "id": "g12-lh-ag-06",
+      "slice": "align",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "colinear"
+      },
+      "stem": "A(0,0), B(1,2), C(2,4) are aligned because:",
+      "choices": [
+        "\\(AB=BC\\)",
+        "\\(\\overrightarrow{AB}=2\\overrightarrow{AC}\\)",
+        "\\(\\overrightarrow{AC}=2\\overrightarrow{AB}\\)",
+        "\\(AC=1\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(\\overrightarrow{AC}=2\\overrightarrow{AB}\\)",
+      "solutionSketch": [
+        "AC=(2,4)=2(1,2)=2 AB."
+      ],
+      "bareme": 3,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\overrightarrow{AC}=2\\overrightarrow{AB}"
+    },
+    {
+      "id": "g12-lh-ag-07",
+      "slice": "eq",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "vertical"
+      },
+      "stem": "The line x=3 is:",
+      "choices": [
+        "horizontal",
+        "vertical",
+        "slope 3",
+        "through origin"
+      ],
+      "answerIndex": 1,
+      "answer": "vertical",
+      "solutionSketch": [
+        "Constant x: vertical line."
+      ],
+      "bareme": 1,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "x=3"
+    },
+    {
+      "id": "g12-lh-ag-08",
+      "slice": "mid",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "pb"
+      },
+      "stem": "The perpendicular bisector of A(0,0), B(2,0) has equation:",
+      "choices": [
+        "\\(x=0\\)",
+        "\\(x=1\\)",
+        "\\(y=1\\)",
+        "\\(y=x\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(x=1\\)",
+      "solutionSketch": [
+        "Midpoint (1,0), perpendicular to (2,0) is vertical x=1."
+      ],
+      "bareme": 2,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "x=1"
+    }
+  ]
+}

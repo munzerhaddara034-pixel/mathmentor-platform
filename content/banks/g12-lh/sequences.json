@@ -1,0 +1,321 @@
+{
+  "id": "g12-lh-sequences",
+  "track": "grade-12",
+  "certificate": "LH",
+  "topic": "sequences",
+  "title": "Sequences (LH)",
+  "arabicTitle": "المتتاليات — آداب وإنسانيات",
+  "contestMinutes": 20,
+  "passScore": 50,
+  "sourceModels": [
+    "LH official-style scaffold"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "arith",
+      "title": "Arithmetic",
+      "arabicTitle": "حسابية"
+    },
+    {
+      "id": "geo",
+      "title": "Geometric",
+      "arabicTitle": "هندسية"
+    },
+    {
+      "id": "limit",
+      "title": "Limits",
+      "arabicTitle": "النهايات"
+    },
+    {
+      "id": "recur",
+      "title": "Recurrence",
+      "arabicTitle": "تراجعية"
+    },
+    {
+      "id": "sum",
+      "title": "Sums",
+      "arabicTitle": "المجموع"
+    },
+    {
+      "id": "closed",
+      "title": "Closed form",
+      "arabicTitle": "الشكل الصريح"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "functions",
+      "file": "content/banks/g12-lh/functions.json",
+      "title": "I · Functions",
+      "arabicTitle": "أولاً · الدوال",
+      "implemented": true
+    },
+    {
+      "id": "sequences",
+      "file": "content/banks/g12-lh/sequences.json",
+      "title": "II · Sequences",
+      "arabicTitle": "ثانياً · المتتاليات",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-lh/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-lh-seq-01",
+      "slice": "arith",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "d"
+      },
+      "stem": "The sequence 5, 8, 11, 14, … is arithmetic with difference:",
+      "choices": [
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(5\\)",
+        "\\(8\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "8−5=3."
+      ],
+      "bareme": 1,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=5+3(n-1)"
+    },
+    {
+      "id": "g12-lh-seq-02",
+      "slice": "geo",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "q"
+      },
+      "stem": "2, 6, 18, 54, … is geometric with ratio:",
+      "choices": [
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(6\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "6/2=3."
+      ],
+      "bareme": 1,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=2\\cdot 3^{n-1}"
+    },
+    {
+      "id": "g12-lh-seq-03",
+      "slice": "limit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "harm"
+      },
+      "stem": "u_n=1/n. Then lim_{n→∞} u_n equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "Standard limit 1/n → 0."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=\\frac1n"
+    },
+    {
+      "id": "g12-lh-seq-04",
+      "slice": "recur",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "halving"
+      },
+      "stem": "u_0=4, u_{n+1}=u_n/2. Then u_3 equals:",
+      "choices": [
+        "\\(2\\)",
+        "\\(1\\)",
+        "\\(0.5\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(0.5\\)",
+      "solutionSketch": [
+        "4, 2, 1, 0.5."
+      ],
+      "bareme": 2,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_{n+1}=u_n/2"
+    },
+    {
+      "id": "g12-lh-seq-05",
+      "slice": "sum",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "odd-sum"
+      },
+      "stem": "1+3+5+7+9 equals:",
+      "choices": [
+        "\\(20\\)",
+        "\\(25\\)",
+        "\\(30\\)",
+        "\\(15\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(25\\)",
+      "solutionSketch": [
+        "Five odd numbers: 5²=25."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\sum_{k=1}^{5}(2k-1)"
+    },
+    {
+      "id": "g12-lh-seq-06",
+      "slice": "limit",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "rat-1"
+      },
+      "stem": "u_n=(n+1)/(n+3). lim u_n equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1/3\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "(1+1/n)/(1+3/n) → 1."
+      ],
+      "bareme": 3,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=\\frac{n+1}{n+3}"
+    },
+    {
+      "id": "g12-lh-seq-07",
+      "slice": "geo",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "geo-inf"
+      },
+      "stem": "∑_{k=0}^{∞} (1/4)^k equals:",
+      "choices": [
+        "\\(1/4\\)",
+        "\\(1/3\\)",
+        "\\(4/3\\)",
+        "\\(4\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(4/3\\)",
+      "solutionSketch": [
+        "1/(1−1/4)=4/3."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\sum_{k=0}^{\\infty}(1/4)^k"
+    },
+    {
+      "id": "g12-lh-seq-08",
+      "slice": "closed",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "nth"
+      },
+      "stem": "u_n=2n+1. The 10th term (n starting at 1) is:",
+      "choices": [
+        "\\(19\\)",
+        "\\(21\\)",
+        "\\(20\\)",
+        "\\(11\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(21\\)",
+      "solutionSketch": [
+        "u_10=20+1=21."
+      ],
+      "bareme": 2,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "u_n=2n+1"
+    }
+  ]
+}

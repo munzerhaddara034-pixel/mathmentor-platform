@@ -1,0 +1,331 @@
+{
+  "id": "g12-lh-functions",
+  "track": "grade-12",
+  "certificate": "LH",
+  "topic": "functions",
+  "title": "Functions (LH)",
+  "arabicTitle": "الدوال — آداب وإنسانيات",
+  "contestMinutes": 20,
+  "passScore": 50,
+  "sourceModels": [
+    "LH official-style scaffold"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "poly",
+      "title": "Polynomials",
+      "arabicTitle": "كثيرات الحدود"
+    },
+    {
+      "id": "sign",
+      "title": "Variation",
+      "arabicTitle": "التغيرات"
+    },
+    {
+      "id": "limit",
+      "title": "Limits",
+      "arabicTitle": "النهايات"
+    },
+    {
+      "id": "ln",
+      "title": "Logarithm",
+      "arabicTitle": "اللوغاريتم"
+    },
+    {
+      "id": "exp",
+      "title": "Exponential",
+      "arabicTitle": "الأسّية"
+    },
+    {
+      "id": "tangent",
+      "title": "Tangent",
+      "arabicTitle": "المماس"
+    },
+    {
+      "id": "root",
+      "title": "Roots / IVT",
+      "arabicTitle": "الجذور"
+    },
+    {
+      "id": "asymp",
+      "title": "Asymptotes",
+      "arabicTitle": "التقارب"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "functions",
+      "file": "content/banks/g12-lh/functions.json",
+      "title": "I · Functions",
+      "arabicTitle": "أولاً · الدوال",
+      "implemented": true
+    },
+    {
+      "id": "sequences",
+      "file": "content/banks/g12-lh/sequences.json",
+      "title": "II · Sequences",
+      "arabicTitle": "ثانياً · المتتاليات",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-lh/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-lh-fn-01",
+      "slice": "poly",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "poly-der"
+      },
+      "stem": "The derivative of f(x)=x²−4x+1 is:",
+      "choices": [
+        "\\(2x-4\\)",
+        "\\(x-4\\)",
+        "\\(2x+1\\)",
+        "\\(x^2-4\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2x-4\\)",
+      "solutionSketch": [
+        "Term by term: 2x−4."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "f(x)=x^2-4x+1"
+    },
+    {
+      "id": "g12-lh-fn-02",
+      "slice": "sign",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "var-table"
+      },
+      "stem": "f'(x)=2x−4 vanishes at x=2. f decreases on:",
+      "choices": [
+        "\\(]2,+\\infty[\\)",
+        "\\(]-\\infty,2]\\)",
+        "\\(\\mathbb{R}\\)",
+        "\\(\\emptyset\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(]-\\infty,2]\\)",
+      "solutionSketch": [
+        "f'(x)≤0 on ]−∞,2]."
+      ],
+      "bareme": 1,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "f'(x)=2x-4"
+    },
+    {
+      "id": "g12-lh-fn-03",
+      "slice": "limit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "rat-lim"
+      },
+      "stem": "lim_{x→+∞} (3x+1)/(x+2) equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1/2\\)",
+        "\\(3\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "Dominant terms 3x/x=3."
+      ],
+      "bareme": 1,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\lim_{x\\to+\\infty}\\frac{3x+1}{x+2}"
+    },
+    {
+      "id": "g12-lh-fn-04",
+      "slice": "ln",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "ln-der"
+      },
+      "stem": "The derivative of ln(x+1) on ]−1,+∞[ is:",
+      "choices": [
+        "\\(1/x\\)",
+        "\\(1/(x+1)\\)",
+        "\\(x+1\\)",
+        "\\(1/(x+1)^2\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1/(x+1)\\)",
+      "solutionSketch": [
+        "(ln u)'=u'/u with u=x+1."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "(\\ln(x+1))'"
+    },
+    {
+      "id": "g12-lh-fn-05",
+      "slice": "exp",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "exp-0"
+      },
+      "stem": "lim_{x→−∞} e^x equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "Exponential vanishes at −∞."
+      ],
+      "bareme": 2,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\lim_{x\\to-\\infty}e^x"
+    },
+    {
+      "id": "g12-lh-fn-06",
+      "slice": "tangent",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "tangent"
+      },
+      "stem": "The tangent to y=x² at x=1 has slope 2 and equation:",
+      "choices": [
+        "\\(y=2x\\)",
+        "\\(y=2x-1\\)",
+        "\\(y=x-1\\)",
+        "\\(y=2x+1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(y=2x-1\\)",
+      "solutionSketch": [
+        "y−1=2(x−1) ⇒ y=2x−1."
+      ],
+      "bareme": 3,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "y=x^2\\ \\text{at }x=1"
+    },
+    {
+      "id": "g12-lh-fn-07",
+      "slice": "root",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "ivt"
+      },
+      "stem": "f(x)=x³−x−1 satisfies f(1)=−1<0 and f(2)=5>0. By IVT there is a root in:",
+      "choices": [
+        "\\(]0,1[\\)",
+        "\\(]1,2[\\)",
+        "\\(]2,3[\\)",
+        "\\(]−1,0[\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(]1,2[\\)",
+      "solutionSketch": [
+        "Continuous on [1,2] with a sign change."
+      ],
+      "bareme": 3,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "f(x)=x^3-x-1"
+    },
+    {
+      "id": "g12-lh-fn-08",
+      "slice": "asymp",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "asymp"
+      },
+      "stem": "f(x)=(2x+1)/(x−1) has a vertical asymptote x=1 and horizontal asymptote:",
+      "choices": [
+        "\\(y=0\\)",
+        "\\(y=1\\)",
+        "\\(y=2\\)",
+        "\\(y=x\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(y=2\\)",
+      "solutionSketch": [
+        "Degree 1/1, ratio of leading coefficients = 2."
+      ],
+      "bareme": 2,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "f(x)=\\frac{2x+1}{x-1}"
+    }
+  ]
+}

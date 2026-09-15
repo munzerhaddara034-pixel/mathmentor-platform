@@ -8,6 +8,7 @@ Typical official paper: mixed MCQ, space geometry, probability, functions analys
 | `space-geometry.json` | هندسة الفضاء | **seeded** |
 | `probability.json` | الاحتمالات | **seeded** |
 | `functions.json` | دراسة الدوال | **seeded** |
+| `sequences.json` | المتتاليات | **scaffold** |
 | `integration.json` | التكامل (فصل إضافي، ليس خانة النموذج الرباعي) | later |
 
 Limits classroom video stays tied to the first slice of `functions.json` (`/classroom/grade-12-ch1`).

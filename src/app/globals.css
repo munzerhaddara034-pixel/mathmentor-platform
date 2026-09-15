@@ -422,7 +422,136 @@ textarea { min-height: 120px; resize: vertical; }
 .question-image { max-width: 100%; border-radius: 12px; margin: 8px 0; }
 .activate-card { max-width: 520px; }
 @media print {
-  .nav, .chat-widget, .btn, .math-grid-canvas { display: none !important; }
+  .nav, .chat-widget, .btn, .math-grid-canvas, .site-footer, .exam-print-actions, .nav-burger { display: none !important; }
+  .app-frame { min-height: auto; }
+  body, html { background: #fff !important; }
+  .exam-paper { box-shadow: none !important; }
+  .shell.exam-print-page { max-width: none; padding: 0; }
+}
+
+.exam-filter-grid {
+  display: grid;
+  gap: 12px;
+}
+@media (min-width: 800px) {
+  .exam-filter-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
+}
+.exam-cert-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.exam-cert-chip {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 18px;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: grid;
+  text-align: right;
+}
+.exam-cert-chip.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+.exam-part-list { margin: 8px 0 0; padding-inline-start: 18px; color: var(--muted); }
+.exam-part-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.exam-part-tab {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.exam-part-tab.active {
+  background: var(--navy);
+  color: var(--gold);
+}
+.result-item-head { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.result-bareme-unit { font-size: 0.55em; font-weight: 700; margin-inline-start: 8px; }
+.num-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+.bareme-table { margin-top: 18px; }
+.exam-disclaimer-inline { margin-top: 12px; }
+
+.exam-paper {
+  background: #fff;
+  color: #10213d;
+  border: 3px double #10213d;
+  border-radius: 8px;
+  padding: 28px 32px 40px;
+  margin-top: 18px;
+}
+.exam-paper-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  border-bottom: 2px solid #d9aa53;
+  padding-bottom: 12px;
+}
+.exam-crest { display: flex; gap: 12px; align-items: center; }
+.exam-crest-mark {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 2px solid #10213d; display: grid; place-items: center;
+  font-family: Georgia, serif; font-size: 22px; color: #d9aa53; background: #10213d;
+}
+.exam-kicker { margin: 0; font-weight: 800; letter-spacing: 0.04em; }
+.exam-ministry { margin: 0; font-size: 13px; color: #61708a; }
+.exam-brand-block { text-align: left; display: grid; font-weight: 800; }
+.exam-disclaimer {
+  background: #fff8e8;
+  border: 1px dashed #d9aa53;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.exam-paper-title { margin: 8px 0 0; font-size: 1.6rem; }
+.exam-paper-sub { margin: 4px 0 12px; color: #61708a; }
+.exam-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  margin: 0 0 12px;
+}
+.exam-meta-grid dt { font-size: 12px; color: #61708a; }
+.exam-meta-grid dd { margin: 0; font-weight: 800; }
+.exam-style-tag { font-size: 12px; color: #61708a; }
+.exam-part-block { margin-top: 22px; break-inside: avoid; }
+.exam-part-block h2 { border-bottom: 1px solid #dfe7f1; padding-bottom: 6px; }
+.exam-part-marks { font-size: 0.85rem; color: #61708a; margin-inline-start: 8px; }
+.exam-item { margin-top: 16px; }
+.exam-item-stem { font-weight: 700; }
+.exam-item-bareme { color: #61708a; font-weight: 700; margin-inline-start: 8px; font-size: 13px; }
+.exam-choices { list-style: none; padding: 0; display: grid; gap: 4px; }
+.exam-choices span { font-weight: 800; margin-inline-end: 6px; }
+.exam-choice-key { font-weight: 800; color: #166534; }
+.exam-solution {
+  background: #fffdf7;
+  border: 1px dashed #d9aa53;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 8px;
+}
+.exam-print-actions { margin-bottom: 8px; }
+
+@media (max-width: 800px) {
+  .exam-paper { padding: 16px; }
+  .exam-paper-head { flex-direction: column; align-items: flex-start; }
 }
 .auth-shell { display: grid; gap: 20px; }
 @media (min-width: 880px) {

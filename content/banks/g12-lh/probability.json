@@ -1,0 +1,316 @@
+{
+  "id": "g12-lh-probability",
+  "track": "grade-12",
+  "certificate": "LH",
+  "topic": "probability",
+  "title": "Probability (LH)",
+  "arabicTitle": "الاحتمالات — آداب وإنسانيات",
+  "contestMinutes": 20,
+  "passScore": 50,
+  "sourceModels": [
+    "LH official-style scaffold"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+  "verbatimPastPaper": false,
+  "slices": [
+    {
+      "id": "count",
+      "title": "Counting",
+      "arabicTitle": "العدّ"
+    },
+    {
+      "id": "cond",
+      "title": "Conditional",
+      "arabicTitle": "الشرطية"
+    },
+    {
+      "id": "indep",
+      "title": "Independence",
+      "arabicTitle": "الاستقلال"
+    },
+    {
+      "id": "rv",
+      "title": "Random variable",
+      "arabicTitle": "المتغير العشوائي"
+    },
+    {
+      "id": "total",
+      "title": "Compound",
+      "arabicTitle": "مركّبة"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "functions",
+      "file": "content/banks/g12-lh/functions.json",
+      "title": "I · Functions",
+      "arabicTitle": "أولاً · الدوال",
+      "implemented": true
+    },
+    {
+      "id": "sequences",
+      "file": "content/banks/g12-lh/sequences.json",
+      "title": "II · Sequences",
+      "arabicTitle": "ثانياً · المتتاليات",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-lh/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-lh-pr-01",
+      "slice": "count",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "die"
+      },
+      "stem": "A fair die is rolled. P(even) equals:",
+      "choices": [
+        "\\(1/6\\)",
+        "\\(1/3\\)",
+        "\\(1/2\\)",
+        "\\(2/3\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(1/2\\)",
+      "solutionSketch": [
+        "3 even faces out of 6."
+      ],
+      "bareme": 1,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "P(\\text{even})=\\frac12"
+    },
+    {
+      "id": "g12-lh-pr-02",
+      "slice": "count",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "coins"
+      },
+      "stem": "A coin is tossed twice. P(two heads) equals:",
+      "choices": [
+        "\\(1/4\\)",
+        "\\(1/3\\)",
+        "\\(1/2\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1/4\\)",
+      "solutionSketch": [
+        "HH among {HH,HT,TH,TT}."
+      ],
+      "bareme": 1,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "P(HH)=\\frac14"
+    },
+    {
+      "id": "g12-lh-pr-03",
+      "slice": "cond",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "cond"
+      },
+      "stem": "P(A)=0.4, P(B)=0.5, P(A∩B)=0.2. Then P(A|B) equals:",
+      "choices": [
+        "\\(0.2\\)",
+        "\\(0.4\\)",
+        "\\(0.5\\)",
+        "\\(0.8\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0.4\\)",
+      "solutionSketch": [
+        "P(A|B)=0.2/0.5=0.4."
+      ],
+      "bareme": 2,
+      "styleYear": 2023,
+      "session": "ordinary",
+      "styleTag": "style:official-2023-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "P(A\\mid B)=\\frac{P(A\\cap B)}{P(B)}"
+    },
+    {
+      "id": "g12-lh-pr-04",
+      "slice": "indep",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "indep"
+      },
+      "stem": "If A and B are independent with P(A)=0.3 and P(B)=0.5 then P(A∩B) equals:",
+      "choices": [
+        "\\(0.15\\)",
+        "\\(0.8\\)",
+        "\\(0.2\\)",
+        "\\(0.3\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.15\\)",
+      "solutionSketch": [
+        "Independence: product 0.15."
+      ],
+      "bareme": 2,
+      "styleYear": 2023,
+      "session": "extraordinary",
+      "styleTag": "style:official-2023-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "P(A\\cap B)=P(A)P(B)"
+    },
+    {
+      "id": "g12-lh-pr-05",
+      "slice": "rv",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "expect"
+      },
+      "stem": "X takes 0,1,2 with probabilities 0.2, 0.5, 0.3. Then E(X) equals:",
+      "choices": [
+        "\\(0.5\\)",
+        "\\(1.0\\)",
+        "\\(1.1\\)",
+        "\\(1.5\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(1.1\\)",
+      "solutionSketch": [
+        "0·0.2+1·0.5+2·0.3=1.1."
+      ],
+      "bareme": 3,
+      "styleYear": 2024,
+      "session": "ordinary",
+      "styleTag": "style:official-2024-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "E(X)=\\sum x_i p_i"
+    },
+    {
+      "id": "g12-lh-pr-06",
+      "slice": "count",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "binom"
+      },
+      "stem": "C(5,2) equals:",
+      "choices": [
+        "\\(5\\)",
+        "\\(10\\)",
+        "\\(20\\)",
+        "\\(25\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(10\\)",
+      "solutionSketch": [
+        "5·4/2=10."
+      ],
+      "bareme": 3,
+      "styleYear": 2024,
+      "session": "extraordinary",
+      "styleTag": "style:official-2024-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "\\binom{5}{2}=10"
+    },
+    {
+      "id": "g12-lh-pr-07",
+      "slice": "total",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "without-rep"
+      },
+      "stem": "A bag has 3 red and 2 blue balls. Two are drawn without replacement. P(both red) equals:",
+      "choices": [
+        "\\(3/5\\)",
+        "\\(6/20\\)",
+        "\\(3/10\\)",
+        "\\(2/5\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(3/10\\)",
+      "solutionSketch": [
+        "(3/5)·(2/4)=6/20=3/10."
+      ],
+      "bareme": 2,
+      "styleYear": 2025,
+      "session": "ordinary",
+      "styleTag": "style:official-2025-ordinary",
+      "verbatimPastPaper": false,
+      "latex": "P(RR)=\\frac{3}{5}\\cdot\\frac{2}{4}"
+    },
+    {
+      "id": "g12-lh-pr-08",
+      "slice": "rv",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LH official-style scaffold"
+        ],
+        "note": "Academy-original items patterned on Lebanese official-session wording. Practice in official style — not photocopies of past papers.",
+        "tag": "bernoulli"
+      },
+      "stem": "A fair coin: X=1 on heads, 0 on tails. E(X) equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1/2\\)",
+        "\\(1\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1/2\\)",
+      "solutionSketch": [
+        "Bernoulli p=1/2."
+      ],
+      "bareme": 1,
+      "styleYear": 2025,
+      "session": "extraordinary",
+      "styleTag": "style:official-2025-extraordinary",
+      "verbatimPastPaper": false,
+      "latex": "E(X)=p=\\frac12"
+    }
+  ]
+}

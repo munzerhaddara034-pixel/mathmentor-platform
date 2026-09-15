@@ -34,8 +34,8 @@ export default async function HomePage() {
           <Link href="/lessons" className="ghost-btn">
             شاهد الدروس
           </Link>
-          <Link href="/practice" className="ghost-btn">
-            بنك الأسئلة
+          <Link href="/exams" className="ghost-btn">
+            بنك الامتحانات
           </Link>
         </div>
       </section>
