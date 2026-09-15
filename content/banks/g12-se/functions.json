@@ -1,0 +1,876 @@
+{
+  "id": "g12-se-functions",
+  "track": "grade-12",
+  "certificate": "SE",
+  "topic": "functions",
+  "title": "Functions & economic analysis",
+  "arabicTitle": "الدوال والتحليل الاقتصادي",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "SE_All Sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 SE (اجتماع واقتصاد) official sessions (SE_All Sessions.pdf): limits, table of variations, marginal cost, profit, demand elasticity, unique root. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "limits",
+      "title": "Limits and asymptotes",
+      "arabicTitle": "النهايات والتقارب"
+    },
+    {
+      "id": "variation",
+      "title": "Derivatives and variations",
+      "arabicTitle": "المشتقات وجدول التغيرات"
+    },
+    {
+      "id": "cost_profit",
+      "title": "Cost, revenue, profit",
+      "arabicTitle": "الكلفة والإيراد والربح"
+    },
+    {
+      "id": "demand",
+      "title": "Demand and elasticity",
+      "arabicTitle": "الطلب والمرونة"
+    },
+    {
+      "id": "integral",
+      "title": "Area and primitives",
+      "arabicTitle": "المساحة والأصول"
+    },
+    {
+      "id": "root",
+      "title": "Unique root sandwich",
+      "arabicTitle": "حصار الجذر الوحيد"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-se/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-se/probability.json",
+      "title": "II · Probability & statistics",
+      "arabicTitle": "ثانياً · الاحتمالات والإحصاء",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-se/functions.json",
+      "title": "III · Functions & economic analysis",
+      "arabicTitle": "ثالثاً · الدوال والتحليل الاقتصادي",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-se-fn-lm-01",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "horiz-asymp-1"
+      },
+      "stem": "Let f be defined on [0; +∞[ by f(x)=1−(x−2)e^{−x}. Then lim_{x→+∞} f(x) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "(x−2)e^{−x} → 0, so f(x) → 1. The line y=1 is a horizontal asymptote of (G)."
+      ],
+      "latex": "f(x)=1-(x-2)e^{-x}"
+    },
+    {
+      "id": "g12-se-fn-lm-02",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "d-is-asymptote"
+      },
+      "stem": "If lim_{x→+∞} f(x)=1, the line (d) of equation y=1 represents, for the curve (G) of f:",
+      "choices": [
+        "a horizontal asymptote",
+        "a vertical asymptote",
+        "a tangent at the origin",
+        "an axis of symmetry"
+      ],
+      "answerIndex": 0,
+      "answer": "a horizontal asymptote",
+      "solutionSketch": [
+        "A finite non-zero (or zero) limit at +∞ gives a horizontal asymptote y=L."
+      ]
+    },
+    {
+      "id": "g12-se-fn-lm-03",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "demand-limit-inf"
+      },
+      "stem": "Let f(x)=4/(1+ln x) on ]1/e; +∞[. Then lim_{x→+∞} f(x) equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(4\\)",
+        "\\(+\\infty\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "ln x → +∞ so f(x)→0: y=0 is a horizontal asymptote."
+      ]
+    },
+    {
+      "id": "g12-se-fn-vr-01",
+      "slice": "variation",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "critical-3"
+      },
+      "stem": "Let f(x)=1−(x−2)e^{−x}. Given f'(x)=(x−3)e^{−x}, then f'(x)=0 at:",
+      "choices": [
+        "\\(x=3\\)",
+        "\\(x=2\\)",
+        "\\(x=0\\)",
+        "\\(x=1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x=3\\)",
+      "solutionSketch": [
+        "e^{−x}>0 for all x, so f'(x)=0 iff x=3."
+      ]
+    },
+    {
+      "id": "g12-se-fn-vr-02",
+      "slice": "variation",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "decreasing-on-0-3"
+      },
+      "stem": "If f'(x)=(x−3)e^{−x}, then on [0; 3] the function f is:",
+      "choices": [
+        "decreasing",
+        "increasing",
+        "constant",
+        "convex only"
+      ],
+      "answerIndex": 0,
+      "answer": "decreasing",
+      "solutionSketch": [
+        "On [0;3], (x−3)≤0 and e^{−x}>0, so f'≤0."
+      ]
+    },
+    {
+      "id": "g12-se-fn-cp-01",
+      "slice": "cost_profit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "fixed-cost"
+      },
+      "stem": "The total cost CT is a primitive of the marginal cost MC satisfying CT(0)=fixed cost. If MC(x)=1−(x−2)e^{−x} and the fixed cost is 1 (million LL), then CT(0) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(2\\)",
+        "MC(0)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "By definition the fixed cost is CT(0)."
+      ]
+    },
+    {
+      "id": "g12-se-fn-cp-02",
+      "slice": "cost_profit",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "revenue-2x"
+      },
+      "stem": "Pens are sold at 20 000 LL each and x is the number of hundreds of pens. The daily revenue, in millions LL, is:",
+      "choices": [
+        "\\(R(x)=2x\\)",
+        "\\(R(x)=20x\\)",
+        "\\(R(x)=0.02x\\)",
+        "\\(R(x)=x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(R(x)=2x\\)",
+      "solutionSketch": [
+        "100×20 000 LL = 2 million LL per hundred, so R(x)=2x."
+      ]
+    },
+    {
+      "id": "g12-se-fn-dm-01",
+      "slice": "demand",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "demand-at-1000"
+      },
+      "stem": "A demand f(p)=4/(1+ln p) is expressed in thousands of units, p in thousands LL. For a unit price of 1000 LL one has p=1, hence the demanded quantity is:",
+      "choices": [
+        "4000 units",
+        "4 units",
+        "1000 units",
+        "1 unit"
+      ],
+      "answerIndex": 0,
+      "answer": "4000 units",
+      "solutionSketch": [
+        "f(1)=4/(1+0)=4, so 4000 units."
+      ]
+    },
+    {
+      "id": "g12-se-fn-dm-02",
+      "slice": "demand",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "inelastic-E3"
+      },
+      "stem": "The elasticity of a demand f is E(p)= −p f'(p)/f(p). If E(3)=0.47 < 1, then at p=3 the demand is:",
+      "choices": [
+        "inelastic",
+        "elastic",
+        "perfectly elastic",
+        "undefined"
+      ],
+      "answerIndex": 0,
+      "answer": "inelastic",
+      "solutionSketch": [
+        "|E|<1 ⇒ inelastic. An increase of 1% in the price decreases demand by about 0.47%."
+      ]
+    },
+    {
+      "id": "g12-se-fn-in-01",
+      "slice": "integral",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "antideriv-exp"
+      },
+      "stem": "An antiderivative of e^{−x} on IR is:",
+      "choices": [
+        "\\(-e^{-x}\\)",
+        "\\(e^{-x}\\)",
+        "\\(-xe^{-x}\\)",
+        "\\(e^{x}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-e^{-x}\\)",
+      "solutionSketch": [
+        "(−e^{−x})'=e^{−x}."
+      ]
+    },
+    {
+      "id": "g12-se-fn-in-02",
+      "slice": "integral",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "maintenance-2y"
+      },
+      "stem": "The maintenance rate of a machine is f(t)=e^{0.5 t} (millions LL per year). The maintenance cost during [0; 2] equals:",
+      "choices": [
+        "\\(2(e-1)\\)",
+        "\\(e^{0.5}\\)",
+        "\\(e\\)",
+        "\\(2e\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2(e-1)\\)",
+      "solutionSketch": [
+        "∫_0^2 e^{0.5 t} dt = 2 e^{0.5 t}|_0^2 = 2(e−1)."
+      ],
+      "latex": "\\int_0^2 e^{0.5 t}\\,dt"
+    },
+    {
+      "id": "g12-se-fn-rt-01",
+      "slice": "root",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sandwich-easy"
+      },
+      "stem": "If P is continuous and strictly increasing on [2.13; 2.14] with P(2.13)<0<P(2.14), then the equation P(x)=0 has:",
+      "choices": [
+        "a unique root α in ]2.13; 2.14[",
+        "no root",
+        "two roots",
+        "a root at 0"
+      ],
+      "answerIndex": 0,
+      "answer": "a unique root α in ]2.13; 2.14[",
+      "solutionSketch": [
+        "IVT plus strict increase ⇒ unique sandwich."
+      ]
+    },
+    {
+      "id": "g12-se-fn-lm-04",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "vert-asymp-1e"
+      },
+      "stem": "Let f(x)=4/(1+ln x) on ]1/e; +∞[. Then lim_{x→(1/e)+} f(x) equals:",
+      "choices": [
+        "\\(+\\infty\\)",
+        "\\(0\\)",
+        "\\(4\\)",
+        "\\(-\\infty\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "ln x → −1+, so 1+ln x → 0+, hence f → +∞. The line x=1/e is a vertical asymptote."
+      ]
+    },
+    {
+      "id": "g12-se-fn-lm-05",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "oblique-x-minus-2"
+      },
+      "stem": "Let f(x)=x−2−2x e^{−x} on [−1; +∞[. Then lim_{x→+∞}[f(x)−(x−2)] equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(-2\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "f(x)−(x−2)=−2x e^{−x} → 0, so y=x−2 is an oblique asymptote."
+      ]
+    },
+    {
+      "id": "g12-se-fn-vr-03",
+      "slice": "variation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "min-at-3"
+      },
+      "stem": "Given f'(x)=(x−3)e^{−x}, the table of variations of f on [0; +∞[ has a minimum at:",
+      "choices": [
+        "\\(x=3\\)",
+        "\\(x=0\\)",
+        "\\(x=2\\)",
+        "no extremum"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x=3\\)",
+      "solutionSketch": [
+        "f' changes − to + at x=3: local minimum."
+      ]
+    },
+    {
+      "id": "g12-se-fn-vr-04",
+      "slice": "variation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "tangent-at-0"
+      },
+      "stem": "The tangent to (G) of f(x)=1−(x−2)e^{−x} at the point of abscissa 0 has equation:",
+      "choices": [
+        "\\(y=-3x+3\\)",
+        "\\(y=3x+3\\)",
+        "\\(y=-3x\\)",
+        "\\(y=x+1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(y=-3x+3\\)",
+      "solutionSketch": [
+        "f(0)=1−(−2)·1=3, f'(0)=(−3)·1=−3, so y−3=−3x ⇒ y=−3x+3."
+      ]
+    },
+    {
+      "id": "g12-se-fn-vr-05",
+      "slice": "variation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "always-decreasing"
+      },
+      "stem": "If f'(x)<0 on the whole domain ]1/e; +∞[ of f(x)=4/(1+ln x), then f is:",
+      "choices": [
+        "strictly decreasing",
+        "strictly increasing",
+        "constant",
+        "with a maximum at 1"
+      ],
+      "answerIndex": 0,
+      "answer": "strictly decreasing",
+      "solutionSketch": [
+        "f'(x)=−4/(x(1+ln x)²)<0."
+      ]
+    },
+    {
+      "id": "g12-se-fn-cp-03",
+      "slice": "cost_profit",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "profit-formula"
+      },
+      "stem": "If CT(x)=x+2+(x−1)e^{−x} and R(x)=2x, the profit P=R−CT is:",
+      "choices": [
+        "\\(P(x)=x-2-(x-1)e^{-x}\\)",
+        "\\(P(x)=3x+2+(x-1)e^{-x}\\)",
+        "\\(P(x)=x+2\\)",
+        "\\(P(x)=2x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(P(x)=x-2-(x-1)e^{-x}\\)",
+      "solutionSketch": [
+        "P(x)=2x−[x+2+(x−1)e^{−x}]=x−2−(x−1)e^{−x}."
+      ]
+    },
+    {
+      "id": "g12-se-fn-cp-04",
+      "slice": "cost_profit",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "primitive-cost"
+      },
+      "stem": "A factory has MC(x)=1+2(1−x)e^{−x} and fixed cost 2. Then the total cost is:",
+      "choices": [
+        "\\(C(x)=x+2+2xe^{-x}\\)",
+        "\\(C(x)=x+2\\)",
+        "\\(C(x)=2xe^{-x}\\)",
+        "\\(C(x)=MC(x)+2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(C(x)=x+2+2xe^{-x}\\)",
+      "solutionSketch": [
+        "C'(x)=1+2(1−x)e^{−x}=MC(x) and C(0)=2."
+      ]
+    },
+    {
+      "id": "g12-se-fn-cp-05",
+      "slice": "cost_profit",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "chemical-profit"
+      },
+      "stem": "If CT(x)=x+2+2x e^{−x} and the production is sold at 2000 LL per litre (x in thousands of litres, money in millions LL), then the profit is:",
+      "choices": [
+        "\\(P(x)=x-2-2xe^{-x}\\)",
+        "\\(P(x)=2x\\)",
+        "\\(P(x)=x+2\\)",
+        "\\(P(x)=-2+2xe^{-x}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(P(x)=x-2-2xe^{-x}\\)",
+      "solutionSketch": [
+        "Revenue R(x)=2x million LL, because 1000×2000 LL = 2 million LL per thousand litres.",
+        "P=R−C=2x−(x+2+2x e^{−x})=x−2−2x e^{−x}."
+      ]
+    },
+    {
+      "id": "g12-se-fn-dm-03",
+      "slice": "demand",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "elasticity-closed"
+      },
+      "stem": "If f(p)=4/(1+ln p), then E(p)= −p f'(p)/f(p) simplifies to:",
+      "choices": [
+        "\\(\\dfrac{1}{1+\\ln p}\\)",
+        "\\(1+\\ln p\\)",
+        "\\(4\\)",
+        "\\(p\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{1+\\ln p}\\)",
+      "solutionSketch": [
+        "f'(p)=−4/(p(1+ln p)²), so −p f'/f = 1/(1+ln p)."
+      ]
+    },
+    {
+      "id": "g12-se-fn-dm-04",
+      "slice": "demand",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "equilibrium-alpha"
+      },
+      "stem": "Demand f(x)=1+e^{−2x+1} and supply g(x)=e^{2x} (x in thousands LL). The unique solution α of f(x)=g(x) represents:",
+      "choices": [
+        "the equilibrium unit price",
+        "the fixed cost",
+        "the elasticity",
+        "the profit"
+      ],
+      "answerIndex": 0,
+      "answer": "the equilibrium unit price",
+      "solutionSketch": [
+        "f(α)=g(α) is the market equilibrium price."
+      ]
+    },
+    {
+      "id": "g12-se-fn-in-03",
+      "slice": "integral",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "area-antideriv"
+      },
+      "stem": "The area bounded by (G): y=1−(x−2)e^{−x}, the x-axis and the lines x=1 and x=2 equals ∫_1^2 f(x) dx. An antiderivative of f is:",
+      "choices": [
+        "\\(x+(x-1)e^{-x}\\)",
+        "\\(x-(x-2)e^{-x}\\)",
+        "\\(e^{-x}\\)",
+        "\\(x e^{-x}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x+(x-1)e^{-x}\\)",
+      "solutionSketch": [
+        "Integrate by parts: ∫(x−2)e^{−x} dx = −(x−1)e^{−x}, so ∫f=x+(x−1)e^{−x}."
+      ]
+    },
+    {
+      "id": "g12-se-fn-rt-02",
+      "slice": "root",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "profit-root-sandwich"
+      },
+      "stem": "The curve of a profit P is given on [0; 8]. If P(2.13)≈−0.004<0 and P(2.14)≈0.006>0 with P increasing, then:",
+      "choices": [
+        "\\(2.13<\\alpha<2.14\\) where P(α)=0",
+        "α=2.13",
+        "P has no zero",
+        "α>8"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2.13<\\alpha<2.14\\) where P(α)=0",
+      "solutionSketch": [
+        "Sign change of a continuous increasing function on a tiny interval."
+      ]
+    },
+    {
+      "id": "g12-se-fn-lm-06",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "position-vs-oblique"
+      },
+      "stem": "Let f(x)=x−2−2x e^{−x}. The relative position of (C) and its oblique asymptote (d): y=x−2 is given by f(x)−(x−2)=−2x e^{−x}. Thus on ]0; +∞[ the curve (C) is:",
+      "choices": [
+        "below (d)",
+        "above (d)",
+        "crossing (d) at every x",
+        "identical to (d)"
+      ],
+      "answerIndex": 0,
+      "answer": "below (d)",
+      "solutionSketch": [
+        "−2x e^{−x}<0 for x>0, so (C) is below (d)."
+      ]
+    },
+    {
+      "id": "g12-se-fn-vr-06",
+      "slice": "variation",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "decrease-to-1"
+      },
+      "stem": "Let f(x)=1+e^{−2x+1} on [0; +∞[. Then f'(x)=−2e^{−2x+1} < 0, so f is strictly decreasing, and lim_{x→+∞} f(x)=1. The table of variations therefore goes from f(0)=1+e down to:",
+      "choices": [
+        "1 (open, never attained)",
+        "0",
+        "e",
+        "−∞"
+      ],
+      "answerIndex": 0,
+      "answer": "1 (open, never attained)",
+      "solutionSketch": [
+        "f(x)>1 for all x, approaching 1. f(0)=1+e^1=1+e."
+      ]
+    },
+    {
+      "id": "g12-se-fn-cp-06",
+      "slice": "cost_profit",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "2000-litres-no-profit"
+      },
+      "stem": "If P(x)=x−2−2x e^{−x} and α=2.45 is the unique positive root of P, then at a daily production of 2000 litres (x=2) the factory:",
+      "choices": [
+        "does not achieve a profit, because 2<α so P(2)<0",
+        "achieves a profit",
+        "has P(2)=0",
+        "has infinite cost"
+      ],
+      "answerIndex": 0,
+      "answer": "does not achieve a profit, because 2<α so P(2)<0",
+      "solutionSketch": [
+        "P increasing, P(α)=0, 2<2.45 ⇒ P(2)<0."
+      ]
+    },
+    {
+      "id": "g12-se-fn-dm-05",
+      "slice": "demand",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "E3-interpretation"
+      },
+      "stem": "For f(p)=4/(1+ln p), E(3)=1/(1+ln 3). Since ln 3≈1.10, E(3)≈0.48. An increase of 1% in the price when the unit price is 3000 LL decreases the demand by about:",
+      "choices": [
+        "0.48%",
+        "3%",
+        "1%",
+        "4%"
+      ],
+      "answerIndex": 0,
+      "answer": "0.48%",
+      "solutionSketch": [
+        "Interpretation of elasticity: percentage change in demand ≈ −E(p) times percentage change in price."
+      ]
+    },
+    {
+      "id": "g12-se-fn-dm-06",
+      "slice": "demand",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "eq-quantity"
+      },
+      "stem": "Demand f(x)=1+e^{−2x+1} and supply g(x)=e^{2x}. If α=0.399 is the unique solution of f=g, the corresponding demanded quantity (thousands of units) is g(α)=e^{2α} ≈:",
+      "choices": [
+        "2.22",
+        "0.399",
+        "1",
+        "e"
+      ],
+      "answerIndex": 0,
+      "answer": "2.22",
+      "solutionSketch": [
+        "e^{0.798}≈2.22. Economically this is the equilibrium quantity."
+      ]
+    },
+    {
+      "id": "g12-se-fn-in-04",
+      "slice": "integral",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "area-value"
+      },
+      "stem": "∫_1^2 [1−(x−2)e^{−x}] dx = [x+(x−1)e^{−x}]_1^2 equals:",
+      "choices": [
+        "\\(1+e^{-2}\\)",
+        "\\(1\\)",
+        "\\(e^{-1}\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1+e^{-2}\\)",
+      "solutionSketch": [
+        "At 2: 2+(1)e^{−2}=2+e^{−2}. At 1: 1+0=1. Difference: 1+e^{−2}."
+      ]
+    },
+    {
+      "id": "g12-se-fn-rt-03",
+      "slice": "root",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "min-pens-profit"
+      },
+      "stem": "A factory realises a profit when P(x)>0. If P is increasing, P(α)=0 and α≈2.45 (x in hundreds of pens), the minimum daily production (in pens) to realise a profit is:",
+      "choices": [
+        "300 pens",
+        "245 pens",
+        "2.45 pens",
+        "25 pens"
+      ],
+      "answerIndex": 0,
+      "answer": "300 pens",
+      "solutionSketch": [
+        "x is in hundreds of pens and P(x)>0 iff x>α≈2.45.",
+        "The smallest whole number of hundreds strictly above 2.45 is 3, hence 300 pens."
+      ]
+    },
+    {
+      "id": "g12-se-fn-rt-04",
+      "slice": "root",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ln-eq"
+      },
+      "stem": "The equation ln(x−1)=−1 has the unique solution:",
+      "choices": [
+        "\\(1+e^{-1}\\)",
+        "\\(0\\)",
+        "\\(e^{-1}\\)",
+        "\\(1-e\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1+e^{-1}\\)",
+      "solutionSketch": [
+        "x−1=e^{−1}, so x=1+1/e. Domain requires x>1."
+      ]
+    }
+  ]
+}

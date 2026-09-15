@@ -1,5 +1,16 @@
 import type { Difficulty, GradeTrack, QuizQuestion } from "./types";
-import functionsBankJson from "../../content/banks/g12-ls/functions.json";
+import lsFunctionsBankJson from "../../content/banks/g12-ls/functions.json";
+import lsSpaceBankJson from "../../content/banks/g12-ls/space-geometry.json";
+import lsProbabilityBankJson from "../../content/banks/g12-ls/probability.json";
+import lsMcqBankJson from "../../content/banks/g12-ls/mcq-mixed.json";
+import seFunctionsBankJson from "../../content/banks/g12-se/functions.json";
+import seProbabilityBankJson from "../../content/banks/g12-se/probability.json";
+import seMcqBankJson from "../../content/banks/g12-se/mcq-mixed.json";
+import gsFunctionsBankJson from "../../content/banks/g12-gs/functions.json";
+import gsSpaceBankJson from "../../content/banks/g12-gs/space-geometry.json";
+import gsProbabilityBankJson from "../../content/banks/g12-gs/probability.json";
+import gsComplexBankJson from "../../content/banks/g12-gs/complex.json";
+import gsMcqBankJson from "../../content/banks/g12-gs/mcq-mixed.json";
 import numbersBankJson from "../../content/banks/brevet/numbers.json";
 import algebraBankJson from "../../content/banks/brevet/algebra.json";
 import wordProblemsBankJson from "../../content/banks/brevet/word_problems.json";
@@ -64,7 +75,18 @@ export type TopicBank = {
 };
 
 export const topicBanks: TopicBank[] = [
-  functionsBankJson as TopicBank,
+  lsMcqBankJson as TopicBank,
+  lsSpaceBankJson as TopicBank,
+  lsProbabilityBankJson as TopicBank,
+  lsFunctionsBankJson as TopicBank,
+  seMcqBankJson as TopicBank,
+  seProbabilityBankJson as TopicBank,
+  seFunctionsBankJson as TopicBank,
+  gsMcqBankJson as TopicBank,
+  gsSpaceBankJson as TopicBank,
+  gsProbabilityBankJson as TopicBank,
+  gsComplexBankJson as TopicBank,
+  gsFunctionsBankJson as TopicBank,
   numbersBankJson as TopicBank,
   algebraBankJson as TopicBank,
   wordProblemsBankJson as TopicBank,
@@ -165,10 +187,50 @@ export function listTopicBankCards() {
   }));
 }
 
+const CERTIFICATE_ORDER: Record<string, string[]> = {
+  LS: ["g12-ls-mcq-mixed", "g12-ls-space-geometry", "g12-ls-probability", "g12-ls-functions"],
+  SE: ["g12-se-mcq-mixed", "g12-se-probability", "g12-se-functions"],
+  GS: [
+    "g12-gs-mcq-mixed",
+    "g12-gs-space-geometry",
+    "g12-gs-probability",
+    "g12-gs-complex",
+    "g12-gs-functions",
+  ],
+  Brevet: [
+    "brevet-numbers",
+    "brevet-algebra",
+    "brevet-word-problems",
+    "brevet-geometry",
+    "brevet-coordinate",
+  ],
+};
+
+function orderCards(cards: ReturnType<typeof listTopicBankCards>, ids: string[]) {
+  const byId = new Map(cards.map((card) => [card.id, card]));
+  const ordered = ids.map((id) => byId.get(id)).filter((card): card is NonNullable<typeof card> => Boolean(card));
+  const leftover = cards.filter((card) => !ids.includes(card.id));
+  return [...ordered, ...leftover];
+}
+
 export function groupTopicBankCards() {
   const cards = listTopicBankCards();
   return {
-    ls: cards.filter((card) => card.certificate === "LS"),
-    brevet: cards.filter((card) => card.certificate === "Brevet"),
+    ls: orderCards(
+      cards.filter((card) => card.certificate === "LS"),
+      CERTIFICATE_ORDER.LS,
+    ),
+    se: orderCards(
+      cards.filter((card) => card.certificate === "SE"),
+      CERTIFICATE_ORDER.SE,
+    ),
+    gs: orderCards(
+      cards.filter((card) => card.certificate === "GS"),
+      CERTIFICATE_ORDER.GS,
+    ),
+    brevet: orderCards(
+      cards.filter((card) => card.certificate === "Brevet"),
+      CERTIFICATE_ORDER.Brevet,
+    ),
   };
 }

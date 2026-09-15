@@ -1,0 +1,879 @@
+{
+  "id": "g12-ls-mcq-mixed",
+  "track": "grade-12",
+  "certificate": "LS",
+  "topic": "mcq_mixed",
+  "title": "Mixed MCQ",
+  "arabicTitle": "أسئلة مختلطة",
+  "contestMinutes": 20,
+  "passScore": 70,
+  "sourceModels": [
+    "LS all sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 LS official sessions (LS all sessions.pdf): Problem I wording — short mixed items, one correct answer in a table. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "complex",
+      "title": "Complex numbers",
+      "arabicTitle": "الأعداد المركبة"
+    },
+    {
+      "id": "limits",
+      "title": "Limits and calculus",
+      "arabicTitle": "النهايات والحساب"
+    },
+    {
+      "id": "space",
+      "title": "Space geometry",
+      "arabicTitle": "هندسة الفضاء"
+    },
+    {
+      "id": "probability",
+      "title": "Probability",
+      "arabicTitle": "الاحتمالات"
+    },
+    {
+      "id": "functions",
+      "title": "Functions",
+      "arabicTitle": "الدوال"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-ls/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-ls/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-ls/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-ls/functions.json",
+      "title": "IV · Functions analysis",
+      "arabicTitle": "رابعاً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-ls-mc-cx-01",
+      "slice": "complex",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "exp-power"
+      },
+      "stem": "In the table of mixed items of a typical LS paper, only one answer is correct. If z = e^{i π/6}, then z^6 equals:",
+      "choices": [
+        "\\(-1\\)",
+        "\\(1\\)",
+        "\\(i\\)",
+        "\\(-i\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-1\\)",
+      "solutionSketch": [
+        "z^6 = e^{iπ} = −1. Trap: confusing with z^3 = i."
+      ],
+      "latex": "z=e^{i\\pi/6}"
+    },
+    {
+      "id": "g12-ls-mc-cx-02",
+      "slice": "complex",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "modulus-exp"
+      },
+      "stem": "If z = 2 e^{i π/3}, then |z| equals:",
+      "choices": [
+        "\\(2\\)",
+        "\\(\\dfrac{\\pi}{3}\\)",
+        "\\(2e\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "The modulus of re^{iθ} is r (r>0)."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-cx-03",
+      "slice": "complex",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mod-1-plus-i"
+      },
+      "stem": "If z = 1 + i, then |z| equals:",
+      "choices": [
+        "\\(\\sqrt{2}\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(i\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\sqrt{2}\\)",
+      "solutionSketch": [
+        "|1+i|=√(1+1)=√2."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-cx-04",
+      "slice": "complex",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "arg-i"
+      },
+      "stem": "A measure of an argument of i is:",
+      "choices": [
+        "\\(\\dfrac{\\pi}{2}\\)",
+        "\\(0\\)",
+        "\\(\\pi\\)",
+        "\\(\\dfrac{\\pi}{4}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{\\pi}{2}\\)",
+      "solutionSketch": [
+        "i = e^{iπ/2}."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-lm-01",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "exp-over-x"
+      },
+      "stem": "Let f(x)=e^{x}/x for x>0. Then lim_{x→+∞} f(x) equals:",
+      "choices": [
+        "\\(+\\infty\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(e\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "The exponential grows faster than x."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-lm-02",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sinx-over-x"
+      },
+      "stem": "lim_{x→0} (sin x)/x equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "Standard limit."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-sp-01",
+      "slice": "space",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mcq-normal"
+      },
+      "stem": "A normal vector to the plane x − 2y + z + 1 = 0 is:",
+      "choices": [
+        "\\((1;-2;1)\\)",
+        "\\((1;2;1)\\)",
+        "\\((1;-2;-1)\\)",
+        "\\((0;0;1)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;-2;1)\\)",
+      "solutionSketch": [
+        "Read the coefficients of x, y, z."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-sp-02",
+      "slice": "space",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "i-dot-j"
+      },
+      "stem": "The vectors i and j of a direct orthonormal system satisfy i · j =",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "\\(k\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "Distinct basis vectors of an orthonormal system are orthogonal."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-pr-01",
+      "slice": "probability",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "die-multiple-3"
+      },
+      "stem": "A fair die is rolled. The probability of obtaining a multiple of 3 is:",
+      "choices": [
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{6}\\)",
+        "\\(\\dfrac{2}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "Faces 3 and 6: 2/6=1/3."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-pr-02",
+      "slice": "probability",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "complement"
+      },
+      "stem": "If P(A)=0.3 then P(Ā) equals:",
+      "choices": [
+        "\\(0.7\\)",
+        "\\(0.3\\)",
+        "\\(1.3\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.7\\)",
+      "solutionSketch": [
+        "Complement: 1−0.3=0.7."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-fn-01",
+      "slice": "functions",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ln-derivative"
+      },
+      "stem": "If f(x)=ln x on (0,+∞), then f'(x) equals:",
+      "choices": [
+        "\\(\\dfrac{1}{x}\\)",
+        "\\(\\ln x\\)",
+        "\\(x\\)",
+        "\\(\\dfrac{1}{\\ln x}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{1}{x}\\)",
+      "solutionSketch": [
+        "Standard derivative of ln."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-fn-02",
+      "slice": "functions",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "antideriv-2x"
+      },
+      "stem": "An antiderivative of 2x on IR is:",
+      "choices": [
+        "\\(x^2\\)",
+        "\\(2\\)",
+        "\\(2x^2\\)",
+        "\\(x^2+2x\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x^2\\)",
+      "solutionSketch": [
+        "(x²)'=2x. Any antiderivative differs by a constant; among the choices, x² works."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-cx-05",
+      "slice": "complex",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "arg-of-2-over-z"
+      },
+      "stem": "If π/6 is an argument of z, then an argument of 2/z is:",
+      "choices": [
+        "\\(-\\dfrac{\\pi}{6}\\)",
+        "\\(\\dfrac{\\pi}{6}\\)",
+        "\\(\\dfrac{5\\pi}{6}\\)",
+        "\\(-\\dfrac{5\\pi}{6}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-\\dfrac{\\pi}{6}\\)",
+      "solutionSketch": [
+        "arg(2/z)=arg(2)−arg(z)=0−π/6=−π/6. The factor 2 does not change the argument."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-cx-06",
+      "slice": "complex",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "sin-minus-i-cos"
+      },
+      "stem": "Let z = sin(π/3) − i cos(π/3). Then z equals:",
+      "choices": [
+        "\\(e^{-i\\pi/6}\\)",
+        "\\(e^{i\\pi/6}\\)",
+        "\\(e^{i\\pi/3}\\)",
+        "\\(e^{-i\\pi/3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(e^{-i\\pi/6}\\)",
+      "solutionSketch": [
+        "sin(π/3)=√3/2, cos(π/3)=1/2, so z=√3/2 − i/2 = e^{-iπ/6}.",
+        "Trap: writing e^{iπ/6} which is √3/2 + i/2."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-cx-07",
+      "slice": "complex",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "z-plus-iz"
+      },
+      "stem": "If |z|=2 then |z + i z| equals:",
+      "choices": [
+        "\\(2\\sqrt{2}\\)",
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(\\sqrt{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\sqrt{2}\\)",
+      "solutionSketch": [
+        "z+iz=z(1+i), |1+i|=√2, so |z||1+i|=2√2."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-lm-03",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "tower-exp"
+      },
+      "stem": "Let f(x)=e^{e^x / x}. Then lim_{x→+∞} f(x) equals:",
+      "choices": [
+        "\\(+\\infty\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(e\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "e^x / x → +∞, so exp of that → +∞."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-lm-04",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "odd-plus-one-integral"
+      },
+      "stem": "I = ∫_{−π/2}^{π/2} (sin³ x + 1) dx equals:",
+      "choices": [
+        "\\(\\pi\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\dfrac{\\pi}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\pi\\)",
+      "solutionSketch": [
+        "sin³ x is odd, the interval is symmetric, ∫sin³=0, ∫1 dx = π."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-lm-05",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "integral-limit-0"
+      },
+      "stem": "lim_{x→0} [∫_0^x ln(t+1) dt] / (e^x − 1) equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "0/0 form. By l'Hospital: ln(x+1)/e^x → 0/1 = 0."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-sp-03",
+      "slice": "space",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dir-collinear-BC"
+      },
+      "stem": "The line x=t−1, y=t+1, z=t+2 has direction collinear to BC with B(1;0;−2) and C(2;1;−1). This statement is:",
+      "choices": [
+        "true, because BC=(1;1;1)",
+        "false, because BC=(1;−1;1)",
+        "true only for t=0",
+        "false because (d) does not contain B"
+      ],
+      "answerIndex": 0,
+      "answer": "true, because BC=(1;1;1)",
+      "solutionSketch": [
+        "Direction of (d) is (1;1;1)=BC."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-sp-04",
+      "slice": "space",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "N-dot-N-prime"
+      },
+      "stem": "If N(1;−2;1) is normal to (P) and N'(1;0;−1) is normal to (Q), then (P) ⟂ (Q) because:",
+      "choices": [
+        "\\(N\\cdot N'=0\\)",
+        "\\(N\\wedge N'=0\\)",
+        "N is collinear to N'",
+        "both planes contain O"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(N\\cdot N'=0\\)",
+      "solutionSketch": [
+        "1+0−1=0."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-pr-03",
+      "slice": "probability",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "C-10-2"
+      },
+      "stem": "C(10,2) equals:",
+      "choices": [
+        "\\(45\\)",
+        "\\(90\\)",
+        "\\(10\\)",
+        "\\(20\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(45\\)",
+      "solutionSketch": [
+        "10×9/2=45."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-pr-04",
+      "slice": "probability",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "with-replacement"
+      },
+      "stem": "Two balls from 5, with replacement. The number of possible ordered draws is:",
+      "choices": [
+        "\\(25\\)",
+        "\\(20\\)",
+        "\\(10\\)",
+        "\\(5\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(25\\)",
+      "solutionSketch": [
+        "5×5=25. Trap: C(5,2) without replacement."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-fn-03",
+      "slice": "functions",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "x-ln-x"
+      },
+      "stem": "lim_{x→0+} x ln x equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(-\\infty\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "Standard: x ln x → 0 (the power x wins). Trap: −∞ from ln x."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-fn-04",
+      "slice": "functions",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ln-over-x"
+      },
+      "stem": "If f(x)=(ln x)/x on (0,+∞), then lim_{x→+∞} f(x) equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(1\\)",
+        "\\(-\\infty\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "ln x grows slower than x."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-cx-08",
+      "slice": "complex",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "triangle-ABC-affixes"
+      },
+      "stem": "Let z_A=1−2i, z_B=2+3i, z_C=4. Then triangle ABC is:",
+      "choices": [
+        "right and isosceles",
+        "right and not isosceles",
+        "isosceles and not right",
+        "equilateral"
+      ],
+      "answerIndex": 0,
+      "answer": "right and isosceles",
+      "solutionSketch": [
+        "AB=|1+5i|=√26, AC=|3+2i|=√13, BC=|2−3i|=√13.",
+        "AC=BC (isosceles at C) and AB²=AC²+BC² (right-angled at C)."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-cx-09",
+      "slice": "complex",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "minus-sqrt3-plus-exp"
+      },
+      "stem": "If z = −√3 + e^{i π/6}, the exponential form of z is:",
+      "choices": [
+        "\\(e^{i 5\\pi/6}\\)",
+        "\\(e^{i 7\\pi/6}\\)",
+        "\\(\\sqrt{3}\\, e^{-i \\pi/6}\\)",
+        "\\(e^{-i 5\\pi/6}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(e^{i 5\\pi/6}\\)",
+      "solutionSketch": [
+        "e^{iπ/6}=√3/2 + i/2, so z= −√3 + √3/2 + i/2 = −√3/2 + i/2 = e^{i 5π/6}."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-lm-06",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "minus-sin-plus-i-cos"
+      },
+      "stem": "The exponential form of z = −sin θ + i cos θ (θ real) is:",
+      "choices": [
+        "\\(e^{i(\\pi/2+\\theta)}\\)",
+        "\\(e^{i(\\pi/2-\\theta)}\\)",
+        "\\(e^{i(\\theta-\\pi/2)}\\)",
+        "\\(e^{-i\\theta}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(e^{i(\\pi/2+\\theta)}\\)",
+      "solutionSketch": [
+        "e^{i(π/2+θ)}=i e^{iθ}= i cos θ − sin θ = −sin θ + i cos θ."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-sp-05",
+      "slice": "space",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dist-A-to-BC-via-planes"
+      },
+      "stem": "Let (P): x−2y+z+1=0 and (Q): x−z−3=0. A(2; −2; −1) belongs to (Q), and (P) ⟂ (Q). If (BC) is the line of intersection of (P) and (Q), then d(A,(BC)) equals:",
+      "choices": [
+        "\\(d(A,(P))\\)",
+        "\\(0\\)",
+        "\\(d(A,(Q))\\)",
+        "\\(AB\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(d(A,(P))\\)",
+      "solutionSketch": [
+        "A ∈ (Q): 2−(−1)−3=0. N·N'=1+0−1=0 so (P) ⟂ (Q).",
+        "The perpendicular from A to (BC) then has length d(A,(P))."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-sp-06",
+      "slice": "space",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "E-on-AB"
+      },
+      "stem": "E(2; 3; 0), A(4; 0; 0), B(0; 6; 0). Then E belongs to (AB) because there exists k such that OE = (1−k)OA + k OB, namely:",
+      "choices": [
+        "\\(k=\\dfrac{1}{2}\\)",
+        "\\(k=0\\)",
+        "\\(k=1\\)",
+        "\\(k=2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(k=\\dfrac{1}{2}\\)",
+      "solutionSketch": [
+        "Parametrize AB: (4−4s; 6s; 0). Set 4−4s=2 ⇒ s=1/2, y=3. So E is the midpoint of [AB]."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-pr-05",
+      "slice": "probability",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "distribution-check"
+      },
+      "stem": "Let X have P(X=0)=3/5 and, for k=1,…,5, P(X=k)=2/25. Then P(X=0)+…+P(X=5) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(\\dfrac{3}{5}\\)",
+        "\\(\\dfrac{2}{5}\\)",
+        "\\(\\dfrac{13}{25}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "3/5 + 5×(2/25)=15/25+10/25=1, so the table is a probability distribution."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-fn-05",
+      "slice": "functions",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "antideriv-cos-sq"
+      },
+      "stem": "An antiderivative of cos² x is, up to a constant:",
+      "choices": [
+        "\\(\\dfrac{x}{2}+\\dfrac{\\sin 2x}{4}\\)",
+        "\\(\\dfrac{\\cos 3x}{3}\\)",
+        "\\(\\sin^2 x\\)",
+        "\\(\\dfrac{x\\sin 2x}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{x}{2}+\\dfrac{\\sin 2x}{4}\\)",
+      "solutionSketch": [
+        "cos² x = (1+cos 2x)/2, antiderivative x/2 + (sin 2x)/4."
+      ]
+    },
+    {
+      "id": "g12-ls-mc-fn-06",
+      "slice": "functions",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "z-minus-1-over-z"
+      },
+      "stem": "If z is a non-zero real number with |z|=2 and z' = z − 1/z, then |z'| equals:",
+      "choices": [
+        "\\(\\dfrac{3}{2}\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(\\dfrac{5}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{3}{2}\\)",
+      "solutionSketch": [
+        "z=2 or z=−2. If z=2, z'=2−1/2=3/2. If z=−2, z'=−2+1/2=−3/2.",
+        "In both cases |z'|=3/2. Trap: 5/2 is |z|+|1/z|."
+      ]
+    }
+  ]
+}

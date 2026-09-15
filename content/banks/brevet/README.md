@@ -1,8 +1,8 @@
 # Brevet topic banks — الشهادة المتوسطة (Grade 9)
 
-Two certificate levels live under `content/banks/`:
+Two certificate families live under `content/banks/`:
 
-1. **Grade 12 LS** — `g12-ls/` (Functions / Problem IV is live)
+1. **Grade 12** — LS, SE, GS topic banks (`g12-ls/`, `g12-se/`, `g12-gs/`)
 2. **Brevet** — this folder
 
 Official Grade 9 contest PDFs stay on Munzer’s PC. Do **not** photocopy them into Git. New items are tagged `generated-in-official-style` and must **not** be presented as past papers.

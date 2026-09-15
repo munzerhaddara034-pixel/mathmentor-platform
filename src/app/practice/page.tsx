@@ -32,10 +32,10 @@ export default function PracticeHubPage() {
 
       <section className="card" style={{ marginTop: 8 }}>
         <h2>مسابقات الشهادة حسب الموضوع</h2>
-        <p className="muted">مستويان: علوم الحياة (صف 12) والشهادة المتوسطة (صف 9). البنود أكاديمية أصلية بأسلوب النماذج، وليست نسخاً من دورات رسمية.</p>
+        <p className="muted">أربعة فروع للشهادة: علوم الحياة، اجتماع واقتصاد، علوم عامة، والشهادة المتوسطة. البنود أكاديمية أصلية بأسلوب النماذج، وليست نسخاً من دورات رسمية.</p>
 
         <h3 style={{ marginTop: 16 }}>صف 12 · علوم الحياة</h3>
-        <p className="muted">النموذج الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم دراسة الدوال. المنفَّذ الآن هو المسألة الرابعة.</p>
+        <p className="muted">النموذج الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم دراسة الدوال.</p>
         {grouped.ls[0]?.contestTopics?.map((topic) => (
           <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
             {topic.arabicTitle ?? topic.title}
@@ -43,6 +43,30 @@ export default function PracticeHubPage() {
           </p>
         ))}
         {grouped.ls.map((card) => (
+          <BankCard key={card.id} card={card} />
+        ))}
+
+        <h3 style={{ marginTop: 24 }}>صف 12 · اجتماع واقتصاد</h3>
+        <p className="muted">مسابقة الاقتصاد والاجتماع: أسئلة مختلطة (لوغاريتم ومالية وإحصاء)، احتمالات، ثم دوال بتحليل اقتصادي (كلفة، ربح، مرونة الطلب).</p>
+        {grouped.se[0]?.contestTopics?.map((topic) => (
+          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+            {topic.arabicTitle ?? topic.title}
+            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
+          </p>
+        ))}
+        {grouped.se.map((card) => (
+          <BankCard key={card.id} card={card} />
+        ))}
+
+        <h3 style={{ marginTop: 24 }}>صف 12 · علوم عامة</h3>
+        <p className="muted">مسابقة العلوم العامة: أسئلة مختلطة، هندسة فضاء، احتمالات، أعداد مركبة، ثم دراسة الدوال (بما فيها المعادلات التفاضلية).</p>
+        {grouped.gs[0]?.contestTopics?.map((topic) => (
+          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+            {topic.arabicTitle ?? topic.title}
+            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
+          </p>
+        ))}
+        {grouped.gs.map((card) => (
           <BankCard key={card.id} card={card} />
         ))}
 
@@ -114,9 +138,15 @@ function BankCard({
   const blurb =
     card.id === "g12-ls-functions"
       ? "أسلوب المسألة الرابعة في نماذج علوم الحياة. البنود أكاديمية أصلية وليست نماذج منسوخة."
-      : card.certificate === "Brevet"
-        ? "أسلوب الشهادة المتوسطة. البنود أكاديمية أصلية وليست نماذج منسوخة."
-        : null;
+      : card.certificate === "LS"
+        ? "أسلوب نماذج علوم الحياة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+        : card.certificate === "SE"
+          ? "أسلوب نماذج الاجتماع والاقتصاد (كلفة، طلب، مالية، إحصاء). البنود أكاديمية أصلية وليست نماذج منسوخة."
+          : card.certificate === "GS"
+            ? "أسلوب نماذج العلوم العامة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+            : card.certificate === "Brevet"
+              ? "أسلوب الشهادة المتوسطة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+              : null;
   return (
     <article className="card" style={{ marginTop: 12 }}>
       <span className="badge">{card.certificate}</span>

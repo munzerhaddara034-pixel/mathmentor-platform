@@ -1,0 +1,869 @@
+{
+  "id": "g12-se-probability",
+  "track": "grade-12",
+  "certificate": "SE",
+  "topic": "probability",
+  "title": "Probability & statistics",
+  "arabicTitle": "الاحتمالات والإحصاء",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "SE_All Sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 SE (اجتماع واقتصاد) official sessions (SE_All Sessions.pdf): two-way tables, calculators/bills, random variables, ogives, regression. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "counting",
+      "title": "Counting",
+      "arabicTitle": "العد"
+    },
+    {
+      "id": "conditional",
+      "title": "Conditional probability",
+      "arabicTitle": "الاحتمال الشرطي"
+    },
+    {
+      "id": "random_var",
+      "title": "Random variables",
+      "arabicTitle": "المتغيرات العشوائية"
+    },
+    {
+      "id": "two_stage",
+      "title": "Two-stage experiments",
+      "arabicTitle": "التجارب على مرحلتين"
+    },
+    {
+      "id": "stats",
+      "title": "Statistics",
+      "arabicTitle": "الإحصاء"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-se/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-se/probability.json",
+      "title": "II · Probability & statistics",
+      "arabicTitle": "ثانياً · الاحتمالات والإحصاء",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-se/functions.json",
+      "title": "III · Functions & economic analysis",
+      "arabicTitle": "ثالثاً · الدوال والتحليل الاقتصادي",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-se-pr-ct-01",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "club-C50-2"
+      },
+      "stem": "A club has 50 students. The number of ways to choose 2 representatives at random is:",
+      "choices": [
+        "\\(C_{50}^2=1225\\)",
+        "\\(50\\times 2\\)",
+        "\\(50^2\\)",
+        "\\(2^{50}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(C_{50}^2=1225\\)",
+      "solutionSketch": [
+        "Unordered pairs."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ct-02",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "C7-2"
+      },
+      "stem": "A bag contains 7 balls. Two balls are drawn simultaneously. The number of possible draws is:",
+      "choices": [
+        "\\(C_7^2=21\\)",
+        "\\(14\\)",
+        "\\(49\\)",
+        "\\(7\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(C_7^2=21\\)",
+      "solutionSketch": [
+        "C(7,2)=21."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ct-03",
+      "slice": "counting",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "red-green-se"
+      },
+      "stem": "P(drawing one red and one green from 1 red, 2 yellow, 4 green, two balls simultaneous) equals:",
+      "choices": [
+        "\\(\\dfrac{4}{21}\\)",
+        "\\(\\dfrac{5}{21}\\)",
+        "\\(\\dfrac{4}{7}\\)",
+        "\\(\\dfrac{1}{7}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{4}{21}\\)",
+      "solutionSketch": [
+        "C(1,1)C(4,1)/C(7,2)=4/21."
+      ]
+    },
+    {
+      "id": "g12-se-pr-cd-01",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "boy-given-2nd"
+      },
+      "stem": "Among 20 students of the 2nd secondary year there are 12 boys. A student of that year is chosen at random. P(boy | 2nd year) equals:",
+      "choices": [
+        "\\(0.60\\)",
+        "\\(0.24\\)",
+        "\\(0.40\\)",
+        "\\(0.12\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.60\\)",
+      "solutionSketch": [
+        "12/20=0.60. Official SE papers ask for two decimal places."
+      ]
+    },
+    {
+      "id": "g12-se-pr-cd-02",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-graphic"
+      },
+      "stem": "If P(E)=5/33 is the probability of two graphic calculators, one from each of two independent boxes, this uses:",
+      "choices": [
+        "the product of the two graphic proportions",
+        "the sum of the proportions",
+        "Bayes' formula only",
+        "a complementary count of 33"
+      ],
+      "answerIndex": 0,
+      "answer": "the product of the two graphic proportions",
+      "solutionSketch": [
+        "(50/90)×(30/110)= (5/9)×(3/11)=15/99=5/33."
+      ]
+    },
+    {
+      "id": "g12-se-pr-cd-03",
+      "slice": "conditional",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "first-given-boys-se"
+      },
+      "stem": "Two students chosen from 32 boys. P(both in the 1st year | both boys) with 20 first-year boys among 32 boys is:",
+      "choices": [
+        "\\(\\dfrac{C_{20}^2}{C_{32}^2}\\)",
+        "\\(\\dfrac{20}{32}\\)",
+        "\\(\\dfrac{C_{20}^2}{C_{50}^2}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_{20}^2}{C_{32}^2}\\)",
+      "solutionSketch": [
+        "Restricted to the 32 boys."
+      ]
+    },
+    {
+      "id": "g12-se-pr-rv-01",
+      "slice": "random_var",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "graphic-A"
+      },
+      "stem": "A customer chooses one calculator from box A (50 graphic, 40 non-graphic). P(graphic from A) equals:",
+      "choices": [
+        "\\(\\dfrac{5}{9}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{50}{40}\\)",
+        "\\(\\dfrac{4}{9}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{5}{9}\\)",
+      "solutionSketch": [
+        "50/90=5/9."
+      ]
+    },
+    {
+      "id": "g12-se-pr-rv-02",
+      "slice": "random_var",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "min-X-price"
+      },
+      "stem": "X is the sum of two prices chosen from {120 000, 36 000} and {100 000, 30 000}. The smallest possible value of X is:",
+      "choices": [
+        "\\(66\\,000\\) LL",
+        "\\(36\\,000\\) LL",
+        "\\(30\\,000\\) LL",
+        "\\(150\\,000\\) LL"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(66\\,000\\) LL",
+      "solutionSketch": [
+        "36 000+30 000=66 000."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ts-01",
+      "slice": "two_stage",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "pairs-AB"
+      },
+      "stem": "Two boxes A (90 calculators) and B (110 calculators) are independent. One calculator is drawn from each. The number of possible ordered pairs is:",
+      "choices": [
+        "\\(90\\times 110\\)",
+        "\\(200\\)",
+        "\\(C_{200}^2\\)",
+        "\\(90+110\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(90\\times 110\\)",
+      "solutionSketch": [
+        "Independent draws: product of the sizes."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ts-02",
+      "slice": "two_stage",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-green"
+      },
+      "stem": "A red ball numbered n, two yellow (−5), four green (4). P(two green balls) when two are drawn simultaneously is:",
+      "choices": [
+        "\\(\\dfrac{C_4^2}{C_7^2}=\\dfrac{2}{7}\\)",
+        "\\(\\dfrac{4}{7}\\)",
+        "\\(\\dfrac{16}{49}\\)",
+        "\\(\\dfrac{1}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_4^2}{C_7^2}=\\dfrac{2}{7}\\)",
+      "solutionSketch": [
+        "C(4,2)/C(7,2)=6/21=2/7."
+      ]
+    },
+    {
+      "id": "g12-se-pr-st-01",
+      "slice": "stats",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mean-age"
+      },
+      "stem": "The ages of 40 employees: 13 in [20;30[, 12 in [30;40[, 10 in [40;50[, 5 in [50;60]. Using class marks 25, 35, 45, 55, the average age is:",
+      "choices": [
+        "\\(36.75\\)",
+        "\\(40\\)",
+        "\\(35\\)",
+        "\\(30\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(36.75\\)",
+      "solutionSketch": [
+        "(13·25+12·35+10·45+5·55)/40=(325+420+450+275)/40=1470/40=36.75."
+      ]
+    },
+    {
+      "id": "g12-se-pr-st-02",
+      "slice": "stats",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "median-ogive"
+      },
+      "stem": "On an increasing cumulative frequency polygon of 50 smokers, the line y=25 cuts the polygon at an abscissa x≈16.9. This value is interpreted as:",
+      "choices": [
+        "a median of the distribution (about 50% smoke fewer than 17 cigarettes)",
+        "the mean",
+        "the mode",
+        "P(X=25)"
+      ],
+      "answerIndex": 0,
+      "answer": "a median of the distribution (about 50% smoke fewer than 17 cigarettes)",
+      "solutionSketch": [
+        "y=n/2=25 meets the ogive at the median."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ct-04",
+      "slice": "counting",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "same-colour-se"
+      },
+      "stem": "Same-colour draws from 1 red, 2 yellow, 4 green (two simultaneous) have probability:",
+      "choices": [
+        "\\(\\dfrac{7}{21}\\)",
+        "\\(\\dfrac{8}{21}\\)",
+        "\\(\\dfrac{4}{7}\\)",
+        "\\(\\dfrac{2}{7}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{7}{21}\\)",
+      "solutionSketch": [
+        "Same colour: C(2,2)+C(4,2)=1+6=7 over C(7,2)=21. The single red ball cannot form a pair."
+      ]
+    },
+    {
+      "id": "g12-se-pr-cd-04",
+      "slice": "conditional",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "two-boys-se"
+      },
+      "stem": "Two boys are chosen from 32 boys and 18 girls (50 students). P(both boys) equals:",
+      "choices": [
+        "\\(\\dfrac{C_{32}^2}{C_{50}^2}\\)",
+        "\\(\\left(\\dfrac{32}{50}\\right)^2\\)",
+        "\\(\\dfrac{32}{50}\\)",
+        "\\(\\dfrac{2}{32}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_{32}^2}{C_{50}^2}\\)",
+      "solutionSketch": [
+        "Without replacement."
+      ]
+    },
+    {
+      "id": "g12-se-pr-cd-05",
+      "slice": "conditional",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-X-16"
+      },
+      "stem": "Let X be the product of two numbers drawn from the 7-ball bag. P(one red and one green)=4/21. This is also P(X=4n). Then P(X=16) equals:",
+      "choices": [
+        "\\(\\dfrac{6}{21}\\)",
+        "\\(\\dfrac{4}{21}\\)",
+        "\\(\\dfrac{1}{21}\\)",
+        "\\(\\dfrac{2}{7}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{6}{21}\\)",
+      "solutionSketch": [
+        "X=16: two green, C(4,2)/21=6/21."
+      ]
+    },
+    {
+      "id": "g12-se-pr-rv-03",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "which-sum-136"
+      },
+      "stem": "X takes the four values 66 000, 136 000, 150 000 and 220 000 LL (sums of one A-price and one B-price). Then 136 000 corresponds to:",
+      "choices": [
+        "non-graphic A and graphic B",
+        "two graphic",
+        "two non-graphic",
+        "graphic A and non-graphic B"
+      ],
+      "answerIndex": 0,
+      "answer": "non-graphic A and graphic B",
+      "solutionSketch": [
+        "36 000+100 000=136 000."
+      ]
+    },
+    {
+      "id": "g12-se-pr-rv-04",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-two-graphic-prices"
+      },
+      "stem": "With P(graphic A)=5/9, P(non-graphic A)=4/9, P(graphic B)=3/11, P(non-graphic B)=8/11, then P(X=220 000) for two graphic calculators equals:",
+      "choices": [
+        "\\(\\dfrac{15}{99}\\)",
+        "\\(\\dfrac{5}{9}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{32}{99}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{15}{99}\\)",
+      "solutionSketch": [
+        "(5/9)(3/11)=15/99=5/33. 220000=120000+100000."
+      ]
+    },
+    {
+      "id": "g12-se-pr-rv-05",
+      "slice": "random_var",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "product-25"
+      },
+      "stem": "Two balls from 1 red (n), 2 yellow (−5), 4 green (4). Possible products X include −5n, 4n, −20, 16, 25. The value 25 comes from:",
+      "choices": [
+        "two yellow balls",
+        "two green",
+        "red and yellow",
+        "red and green"
+      ],
+      "answerIndex": 0,
+      "answer": "two yellow balls",
+      "solutionSketch": [
+        "(−5)×(−5)=25."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ts-03",
+      "slice": "two_stage",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-F-mixed-calc"
+      },
+      "stem": "P(E)=5/33 (two graphic) and P(F) is the probability of one graphic and one non-graphic. Then P(F) equals:",
+      "choices": [
+        "\\(\\dfrac{52}{99}\\)",
+        "\\(\\dfrac{5}{33}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{4}{9}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{52}{99}\\)",
+      "solutionSketch": [
+        "P(gA,ngB)+P(ngA,gB)=(5/9)(8/11)+(4/9)(3/11)=40/99+12/99=52/99."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ts-04",
+      "slice": "two_stage",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "different-colours"
+      },
+      "stem": "P(drawing two balls of different colours from that 7-ball bag) equals:",
+      "choices": [
+        "\\(\\dfrac{14}{21}\\)",
+        "\\(\\dfrac{7}{21}\\)",
+        "\\(1\\)",
+        "\\(\\dfrac{2}{7}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{14}{21}\\)",
+      "solutionSketch": [
+        "Complement of same colour 7/21, so 14/21=2/3."
+      ]
+    },
+    {
+      "id": "g12-se-pr-st-03",
+      "slice": "stats",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "G-on-regression"
+      },
+      "stem": "A scatter plot of turnover y_i against year rank x_i has centre of gravity G(x̄; ȳ). G always belongs to:",
+      "choices": [
+        "the regression line D_{y/x}",
+        "the y-axis",
+        "the first data point",
+        "the median class"
+      ],
+      "answerIndex": 0,
+      "answer": "the regression line D_{y/x}",
+      "solutionSketch": [
+        "The least-squares line D_{y/x} passes through G."
+      ]
+    },
+    {
+      "id": "g12-se-pr-st-04",
+      "slice": "stats",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "regression-intercept"
+      },
+      "stem": "If D_{y/x} has equation y=−0.674x+m and G(3.5; 2.533) lies on it, then m equals:",
+      "choices": [
+        "\\(4.892\\)",
+        "\\(0\\)",
+        "\\(-0.674\\)",
+        "\\(2.533\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(4.892\\)",
+      "solutionSketch": [
+        "2.533=−0.674×3.5 + m ⇒ m=2.533+2.359=4.892."
+      ]
+    },
+    {
+      "id": "g12-se-pr-st-05",
+      "slice": "stats",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "annuity-i"
+      },
+      "stem": "The present value of an annuity of 75 000 LL for 20 months at 6% annual compounded monthly is closest, among typical SE distractors, to a value obtained from a_{n}=A (1−(1+i)^{−n})/i with i=0.005, n=20. Then i equals:",
+      "choices": [
+        "\\(0.005\\)",
+        "\\(0.06\\)",
+        "\\(0.6\\)",
+        "\\(20\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.005\\)",
+      "solutionSketch": [
+        "Monthly rate 6%/12=0.5%=0.005."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ct-05",
+      "slice": "counting",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "both-odd"
+      },
+      "stem": "Two balls from 9 (3 white, 3 black, 3 red, numbered 1–3 each). P(both odd) equals:",
+      "choices": [
+        "\\(\\dfrac{C_6^2}{C_9^2}=\\dfrac{15}{36}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{6}{9}\\)",
+        "\\(\\dfrac{1}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{C_6^2}{C_9^2}=\\dfrac{15}{36}\\)",
+      "solutionSketch": [
+        "Six odd-numbered balls (1 and 3 in each colour)."
+      ]
+    },
+    {
+      "id": "g12-se-pr-cd-06",
+      "slice": "conditional",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "italy-given-B-se"
+      },
+      "stem": "With the agency probabilities above, P(Italy | full-board) equals:",
+      "choices": [
+        "\\(0.35\\)",
+        "\\(0.21\\)",
+        "\\(0.60\\)",
+        "\\(0.875\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.35\\)",
+      "solutionSketch": [
+        "Independence ⇒ P(I|B)=P(I)=0.35. Or 0.21/0.60=0.35."
+      ]
+    },
+    {
+      "id": "g12-se-pr-cd-07",
+      "slice": "conditional",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "odds-given-diff-colour"
+      },
+      "stem": "Two balls of different colours are drawn from the 9-ball urn. The probability they carry two odd numbers is P(D|C), where D is «different colours and two odd numbers». Then P(D|C) equals:",
+      "choices": [
+        "\\(\\dfrac{4}{9}\\)",
+        "\\(\\dfrac{1}{12}\\)",
+        "\\(\\dfrac{1}{9}\\)",
+        "\\(\\dfrac{1}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{4}{9}\\)",
+      "solutionSketch": [
+        "Six odd balls; both odd: C(6,2)=15. Both odd and same colour: 3, so D (both odd, different colours)=12.",
+        "P(D)=12/36=1/3, P(C)=27/36=3/4, P(D|C)=(1/3)/(3/4)=4/9."
+      ]
+    },
+    {
+      "id": "g12-se-pr-rv-06",
+      "slice": "random_var",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "n-for-EX"
+      },
+      "stem": "For that 7-ball product X, E(X)=−1 is required. Using P(X=−5n)=2/21, P(X=4n)=4/21, P(X=−20)=8/21, P(X=16)=6/21, P(X=25)=1/21, then E(X)=(1/21)(−10n+16n−160+96+25). The n that yields E(X)=−1 is:",
+      "choices": [
+        "\\(3\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "\\(5\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "(6n−39)/21=−1 ⇒ 6n−39=−21 ⇒ 6n=18 ⇒ n=3.",
+        "P(yellow,red)=C(2,1)C(1,1)/21=2/21; P(green,red)=4/21; P(yellow,green)=C(2,1)C(4,1)/21=8/21; two green 6/21; two yellow 1/21."
+      ]
+    },
+    {
+      "id": "g12-se-pr-rv-07",
+      "slice": "random_var",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "EX-meaning"
+      },
+      "stem": "X is the amount paid by a voyager with destinations F,I,T (probs 0.25, 0.35, 0.40) and full/half board (0.60, 0.40) independent. Prices: F 1 500 000 / 1 300 000, I 1 250 000 / 1 100 000, T 800 000 / 700 000. Then E(X) represents:",
+      "choices": [
+        "the mean amount paid by a voyager",
+        "the most frequent destination",
+        "P(Italy)",
+        "the number of voyagers"
+      ],
+      "answerIndex": 0,
+      "answer": "the mean amount paid by a voyager",
+      "solutionSketch": [
+        "Expectation of the random cost is the average receipt per customer."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ts-05",
+      "slice": "two_stage",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "P-fullboard"
+      },
+      "stem": "A tourist agency: P(France)=0.25, P(Italy)=0.35, P(Turkey)=0.40, and 60% full-board independently. P(full-board) equals:",
+      "choices": [
+        "\\(0.60\\)",
+        "\\(0.25\\)",
+        "\\(1\\)",
+        "\\(0.40\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0.60\\)",
+      "solutionSketch": [
+        "Independence of board type and destination: P(B)=0.60."
+      ]
+    },
+    {
+      "id": "g12-se-pr-ts-06",
+      "slice": "two_stage",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "A-B-not-indep"
+      },
+      "stem": "Are the events A: «both numbers odd» and B: «same colour» independent for those 9 balls? P(A)=15/36, P(B)=9/36, P(A∩B)=3/36. Then:",
+      "choices": [
+        "not independent, because 15/36 × 9/36 ≠ 3/36",
+        "independent",
+        "A⊂B",
+        "P(A∩B)=0"
+      ],
+      "answerIndex": 0,
+      "answer": "not independent, because 15/36 × 9/36 ≠ 3/36",
+      "solutionSketch": [
+        "(15/36)(9/36)=135/1296=15/144=5/48, while 3/36=1/12=4/48."
+      ]
+    },
+    {
+      "id": "g12-se-pr-st-06",
+      "slice": "stats",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "depreciation-t"
+      },
+      "stem": "A new car costs 200 million LL, scrap 60 million LL, lifetime 10 years, constant annual depreciation. After t years the value is 116 million LL. Then t equals:",
+      "choices": [
+        "6 years",
+        "5 years",
+        "7 years",
+        "10 years"
+      ],
+      "answerIndex": 0,
+      "answer": "6 years",
+      "solutionSketch": [
+        "Annual depreciation (200−60)/10=14. 200−14t=116 ⇒ 14t=84 ⇒ t=6."
+      ]
+    },
+    {
+      "id": "g12-se-pr-st-07",
+      "slice": "stats",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "SE_All Sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "correlation-interpret"
+      },
+      "stem": "If the correlation coefficient r of (x_i; y_i) equals −0.98, then the linear relation between the two variables is:",
+      "choices": [
+        "strong and negative",
+        "strong and positive",
+        "weak",
+        "non-existent"
+      ],
+      "answerIndex": 0,
+      "answer": "strong and negative",
+      "solutionSketch": [
+        "|r| close to 1 with r<0."
+      ]
+    }
+  ]
+}

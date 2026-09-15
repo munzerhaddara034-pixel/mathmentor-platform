@@ -87,11 +87,13 @@ DRM الحقيقي يحتاج حساب CDN مدفوع. المشغّل المحل
 | فيديو شرح حقيقي (حوالي 80 ثانية، أسلوب صف لا قائمة أهداف) | `public/videos/grade-12-ls-limits-intro.mp4` |
 | ملخص عربي للطالب: أهداف، شرح، أمثلة، أخطاء | `/classroom/grade-12-ch1` و `/resources/print/grade-12-ch1` |
 | بنك أسئلة النهايات (شريحة أولى داخل بنك الدوال، أكثر من 30 بنداً بأسلوب الامتحان) | `/practice/take?lessonId=grade-12-ch1` |
-| مسابقة **علوم الحياة — الدوال** (دراسة الدوال = المسألة الرابعة في النموذج، 16 سؤالاً سهل→صعب) | `/practice` أو `/practice/take?bank=g12-ls-functions&mode=contest` |
+| مسابقة **علوم الحياة** — أسئلة مختلطة، هندسة الفضاء، الاحتمالات، الدوال | `/practice` أو `/practice/take?bank=g12-ls-functions&mode=contest` |
+| مسابقة **اجتماع واقتصاد** — أسئلة مختلطة، احتمالات، دوال اقتصادية | `/practice` أو `/practice/take?bank=g12-se-functions&mode=contest` |
+| مسابقة **علوم عامة** — أسئلة مختلطة، هندسة فضاء، احتمالات، أعداد مركبة، دوال | `/practice` أو `/practice/take?bank=g12-gs-functions&mode=contest` |
 | مسابقة **المتوسط** — الأعداد، الجبر، المسائل اللفظية، الهندسة، الهندسة التحليلية | `/practice` أو `/practice/take?bank=brevet-numbers&mode=contest` |
 | نصوص منطوقة لثلاثة دروس (للتسجيل الحي لاحقاً) | `content/grade-12-ls-limits/` |
 
-التدريب الحر لدرس النهايات يعرض شريحة النهايات. امتحان الدرس يسحب 12 سؤالاً بمزيج صعوبة. مسابقة الدوال تستخدم بنك الموضوع مرتّباً سهل→صعب (نهايات، استمرار، مشتقات، جدول تغيرات، تقارب، دالة عكسية).
+التدريب الحر لدرس النهايات يعرض شريحة النهايات. امتحان الدرس يسحب 12 سؤالاً بمزيج صعوبة. مسابقات الشهادة تستخدم بنك الموضوع مرتّباً سهل→صعب.
 
 لا توجد تسجيلات MP4 لباقي الصفوف بعد. الأستاذ يضع الملف أو رابط يوتيوب كما في القسم التالي.
 
@@ -99,38 +101,62 @@ DRM الحقيقي يحتاج حساب CDN مدفوع. المشغّل المحل
 
 ## بنوك الشهادة حسب الموضوع
 
-النماذج الرسمية على جهاز منذر (`LS all sessions.pdf`, `SE_All Sessions.pdf`, `GS-All.pdf`) **لا تُنسخ** إلى Git. يُستخرج أسلوب السؤال، ثم يُوزَّع على ملفات موضوع.
+النماذج الرسمية على جهاز منذر (`LS all sessions.pdf`, `SE_All Sessions.pdf`, `GS-All.pdf`) **لا تُنسخ** إلى Git. يُستخرج أسلوب السؤال، ثم يُوزَّع على ملفات موضوع. البنود تحمل `source.kind: generated-in-official-style` — **ليست** نماذج رسمية منسوخة.
 
-مسابقة **علوم الحياة** الرسمية غالباً أربع مسائل:
+### علوم الحياة (LS)
 
 | المسألة | الموضوع | الملف |
 | --- | --- | --- |
-| أولاً | أسئلة مختلطة | لاحقاً |
-| ثانياً | هندسة الفضاء | `content/banks/g12-ls/space-geometry.json` (لاحقاً) |
-| ثالثاً | الاحتمالات | `content/banks/g12-ls/probability.json` (لاحقاً) |
-| رابعاً | دراسة الدوال | `content/banks/g12-ls/functions.json` **(هذا الإصدار)** |
+| أولاً | أسئلة مختلطة | `content/banks/g12-ls/mcq-mixed.json` |
+| ثانياً | هندسة الفضاء | `content/banks/g12-ls/space-geometry.json` |
+| ثالثاً | الاحتمالات | `content/banks/g12-ls/probability.json` |
+| رابعاً | دراسة الدوال | `content/banks/g12-ls/functions.json` |
+
+### اجتماع واقتصاد (SE)
+
+| المسألة | الموضوع | الملف |
+| --- | --- | --- |
+| أولاً | أسئلة مختلطة | `content/banks/g12-se/mcq-mixed.json` |
+| ثانياً | الاحتمالات والإحصاء | `content/banks/g12-se/probability.json` |
+| ثالثاً | الدوال والتحليل الاقتصادي | `content/banks/g12-se/functions.json` |
+
+### علوم عامة (GS)
+
+| المسألة | الموضوع | الملف |
+| --- | --- | --- |
+| أولاً | أسئلة مختلطة | `content/banks/g12-gs/mcq-mixed.json` |
+| ثانياً | هندسة الفضاء | `content/banks/g12-gs/space-geometry.json` |
+| ثالثاً | الاحتمالات | `content/banks/g12-gs/probability.json` |
+| رابعاً | الأعداد المركبة | `content/banks/g12-gs/complex.json` |
+| خامساً | دراسة الدوال | `content/banks/g12-gs/functions.json` |
+
+### الشهادة المتوسطة (Brevet)
+
+البنوك الخمسة جاهزة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية (`content/banks/brevet/`). التفاصيل في `content/banks/brevet/README.md`.
 
 ```
-content/banks/g12-ls/functions.json         ← رابعاً · دراسة الدوال (الآن)
-content/banks/g12-ls/space-geometry.json    ← ثانياً · لاحقاً
-content/banks/g12-ls/probability.json       ← ثالثاً · لاحقاً
-content/banks/g12-ls/integration.json       ← فصل إضافي لاحقاً
-content/banks/brevet/geometry.json          ← هندسة البروفيه (الآن)
-content/banks/brevet/algebra.json           ← جبر البروفيه (الآن)
-content/banks/brevet/numbers.json           ← أعداد البروفيه (الآن)
-content/banks/brevet/word_problems.json     ← مسائل لفظية (الآن)
-content/banks/brevet/coordinate.json        ← هندسة تحليلية (الآن)
-content/banks/g12-se/…
-content/banks/g12-gs/…
+content/banks/g12-ls/mcq-mixed.json
+content/banks/g12-ls/space-geometry.json
+content/banks/g12-ls/probability.json
+content/banks/g12-ls/functions.json
+content/banks/g12-se/mcq-mixed.json
+content/banks/g12-se/probability.json
+content/banks/g12-se/functions.json
+content/banks/g12-gs/mcq-mixed.json
+content/banks/g12-gs/space-geometry.json
+content/banks/g12-gs/probability.json
+content/banks/g12-gs/complex.json
+content/banks/g12-gs/functions.json
+content/banks/brevet/numbers.json
+content/banks/brevet/algebra.json
+content/banks/brevet/word_problems.json
+content/banks/brevet/geometry.json
+content/banks/brevet/coordinate.json
 ```
 
-بنك **الدوال** يطابق المسألة الرابعة: حدود المجال (0 و +∞)، خطوط التقارب، جدول التغيرات، الدالة العكسية، المماس، جذر وحيد بحصار عددي. الشرائح: النهايات (مع فيديو الصف) ثم الاستمرار ثم المشتقات ثم جدول التغيرات ثم التقارب ثم العكسية. الملف مرتّب سهل → متوسط → صعب. البنود الأكاديمية تحمل `source.kind: generated-in-official-style` — **ليست** نماذج رسمية منسوخة.
+كيف يُضاف بنك موضوع جديد: انسخ ملفاً قائماً، غيّر `id` والعناوين والشرائح، املأ الأسئلة بأسلوب الجلسات، ثم سجّله في `src/lib/topicBanks.ts`. التفاصيل في `content/banks/README.md`.
 
-**الشهادة المتوسطة (صف 9):** مسابقة بست أو سبع مسائل. البنوك الخمسة جاهزة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية (`content/banks/brevet/`). التفاصيل في `content/banks/brevet/README.md`.
-
-كيف يُضاف الموضوع التالي من الورقة الرباعية (هندسة الفضاء ثم الاحتمالات): انسخ الملف، غيّر `id` والعناوين والشرائح، املأ الأسئلة بأسلوب الجلسات، ثم سجّله في `src/lib/topicBanks.ts`. التفاصيل في `content/banks/README.md`.
-
-الطالب: `/practice` → مسابقة الدوال (صف 12) أو مسابقة الهندسة/الجبر (صف 9)، 16 سؤالاً سهل ثم متوسط ثم صعب، أو تدريب البنك كاملاً.
+الطالب: `/practice` → مسابقة الفرع (LS / SE / GS / Brevet)، 16 سؤالاً سهل ثم متوسط ثم صعب، أو تدريب البنك كاملاً.
 
 ---
 

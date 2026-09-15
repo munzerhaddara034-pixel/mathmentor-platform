@@ -49,37 +49,34 @@
   "contestTopics": [
     {
       "id": "mcq-mixed",
-      "file": null,
+      "file": "content/banks/g12-ls/mcq-mixed.json",
       "title": "I · Mixed MCQ",
       "arabicTitle": "أولاً · أسئلة مختلطة",
-      "note": "Short mixed items (often ~2.5 pts). Not a separate bank file yet.",
-      "implemented": false
+      "implemented": true
     },
     {
       "id": "space-geometry",
       "file": "content/banks/g12-ls/space-geometry.json",
       "title": "II · Space geometry",
       "arabicTitle": "ثانياً · هندسة الفضاء",
-      "implemented": false
+      "implemented": true
     },
     {
       "id": "probability",
       "file": "content/banks/g12-ls/probability.json",
       "title": "III · Probability",
       "arabicTitle": "ثالثاً · الاحتمالات",
-      "implemented": false
+      "implemented": true
     },
     {
       "id": "functions",
       "file": "content/banks/g12-ls/functions.json",
-      "title": "IV · Functions analysis (this bank)",
+      "title": "IV · Functions analysis",
       "arabicTitle": "رابعاً · دراسة الدوال",
       "implemented": true
     }
   ],
   "nextTopicFiles": [
-    "content/banks/g12-ls/space-geometry.json",
-    "content/banks/g12-ls/probability.json",
     "content/banks/g12-ls/integration.json"
   ],
   "questions": [

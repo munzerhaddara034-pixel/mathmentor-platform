@@ -1,0 +1,890 @@
+{
+  "id": "g12-gs-space-geometry",
+  "track": "grade-12",
+  "certificate": "GS",
+  "topic": "space_geometry",
+  "title": "Space geometry",
+  "arabicTitle": "هندسة الفضاء",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "GS-All.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 GS (علوم عامة) official sessions (GS-All.pdf): orthonormal space, planes, skew lines, distances, space figures. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "planes",
+      "title": "Planes",
+      "arabicTitle": "المستويات"
+    },
+    {
+      "id": "lines",
+      "title": "Lines",
+      "arabicTitle": "المستقيمات"
+    },
+    {
+      "id": "orthogonality",
+      "title": "Orthogonality",
+      "arabicTitle": "التعامد"
+    },
+    {
+      "id": "distances",
+      "title": "Distances",
+      "arabicTitle": "المسافات"
+    },
+    {
+      "id": "figures",
+      "title": "Space figures",
+      "arabicTitle": "الأشكال الفضائية"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-gs/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-gs/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-gs/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "complex",
+      "file": "content/banks/g12-gs/complex.json",
+      "title": "IV · Complex numbers",
+      "arabicTitle": "رابعاً · الأعداد المركبة",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-gs/functions.json",
+      "title": "V · Functions analysis",
+      "arabicTitle": "خامساً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-gs-sg-pl-01",
+      "slice": "planes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "normal-P"
+      },
+      "stem": "In the space referred to a direct orthonormal system (O; i, j, k), a normal to x − y − 2z − 5 = 0 is:",
+      "choices": [
+        "\\((1;-1;-2)\\)",
+        "\\((1;1;2)\\)",
+        "\\((5;0;0)\\)",
+        "\\((1;-1;2)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;-1;-2)\\)",
+      "solutionSketch": [
+        "Coefficients of x, y, z."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-pl-02",
+      "slice": "planes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "cross-ABC"
+      },
+      "stem": "The plane through A(1;−2;1), B(2;−1;3), C(1;1;4) has a normal AB∧AC. AB=(1;1;2), AC=(0;3;3). Then AB∧AC equals:",
+      "choices": [
+        "\\((-3;-3;3)\\)",
+        "\\((1;1;2)\\)",
+        "\\((0;0;1)\\)",
+        "\\((3;3;3)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((-3;-3;3)\\)",
+      "solutionSketch": [
+        "i(3−6)−j(3−0)+k(3−0)=(−3;−3;3)."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-pl-03",
+      "slice": "planes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "plane-at-H"
+      },
+      "stem": "An equation of the plane through H(0;0;2) perpendicular to (1;1;−1) is:",
+      "choices": [
+        "\\(x+y-z+2=0\\)",
+        "\\(x+y-z=0\\)",
+        "\\(z=2\\)",
+        "\\(x+y=0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x+y-z+2=0\\)",
+      "solutionSketch": [
+        "1(x−0)+1(y−0)−1(z−2)=0 ⇒ x+y−z+2=0."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ln-01",
+      "slice": "lines",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dir-d"
+      },
+      "stem": "A direction of (d): x=t+1, y=−t+2, z=2t is:",
+      "choices": [
+        "\\((1;-1;2)\\)",
+        "\\((1;2;0)\\)",
+        "\\((1;-1;-2)\\)",
+        "\\((t;t;t)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;-1;2)\\)",
+      "solutionSketch": [
+        "Coefficients of t."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ln-02",
+      "slice": "lines",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "H-on-d"
+      },
+      "stem": "The line x=t, y=t, z=−t+2 passes through H(0;0;2) when t=0. This statement is:",
+      "choices": [
+        "true",
+        "false because z would be 0",
+        "true only in a non-orthonormal system",
+        "false because x≠y"
+      ],
+      "answerIndex": 0,
+      "answer": "true",
+      "solutionSketch": [
+        "Substitute t=0."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ln-03",
+      "slice": "lines",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "param-E"
+      },
+      "stem": "Parametric equations of the line through E(1;2;0) of direction (1;−1;2) are:",
+      "choices": [
+        "\\(x=1+t,\\ y=2-t,\\ z=2t\\)",
+        "\\(x=t,\\ y=-t,\\ z=2t\\)",
+        "\\(x=1,\\ y=2,\\ z=0\\)",
+        "\\(x=1-t,\\ y=2+t,\\ z=t\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x=1+t,\\ y=2-t,\\ z=2t\\)",
+      "solutionSketch": [
+        "Point plus t times direction."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-or-01",
+      "slice": "orthogonality",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "V-dot-N"
+      },
+      "stem": "(d) of direction (1;−1;2) and the plane x−y−2z−5=0 have V·N equal to:",
+      "choices": [
+        "\\(-2\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(6\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-2\\)",
+      "solutionSketch": [
+        "1·1 + (−1)·(−1) + 2·(−2)=1+1−4=−2. The line is not perpendicular to the plane."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-or-02",
+      "slice": "orthogonality",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "lines-perp"
+      },
+      "stem": "Two lines of directions (2;−2;1) and (1;2;2) are perpendicular because the product of directions is:",
+      "choices": [
+        "\\(2-4+2=0\\)",
+        "\\(1\\)",
+        "\\(5\\)",
+        "\\(-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2-4+2=0\\)",
+      "solutionSketch": [
+        "2·1 + (−2)·2 + 1·2=2−4+2=0."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ds-01",
+      "slice": "distances",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dist-O-x3"
+      },
+      "stem": "The distance from O to the plane x=3 is:",
+      "choices": [
+        "\\(3\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(\\sqrt{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "|0−3|=3."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ds-02",
+      "slice": "distances",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "d-A-P"
+      },
+      "stem": "d(A,(P)) for A(1;−2;1) and (P): x+2y−2z−1=0. First |1−4−2−1|=6, √(1+4+4)=3, so the distance is:",
+      "choices": [
+        "\\(2\\)",
+        "\\(6\\)",
+        "\\(3\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "Wait 1+2(−2)−2(1)−1=1−4−2−1=−6, |−6|/3=2. Need the correct plane. Use x+2y−2z+1? A given as (1,−2,1): 1−4−2−1=-6, /3=2. The plane I wrote is x+2y−2z−1: 1-4-2-1=-6. Yes d=2."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-fg-01",
+      "slice": "figures",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mid-AB"
+      },
+      "stem": "The midpoint of A(1;−2;1) and B(2;−1;3) is:",
+      "choices": [
+        "\\((1.5;-1.5;2)\\)",
+        "\\((3;-3;4)\\)",
+        "\\((1;0;2)\\)",
+        "\\((0;0;0)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1.5;-1.5;2)\\)",
+      "solutionSketch": [
+        "Average of coordinates."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-fg-02",
+      "slice": "figures",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "equidistant-H"
+      },
+      "stem": "If H is equidistant from A, B and C then HA=HB=HC, so H is the centre of the sphere through A, B, C (and a fourth point if needed). In a GS paper H often is:",
+      "choices": [
+        "the circumcentre of triangle ABC in its plane, when also on the altitude",
+        "the origin always",
+        "the midpoint of [BC] only",
+        "a point at infinity"
+      ],
+      "answerIndex": 0,
+      "answer": "the circumcentre of triangle ABC in its plane, when also on the altitude",
+      "solutionSketch": [
+        "Equidistance from three non-collinear points: axis of the circumcircle."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-pl-04",
+      "slice": "planes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "plane-ABC-gs"
+      },
+      "stem": "An equation of the plane determined by A(1;−2;1), B(2;−1;3) and C(1;1;4) is:",
+      "choices": [
+        "\\(x+y-z+2=0\\)",
+        "\\(x-y+z=0\\)",
+        "\\(x+y+z=4\\)",
+        "\\(x-y-2z=5\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x+y-z+2=0\\)",
+      "solutionSketch": [
+        "Normal (1;1;−1) through A."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-pl-05",
+      "slice": "planes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mediator-AE"
+      },
+      "stem": "The mediator plane of [AE] with A(1;−1;2) and E(−1;−1;0) has midpoint (0;−1;1) and normal (2;0;2). An equation is:",
+      "choices": [
+        "\\(x+z-1=0\\)",
+        "\\(x=0\\)",
+        "\\(z=1\\)",
+        "\\(y=-1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x+z-1=0\\)",
+      "solutionSketch": [
+        "2(x−0)+2(z−1)=0 ⇒ x+z=1."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ln-04",
+      "slice": "lines",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "E-intersection"
+      },
+      "stem": "The line (d): x=t+1, y=−t+2, z=2t meets the plane x−y−2z−5=0 at the point E:",
+      "choices": [
+        "\\((-2;5;-6)\\)",
+        "\\((1;2;0)\\)",
+        "\\((0;0;0)\\)",
+        "\\((4;-1;6)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((-2;5;-6)\\)",
+      "solutionSketch": [
+        "t=−3: x=−2, y=5, z=−6. Check: −2−5+12−5=0 yes."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ln-05",
+      "slice": "lines",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "bisector-D"
+      },
+      "stem": "A line (D): x=3λ−1, y=−1, z=3λ in the plane of (d),(d') is a bisector of (d),(d') if a direction of (D) is proportional to u/|u| + v/|v| (unit directions). Here u=(2;−2;1), |u|=3, v=(1;2;2), |v|=3, so u+v=(3;0;3) collinear to (1;0;1), and (D) has direction (3;0;3). This matches. Then E(−1;−1;0) corresponds to λ=0. The statement is:",
+      "choices": [
+        "true",
+        "false because |u|≠|v|",
+        "false because y is not 0",
+        "true only if λ=1"
+      ],
+      "answerIndex": 0,
+      "answer": "true",
+      "solutionSketch": [
+        "|u|=|v|=3, u+v=(3;0;3)."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ln-07",
+      "slice": "lines",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "d-dprime-perp"
+      },
+      "stem": "A direction of (d): x=2t+1, y=−2t−1, z=t+2 is (2;−2;1). A direction of (d'): x=m, y=2m−3, z=2m is (1;2;2). These lines are perpendicular because:",
+      "choices": [
+        "\\(2-4+2=0\\)",
+        "they meet at O",
+        "their constants coincide",
+        "\\(|u|=|v|\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2-4+2=0\\)",
+      "solutionSketch": [
+        "Dot product of directions: 2·1+(−2)·2+1·2=0."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-or-03",
+      "slice": "orthogonality",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "Q-perp-d"
+      },
+      "stem": "The plane (Q) perpendicular to (d) of direction (1;−1;2) at E(−2;5;−6) has equation:",
+      "choices": [
+        "\\(x-y+2z+19=0\\)",
+        "\\(x-y-2z=5\\)",
+        "\\(x+y+z=0\\)",
+        "\\(z=0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x-y+2z+19=0\\)",
+      "solutionSketch": [
+        "Normal = direction of (d): (x+2)−(y−5)+2(z+6)=0 ⇒ x−y+2z+19=0."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-or-04",
+      "slice": "orthogonality",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "plane-two-lines"
+      },
+      "stem": "(d) and (d') given by x=2t+1, y=−2t−1, z=t+2 and x=m, y=2m−3, z=2m intersect at A(1;−1;2) because for t=0 and m=1: (1;−1;2) and (1;−1;2). Their directions (2;−2;1) and (1;2;2) are perpendicular. An equation of the plane they determine is N=(2;−2;1)∧(1;2;2)=:",
+      "choices": [
+        "\\((-6;-3;6)\\) collinear to \\((2;1;-2)\\)",
+        "\\((1;0;0)\\)",
+        "\\((2;-2;1)\\)",
+        "\\((0;0;1)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((-6;-3;6)\\) collinear to \\((2;1;-2)\\)",
+      "solutionSketch": [
+        "i(−4−2)−j(4−1)+k(4+2)=(−6;−3;6). Through A: 2(x−1)+1(y+1)−2(z−2)=0 ⇒ 2x+y−2z+1=0? 2x−2 + y+1 −2z+4=0 ⇒ 2x+y−2z+3=0.",
+        "The question asks the cross product, answer (−6;−3;6)."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ds-03",
+      "slice": "distances",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "AH-length"
+      },
+      "stem": "If (d) is perpendicular to (P) at H, then for any M in (P), HM is orthogonal to the direction of (d). Equivalently d(A,(P))=AH when A lies on (d). If A(1;−2;1) and H(0;0;2), AH=:",
+      "choices": [
+        "\\(\\sqrt{1+4+1}=\\sqrt{6}\\)",
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\sqrt{1+4+1}=\\sqrt{6}\\)",
+      "solutionSketch": [
+        "AH=(−1;2;1), |AH|=√6."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ds-04",
+      "slice": "distances",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dist-to-intersection-gs"
+      },
+      "stem": "The distance from B(5;2;0) to (P): x+2y−2z+3=0 is |5+4+3|/3=4. To (P'): 2x+y+2z=0 it is |10+2|/3=4. If (P)⟂(P'), d(B, intersection) equals:",
+      "choices": [
+        "\\(4\\sqrt{2}\\)",
+        "\\(4\\)",
+        "\\(8\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(4\\sqrt{2}\\)",
+      "solutionSketch": [
+        "d²=d1²+d2²=16+16=32, d=4√2."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-fg-03",
+      "slice": "figures",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ATES-square"
+      },
+      "stem": "E(−1;−1;0) on a bisector (D) in plane (P), circle centred at E tangent to (d) and (d') at T and S. If (d)⟂(d'), quadrilateral ATES with A the intersection of (d),(d') is a:",
+      "choices": [
+        "square (when ET=ES=AT=AS)",
+        "rhombus that is never a square",
+        "rectangle only",
+        "parallelogram that is never a rhombus"
+      ],
+      "answerIndex": 0,
+      "answer": "square (when ET=ES=AT=AS)",
+      "solutionSketch": [
+        "Tangents from a point to a circle are equal; with perpendicular lines one gets a square."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-fg-04",
+      "slice": "figures",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "T-on-bisector"
+      },
+      "stem": "If (CH) is perpendicular to plane (HAB) and CA=CB, then the interior bisector of angle ACB contains the projection T of H on (ABC) by:",
+      "choices": [
+        "the property of the altitude and bisector in the isosceles triangle, and the orthogonal projection",
+        "Thales only",
+        "a random coincidence",
+        "Pythagoras alone"
+      ],
+      "answerIndex": 0,
+      "answer": "the property of the altitude and bisector in the isosceles triangle, and the orthogonal projection",
+      "solutionSketch": [
+        "Classic GS configuration: T ∈ bisector (δ)."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-pl-06",
+      "slice": "planes",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "intersect-dir-PP"
+      },
+      "stem": "(P): x+2y−2z+3=0 and (P'): 2x+y+2z=0 are perpendicular (N·N'=2+2−4=0). The line (d) of intersection has direction N∧N':",
+      "choices": [
+        "\\((6;-6;-3)\\) collinear to \\((2;-2;-1)\\)",
+        "\\((1;2;-2)\\)",
+        "\\((2;1;2)\\)",
+        "\\((1;0;0)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((6;-6;-3)\\) collinear to \\((2;-2;-1)\\)",
+      "solutionSketch": [
+        "i(4−(−2))−j(0−(−4))+k(1−4)=(6;−4? wait) i(4+2)=6i. −j(2·0−(−2)·2)=−j(0+4)=−4j. k(1−4)=−3k. So (6;−4;−3)? N=(1,2,−2), N'=(2,1,2).",
+        "i(2·2−(−2)·1)=i(4+2)=6.",
+        "−j(1·2−(−2)·2)=−j(2+4)=−6j.",
+        "k(1·1−2·2)=k(1−4)=−3k.",
+        "(6;−6;−3)=3(2;−2;−1). Fix the −4 I first wrote. Good, choice is (6;-6;-3)."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-pl-07",
+      "slice": "planes",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "point-on-intersection"
+      },
+      "stem": "The line of intersection of (P): x+2y−2z+3=0 and (P'): 2x+y+2z=0 passes through the solution of the system with z=0: x+2y=−3, 2x+y=0. Then y=−2, x=1, so a point of the intersection is:",
+      "choices": [
+        "\\((1;-2;0)\\)",
+        "\\((0;0;0)\\)",
+        "\\((3;0;0)\\)",
+        "\\((0;1;0)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;-2;0)\\)",
+      "solutionSketch": [
+        "z=0 reduces to x+2y=−3 and 2x+y=0 ⇒ x=1, y=−2."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ln-06",
+      "slice": "lines",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "symmetric-wrt-D"
+      },
+      "stem": "I(2;1;2) is on (d): x=t+1, y=−t+2, z=2t (t=1). J is the symmetric of I with respect to (D). Then the midpoint of [IJ] lies on (D) and (IJ) ⟂ (D). If (D) has direction (1;1;0) and passes through E(−2;5;−6), this is the classical GS construction of:",
+      "choices": [
+        "the reflection of I across the line (D)",
+        "the projection of I on (P)",
+        "the inversion of I",
+        "a translation of I"
+      ],
+      "answerIndex": 0,
+      "answer": "the reflection of I across the line (D)",
+      "solutionSketch": [
+        "Symmetric with respect to a line in space."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-or-05",
+      "slice": "orthogonality",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "D-direction"
+      },
+      "stem": "The line (D) in (P) perpendicular to (d) at E is the intersection of (P) and the plane through E perpendicular to (d). A direction of (D) is N_P ∧ V_d. For N=(1;−1;−2) and V=(1;−1;2), N∧V=:",
+      "choices": [
+        "\\((-4;-4;0)\\) collinear to \\((1;1;0)\\)",
+        "\\((1;-1;-2)\\)",
+        "\\((0;0;1)\\)",
+        "\\((1;0;0)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((-4;-4;0)\\) collinear to \\((1;1;0)\\)",
+      "solutionSketch": [
+        "i(2−2)−j(2−(−2))+k(−1−(−1))=(0;−4;0)? i[(−1)(2)−(−2)(−1)]=i(−2−2)=−4i. j component: minus |(1,−2);(1,2)|=−(2−(−2))=−4, so −j(−4)? Standard: i(ny vz − nz vy)−j(nx vz−nz vx)+k(nx vy−ny vx).",
+        "i((−1)(2)−(−2)(−1))+ … = i(−2−2)=−4i.",
+        "−j(1·2−(−2)·1)=−j(2+2)=−4j.",
+        "k(1·(−1)−(−1)·1)=k(−1+1)=0.",
+        "So (−4;−4;0). Yes."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-or-06",
+      "slice": "orthogonality",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "same-side"
+      },
+      "stem": "A(1;1;1) and B(5;2;0) lie on the same side of (P): x+2y−2z+3=0 if the product of the two values of the cartesian form is positive. f(A)=1+2−2+3=4>0, f(B)=5+4+3=12>0, so:",
+      "choices": [
+        "A and B are on the same side of (P)",
+        "they are on opposite sides",
+        "B∈(P)",
+        "A∈(P)"
+      ],
+      "answerIndex": 0,
+      "answer": "A and B are on the same side of (P)",
+      "solutionSketch": [
+        "Same sign of the affine form."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ds-05",
+      "slice": "distances",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "skew-mixed-product"
+      },
+      "stem": "If AB · (AG ∧ GF) ≠ 0, with G,F on a line (d) not through A, then (AB) and (d) are:",
+      "choices": [
+        "skew (not coplanar)",
+        "parallel",
+        "intersecting",
+        "perpendicular and coplanar"
+      ],
+      "answerIndex": 0,
+      "answer": "skew (not coplanar)",
+      "solutionSketch": [
+        "A non-zero mixed product of AB with two directions spanning a plane through (d) means AB is not parallel to that plane, hence not coplanar with (d)."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-ds-06",
+      "slice": "distances",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dB-d"
+      },
+      "stem": "Let d1=d(B,(P))=4 and d2=d(B,(P'))=4 with (P)⟂(P'). Then d(B,(d))²=d1²+d2²=32, so d(B,(d))=",
+      "choices": [
+        "\\(4\\sqrt{2}\\)",
+        "\\(4\\)",
+        "\\(\\sqrt{8}\\)",
+        "\\(32\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(4\\sqrt{2}\\)",
+      "solutionSketch": [
+        "Pythagoras in space for two perpendicular planes."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-fg-05",
+      "slice": "figures",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "AT-radius"
+      },
+      "stem": "Circle in plane (P) with centre E tangent to (d) at T: ET ⟂ (d) and |ET|=distance from E to (d). If |u|=3 and E to (d) is 2, then AT with A on (d) and right angle at T in square ATES equals:",
+      "choices": [
+        "the radius 2, hence AT=2",
+        "3",
+        "1",
+        "√2"
+      ],
+      "answerIndex": 0,
+      "answer": "the radius 2, hence AT=2",
+      "solutionSketch": [
+        "In a square the side equals the radius of the circle centred at E tangent at T,S."
+      ]
+    },
+    {
+      "id": "g12-gs-sg-fg-06",
+      "slice": "figures",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "GS-All.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "OH-length"
+      },
+      "stem": "The point H(0; 0; 2) belongs to the plane x+y−z+2=0. Then |OH| equals:",
+      "choices": [
+        "\\(2\\)",
+        "\\(\\sqrt{3}\\)",
+        "\\(1\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "H is on (Oz) and OH=2. (It is not in general the orthogonal projection of O on the plane.)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,892 @@
+{
+  "id": "g12-ls-space-geometry",
+  "track": "grade-12",
+  "certificate": "LS",
+  "topic": "space_geometry",
+  "title": "Space geometry",
+  "arabicTitle": "هندسة الفضاء",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "LS all sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 LS official sessions (LS all sessions.pdf): Problem II wording — orthonormal system, planes, lines, distances, orthogonality. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "planes",
+      "title": "Planes",
+      "arabicTitle": "المستويات"
+    },
+    {
+      "id": "lines",
+      "title": "Lines",
+      "arabicTitle": "المستقيمات"
+    },
+    {
+      "id": "orthogonality",
+      "title": "Orthogonality",
+      "arabicTitle": "التعامد"
+    },
+    {
+      "id": "distances",
+      "title": "Distances",
+      "arabicTitle": "المسافات"
+    },
+    {
+      "id": "figures",
+      "title": "Space figures",
+      "arabicTitle": "الأشكال الفضائية"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: pedagogical slice order)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": "content/banks/g12-ls/mcq-mixed.json",
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "implemented": true
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-ls/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": true
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-ls/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": true
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-ls/functions.json",
+      "title": "IV · Functions analysis",
+      "arabicTitle": "رابعاً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "g12-ls-sg-pl-01",
+      "slice": "planes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "plane-normal"
+      },
+      "stem": "In the space referred to a direct orthonormal system (O; i, j, k), a normal vector to the plane of equation x + 2y − z − 3 = 0 is:",
+      "choices": [
+        "\\((1;2;-1)\\)",
+        "\\((1;-2;1)\\)",
+        "\\((2;1;1)\\)",
+        "\\((3;0;1)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;2;-1)\\)",
+      "solutionSketch": [
+        "The Cartesian equation ax+by+cz+d=0 has normal (a;b;c).",
+        "Trap: swapping signs on the y-component."
+      ],
+      "latex": "(P):\\ x+2y-z-3=0"
+    },
+    {
+      "id": "g12-ls-sg-pl-02",
+      "slice": "planes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "point-in-plane"
+      },
+      "stem": "The point A(1; 0; 2) belongs to the plane of equation x + y + z − 3 = 0. This statement is:",
+      "choices": [
+        "true, because 1+0+2−3=0",
+        "false, because 1+0+2=3 ≠ 0",
+        "true only if the system is not orthonormal",
+        "false, because A lies on (Oy)"
+      ],
+      "answerIndex": 0,
+      "answer": "true, because 1+0+2−3=0",
+      "solutionSketch": [
+        "Substitute: 1+0+2−3=0, so A ∈ (P).",
+        "Trap: forgetting the constant term."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-pl-03",
+      "slice": "planes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "plane-through-origin"
+      },
+      "stem": "An equation of the plane passing through O and of normal vector (1; 1; 1) is:",
+      "choices": [
+        "\\(x+y+z=0\\)",
+        "\\(x+y+z=1\\)",
+        "\\(x=y=z\\)",
+        "\\(x+y-z=0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x+y+z=0\\)",
+      "solutionSketch": [
+        "N·OM = 0 for every M in the plane through O, hence x+y+z=0."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ln-01",
+      "slice": "lines",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "line-direction"
+      },
+      "stem": "A direction vector of the straight line (d) given by x=1+t, y=2−t, z=3+2t (t real) is:",
+      "choices": [
+        "\\((1;-1;2)\\)",
+        "\\((1;2;3)\\)",
+        "\\((1;1;2)\\)",
+        "\\((t;-t;2t)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;-1;2)\\)",
+      "solutionSketch": [
+        "The coefficients of the parameter t form a direction vector.",
+        "Trap: taking a point of (d) as a direction."
+      ],
+      "latex": "x=1+t,\\ y=2-t,\\ z=3+2t"
+    },
+    {
+      "id": "g12-ls-sg-ln-02",
+      "slice": "lines",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "parametric-through-point"
+      },
+      "stem": "A system of parametric equations of the line through A(0; 1; 2) of direction vector (1; 0; −1) is:",
+      "choices": [
+        "\\(x=t,\\ y=1,\\ z=2-t\\)",
+        "\\(x=t,\\ y=1+t,\\ z=2-t\\)",
+        "\\(x=1,\\ y=t,\\ z=2\\)",
+        "\\(x=t,\\ y=0,\\ z=-t\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x=t,\\ y=1,\\ z=2-t\\)",
+      "solutionSketch": [
+        "x=0+t, y=1+0·t, z=2−t."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ln-03",
+      "slice": "lines",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "line-parallel-plane"
+      },
+      "stem": "The line of parametric equations x=t, y=t, z=t is parallel to the plane x + y − 2z = 5 because a direction vector V of the line satisfies:",
+      "choices": [
+        "\\(V\\cdot N=0\\) where N=(1;1;-2)",
+        "\\(V\\cdot N=1\\)",
+        "the line contains O",
+        "the constant 5 is even"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(V\\cdot N=0\\) where N=(1;1;-2)",
+      "solutionSketch": [
+        "V=(1;1;1), N=(1;1;−2), V·N=1+1−2=0, so (d) ∥ (P) (and O is not in the plane)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-or-01",
+      "slice": "orthogonality",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "planes-perp-dot"
+      },
+      "stem": "The planes of equations x + y + z = 1 and x − 2y + z = 0 are perpendicular if and only if their normals N and N' satisfy N · N' = 0. Here N · N' equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "N=(1;1;1), N'=(1;−2;1), so N·N'=1−2+1=0.",
+        "Trap: requiring the constant terms to match."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-or-02",
+      "slice": "orthogonality",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "right-at-A"
+      },
+      "stem": "The vectors AB=(2; 0; 0) and AC=(0; 2; 0) satisfy AB · AC = 0. Then triangle ABC is:",
+      "choices": [
+        "right-angled at A",
+        "equilateral",
+        "right-angled at B",
+        "isosceles of vertex B"
+      ],
+      "answerIndex": 0,
+      "answer": "right-angled at A",
+      "solutionSketch": [
+        "A vanishing dot product of AB and AC means (AB) ⟂ (AC), so the right angle is at A."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ds-01",
+      "slice": "distances",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "point-plane-dist"
+      },
+      "stem": "The distance from A(1; 1; 1) to the plane of equation x + y + z − 6 = 0 equals:",
+      "choices": [
+        "\\(\\sqrt{3}\\)",
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(\\dfrac{1}{\\sqrt{3}}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\sqrt{3}\\)",
+      "solutionSketch": [
+        "d = |1+1+1−6|/√3 = 3/√3 = √3.",
+        "Trap: omitting the square root of a²+b²+c²."
+      ],
+      "latex": "d(A,(P))=\\frac{|ax_A+by_A+cz_A+d|}{\\sqrt{a^2+b^2+c^2}}"
+    },
+    {
+      "id": "g12-ls-sg-ds-02",
+      "slice": "distances",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "coord-plane-dist"
+      },
+      "stem": "The distance from A(0; 0; 0) to the plane x = 4 is:",
+      "choices": [
+        "\\(4\\)",
+        "\\(0\\)",
+        "\\(2\\)",
+        "\\(\\sqrt{4}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(4\\)",
+      "solutionSketch": [
+        "The plane x−4=0 is parallel to (yOz); the distance from O is |0−4|=4."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-fg-01",
+      "slice": "figures",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "midpoint"
+      },
+      "stem": "The midpoint of the segment [AB] with A(2; 0; 4) and B(0; 2; 0) is:",
+      "choices": [
+        "\\((1;1;2)\\)",
+        "\\((2;2;4)\\)",
+        "\\((1;0;2)\\)",
+        "\\((0;1;2)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;1;2)\\)",
+      "solutionSketch": [
+        "I = ((2+0)/2; (0+2)/2; (4+0)/2) = (1;1;2)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-fg-02",
+      "slice": "figures",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "axis-intercept-triangle"
+      },
+      "stem": "The points A(2; 0; 0), B(0; 2; 0) and C(0; 0; 2) are the intercepts of the plane x + y + z = 2 with the coordinate axes. Then ABC is:",
+      "choices": [
+        "equilateral",
+        "right-angled at A",
+        "a line segment",
+        "isosceles of vertex O"
+      ],
+      "answerIndex": 0,
+      "answer": "equilateral",
+      "solutionSketch": [
+        "AB=AC=BC=√8=2√2, so ABC is equilateral.",
+        "Trap: thinking the right angles of the axes force a right triangle ABC."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-pl-04",
+      "slice": "planes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "plane-three-points"
+      },
+      "stem": "An equation of the plane determined by A(1; 0; 0), B(0; 1; 0) and C(0; 0; 1) is:",
+      "choices": [
+        "\\(x+y+z=1\\)",
+        "\\(x+y+z=0\\)",
+        "\\(x+y+z=3\\)",
+        "\\(xy+yz+zx=1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x+y+z=1\\)",
+      "solutionSketch": [
+        "AB=(−1;1;0), AC=(−1;0;1), AB∧AC=(1;1;1). Through A: 1(x−1)+1(y−0)+1(z−0)=0."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-pl-05",
+      "slice": "planes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ls-perp-planes"
+      },
+      "stem": "The planes (P): x + y + z − 2 = 0 and (Q): x − z − 3 = 0 are perpendicular because:",
+      "choices": [
+        "N_P · N_Q = 0 with N_P=(1;1;1) and N_Q=(1;0;-1)",
+        "they share the point (2;0;0)",
+        "their constants 2 and 3 are different",
+        "N_P is collinear to N_Q"
+      ],
+      "answerIndex": 0,
+      "answer": "N_P · N_Q = 0 with N_P=(1;1;1) and N_Q=(1;0;-1)",
+      "solutionSketch": [
+        "1·1 + 1·0 + 1·(−1)=0, so (P) ⟂ (Q).",
+        "They are distinct; perpendicularity is the vanishing of the normals' product."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-pl-06",
+      "slice": "planes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "parallel-distinct-planes"
+      },
+      "stem": "The planes x − 2y + z + 1 = 0 and 2x − 4y + 2z − 6 = 0 are:",
+      "choices": [
+        "distinct and parallel",
+        "perpendicular",
+        "the same plane",
+        "intersecting along (Ox)"
+      ],
+      "answerIndex": 0,
+      "answer": "distinct and parallel",
+      "solutionSketch": [
+        "Normals are collinear: (2;−4;2)=2(1;−2;1), but 2(+1)≠−6, so distinct parallel planes."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ln-04",
+      "slice": "lines",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "line-plane-meet"
+      },
+      "stem": "The intersection of the line x=t, y=t, z=t with the plane x + y + z = 3 is the point:",
+      "choices": [
+        "\\((1;1;1)\\)",
+        "\\((3;0;0)\\)",
+        "\\((0;0;3)\\)",
+        "\\((1;1;0)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;1;1)\\)",
+      "solutionSketch": [
+        "3t=3 so t=1, hence M(1;1;1)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ln-05",
+      "slice": "lines",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "line-in-plane"
+      },
+      "stem": "The line (d): x=1+t, y=t, z=1−2t lies in the plane x + y + z − 2 = 0 because:",
+      "choices": [
+        "every point of (d) satisfies the plane equation identically",
+        "the direction of (d) is (1;1;1)",
+        "the point (1;0;1) is the origin",
+        "t must equal 0"
+      ],
+      "answerIndex": 0,
+      "answer": "every point of (d) satisfies the plane equation identically",
+      "solutionSketch": [
+        "(1+t)+t+(1−2t)−2=0 for every t, so (d) ⊂ (P)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ln-06",
+      "slice": "lines",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "parametric-BD"
+      },
+      "stem": "A system of parametric equations of the line (BD) with B(0; 2; 3) and D(1; −1; 3) is:",
+      "choices": [
+        "\\(x=s,\\ y=2-3s,\\ z=3\\)",
+        "\\(x=s,\\ y=2+s,\\ z=3+s\\)",
+        "\\(x=0,\\ y=2+s,\\ z=3s\\)",
+        "\\(x=s,\\ y=-3s,\\ z=s\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(x=s,\\ y=2-3s,\\ z=3\\)",
+      "solutionSketch": [
+        "BD=(1;−3;0). From B: x=s, y=2−3s, z=3."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-or-03",
+      "slice": "orthogonality",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "intersection-direction"
+      },
+      "stem": "A direction of the line of intersection of the planes x − y + z = 2 and x + y − z = 0 is:",
+      "choices": [
+        "\\((0;1;1)\\)",
+        "\\((1;0;0)\\)",
+        "\\((1;1;0)\\)",
+        "\\((1;-1;1)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((0;1;1)\\)",
+      "solutionSketch": [
+        "N1×N2 = |i j k; 1 −1 1; 1 1 −1| = (0;2;2), collinear to (0;1;1)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-or-04",
+      "slice": "orthogonality",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "ortho-projection-plane"
+      },
+      "stem": "The orthogonal projection of A(1; 2; 3) on the plane x + y + z = 0 is the point H:",
+      "choices": [
+        "\\((-1;0;1)\\)",
+        "\\((0;0;0)\\)",
+        "\\((1;2;3)\\)",
+        "\\((−1;−2;−3)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((-1;0;1)\\)",
+      "solutionSketch": [
+        "The perpendicular is A+t(1;1;1)=(1+t;2+t;3+t).",
+        "1+t+2+t+3+t=0 ⇒ t=−2, so H=(−1;0;1)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ds-03",
+      "slice": "distances",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dist-plane-3"
+      },
+      "stem": "The distance from A(1; 0; −1) to the plane 2x − y + 2z + 3 = 0 equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(2\\)",
+        "\\(\\dfrac{3}{2}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "|2−0−2+3|/√(4+1+4)=3/3=1."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ds-04",
+      "slice": "distances",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "point-line-axis"
+      },
+      "stem": "Let A(2; 1; 0) and (d) be the line through O of direction (1; 0; 0). Then d(A,(d)) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(\\sqrt{5}\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "AO=(2;1;0), u=(1;0;0), |AO∧u|=|(0;0;−1)|=1, and |u|=1."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-fg-03",
+      "slice": "figures",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "triangle-area-cross"
+      },
+      "stem": "The area of triangle ABC with A(1; 0; 0), B(0; 1; 0), C(0; 0; 1) equals:",
+      "choices": [
+        "\\(\\dfrac{\\sqrt{3}}{2}\\)",
+        "\\(\\sqrt{3}\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{\\sqrt{3}}{2}\\)",
+      "solutionSketch": [
+        "AB=(−1;1;0), AC=(−1;0;1), AB∧AC=(1;1;1), area = √3 / 2."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-fg-04",
+      "slice": "figures",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "circumcentre-axis-triangle"
+      },
+      "stem": "The plane x + y + z = 2 meets the axes at A(2; 0; 0), B(0; 2; 0), C(0; 0; 2). The centre of the circle circumscribed about ABC is:",
+      "choices": [
+        "\\(\\left(\\dfrac{2}{3};\\dfrac{2}{3};\\dfrac{2}{3}\\right)\\)",
+        "\\((1;1;1)\\)",
+        "\\((0;0;0)\\)",
+        "\\((2;2;2)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\left(\\dfrac{2}{3};\\dfrac{2}{3};\\dfrac{2}{3}\\right)\\)",
+      "solutionSketch": [
+        "That centre is the orthogonal projection of O on the plane: (t;t;t) with 3t=2, so t=2/3.",
+        "It is equidistant from A, B and C."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-pl-07",
+      "slice": "planes",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "mediator-plane"
+      },
+      "stem": "An equation of the mediator plane of [AE] with A(3; 1; 0) and E(−1; 1; 2) is:",
+      "choices": [
+        "\\(2x-z=1\\)",
+        "\\(x+y+z=0\\)",
+        "\\(x-y=0\\)",
+        "\\(2x+z=1\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2x-z=1\\)",
+      "solutionSketch": [
+        "Midpoint I=(1;1;1) and AE=(−4;0;2).",
+        "−4(x−1)+2(z−1)=0 ⇒ −4x+4+2z−2=0 ⇒ 2x−z=1."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ln-07",
+      "slice": "lines",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "symmetric-wrt-plane"
+      },
+      "stem": "The symmetric of I(2; 1; 2) with respect to the plane x − y − 2z − 5 = 0 is a point J. The midpoint of [IJ] is the intersection of (IJ) with that plane. A direction of (IJ) is:",
+      "choices": [
+        "\\((1;-1;-2)\\)",
+        "\\((2;1;2)\\)",
+        "\\((1;1;0)\\)",
+        "\\((0;1;-1)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((1;-1;-2)\\)",
+      "solutionSketch": [
+        "The line joining a point to its symmetric with respect to a plane is orthogonal to the plane.",
+        "Hence a direction of (IJ) is the normal (1;−1;−2)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-or-05",
+      "slice": "orthogonality",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "foot-on-diagonal"
+      },
+      "stem": "The foot of the perpendicular from A(2; 3; 1) to the line x=t, y=t, z=t is:",
+      "choices": [
+        "\\((2;2;2)\\)",
+        "\\((1;1;1)\\)",
+        "\\((2;3;1)\\)",
+        "\\((0;0;0)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((2;2;2)\\)",
+      "solutionSketch": [
+        "H=(t;t;t), (A−H)·(1;1;1)=0 ⇒ 6−3t=0 ⇒ t=2, so H=(2;2;2)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-or-06",
+      "slice": "orthogonality",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dist-to-intersection"
+      },
+      "stem": "Let (P): x + 2y − 2z + 3 = 0 and (P'): 2x + y + 2z = 0. Then (P) and (P') are perpendicular, and if d1=d(B,(P)), d2=d(B,(P')) for B(5; 2; 0), then d(B, (P)∩(P'))² equals:",
+      "choices": [
+        "\\(d_1^2+d_2^2\\)",
+        "\\(d_1+d_2\\)",
+        "\\(d_1 d_2\\)",
+        "\\(|d_1-d_2|\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(d_1^2+d_2^2\\)",
+      "solutionSketch": [
+        "N·N'=2+2−4=0 so the planes are perpendicular.",
+        "The distance to their intersection line satisfies d² = d1² + d2²."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ds-05",
+      "slice": "distances",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "skew-distance"
+      },
+      "stem": "Let (d) pass through A(1; 0; 0) with direction u=(1; 0; 0) and (d') through B(0; 1; 0) with direction v=(0; 0; 1). Then d((d),(d')) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(\\sqrt{2}\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "u∧v=(0;−1;0), AB=(−1;1;0), |AB·(u∧v)| / |u∧v| = 1.",
+        "The lines are skew (not coplanar)."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-ds-06",
+      "slice": "distances",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "dist-to-BC"
+      },
+      "stem": "The distance from A(2; 1; 1) to the line (BC) with B(0; 2; 3) and C(−1; 0; 5) equals:",
+      "choices": [
+        "\\(\\dfrac{\\sqrt{65}}{3}\\)",
+        "\\(3\\)",
+        "\\(\\sqrt{65}\\)",
+        "\\(\\dfrac{1}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{\\sqrt{65}}{3}\\)",
+      "solutionSketch": [
+        "BA=(2;−1;−2), BC=(−1;−2;2), BA∧BC=(−6;−2;−5), |BA∧BC|=√65, |BC|=3.",
+        "d=√65 / 3."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-fg-05",
+      "slice": "figures",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "constant-area"
+      },
+      "stem": "Let M be a variable point of the line (d): x=t−1, y=t+1, z=t+2, and let B(1; 0; −2), C(2; 1; −1). If (d) is parallel to (BC), the area of triangle MBC is:",
+      "choices": [
+        "independent of the position of M on (d)",
+        "equal to 0 for every M",
+        "maximized only at t=0",
+        "proportional to t²"
+      ],
+      "answerIndex": 0,
+      "answer": "independent of the position of M on (d)",
+      "solutionSketch": [
+        "BC=(1;1;1) is a direction of (d), so the height from M to (BC) is constant.",
+        "Hence area(MBC)=½ |MB∧BC| is constant."
+      ]
+    },
+    {
+      "id": "g12-ls-sg-fg-06",
+      "slice": "figures",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 official-session wording. Not a photocopy of any past paper.",
+        "tag": "tetra-volume"
+      },
+      "stem": "The volume of tetrahedron OABC with A(2; 0; 0), B(0; 2; 0), C(0; 0; 2) equals:",
+      "choices": [
+        "\\(\\dfrac{4}{3}\\)",
+        "\\(8\\)",
+        "\\(4\\)",
+        "\\(\\dfrac{8}{3}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(\\dfrac{4}{3}\\)",
+      "solutionSketch": [
+        "V = (1/6) |OA · (OB∧OC)| = (1/6)·8 = 4/3."
+      ]
+    }
+  ]
+}
