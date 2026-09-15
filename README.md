@@ -88,7 +88,7 @@ DRM الحقيقي يحتاج حساب CDN مدفوع. المشغّل المحل
 | ملخص عربي للطالب: أهداف، شرح، أمثلة، أخطاء | `/classroom/grade-12-ch1` و `/resources/print/grade-12-ch1` |
 | بنك أسئلة النهايات (شريحة أولى داخل بنك الدوال، أكثر من 30 بنداً بأسلوب الامتحان) | `/practice/take?lessonId=grade-12-ch1` |
 | مسابقة **علوم الحياة — الدوال** (دراسة الدوال = المسألة الرابعة في النموذج، 16 سؤالاً سهل→صعب) | `/practice` أو `/practice/take?bank=g12-ls-functions&mode=contest` |
-| مسابقة **المتوسط — الهندسة** و**الجبر** (بنوك الشهادة المتوسطة) | `/practice` أو `/practice/take?bank=brevet-geometry&mode=contest` |
+| مسابقة **المتوسط** — الأعداد، الجبر، المسائل اللفظية، الهندسة، الهندسة التحليلية | `/practice` أو `/practice/take?bank=brevet-numbers&mode=contest` |
 | نصوص منطوقة لثلاثة دروس (للتسجيل الحي لاحقاً) | `content/grade-12-ls-limits/` |
 
 التدريب الحر لدرس النهايات يعرض شريحة النهايات. امتحان الدرس يسحب 12 سؤالاً بمزيج صعوبة. مسابقة الدوال تستخدم بنك الموضوع مرتّباً سهل→صعب (نهايات، استمرار، مشتقات، جدول تغيرات، تقارب، دالة عكسية).
@@ -117,16 +117,16 @@ content/banks/g12-ls/probability.json       ← ثالثاً · لاحقاً
 content/banks/g12-ls/integration.json       ← فصل إضافي لاحقاً
 content/banks/brevet/geometry.json          ← هندسة البروفيه (الآن)
 content/banks/brevet/algebra.json           ← جبر البروفيه (الآن)
-content/banks/brevet/numbers.json           ← لاحقاً
-content/banks/brevet/word_problems.json     ← لاحقاً
-content/banks/brevet/coordinate.json        ← لاحقاً
+content/banks/brevet/numbers.json           ← أعداد البروفيه (الآن)
+content/banks/brevet/word_problems.json     ← مسائل لفظية (الآن)
+content/banks/brevet/coordinate.json        ← هندسة تحليلية (الآن)
 content/banks/g12-se/…
 content/banks/g12-gs/…
 ```
 
 بنك **الدوال** يطابق المسألة الرابعة: حدود المجال (0 و +∞)، خطوط التقارب، جدول التغيرات، الدالة العكسية، المماس، جذر وحيد بحصار عددي. الشرائح: النهايات (مع فيديو الصف) ثم الاستمرار ثم المشتقات ثم جدول التغيرات ثم التقارب ثم العكسية. الملف مرتّب سهل → متوسط → صعب. البنود الأكاديمية تحمل `source.kind: generated-in-official-style` — **ليست** نماذج رسمية منسوخة.
 
-**الشهادة المتوسطة (صف 9):** مسابقة بست أو سبع مسائل. البنوك: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية. المنفَّذ الآن **الهندسة** و**الجبر** (`content/banks/brevet/`). التفاصيل في `content/banks/brevet/README.md`.
+**الشهادة المتوسطة (صف 9):** مسابقة بست أو سبع مسائل. البنوك الخمسة جاهزة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية (`content/banks/brevet/`). التفاصيل في `content/banks/brevet/README.md`.
 
 كيف يُضاف الموضوع التالي من الورقة الرباعية (هندسة الفضاء ثم الاحتمالات): انسخ الملف، غيّر `id` والعناوين والشرائح، املأ الأسئلة بأسلوب الجلسات، ثم سجّله في `src/lib/topicBanks.ts`. التفاصيل في `content/banks/README.md`.
 

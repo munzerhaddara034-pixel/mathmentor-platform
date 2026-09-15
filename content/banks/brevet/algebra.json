@@ -50,7 +50,7 @@
       "file": "content/banks/brevet/numbers.json",
       "title": "Numbers",
       "arabicTitle": "الأعداد",
-      "implemented": false
+      "implemented": true
     },
     {
       "id": "algebra",
@@ -64,7 +64,7 @@
       "file": "content/banks/brevet/word_problems.json",
       "title": "Word problems",
       "arabicTitle": "المسائل اللفظية",
-      "implemented": false
+      "implemented": true
     },
     {
       "id": "geometry",
@@ -78,13 +78,8 @@
       "file": "content/banks/brevet/coordinate.json",
       "title": "Coordinate geometry",
       "arabicTitle": "الهندسة التحليلية",
-      "implemented": false
+      "implemented": true
     }
-  ],
-  "nextTopicFiles": [
-    "content/banks/brevet/numbers.json",
-    "content/banks/brevet/word_problems.json",
-    "content/banks/brevet/coordinate.json"
   ],
   "questions": [
     {

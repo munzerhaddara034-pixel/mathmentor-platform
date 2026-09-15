@@ -11,24 +11,25 @@ Official Grade 9 contest PDFs stay on Munzer’s PC. Do **not** photocopy them i
 
 | Bank | Arabic | Status |
 | --- | --- | --- |
-| `numbers.json` | الأعداد (radicals, scientific notation, irreducible fractions) | later |
+| `numbers.json` | الأعداد (radicals, scientific notation, irreducible fractions) | **seeded** |
 | `algebra.json` | الجبر (expand, factor, equations, inequalities, systems) | **seeded** |
-| `word_problems.json` | المسائل اللفظية (percentages, contextual systems) | later |
+| `word_problems.json` | المسائل اللفظية (percentages, contextual systems) | **seeded** |
 | `geometry.json` | الهندسة (triangles, circles, similarity, Thales, transformations, right-triangle trig) | **seeded** |
-| `coordinate.json` | الهندسة التحليلية (orthonormal plane, line equations, perpendicular bisectors) | later |
-
-Pilot order: **geometry + algebra first** (highest exam weight), then numbers, word problems, coordinate.
+| `coordinate.json` | الهندسة التحليلية (orthonormal plane, line equations, perpendicular bisectors) | **seeded** |
 
 Difficulty inside each file: **easy → medium → hard**, Lebanese Brevet rigor (not primary-school easy).
 
 ## Student URLs
 
-- Geometry contest: `/practice/take?bank=brevet-geometry&mode=contest`
+- Numbers contest: `/practice/take?bank=brevet-numbers&mode=contest`
 - Algebra contest: `/practice/take?bank=brevet-algebra&mode=contest`
+- Word-problems contest: `/practice/take?bank=brevet-word-problems&mode=contest`
+- Geometry contest: `/practice/take?bank=brevet-geometry&mode=contest`
+- Coordinate contest: `/practice/take?bank=brevet-coordinate&mode=contest`
 - Full-bank training: add `&mode=free`
 - Hub: `/practice`
 
-Rebuild after editing `scripts/build-brevet-banks.py`:
+Rebuild after editing `scripts/build-brevet-banks.py` or `scripts/brevet_extra_banks.py`:
 
 ```bash
 python3 scripts/build-brevet-banks.py

@@ -47,7 +47,7 @@ export default function PracticeHubPage() {
         ))}
 
         <h3 style={{ marginTop: 24 }}>صف 9 · الشهادة المتوسطة</h3>
-        <p className="muted">مسابقة البروفيه عادةً ست أو سبع مسائل. البنوك المقترحة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية. المنفَّذ الآن: الهندسة والجبر.</p>
+        <p className="muted">مسابقة البروفيه عادةً ست أو سبع مسائل. البنوك الخمسة جاهزة للمسابقة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية.</p>
         {grouped.brevet[0]?.contestTopics?.map((topic) => (
           <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
             {topic.arabicTitle ?? topic.title}

@@ -1,15 +1,27 @@
 #!/usr/bin/env python3
-"""Seed Brevet (Grade 9 / الشهادة المتوسطة) geometry + algebra topic banks.
+"""Seed Brevet (Grade 9 / الشهادة المتوسطة) topic banks.
 
 Items follow official contest wording (isosceles with principal vertex, circle of
-diameter, expand/factor E(x), linear systems) but use original numbers.
-They are NOT past papers.
+diameter, expand/factor E(x), scientific notation, two-offer tariffs, orthonormal
+plane) but use original numbers. They are NOT past papers.
 """
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
+
+from brevet_extra_banks import (
+    COORD,
+    COORD_RANK,
+    COORD_SLICES,
+    NUM,
+    NUM_RANK,
+    NUM_SLICES,
+    WP,
+    WP_RANK,
+    WP_SLICES,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "content/banks/brevet"
@@ -23,11 +35,11 @@ SOURCE = {
 BAND = {"easy": 0, "medium": 1, "hard": 2}
 
 BREVET_TOPICS = [
-    {"id": "numbers", "file": "content/banks/brevet/numbers.json", "title": "Numbers", "arabicTitle": "الأعداد", "implemented": False},
+    {"id": "numbers", "file": "content/banks/brevet/numbers.json", "title": "Numbers", "arabicTitle": "الأعداد", "implemented": True},
     {"id": "algebra", "file": "content/banks/brevet/algebra.json", "title": "Algebra", "arabicTitle": "الجبر", "implemented": True},
-    {"id": "word_problems", "file": "content/banks/brevet/word_problems.json", "title": "Word problems", "arabicTitle": "المسائل اللفظية", "implemented": False},
+    {"id": "word_problems", "file": "content/banks/brevet/word_problems.json", "title": "Word problems", "arabicTitle": "المسائل اللفظية", "implemented": True},
     {"id": "geometry", "file": "content/banks/brevet/geometry.json", "title": "Geometry", "arabicTitle": "الهندسة", "implemented": True},
-    {"id": "coordinate", "file": "content/banks/brevet/coordinate.json", "title": "Coordinate geometry", "arabicTitle": "الهندسة التحليلية", "implemented": False},
+    {"id": "coordinate", "file": "content/banks/brevet/coordinate.json", "title": "Coordinate geometry", "arabicTitle": "الهندسة التحليلية", "implemented": True},
 ]
 
 
@@ -860,11 +872,6 @@ def bank(meta, slices, questions, rank):
         "slices": slices,
         "order": "easy → medium → hard",
         "contestTopics": BREVET_TOPICS,
-        "nextTopicFiles": [
-            "content/banks/brevet/numbers.json",
-            "content/banks/brevet/word_problems.json",
-            "content/banks/brevet/coordinate.json",
-        ],
         "questions": qs,
     }
     return payload
@@ -872,19 +879,39 @@ def bank(meta, slices, questions, rank):
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    geo = bank(
-        {"id": "brevet-geometry", "topic": "geometry", "title": "Geometry", "arabicTitle": "الهندسة"},
-        GEO_SLICES,
-        GEO,
-        GEO_RANK,
-    )
-    alg = bank(
-        {"id": "brevet-algebra", "topic": "algebra", "title": "Algebra", "arabicTitle": "الجبر"},
-        ALG_SLICES,
-        ALG,
-        ALG_RANK,
-    )
-    for payload in (geo, alg):
+    payloads = [
+        bank(
+            {"id": "brevet-numbers", "topic": "numbers", "title": "Numbers", "arabicTitle": "الأعداد"},
+            NUM_SLICES,
+            NUM,
+            NUM_RANK,
+        ),
+        bank(
+            {"id": "brevet-algebra", "topic": "algebra", "title": "Algebra", "arabicTitle": "الجبر"},
+            ALG_SLICES,
+            ALG,
+            ALG_RANK,
+        ),
+        bank(
+            {"id": "brevet-word-problems", "topic": "word_problems", "title": "Word problems", "arabicTitle": "المسائل اللفظية"},
+            WP_SLICES,
+            WP,
+            WP_RANK,
+        ),
+        bank(
+            {"id": "brevet-geometry", "topic": "geometry", "title": "Geometry", "arabicTitle": "الهندسة"},
+            GEO_SLICES,
+            GEO,
+            GEO_RANK,
+        ),
+        bank(
+            {"id": "brevet-coordinate", "topic": "coordinate", "title": "Coordinate geometry", "arabicTitle": "الهندسة التحليلية"},
+            COORD_SLICES,
+            COORD,
+            COORD_RANK,
+        ),
+    ]
+    for payload in payloads:
         path = OUT / f"{payload['topic']}.json"
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         bands = {}

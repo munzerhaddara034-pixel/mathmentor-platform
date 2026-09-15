@@ -5,7 +5,7 @@ Certificate practice is split **by topic**, not by dumping a whole session PDF i
 Two certificate levels:
 
 1. **Grade 12 LS** (`g12-ls/`) — Functions (Problem IV) is live
-2. **Brevet / الشهادة المتوسطة** (`brevet/`) — geometry + algebra seeded
+2. **Brevet / الشهادة المتوسطة** (`brevet/`) — five topic banks seeded (numbers, algebra, word problems, geometry, coordinate)
 
 Official packs on Munzer’s PC (not committed; do not photocopy into Git):
 
@@ -41,9 +41,9 @@ content/banks/
   g12-ls/integration.json      ← extra LS chapter later (not one of the four paper slots)
   brevet/geometry.json         ← Brevet geometry (now)
   brevet/algebra.json          ← Brevet algebra (now)
-  brevet/numbers.json          ← later
-  brevet/word_problems.json    ← later
-  brevet/coordinate.json       ← later
+  brevet/numbers.json          ← Brevet numbers (now)
+  brevet/word_problems.json    ← Brevet word problems (now)
+  brevet/coordinate.json       ← Brevet coordinate geometry (now)
   g12-se/…                     ← SE topics later
   g12-gs/…                     ← GS topics later
 ```
@@ -96,4 +96,4 @@ python3 scripts/merge-session-style-functions.py
 
 ## Brevet (Grade 9)
 
-See `content/banks/brevet/README.md`. Geometry and algebra contests are on `/practice`. Rebuild with `python3 scripts/build-brevet-banks.py`.
+See `content/banks/brevet/README.md`. All five Brevet contests are on `/practice`. Rebuild with `python3 scripts/build-brevet-banks.py`.

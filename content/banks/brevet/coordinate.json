@@ -1,0 +1,934 @@
+{
+  "id": "brevet-coordinate",
+  "track": "grade-9",
+  "certificate": "Brevet",
+  "topic": "coordinate",
+  "title": "Coordinate geometry",
+  "arabicTitle": "الهندسة التحليلية",
+  "contestMinutes": 20,
+  "passScore": 70,
+  "sourceModels": [
+    "Grade 9 / Brevet official contests pack"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Brevet sessions (الشهادة المتوسطة): official English wording, original numbers. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "point_line",
+      "title": "Point and line",
+      "arabicTitle": "نقطة ومستقيم"
+    },
+    {
+      "id": "slope_eq",
+      "title": "Slope and equation",
+      "arabicTitle": "الميل والمعادلة"
+    },
+    {
+      "id": "parallel_perp",
+      "title": "Parallel and perpendicular",
+      "arabicTitle": "التوازي والتعامد"
+    },
+    {
+      "id": "midpoint_pb",
+      "title": "Midpoint and perpendicular bisector",
+      "arabicTitle": "المنتصف والمنصف العمودي"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "numbers",
+      "file": "content/banks/brevet/numbers.json",
+      "title": "Numbers",
+      "arabicTitle": "الأعداد",
+      "implemented": true
+    },
+    {
+      "id": "algebra",
+      "file": "content/banks/brevet/algebra.json",
+      "title": "Algebra",
+      "arabicTitle": "الجبر",
+      "implemented": true
+    },
+    {
+      "id": "word_problems",
+      "file": "content/banks/brevet/word_problems.json",
+      "title": "Word problems",
+      "arabicTitle": "المسائل اللفظية",
+      "implemented": true
+    },
+    {
+      "id": "geometry",
+      "file": "content/banks/brevet/geometry.json",
+      "title": "Geometry",
+      "arabicTitle": "الهندسة",
+      "implemented": true
+    },
+    {
+      "id": "coordinate",
+      "file": "content/banks/brevet/coordinate.json",
+      "title": "Coordinate geometry",
+      "arabicTitle": "الهندسة التحليلية",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "brevet-co-pt-01",
+      "slice": "point_line",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "point-on-line"
+      },
+      "stem": "In an orthonormal system, the point A(2 ; 3) and the line (d): y = x + 1. Then:",
+      "choices": [
+        "A belongs to (d)",
+        "A does not belong to (d)",
+        "(d) is vertical",
+        "A is the origin"
+      ],
+      "answerIndex": 0,
+      "answer": "A belongs to (d)",
+      "solutionSketch": [
+        "The coordinates of A verify the equation: 3 = 2 + 1, so A belongs to (d)."
+      ],
+      "latex": "y=x+1"
+    },
+    {
+      "id": "brevet-co-pt-02",
+      "slice": "point_line",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "y-intercept"
+      },
+      "stem": "The y-intercept of the line y = 3x − 5 is the point:",
+      "choices": [
+        "(0 ; 3)",
+        "(−5 ; 0)",
+        "(3 ; −5)",
+        "(0 ; −5)"
+      ],
+      "answerIndex": 3,
+      "answer": "(0 ; −5)",
+      "solutionSketch": [
+        "Set x = 0: y = −5, so the y-intercept is (0 ; −5).",
+        "Trap: ( −5 ; 0 ), the x-intercept."
+      ],
+      "latex": "y=3x-5"
+    },
+    {
+      "id": "brevet-co-pt-03",
+      "slice": "point_line",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "which-point"
+      },
+      "stem": "Which of the following points belongs to the line y = −2x + 4?",
+      "choices": [
+        "(0 ; 4)",
+        "(0 ; −2)",
+        "(4 ; 0)",
+        "(2 ; 4)"
+      ],
+      "answerIndex": 0,
+      "answer": "(0 ; 4)",
+      "solutionSketch": [
+        "For (0 ; 4): y = 4. For (4 ; 0): 0 = −8 + 4 is false. Trap: mixing intercepts."
+      ]
+    },
+    {
+      "id": "brevet-co-sl-01",
+      "slice": "slope_eq",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "slope-two-points"
+      },
+      "stem": "The slope of the line passing through A(1 ; 2) and B(3 ; 6) is:",
+      "choices": [
+        "\\(1/2\\)",
+        "2",
+        "4",
+        "3"
+      ],
+      "answerIndex": 1,
+      "answer": "2",
+      "solutionSketch": [
+        "a(AB) = (6 − 2)/(3 − 1) = 4/2 = 2.",
+        "Trap: inverting the ratio (1/2)."
+      ],
+      "latex": "a=\\frac{y_B-y_A}{x_B-x_A}"
+    },
+    {
+      "id": "brevet-co-sl-02",
+      "slice": "slope_eq",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "read-slope"
+      },
+      "stem": "The line y = −3x + 1 has slope:",
+      "choices": [
+        "1",
+        "3",
+        "\\(-1/3\\)",
+        "−3"
+      ],
+      "answerIndex": 3,
+      "answer": "−3",
+      "solutionSketch": [
+        "In y = ax + b the slope is a = −3.",
+        "Trap: taking the opposite of the reciprocal as if asking for a perpendicular."
+      ],
+      "latex": "y=-3x+1"
+    },
+    {
+      "id": "brevet-co-pp-01",
+      "slice": "parallel_perp",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "parallel-same-slope"
+      },
+      "stem": "In an orthonormal system, the lines (D1): y = 2x + 1 and (D2): y = 2x − 5 are:",
+      "choices": [
+        "perpendicular",
+        "parallel",
+        "intersecting at the origin",
+        "coincident"
+      ],
+      "answerIndex": 1,
+      "answer": "parallel",
+      "solutionSketch": [
+        "Same slope 2, different intercepts: the lines are parallel and distinct."
+      ]
+    },
+    {
+      "id": "brevet-co-pp-02",
+      "slice": "parallel_perp",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perp-product"
+      },
+      "stem": "In an orthonormal system, two non-vertical perpendicular lines have slopes a and a′ satisfying:",
+      "choices": [
+        "\\(a\\times a'=1\\)",
+        "\\(a\\times a'=-1\\)",
+        "\\(a=a'\\)",
+        "\\(a+a'=0\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(a\\times a'=-1\\)",
+      "solutionSketch": [
+        "The product of the slopes of two perpendicular lines is −1."
+      ],
+      "latex": "a\\times a'=-1"
+    },
+    {
+      "id": "brevet-co-md-01",
+      "slice": "midpoint_pb",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "midpoint"
+      },
+      "stem": "I is the midpoint of [AB] with A(2 ; 4) and B(6 ; 8). Then I is:",
+      "choices": [
+        "(8 ; 12)",
+        "(4 ; 6)",
+        "(2 ; 4)",
+        "(4 ; 4)"
+      ],
+      "answerIndex": 1,
+      "answer": "(4 ; 6)",
+      "solutionSketch": [
+        "I = ((2+6)/2 ; (4+8)/2) = (4 ; 6).",
+        "Trap: adding the coordinates without dividing by 2."
+      ],
+      "latex": "I=\\left(\\frac{x_A+x_B}{2};\\frac{y_A+y_B}{2}\\right)"
+    },
+    {
+      "id": "brevet-co-md-02",
+      "slice": "midpoint_pb",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "midpoint-origin"
+      },
+      "stem": "The midpoint of [AB] with A(0 ; 0) and B(6 ; −2) is:",
+      "choices": [
+        "(6 ; −2)",
+        "(3 ; −2)",
+        "(−3 ; 1)",
+        "(3 ; −1)"
+      ],
+      "answerIndex": 3,
+      "answer": "(3 ; −1)",
+      "solutionSketch": [
+        "I = (3 ; −1)."
+      ]
+    },
+    {
+      "id": "brevet-co-pt-04",
+      "slice": "point_line",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "verify-A"
+      },
+      "stem": "The point A(1 ; −1) and the line (d): y = 2x − 3. Then:",
+      "choices": [
+        "A belongs to (d)",
+        "A is the y-intercept of (d)",
+        "(d) is vertical",
+        "A is the origin"
+      ],
+      "answerIndex": 0,
+      "answer": "A belongs to (d)",
+      "solutionSketch": [
+        "2(1) − 3 = −1, so the coordinates of A verify the equation of (d)."
+      ],
+      "latex": "y=2x-3"
+    },
+    {
+      "id": "brevet-co-pt-05",
+      "slice": "point_line",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "which-on-d"
+      },
+      "stem": "Which of the following points belongs to (d): y = −x + 5?",
+      "choices": [
+        "(2 ; 7)",
+        "(2 ; 3)",
+        "(5 ; 5)",
+        "(0 ; 0)"
+      ],
+      "answerIndex": 1,
+      "answer": "(2 ; 3)",
+      "solutionSketch": [
+        "For (2 ; 3): −2 + 5 = 3. For (2 ; 7): −2 + 5 ≠ 7 (that would be y = x + 5)."
+      ]
+    },
+    {
+      "id": "brevet-co-pt-06",
+      "slice": "point_line",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "implicit-verify"
+      },
+      "stem": "The line (d) has equation 2x + 3y − 12 = 0. The point C(3 ; 2):",
+      "choices": [
+        "does not belong to (d)",
+        "belongs to (d)",
+        "is the origin",
+        "makes (d) vertical"
+      ],
+      "answerIndex": 1,
+      "answer": "belongs to (d)",
+      "solutionSketch": [
+        "2×3 + 3×2 − 12 = 0, so C belongs to (d)."
+      ],
+      "latex": "2x+3y-12=0"
+    },
+    {
+      "id": "brevet-co-sl-03",
+      "slice": "slope_eq",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "equation-AB"
+      },
+      "stem": "A(0 ; 2) and B(8 ; 6). An equation of the line (AB) is:",
+      "choices": [
+        "\\(y=2x+2\\)",
+        "\\(y=\\frac{1}{2}x\\)",
+        "\\(y=4x+2\\)",
+        "\\(y=\\frac{1}{2}x+2\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(y=\\frac{1}{2}x+2\\)",
+      "solutionSketch": [
+        "a(AB) = (6−2)/(8−0) = 1/2. Through (0 ; 2): y = (1/2)x + 2."
+      ],
+      "latex": "y=\\frac{1}{2}x+2"
+    },
+    {
+      "id": "brevet-co-sl-04",
+      "slice": "slope_eq",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "slope-CD"
+      },
+      "stem": "The slope of the line through C(2 ; −1) and D(6 ; 7) is:",
+      "choices": [
+        "\\(1/2\\)",
+        "8",
+        "−2",
+        "2"
+      ],
+      "answerIndex": 3,
+      "answer": "2",
+      "solutionSketch": [
+        "a(CD) = (7 − (−1))/(6 − 2) = 8/4 = 2."
+      ]
+    },
+    {
+      "id": "brevet-co-sl-05",
+      "slice": "slope_eq",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "point-slope"
+      },
+      "stem": "The line passing through A(1 ; 4) with slope −1 has equation:",
+      "choices": [
+        "\\(y=-x+4\\)",
+        "\\(y=x+5\\)",
+        "\\(y=-x+5\\)",
+        "\\(y=-x+3\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(y=-x+5\\)",
+      "solutionSketch": [
+        "y − 4 = −1(x − 1), so y = −x + 5."
+      ],
+      "latex": "y-4=-(x-1)"
+    },
+    {
+      "id": "brevet-co-pp-03",
+      "slice": "parallel_perp",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perp-slopes"
+      },
+      "stem": "In an orthonormal system, (D1): y = 3x − 4 and (D2): y = −(1/3)x + 2 are:",
+      "choices": [
+        "parallel",
+        "coincident",
+        "perpendicular",
+        "vertical"
+      ],
+      "answerIndex": 2,
+      "answer": "perpendicular",
+      "solutionSketch": [
+        "3 × (−1/3) = −1, so the lines are perpendicular."
+      ]
+    },
+    {
+      "id": "brevet-co-pp-04",
+      "slice": "parallel_perp",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perp-4"
+      },
+      "stem": "In an orthonormal system, (D1): y = 4x − 1 and (D2): y = −x/4 + 3 are:",
+      "choices": [
+        "parallel",
+        "perpendicular",
+        "coincident",
+        "horizontal"
+      ],
+      "answerIndex": 1,
+      "answer": "perpendicular",
+      "solutionSketch": [
+        "4 × (−1/4) = −1, so (D1) ⊥ (D2)."
+      ]
+    },
+    {
+      "id": "brevet-co-pp-05",
+      "slice": "parallel_perp",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "d-perp-AE"
+      },
+      "stem": "In an orthonormal system, (d): y = −3x + 4 and (AE): y = (1/3)x − 1. Then:",
+      "choices": [
+        "(d) // (AE)",
+        "(d) ⊥ (AE)",
+        "(d) and (AE) coincide",
+        "(d) is vertical"
+      ],
+      "answerIndex": 1,
+      "answer": "(d) ⊥ (AE)",
+      "solutionSketch": [
+        "−3 × (1/3) = −1, so (d) ⊥ (AE)."
+      ]
+    },
+    {
+      "id": "brevet-co-md-03",
+      "slice": "midpoint_pb",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perp-bisector-eq"
+      },
+      "stem": "A(1 ; 3) and B(5 ; 7). An equation of the perpendicular bisector of [AB] is:",
+      "choices": [
+        "\\(y=x+2\\)",
+        "\\(y=-x+5\\)",
+        "\\(y=-x+8\\)",
+        "\\(y=-x+3\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(y=-x+8\\)",
+      "solutionSketch": [
+        "Midpoint I(3 ; 5). Slope of AB is 1, so the perpendicular slope is −1.",
+        "Through I: y − 5 = −(x − 3), hence y = −x + 8.",
+        "Trap: the line (AB) itself, y = x + 2."
+      ],
+      "latex": "y=-x+8"
+    },
+    {
+      "id": "brevet-co-md-04",
+      "slice": "midpoint_pb",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "vertical-pb"
+      },
+      "stem": "A(0 ; 2) and B(4 ; 2). The perpendicular bisector of [AB] has equation:",
+      "choices": [
+        "\\(y=2\\)",
+        "\\(x=4\\)",
+        "\\(y=x\\)",
+        "\\(x=2\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(x=2\\)",
+      "solutionSketch": [
+        "[AB] is horizontal; its midpoint is (2 ; 2); the perpendicular bisector is the vertical line x = 2."
+      ]
+    },
+    {
+      "id": "brevet-co-md-05",
+      "slice": "midpoint_pb",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "midpoint-signed"
+      },
+      "stem": "I is the midpoint of [AB] with A(−1 ; 4) and B(5 ; −2). Then I is:",
+      "choices": [
+        "(4 ; 2)",
+        "(2 ; 3)",
+        "(3 ; 1)",
+        "(2 ; 1)"
+      ],
+      "answerIndex": 3,
+      "answer": "(2 ; 1)",
+      "solutionSketch": [
+        "I = ((−1+5)/2 ; (4+(−2))/2) = (2 ; 1)."
+      ]
+    },
+    {
+      "id": "brevet-co-md-06",
+      "slice": "midpoint_pb",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "distance"
+      },
+      "stem": "In an orthonormal system, A(1 ; −2) and B(4 ; 2). The length AB equals:",
+      "choices": [
+        "5",
+        "7",
+        "\\(\\sqrt{7}\\)",
+        "25"
+      ],
+      "answerIndex": 0,
+      "answer": "5",
+      "solutionSketch": [
+        "AB² = (4−1)² + (2−(−2))² = 9 + 16 = 25, so AB = 5.",
+        "Trap: adding 3+4 or leaving 25."
+      ],
+      "latex": "AB=\\sqrt{3^2+4^2}"
+    },
+    {
+      "id": "brevet-co-pt-07",
+      "slice": "point_line",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "E-on-D"
+      },
+      "stem": "The line (D): y = (1/2)x − 2. Then the point E(6 ; 1):",
+      "choices": [
+        "belongs to (D)",
+        "does not belong to (D)",
+        "is the origin",
+        "makes (D) vertical"
+      ],
+      "answerIndex": 0,
+      "answer": "belongs to (D)",
+      "solutionSketch": [
+        "(1/2)×6 − 2 = 1, so E belongs to (D). Two points determine a line: A(0 ; −2) also belongs to (D)."
+      ],
+      "latex": "y=\\frac{1}{2}x-2"
+    },
+    {
+      "id": "brevet-co-pt-08",
+      "slice": "point_line",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "P-on-d"
+      },
+      "stem": "The line (d): 3x − y + 1 = 0. The point P(1 ; 4):",
+      "choices": [
+        "belongs to (d)",
+        "does not belong to (d)",
+        "is the x-intercept of (d)",
+        "makes (d) horizontal"
+      ],
+      "answerIndex": 0,
+      "answer": "belongs to (d)",
+      "solutionSketch": [
+        "3(1) − 4 + 1 = 0, so P belongs to (d)."
+      ],
+      "latex": "3x-y+1=0"
+    },
+    {
+      "id": "brevet-co-sl-06",
+      "slice": "slope_eq",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "equation-through-origin"
+      },
+      "stem": "A(−2 ; 1) and B(4 ; −2). An equation of the line (AB) is:",
+      "choices": [
+        "\\(y=-\\frac{1}{2}x+1\\)",
+        "\\(y=-2x\\)",
+        "\\(y=\\frac{1}{2}x\\)",
+        "\\(y=-\\frac{1}{2}x\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(y=-\\frac{1}{2}x\\)",
+      "solutionSketch": [
+        "a(AB) = (−2 − 1)/(4 − (−2)) = −3/6 = −1/2.",
+        "y − 1 = −(1/2)(x + 2) = −x/2 − 1, so y = −(1/2)x."
+      ],
+      "latex": "y=-\\frac{1}{2}x"
+    },
+    {
+      "id": "brevet-co-sl-07",
+      "slice": "slope_eq",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "to-slope-intercept"
+      },
+      "stem": "Write 2x − 4y + 8 = 0 in the form y = ax + b. The result is:",
+      "choices": [
+        "\\(y=2x+8\\)",
+        "\\(y=\\frac{1}{2}x-2\\)",
+        "\\(y=-2x+2\\)",
+        "\\(y=\\frac{1}{2}x+2\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(y=\\frac{1}{2}x+2\\)",
+      "solutionSketch": [
+        "−4y = −2x − 8, so y = (1/2)x + 2."
+      ],
+      "latex": "2x-4y+8=0"
+    },
+    {
+      "id": "brevet-co-sl-08",
+      "slice": "slope_eq",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "angle-slope"
+      },
+      "stem": "In an orthonormal system, the line y = 2x + 1 makes with the positive x-axis an angle α. Rounded to the nearest degree, α is nearest to:",
+      "choices": [
+        "\\(27^\\circ\\)",
+        "\\(45^\\circ\\)",
+        "\\(63^\\circ\\)",
+        "\\(117^\\circ\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(63^\\circ\\)",
+      "solutionSketch": [
+        "tan α = 2, and tan 63° ≈ 1.96, tan 45° = 1. So α ≈ 63°.",
+        "Trap: 27° (that is tan^{−1}(1/2))."
+      ],
+      "latex": "\\tan\\alpha=2"
+    },
+    {
+      "id": "brevet-co-pp-06",
+      "slice": "parallel_perp",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perp-slope-only"
+      },
+      "stem": "A slope of a line perpendicular to y = (2/5)x + 1 is:",
+      "choices": [
+        "\\(5/2\\)",
+        "\\(-2/5\\)",
+        "\\(2/5\\)",
+        "\\(-5/2\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(-5/2\\)",
+      "solutionSketch": [
+        "The perpendicular slope is the opposite of the reciprocal: −5/2.",
+        "Trap: +5/2 or −2/5."
+      ]
+    },
+    {
+      "id": "brevet-co-pp-07",
+      "slice": "parallel_perp",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perp-through-A"
+      },
+      "stem": "The line through A(1 ; 2) perpendicular to y = (1/3)x has equation:",
+      "choices": [
+        "\\(y=3x-1\\)",
+        "\\(y=-3x-1\\)",
+        "\\(y=\\frac{1}{3}x+2\\)",
+        "\\(y=-3x+5\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(y=-3x+5\\)",
+      "solutionSketch": [
+        "Perpendicular slope −3. Then y − 2 = −3(x − 1), so y = −3x + 5."
+      ],
+      "latex": "y=-3x+5"
+    },
+    {
+      "id": "brevet-co-pp-08",
+      "slice": "parallel_perp",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "neither-par-perp"
+      },
+      "stem": "In an orthonormal system, (D1): y = (1 − √5)x − 2 and (D2): y = (1 + √5)x + 2 are:",
+      "choices": [
+        "parallel",
+        "perpendicular",
+        "intersecting, neither parallel nor perpendicular",
+        "coincident"
+      ],
+      "answerIndex": 2,
+      "answer": "intersecting, neither parallel nor perpendicular",
+      "solutionSketch": [
+        "The slopes 1−√5 and 1+√5 are different, so the lines are not parallel.",
+        "Product: (1−√5)(1+√5) = 1 − 5 = −4 ≠ −1, so they are not perpendicular."
+      ]
+    },
+    {
+      "id": "brevet-co-md-07",
+      "slice": "midpoint_pb",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "pb-hard"
+      },
+      "stem": "A(0 ; 1) and B(4 ; 3). An equation of the perpendicular bisector of [AB] is:",
+      "choices": [
+        "\\(y=\\frac{1}{2}x+1\\)",
+        "\\(y=-2x+2\\)",
+        "\\(y=-2x+4\\)",
+        "\\(y=-2x+6\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(y=-2x+6\\)",
+      "solutionSketch": [
+        "I(2 ; 2). Slope of AB is 1/2, so the perpendicular slope is −2.",
+        "y − 2 = −2(x − 2), hence y = −2x + 6."
+      ],
+      "latex": "y=-2x+6"
+    },
+    {
+      "id": "brevet-co-md-08",
+      "slice": "midpoint_pb",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "parallelogram-vertex"
+      },
+      "stem": "ABCD is a parallelogram with A(1 ; 0), B(5 ; 1) and C(4 ; 4). Then D equals:",
+      "choices": [
+        "(8 ; 5)",
+        "(4 ; 3)",
+        "(5 ; 4)",
+        "(0 ; 3)"
+      ],
+      "answerIndex": 3,
+      "answer": "(0 ; 3)",
+      "solutionSketch": [
+        "Vector AD = vector BC, so D = A + (C − B) = (1+4−5 ; 0+4−1) = (0 ; 3).",
+        "Trap: (8 ; 5) = B + C − A, the fourth vertex of a different parallelogram on the same three points."
+      ]
+    },
+    {
+      "id": "brevet-co-md-09",
+      "slice": "midpoint_pb",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "intersection"
+      },
+      "stem": "In an orthonormal system, the lines y = 2x − 1 and y = −x + 5 intersect at:",
+      "choices": [
+        "(0 ; −1)",
+        "(5 ; 0)",
+        "(2 ; 1)",
+        "(2 ; 3)"
+      ],
+      "answerIndex": 3,
+      "answer": "(2 ; 3)",
+      "solutionSketch": [
+        "2x − 1 = −x + 5, so 3x = 6, x = 2 and y = 3. Intersection (2 ; 3)."
+      ],
+      "latex": "2x-1=-x+5"
+    }
+  ]
+}
