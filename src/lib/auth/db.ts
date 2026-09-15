@@ -1,6 +1,7 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { DEMO_PROMO_CODES } from "@/lib/access";
 import { createId } from "@/lib/ids";
 import { hashPassword } from "./password";
 import { DEMO_ACCOUNTS, isUserRole, type SessionUser, type UserRole } from "./types";
@@ -13,6 +14,7 @@ type UserRow = {
   role: string;
   linked_student_id: string | null;
   track: string | null;
+  phone: string | null;
   created_at: string;
 };
 
@@ -61,6 +63,7 @@ function openDb() {
       role TEXT NOT NULL,
       linked_student_id TEXT,
       track TEXT,
+      phone TEXT,
       created_at TEXT NOT NULL
     );
     CREATE TABLE IF NOT EXISTS enrollments (
@@ -90,10 +93,60 @@ function openDb() {
       href TEXT,
       created_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS promo_codes (
+      code TEXT PRIMARY KEY,
+      scope_kind TEXT NOT NULL,
+      scope_id TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      expires_at TEXT,
+      batch_id TEXT,
+      note TEXT,
+      redeemed_by TEXT,
+      redeemed_at TEXT,
+      redeemed_name TEXT,
+      redeemed_phone TEXT
+    );
+    CREATE TABLE IF NOT EXISTS user_entitlements (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      scope_kind TEXT NOT NULL,
+      scope_id TEXT NOT NULL,
+      source_code TEXT,
+      unlocked_at TEXT NOT NULL,
+      UNIQUE(user_id, scope_kind, scope_id)
+    );
+    CREATE TABLE IF NOT EXISTS content_overrides (
+      key TEXT PRIMARY KEY,
+      kind TEXT NOT NULL,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      title TEXT,
+      arabic_title TEXT,
+      video_url TEXT,
+      video_url_fr TEXT,
+      notes TEXT,
+      updated_at TEXT NOT NULL
+    );
   `);
+  ensureColumn(db, "users", "phone", "TEXT");
   seedIfEmpty(db);
+  seedDemoPromoCodes(db);
+  backfillDemoPhones(db);
   globalForAuth.mmAuthDb = db;
   return db;
+}
+
+function tableColumns(db: DatabaseSync, table: string) {
+  const rows = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  return new Set(rows.map((row) => row.name));
+}
+
+function ensureColumn(db: DatabaseSync, table: string, column: string, ddl: string) {
+  if (tableColumns(db, table).has(column)) return;
+  db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
+}
+
+export function getAuthDb() {
+  return openDb();
 }
 
 function daysFromNow(days: number) {
@@ -109,8 +162,8 @@ function seedIfEmpty(db: DatabaseSync) {
 
   const now = new Date().toISOString();
   const insertUser = db.prepare(
-    `INSERT INTO users (id, email, name, password_hash, role, linked_student_id, track, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (id, email, name, password_hash, role, linked_student_id, track, phone, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   const ids: Record<string, string> = {};
   for (const account of DEMO_ACCOUNTS) {
@@ -124,6 +177,7 @@ function seedIfEmpty(db: DatabaseSync) {
       account.role,
       null,
       account.track,
+      account.phone ?? null,
       now,
     );
   }
@@ -180,6 +234,25 @@ function seedIfEmpty(db: DatabaseSync) {
   );
 }
 
+function seedDemoPromoCodes(db: DatabaseSync) {
+  const insert = db.prepare(
+    `INSERT OR IGNORE INTO promo_codes
+      (code, scope_kind, scope_id, created_at, expires_at, batch_id, note, redeemed_by, redeemed_at, redeemed_name, redeemed_phone)
+     VALUES (?, ?, ?, ?, NULL, 'demo-seed', ?, NULL, NULL, NULL, NULL)`,
+  );
+  const now = new Date().toISOString();
+  for (const item of DEMO_PROMO_CODES) {
+    insert.run(item.code, item.scopeKind, item.scopeId, now, item.note);
+  }
+}
+
+function backfillDemoPhones(db: DatabaseSync) {
+  const update = db.prepare("UPDATE users SET phone = ? WHERE email = ? AND (phone IS NULL OR phone = '')");
+  for (const account of DEMO_ACCOUNTS) {
+    if (account.phone) update.run(account.phone, account.email.toLowerCase());
+  }
+}
+
 function toSessionUser(row: UserRow): SessionUser {
   const role: UserRole = isUserRole(row.role) ? row.role : "student";
   return {
@@ -189,6 +262,7 @@ function toSessionUser(row: UserRow): SessionUser {
     role,
     linkedStudentId: row.linked_student_id,
     track: row.track,
+    phone: row.phone,
   };
 }
 
@@ -211,6 +285,7 @@ export function createUser(input: {
   password: string;
   role: UserRole;
   track?: string | null;
+  phone?: string | null;
   linkedStudentEmail?: string | null;
 }) {
   const db = openDb();
@@ -229,8 +304,8 @@ export function createUser(input: {
   const id = createId(input.role);
   const now = new Date().toISOString();
   db.prepare(
-    `INSERT INTO users (id, email, name, password_hash, role, linked_student_id, track, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (id, email, name, password_hash, role, linked_student_id, track, phone, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   ).run(
     id,
     email,
@@ -239,6 +314,7 @@ export function createUser(input: {
     input.role,
     linkedStudentId,
     input.track ?? (input.role === "student" ? "grade-12" : null),
+    input.phone?.replace(/\s+/g, "") || null,
     now,
   );
   if (input.role === "student") {
@@ -289,4 +365,18 @@ export function asProgressEntries(userId: string) {
     score: row.percent,
     passedQuiz: row.passed_quiz === 1,
   }));
+}
+
+export function updateUserProfile(id: string, patch: { name?: string; phone?: string | null }) {
+  const current = findUserById(id);
+  if (!current) return undefined;
+  const name = patch.name?.trim() || current.name;
+  const phone = patch.phone === undefined ? current.phone ?? null : patch.phone?.replace(/\s+/g, "") || null;
+  openDb().prepare("UPDATE users SET name = ?, phone = ? WHERE id = ?").run(name, phone, id);
+  return findUserById(id);
+}
+
+export function listUsersByIds(ids: string[]) {
+  const unique = [...new Set(ids.filter(Boolean))];
+  return unique.map((id) => findUserById(id)).filter((user): user is SessionUser => Boolean(user));
 }

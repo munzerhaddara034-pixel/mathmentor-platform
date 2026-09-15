@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { requireRole } from "@/lib/auth/server";
-import { createScratchCards, readStore } from "@/lib/store";
+import { createPromoCodes, listPromoCodes, promoStats } from "@/lib/auth/entitlements";
+import { SCOPE_OPTIONS, type ScopeKind } from "@/lib/access";
+
+export const runtime = "nodejs";
 
 export async function GET() {
   const gate = await requireRole(["teacher"]);
   if (!gate.ok) return gate.error;
-  const store = await readStore();
-  return NextResponse.json({ cards: store.scratchCards, entitlements: store.entitlements });
+  return NextResponse.json({
+    cards: listPromoCodes(),
+    stats: promoStats(),
+    scopes: SCOPE_OPTIONS,
+  });
 }
 
 export async function POST(request: Request) {
@@ -15,17 +21,27 @@ export async function POST(request: Request) {
   const body = (await request.json()) as {
     code?: string;
     planId?: string;
+    scopeKind?: ScopeKind;
+    scopeId?: string;
     count?: number;
     note?: string;
     expiresAt?: string;
   };
-  if (!body.planId) return NextResponse.json({ error: "اختر الدورة أو الصف" }, { status: 400 });
-  const created = await createScratchCards({
-    code: body.code,
-    planId: body.planId,
-    count: body.count,
-    note: body.note,
-    expiresAt: body.expiresAt,
-  });
-  return NextResponse.json({ created });
+  const scopeKind = body.scopeKind ?? "plan";
+  const scopeId = body.scopeId ?? body.planId;
+  if (!scopeId) return NextResponse.json({ error: "اختر الدورة أو الصف أو الوحدة" }, { status: 400 });
+  try {
+    const created = createPromoCodes({
+      scopeKind,
+      scopeId,
+      count: body.count,
+      note: body.note,
+      expiresAt: body.expiresAt,
+      code: body.code,
+    });
+    return NextResponse.json({ created, stats: promoStats() });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "تعذر توليد الأكواد";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 }

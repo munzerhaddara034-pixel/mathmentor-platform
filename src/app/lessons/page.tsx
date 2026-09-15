@@ -9,7 +9,8 @@ export default function LessonsIndexPage() {
       <h1>Classroom videos</h1>
       <p className="muted">
         Default language is English. On bilingual lessons, one EN | FR click switches the voice and every line on the
-        board together. Professor Munzer is on camera in each explainer.
+        board together. Limits intro is a free preview after student login (moving name + phone watermark, speed 0.75x–2x,
+        chapter markers). Continuity, derivatives, and Thales need a 12-character card on your account.
       </p>
       <div className="grid two">
         {cards.map((card) => (

@@ -40,11 +40,7 @@ function seed(): StoreData {
     studentChat: [],
     progress: [],
     customLessons: [],
-    scratchCards: [
-      { code: "MUNZER-GOLD-9A", planId: "all", used: false },
-      { code: "MUNZER-G12-7K", planId: "g11-12", used: false },
-      { code: "BREVET-29-MX", planId: "g7-9", used: false },
-    ],
+    scratchCards: [],
     quizAttempts: [],
     customQuestions: [],
     entitlements: [],

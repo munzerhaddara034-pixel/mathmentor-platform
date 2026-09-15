@@ -81,6 +81,7 @@ export default function ProfessorPage() {
         ارفع الكتاب أو نموذج الامتحان، ولّد فيديو الشرح وحلول الفيديو/الورق، ثم اعتمد أو ارفض قبل أن يراها الطالب.
       </p>
       <div className="row">
+        <a className="btn dark" href="/admin">لوحة الإدارة / الأكواد</a>
         <a className="btn dark" href="/classroom">Classroom videos</a>
         <a className="btn" href="/assistant">AI manager</a>
       </div>

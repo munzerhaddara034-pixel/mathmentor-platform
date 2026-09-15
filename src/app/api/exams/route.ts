@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { addExam, readStore } from "@/lib/store";
 import { createId } from "@/lib/ids";
 import type { GradeTrack } from "@/lib/types";
+import { requireRole } from "@/lib/auth/server";
 
 export async function GET() {
   const store = await readStore();
@@ -9,6 +10,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const gate = await requireRole(["teacher"]);
+  if (!gate.ok) return gate.error;
   const body = (await request.json()) as {
     title?: string;
     arabicTitle?: string;

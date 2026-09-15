@@ -8,6 +8,7 @@ export type CookieSession = {
   role: "student" | "teacher" | "parent";
   linkedStudentId?: string | null;
   track?: string | null;
+  phone?: string | null;
   exp: number;
 };
 

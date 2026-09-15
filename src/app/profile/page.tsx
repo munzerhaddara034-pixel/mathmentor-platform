@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { findUserById } from "@/lib/auth/db";
 import { getFreshSession } from "@/lib/auth/server";
 import { roleLabel } from "@/lib/auth/types";
+import { ProfileEditor } from "@/components/ProfileEditor";
 
 export default async function ProfilePage() {
   const user = await getFreshSession();
@@ -25,6 +26,8 @@ export default async function ProfilePage() {
           </p>
         ) : null}
         {user.role === "student" && user.track ? <p className="muted">المسار الافتراضي: {user.track}</p> : null}
+        <p className="muted">الهاتف الحالي: {user.phone || "غير مسجّل — أضفه قبل مشاهدة الفيديو"}</p>
+        <ProfileEditor user={user} />
         <div className="row">
           <Link className="btn dark" href="/dashboard">
             لوحة التحكم

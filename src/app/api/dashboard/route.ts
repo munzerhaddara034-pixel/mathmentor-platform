@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { academyLessons } from "@/lib/academyLessons";
 import { requireRole } from "@/lib/auth/server";
 import { readStore } from "@/lib/store";
+import { promoStats } from "@/lib/auth/entitlements";
+
+export const runtime = "nodejs";
 
 export async function GET() {
   const gate = await requireRole(["teacher"]);
   if (!gate.ok) return gate.error;
   const store = await readStore();
+  const cards = promoStats();
   const passed = store.progress.filter((item) => item.passedQuiz).length;
   const views = academyLessons.map((lesson) => ({
     id: lesson.id,
@@ -17,15 +21,15 @@ export async function GET() {
   const avg = store.quizAttempts.length
     ? Math.round(store.quizAttempts.reduce((sum, item) => sum + item.score, 0) / store.quizAttempts.length)
     : 0;
-  const usedCards = store.scratchCards.filter((item) => item.used).length;
   return NextResponse.json({
-    subscribers: new Set(store.quizAttempts.map((item) => item.studentName)).size + usedCards,
+    subscribers: new Set(store.quizAttempts.map((item) => item.studentName)).size + cards.used,
     videosTop: views.slice(0, 8),
     examAverage: avg,
-    cardsSold: usedCards,
-    cardsLeft: store.scratchCards.filter((item) => !item.used).length,
+    cardsSold: cards.used,
+    cardsLeft: cards.unused,
+    passedLessons: passed,
     financials: {
-      estimatedUsd: usedCards * 39 + store.progress.length * 5,
+      estimatedUsd: cards.used * 39 + store.progress.length * 5,
       currency: "USD",
     },
     attempts: store.quizAttempts.slice(0, 12),

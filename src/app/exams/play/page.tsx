@@ -1,6 +1,7 @@
 "use client";
 
 import { QuizEngine } from "@/components/QuizEngine";
+import { PremiumExamGate } from "@/components/PremiumExamGate";
 import { assembleExam, type AssembledExam } from "@/lib/examCatalog";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
@@ -31,6 +32,7 @@ function PlayInner() {
   const timed = pack.durationMinutes > 0;
 
   return (
+    <PremiumExamGate certificate={pack.certificate}>
     <main className="shell exam-play" dir="rtl">
       <p className="eyebrow">{pack.certificate} · {pack.styleTag}</p>
       <h1>{pack.arabicTitle}</h1>
@@ -56,6 +58,7 @@ function PlayInner() {
         printHref={`/exams/print?pack=${encodeURIComponent(pack.id)}&mode=paper`}
       />
     </main>
+    </PremiumExamGate>
   );
 }
 

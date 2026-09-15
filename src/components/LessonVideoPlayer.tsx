@@ -2,10 +2,12 @@
 
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ClassroomStudio } from "@/components/ClassroomStudio";
+import { FloatingWatermark } from "@/components/FloatingWatermark";
+import { PLAYBACK_SPEEDS, chaptersFromScenes, type PlaybackSpeed } from "@/lib/access";
 import { resolveLessonVideo } from "@/lib/lessonMedia";
 import { DEFAULT_LESSON_LANG, type LessonLang } from "@/lib/lessonNotes";
 import type { StoryboardScene } from "@/lib/types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function LessonVideoPlayer({
   videoUrl,
@@ -27,6 +29,7 @@ export function LessonVideoPlayer({
   onLangChange?: (lang: LessonLang) => void;
 }) {
   const [internalLang, setInternalLang] = useState<LessonLang>(DEFAULT_LESSON_LANG);
+  const [speed, setSpeed] = useState<PlaybackSpeed>(1);
   const currentLang = lang ?? internalLang;
   const setLang = (next: LessonLang) => {
     setInternalLang(next);
@@ -37,6 +40,7 @@ export function LessonVideoPlayer({
   const activeUrl = currentLang === "fr" && videoUrlFr ? videoUrlFr : videoUrl;
   const media = resolveLessonVideo({ videoUrl: activeUrl });
   const activeScenes = currentLang === "fr" && scenesFr?.length ? scenesFr : scenes;
+  const chapters = useMemo(() => chaptersFromScenes(activeScenes), [activeScenes]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wasPlaying = useRef(false);
@@ -46,6 +50,7 @@ export function LessonVideoPlayer({
     const node = videoRef.current;
     if (!node || media.kind !== "file") return;
     const apply = () => {
+      node.playbackRate = speed;
       if (Number.isFinite(node.duration) && node.duration > 0) {
         node.currentTime = Math.min(node.duration * timeRatio.current, Math.max(node.duration - 0.05, 0));
       }
@@ -53,13 +58,24 @@ export function LessonVideoPlayer({
     };
     node.addEventListener("loadedmetadata", apply, { once: true });
     return () => node.removeEventListener("loadedmetadata", apply);
-  }, [activeUrl, media.kind]);
+  }, [activeUrl, media.kind, speed]);
+
+  useEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = speed;
+  }, [speed]);
 
   const rememberPosition = () => {
     const node = videoRef.current;
     if (!node || !Number.isFinite(node.duration) || node.duration <= 0) return;
     timeRatio.current = node.currentTime / node.duration;
     wasPlaying.current = !node.paused;
+  };
+
+  const seekChapter = (start: number) => {
+    const node = videoRef.current;
+    if (!node) return;
+    node.currentTime = start;
+    void node.play().catch(() => undefined);
   };
 
   const toggle = (
@@ -73,6 +89,23 @@ export function LessonVideoPlayer({
     />
   );
 
+  const speedControl = (
+    <label className="speed-control">
+      <span>{currentLang === "fr" ? "Vitesse" : "السرعة"}</span>
+      <select
+        value={speed}
+        onChange={(event) => setSpeed(Number(event.target.value) as PlaybackSpeed)}
+        aria-label={currentLang === "fr" ? "Vitesse de lecture" : "سرعة التشغيل"}
+      >
+        {PLAYBACK_SPEEDS.map((value) => (
+          <option key={value} value={value}>
+            {value}x
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+
   if (media.kind === "storyboard") {
     return (
       <div>
@@ -80,9 +113,18 @@ export function LessonVideoPlayer({
           <p className="muted" style={{ margin: 0 }}>
             {currentLang === "fr" ? "Tableau interactif · bascule EN | FR" : "Interactive board · EN | FR toggle"}
           </p>
-          {toggle}
+          <div className="player-toolbar-actions">
+            {speedControl}
+            {toggle}
+          </div>
         </div>
-        <ClassroomStudio heading={heading} scenes={activeScenes} watermark={watermark} lang={currentLang} />
+        <ClassroomStudio
+          heading={heading}
+          scenes={activeScenes}
+          watermark={watermark}
+          lang={currentLang}
+          speed={speed}
+        />
       </div>
     );
   }
@@ -90,7 +132,12 @@ export function LessonVideoPlayer({
   return (
     <div className="classroom video-secure" onContextMenu={(event) => event.preventDefault()}>
       <div className="lesson-media-frame">
-        <div className="lang-toggle-overlay">{toggle}</div>
+        <div className="lang-toggle-overlay">
+          <div className="player-toolbar-actions">
+            {speedControl}
+            {toggle}
+          </div>
+        </div>
         {media.kind === "file" ? (
           <video
             ref={videoRef}
@@ -98,7 +145,7 @@ export function LessonVideoPlayer({
             className="lesson-media"
             src={media.src}
             controls
-            controlsList="nodownload noplaybackrate"
+            controlsList="nodownload"
             disablePictureInPicture
             playsInline
             preload="metadata"
@@ -112,13 +159,30 @@ export function LessonVideoPlayer({
             allowFullScreen
           />
         )}
-        <span className="dynamic-watermark">{watermark}</span>
-        <span className="dynamic-watermark delay">{watermark}</span>
+        <FloatingWatermark text={watermark} />
         <p className="classroom-tag">
           {currentLang === "fr" ? "FR · audio + texte" : "EN · audio + text"} · {media.providerLabel} ·{" "}
           {currentLang === "fr" ? "protégé" : "protected"}
         </p>
       </div>
+      {chapters.length > 1 ? (
+        <div className="chapter-rail" dir="ltr">
+          <p className="chapter-rail-label">{currentLang === "fr" ? "Chapitres de la leçon" : "فصول الدرس"}</p>
+          <div className="chapter-chips">
+            {chapters.map((chapter, index) => (
+              <button
+                key={chapter.id}
+                type="button"
+                className="chapter-chip"
+                onClick={() => (media.kind === "file" ? seekChapter(chapter.start) : undefined)}
+                title={`${chapter.title} · ${Math.round(chapter.start)}s`}
+              >
+                {index + 1}. {chapter.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
       {bilingual ? (
         <p className="muted" style={{ marginTop: 8 }}>
           {currentLang === "fr"

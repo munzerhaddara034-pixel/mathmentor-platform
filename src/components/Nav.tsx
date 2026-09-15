@@ -14,11 +14,13 @@ function linksFor(user: SessionUser | null) {
       { href: "/exams", label: "الامتحانات" },
       { href: "/classroom", label: "الصف" },
       { href: "/subscribe", label: "الاشتراك" },
+      { href: "/redeem", label: "تفعيل كود" },
     ];
   }
   if (user.role === "teacher") {
     return [
       { href: "/dashboard", label: "لوحة التحكم" },
+      { href: "/admin", label: "الإدارة" },
       { href: "/professor", label: "الأستاذ" },
       { href: "/assistant", label: "الموظف" },
       { href: "/bank", label: "بنك الأستاذ" },
@@ -39,6 +41,7 @@ function linksFor(user: SessionUser | null) {
     { href: "/lessons", label: "الدروس" },
     { href: "/exams", label: "الامتحانات" },
     { href: "/classroom", label: "الصف" },
+    { href: "/redeem", label: "تفعيل كود" },
     { href: "/student", label: "دردشة" },
     { href: "/profile", label: "ملفي" },
   ];
