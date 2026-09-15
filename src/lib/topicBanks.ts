@@ -1,5 +1,7 @@
 import type { Difficulty, GradeTrack, QuizQuestion } from "./types";
 import functionsBankJson from "../../content/banks/g12-ls/functions.json";
+import geometryBankJson from "../../content/banks/brevet/geometry.json";
+import algebraBankJson from "../../content/banks/brevet/algebra.json";
 
 export type BankDifficulty = "easy" | "medium" | "hard";
 
@@ -58,7 +60,11 @@ export type TopicBank = {
   questions: TopicBankQuestion[];
 };
 
-export const topicBanks: TopicBank[] = [functionsBankJson as TopicBank];
+export const topicBanks: TopicBank[] = [
+  functionsBankJson as TopicBank,
+  geometryBankJson as TopicBank,
+  algebraBankJson as TopicBank,
+];
 
 export function getTopicBank(id: string): TopicBank | undefined {
   return topicBanks.find((bank) => bank.id === id);
@@ -149,5 +155,14 @@ export function listTopicBankCards() {
     slices: bank.slices,
     contestTopics: bank.contestTopics ?? [],
     styleNote: bank.styleNote,
+    topic: bank.topic,
   }));
+}
+
+export function groupTopicBankCards() {
+  const cards = listTopicBankCards();
+  return {
+    ls: cards.filter((card) => card.certificate === "LS"),
+    brevet: cards.filter((card) => card.certificate === "Brevet"),
+  };
 }

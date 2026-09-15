@@ -1,7 +1,7 @@
 "use client";
 
 import { academyLessons, gradeGroups } from "@/lib/academyLessons";
-import { listTopicBankCards } from "@/lib/topicBanks";
+import { groupTopicBankCards, listTopicBankCards } from "@/lib/topicBanks";
 import type { ExamPaper, GradeTrack } from "@/lib/types";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -10,7 +10,7 @@ export default function PracticeHubPage() {
   const [track, setTrack] = useState<GradeTrack>("grade-12");
   const [lessonId, setLessonId] = useState("grade-12-ch1");
   const [exams, setExams] = useState<ExamPaper[]>([]);
-  const topicCards = listTopicBankCards();
+  const grouped = groupTopicBankCards();
 
   const lessons = useMemo(() => academyLessons.filter((item) => item.track === track), [track]);
 
@@ -32,41 +32,30 @@ export default function PracticeHubPage() {
 
       <section className="card" style={{ marginTop: 8 }}>
         <h2>مسابقات الشهادة حسب الموضوع</h2>
-        <p className="muted">
-          نموذج علوم الحياة الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم <strong>دراسة الدوال</strong>. المنفَّذ الآن هو المسألة الرابعة.
-        </p>
-        {topicCards
-          .find((card) => card.id === "g12-ls-functions")
-          ?.contestTopics?.map((topic) => (
-            <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
-              {topic.arabicTitle ?? topic.title}
-              {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
-            </p>
-          ))}
-        {topicCards.map((card) => (
-          <article key={card.id} className="card" style={{ marginTop: 12 }}>
-            <span className="badge">{card.certificate}</span>
-            <h3>
-              {card.certificate} — {card.arabicTitle}
-            </h3>
-            <p className="muted">
-              {card.questionCount} سؤالاً · {card.slices.map((slice) => slice.arabicTitle).join(" · ")} · المسابقة {card.contestMinutes} دقيقة
-            </p>
-            {card.styleNote ? <p className="muted">{card.id === "g12-ls-functions" ? "أسلوب المسألة الرابعة في نماذج علوم الحياة، بنود أكاديمية أصلية وليست نماذج منسوخة." : card.styleNote}</p> : null}
-            <div className="row">
-              <Link className="btn dark" href={`/practice/take?bank=${card.id}&mode=contest`}>
-                مسابقة {card.arabicTitle}
-              </Link>
-              <Link className="btn" href={`/practice/take?bank=${card.id}&mode=free`}>
-                تدريب البنك كاملاً
-              </Link>
-              {card.id === "g12-ls-functions" ? (
-                <Link className="btn" href="/classroom/grade-12-ch1">
-                  درس النهايات (فيديو)
-                </Link>
-              ) : null}
-            </div>
-          </article>
+        <p className="muted">مستويان: علوم الحياة (صف 12) والشهادة المتوسطة (صف 9). البنود أكاديمية أصلية بأسلوب النماذج، وليست نسخاً من دورات رسمية.</p>
+
+        <h3 style={{ marginTop: 16 }}>صف 12 · علوم الحياة</h3>
+        <p className="muted">النموذج الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم دراسة الدوال. المنفَّذ الآن هو المسألة الرابعة.</p>
+        {grouped.ls[0]?.contestTopics?.map((topic) => (
+          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+            {topic.arabicTitle ?? topic.title}
+            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
+          </p>
+        ))}
+        {grouped.ls.map((card) => (
+          <BankCard key={card.id} card={card} />
+        ))}
+
+        <h3 style={{ marginTop: 24 }}>صف 9 · الشهادة المتوسطة</h3>
+        <p className="muted">مسابقة البروفيه عادةً ست أو سبع مسائل. البنوك المقترحة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية. المنفَّذ الآن: الهندسة والجبر.</p>
+        {grouped.brevet[0]?.contestTopics?.map((topic) => (
+          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+            {topic.arabicTitle ?? topic.title}
+            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
+          </p>
+        ))}
+        {grouped.brevet.map((card) => (
+          <BankCard key={card.id} card={card} />
         ))}
       </section>
 
@@ -114,5 +103,43 @@ export default function PracticeHubPage() {
         </section>
       ) : null}
     </main>
+  );
+}
+
+function BankCard({
+  card,
+}: {
+  card: ReturnType<typeof listTopicBankCards>[number];
+}) {
+  const blurb =
+    card.id === "g12-ls-functions"
+      ? "أسلوب المسألة الرابعة في نماذج علوم الحياة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+      : card.certificate === "Brevet"
+        ? "أسلوب الشهادة المتوسطة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+        : null;
+  return (
+    <article className="card" style={{ marginTop: 12 }}>
+      <span className="badge">{card.certificate}</span>
+      <h3>
+        {card.certificate} — {card.arabicTitle}
+      </h3>
+      <p className="muted">
+        {card.questionCount} سؤالاً · {card.slices.map((slice) => slice.arabicTitle).join(" · ")} · المسابقة {card.contestMinutes} دقيقة
+      </p>
+      {blurb ? <p className="muted">{blurb}</p> : null}
+      <div className="row">
+        <Link className="btn dark" href={`/practice/take?bank=${card.id}&mode=contest`}>
+          مسابقة {card.arabicTitle}
+        </Link>
+        <Link className="btn" href={`/practice/take?bank=${card.id}&mode=free`}>
+          تدريب البنك كاملاً
+        </Link>
+        {card.id === "g12-ls-functions" ? (
+          <Link className="btn" href="/classroom/grade-12-ch1">
+            درس النهايات (فيديو)
+          </Link>
+        ) : null}
+      </div>
+    </article>
   );
 }

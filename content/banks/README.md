@@ -2,6 +2,11 @@
 
 Certificate practice is split **by topic**, not by dumping a whole session PDF into one quiz.
 
+Two certificate levels:
+
+1. **Grade 12 LS** (`g12-ls/`) — Functions (Problem IV) is live
+2. **Brevet / الشهادة المتوسطة** (`brevet/`) — geometry + algebra seeded
+
 Official packs on Munzer’s PC (not committed; do not photocopy into Git):
 
 | File | Track |
@@ -9,6 +14,7 @@ Official packs on Munzer’s PC (not committed; do not photocopy into Git):
 | `LS all sessions.pdf` | Grade 12 Life Sciences |
 | `SE_All Sessions.pdf` | Grade 12 Sociology & Economics |
 | `GS-All.pdf` | Grade 12 General Science |
+| Grade 9 / Brevet contests pack | الشهادة المتوسطة |
 
 ## Typical LS paper (four topics)
 
@@ -33,9 +39,13 @@ content/banks/
   g12-ls/space-geometry.json   ← II · later
   g12-ls/probability.json      ← III · later
   g12-ls/integration.json      ← extra LS chapter later (not one of the four paper slots)
+  brevet/geometry.json         ← Brevet geometry (now)
+  brevet/algebra.json          ← Brevet algebra (now)
+  brevet/numbers.json          ← later
+  brevet/word_problems.json    ← later
+  brevet/coordinate.json       ← later
   g12-se/…                     ← SE topics later
   g12-gs/…                     ← GS topics later
-  g9/…                         ← Brevet later
 ```
 
 One JSON file = one topic contest. Functions slices (easy → hard within the file):
@@ -59,7 +69,7 @@ Each question:
 
 Keep the array **easy → medium → hard**. Within a band, keep pedagogical slice order (Limits first).
 
-The file also stores `contestTopics`: the four-part LS paper, with `implemented: true` only on Functions for now.
+The file also stores `contestTopics`: the official paper split for that certificate (LS four problems, or Brevet’s five topic banks), with `implemented: true` only on live files.
 
 ## How to add the next LS paper topic (example: space geometry)
 
@@ -83,3 +93,7 @@ python3 scripts/merge-session-style-functions.py
 - Contest (16 questions, easy→hard, 25 min): `/practice/take?bank=g12-ls-functions&mode=contest`
 - Full bank training (ordered): `/practice/take?bank=g12-ls-functions&mode=free`
 - Limits lesson only (first slice + video): `/classroom/grade-12-ch1` and `/practice/take?lessonId=grade-12-ch1`
+
+## Brevet (Grade 9)
+
+See `content/banks/brevet/README.md`. Geometry and algebra contests are on `/practice`. Rebuild with `python3 scripts/build-brevet-banks.py`.
