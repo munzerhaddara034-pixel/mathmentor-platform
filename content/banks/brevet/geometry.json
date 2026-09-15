@@ -1,0 +1,866 @@
+{
+  "id": "brevet-geometry",
+  "track": "grade-9",
+  "certificate": "Brevet",
+  "topic": "geometry",
+  "title": "Geometry",
+  "arabicTitle": "الهندسة",
+  "contestMinutes": 20,
+  "passScore": 70,
+  "sourceModels": [
+    "Grade 9 / Brevet official contests pack"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Brevet sessions (الشهادة المتوسطة): official English wording, original numbers. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "circle",
+      "title": "Circle",
+      "arabicTitle": "الدائرة"
+    },
+    {
+      "id": "triangle",
+      "title": "Triangles",
+      "arabicTitle": "المثلثات"
+    },
+    {
+      "id": "similar",
+      "title": "Similarity",
+      "arabicTitle": "التشابه"
+    },
+    {
+      "id": "thales",
+      "title": "Thales",
+      "arabicTitle": "طاليس"
+    },
+    {
+      "id": "transformation",
+      "title": "Transformations",
+      "arabicTitle": "التحويلات"
+    },
+    {
+      "id": "trig",
+      "title": "Right-triangle trigonometry",
+      "arabicTitle": "حساب مثلثات القائم"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "numbers",
+      "file": "content/banks/brevet/numbers.json",
+      "title": "Numbers",
+      "arabicTitle": "الأعداد",
+      "implemented": true
+    },
+    {
+      "id": "algebra",
+      "file": "content/banks/brevet/algebra.json",
+      "title": "Algebra",
+      "arabicTitle": "الجبر",
+      "implemented": true
+    },
+    {
+      "id": "word_problems",
+      "file": "content/banks/brevet/word_problems.json",
+      "title": "Word problems",
+      "arabicTitle": "المسائل اللفظية",
+      "implemented": true
+    },
+    {
+      "id": "geometry",
+      "file": "content/banks/brevet/geometry.json",
+      "title": "Geometry",
+      "arabicTitle": "الهندسة",
+      "implemented": true
+    },
+    {
+      "id": "coordinate",
+      "file": "content/banks/brevet/coordinate.json",
+      "title": "Coordinate geometry",
+      "arabicTitle": "الهندسة التحليلية",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "brevet-geo-circ-01",
+      "slice": "circle",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "diameter-right-angle"
+      },
+      "stem": "ABC is inscribed in a circle of diameter [AB]. Then angle ACB equals:",
+      "choices": [
+        "\\(45^\\circ\\)",
+        "\\(90^\\circ\\)",
+        "\\(60^\\circ\\)",
+        "\\(180^\\circ\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(90^\\circ\\)",
+      "solutionSketch": [
+        "The angle inscribed in a semicircle is a right angle (Thales’ theorem on the circle).",
+        "Trap: 60° as if ABC were equilateral."
+      ]
+    },
+    {
+      "id": "brevet-geo-circ-02",
+      "slice": "circle",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "radius"
+      },
+      "stem": "A circle has diameter 14 cm. Its radius is:",
+      "choices": [
+        "14 cm",
+        "7 cm",
+        "28 cm",
+        "21 cm"
+      ],
+      "answerIndex": 1,
+      "answer": "7 cm",
+      "solutionSketch": [
+        "Radius is half the diameter: 14/2 = 7 cm."
+      ],
+      "latex": "R=d/2"
+    },
+    {
+      "id": "brevet-geo-tri-01",
+      "slice": "triangle",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "isosceles-base-angle"
+      },
+      "stem": "ABC is isosceles with principal vertex A and AB = AC. If angle BAC = 40°, then angle ABC equals:",
+      "choices": [
+        "\\(40^\\circ\\)",
+        "\\(70^\\circ\\)",
+        "\\(100^\\circ\\)",
+        "\\(50^\\circ\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(70^\\circ\\)",
+      "solutionSketch": [
+        "Base angles are equal: (180° − 40°)/2 = 70°."
+      ]
+    },
+    {
+      "id": "brevet-geo-tri-02",
+      "slice": "triangle",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "isosceles-right"
+      },
+      "stem": "ABC is right-angled at C with AC = BC = 6 cm. Then AB equals:",
+      "choices": [
+        "6 cm",
+        "\\(6\\sqrt{2}\\) cm",
+        "12 cm",
+        "\\(3\\sqrt{2}\\) cm"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(6\\sqrt{2}\\) cm",
+      "solutionSketch": [
+        "Isosceles right triangle: hypotenuse = 6√2."
+      ],
+      "latex": "AB=6\\sqrt{2}"
+    },
+    {
+      "id": "brevet-geo-sim-01",
+      "slice": "similar",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "similarity-ratio"
+      },
+      "stem": "Triangles ABC and A′B′C′ are similar with ratio k = 2. If AB = 5 cm, then A′B′ equals:",
+      "choices": [
+        "2.5 cm",
+        "10 cm",
+        "7 cm",
+        "25 cm"
+      ],
+      "answerIndex": 1,
+      "answer": "10 cm",
+      "solutionSketch": [
+        "Corresponding sides scale by k: 5 × 2 = 10."
+      ]
+    },
+    {
+      "id": "brevet-geo-tha-01",
+      "slice": "thales",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "thales-ratio"
+      },
+      "stem": "In triangle ABC, (DE) is parallel to (BC) with D on [AB] and E on [AC]. If AD/AB = 2/5, then AE/AC equals:",
+      "choices": [
+        "5/2",
+        "2/5",
+        "3/5",
+        "1/2"
+      ],
+      "answerIndex": 1,
+      "answer": "2/5",
+      "solutionSketch": [
+        "Thales: a parallel to one side cuts the other two sides proportionally."
+      ],
+      "latex": "\\frac{AD}{AB}=\\frac{AE}{AC}"
+    },
+    {
+      "id": "brevet-geo-trf-01",
+      "slice": "transformation",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "translation-endpoint"
+      },
+      "stem": "M is the image of A by the translation of vector AB. Then M is:",
+      "choices": [
+        "the midpoint of [AB]",
+        "point B",
+        "point A",
+        "a point such that AM = 2 AB"
+      ],
+      "answerIndex": 1,
+      "answer": "point B",
+      "solutionSketch": [
+        "Translation of A by vector AB sends A to B."
+      ],
+      "latex": "t_{\\overrightarrow{AB}}(A)=B"
+    },
+    {
+      "id": "brevet-geo-trig-01",
+      "slice": "trig",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sine-def"
+      },
+      "stem": "In a right triangle with opposite side 3 and hypotenuse 5, sin of that acute angle equals:",
+      "choices": [
+        "\\(3/4\\)",
+        "\\(3/5\\)",
+        "\\(4/5\\)",
+        "\\(4/3\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3/5\\)",
+      "solutionSketch": [
+        "sin = opposite / hypotenuse = 3/5."
+      ],
+      "latex": "\\sin=\\frac{opp}{hyp}"
+    },
+    {
+      "id": "brevet-geo-trig-02",
+      "slice": "trig",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "tan-def"
+      },
+      "stem": "In a right triangle with opposite 3 and adjacent 4, tan of that acute angle equals:",
+      "choices": [
+        "\\(3/5\\)",
+        "\\(3/4\\)",
+        "\\(4/3\\)",
+        "\\(4/5\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3/4\\)",
+      "solutionSketch": [
+        "tan = opposite / adjacent = 3/4. Trap: 4/3 (the complementary angle)."
+      ],
+      "latex": "\\tan=\\frac{opp}{adj}"
+    },
+    {
+      "id": "brevet-geo-circ-03",
+      "slice": "circle",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "semicircle-pythagoras"
+      },
+      "stem": "A circle of diameter [AB] has radius 5 cm. Point M lies on the circle, AM = 6 cm. Then BM equals:",
+      "choices": [
+        "8 cm",
+        "5 cm",
+        "\\(4\\) cm",
+        "10 cm"
+      ],
+      "answerIndex": 0,
+      "answer": "8 cm",
+      "solutionSketch": [
+        "Triangle AMB is right-angled at M, and AB = 10.",
+        "BM = √(AB² − AM²) = √(100 − 36) = 8."
+      ],
+      "latex": "AM^2+BM^2=AB^2"
+    },
+    {
+      "id": "brevet-geo-circ-04",
+      "slice": "circle",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "chord-distance"
+      },
+      "stem": "O is the center of a circle of radius 5. Chord [CD] has length 8. The distance from O to [CD] is:",
+      "choices": [
+        "3 cm",
+        "4 cm",
+        "5 cm",
+        "2 cm"
+      ],
+      "answerIndex": 0,
+      "answer": "3 cm",
+      "solutionSketch": [
+        "The perpendicular from the center to a chord bisects the chord: half-chord = 4.",
+        "Distance = √(5² − 4²) = 3."
+      ]
+    },
+    {
+      "id": "brevet-geo-tri-03",
+      "slice": "triangle",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "isosceles-altitude"
+      },
+      "stem": "ABC is isosceles with principal vertex A, BC = 10 cm and AB = AC = 13 cm. Let I be the midpoint of [BC]. Then AI equals:",
+      "choices": [
+        "12 cm",
+        "8 cm",
+        "√69 cm",
+        "5 cm"
+      ],
+      "answerIndex": 0,
+      "answer": "12 cm",
+      "solutionSketch": [
+        "The altitude from the principal vertex is also a median: BI = 5.",
+        "AI = √(13² − 5²) = √(169 − 25) = 12."
+      ],
+      "latex": "AI=\\sqrt{13^2-5^2}"
+    },
+    {
+      "id": "brevet-geo-tri-04",
+      "slice": "triangle",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perp-bisector-isosceles"
+      },
+      "stem": "In triangle ABC, (AI) is the perpendicular bisector of [BC]. Then:",
+      "choices": [
+        "AB = AC",
+        "angle B = 90°",
+        "I is the midpoint of [AB]",
+        "BC = AI"
+      ],
+      "answerIndex": 0,
+      "answer": "AB = AC",
+      "solutionSketch": [
+        "Any point of the perpendicular bisector of [BC] is equidistant from B and C, so AB = AC."
+      ]
+    },
+    {
+      "id": "brevet-geo-sim-02",
+      "slice": "similar",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "altitude-to-hypotenuse"
+      },
+      "stem": "ABC is right-angled at C. The altitude from C meets [AB] at H. Then triangles ACH and ABC are similar because:",
+      "choices": [
+        "they have the same hypotenuse",
+        "they share angle A, and both are right-angled",
+        "CH is a median",
+        "AC = BC"
+      ],
+      "answerIndex": 1,
+      "answer": "they share angle A, and both are right-angled",
+      "solutionSketch": [
+        "AA criterion: both right-angled, and they share angle A.",
+        "This is the usual geometric-mean setup of Brevet sessions."
+      ]
+    },
+    {
+      "id": "brevet-geo-sim-03",
+      "slice": "similar",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "area-ratio"
+      },
+      "stem": "ABC ~ DEF with ratio 3 (ABC to DEF). The ratio of their areas is:",
+      "choices": [
+        "3",
+        "6",
+        "9",
+        "1/3"
+      ],
+      "answerIndex": 2,
+      "answer": "9",
+      "solutionSketch": [
+        "Areas scale by the square of the similarity ratio: 3² = 9."
+      ]
+    },
+    {
+      "id": "brevet-geo-tha-02",
+      "slice": "thales",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "thales-length"
+      },
+      "stem": "In triangle ABC, (MN)//(BC) with M on [AB], N on [AC]. AM = 4, MB = 6, AC = 15. Then AN equals:",
+      "choices": [
+        "6",
+        "10",
+        "9",
+        "4"
+      ],
+      "answerIndex": 0,
+      "answer": "6",
+      "solutionSketch": [
+        "AM/AB = 4/10 = 2/5, so AN = (2/5)×15 = 6.",
+        "Trap: using AM/MB = 4/6 and writing AN = 10."
+      ],
+      "latex": "\\frac{AM}{AB}=\\frac{AN}{AC}"
+    },
+    {
+      "id": "brevet-geo-tha-03",
+      "slice": "thales",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "midline"
+      },
+      "stem": "The midline of triangle ABC joining the midpoints of [AB] and [AC]:",
+      "choices": [
+        "equals BC and is parallel to (BC)",
+        "is parallel to (BC) and equal to BC/2",
+        "passes through A",
+        "is a median"
+      ],
+      "answerIndex": 1,
+      "answer": "is parallel to (BC) and equal to BC/2",
+      "solutionSketch": [
+        "Midline (mid-segment) theorem: parallel to the third side and half as long."
+      ]
+    },
+    {
+      "id": "brevet-geo-trf-02",
+      "slice": "transformation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "translation-parallelogram"
+      },
+      "stem": "M is the image of A by the translation of vector BC. Quadrilateral ABCM is:",
+      "choices": [
+        "a rectangle",
+        "a parallelogram",
+        "a rhombus",
+        "a kite"
+      ],
+      "answerIndex": 1,
+      "answer": "a parallelogram",
+      "solutionSketch": [
+        "AM = BC (equal and parallel), so ABCM is a parallelogram.",
+        "It is a rectangle or rhombus only with extra hypotheses."
+      ]
+    },
+    {
+      "id": "brevet-geo-trf-03",
+      "slice": "transformation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "translation-line"
+      },
+      "stem": "A translation maps a line (d) to a line (d′). Then (d) and (d′) are:",
+      "choices": [
+        "perpendicular",
+        "secant at one point",
+        "parallel (or coincident)",
+        "always coincident"
+      ],
+      "answerIndex": 2,
+      "answer": "parallel (or coincident)",
+      "solutionSketch": [
+        "A translation maps a line to a parallel line (the same line if the vector is parallel to it)."
+      ]
+    },
+    {
+      "id": "brevet-geo-trig-03",
+      "slice": "trig",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "tan-in-triangle"
+      },
+      "stem": "ABC is right-angled at C, AC = 8, BC = 6. Then tan of angle A equals:",
+      "choices": [
+        "\\(3/4\\)",
+        "\\(4/3\\)",
+        "\\(6/10\\)",
+        "\\(8/6\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(3/4\\)",
+      "solutionSketch": [
+        "Opposite to A is BC = 6, adjacent is AC = 8, so tan A = 6/8 = 3/4.",
+        "Trap: 4/3 (that is tan B) or using the hypotenuse."
+      ],
+      "latex": "\\tan A=\\frac{BC}{AC}"
+    },
+    {
+      "id": "brevet-geo-trig-04",
+      "slice": "trig",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sin-B"
+      },
+      "stem": "ABC is right-angled at C with AB = 10 and AC = 6. Then sin of angle B equals:",
+      "choices": [
+        "\\(3/5\\)",
+        "\\(4/5\\)",
+        "\\(6/8\\)",
+        "\\(8/6\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(3/5\\)",
+      "solutionSketch": [
+        "BC = 8. Opposite to B is AC = 6, hypotenuse 10, so sin B = 6/10 = 3/5."
+      ]
+    },
+    {
+      "id": "brevet-geo-circ-05",
+      "slice": "circle",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "circumradius-right"
+      },
+      "stem": "ABC is right-angled at C with AC = 6 and BC = 8. The radius of the circle circumscribed about triangle ABC is:",
+      "choices": [
+        "5",
+        "7",
+        "10",
+        "4"
+      ],
+      "answerIndex": 0,
+      "answer": "5",
+      "solutionSketch": [
+        "In a right triangle the circumcenter is the midpoint of the hypotenuse.",
+        "AB = 10, so R = 5. Trap: taking R = AB = 10."
+      ],
+      "latex": "R=AB/2"
+    },
+    {
+      "id": "brevet-geo-circ-06",
+      "slice": "circle",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "power-of-point"
+      },
+      "stem": "From a point P outside a circle, a tangent [PT] and a secant through A then B are drawn, with PA = 4 and PB = 9. Then PT equals:",
+      "choices": [
+        "6",
+        "√13",
+        "36",
+        "5"
+      ],
+      "answerIndex": 0,
+      "answer": "6",
+      "solutionSketch": [
+        "Power of a point: PT² = PA × PB = 36, so PT = 6.",
+        "Trap: adding 4+9 or taking √(9−4)."
+      ],
+      "latex": "PT^2=PA\\times PB"
+    },
+    {
+      "id": "brevet-geo-tri-05",
+      "slice": "triangle",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "rectangle-cyclic"
+      },
+      "stem": "ABCD is a rectangle with AB = 8 cm and AD = 6 cm. The four vertices lie on a circle of radius:",
+      "choices": [
+        "5 cm",
+        "7 cm",
+        "10 cm",
+        "4 cm"
+      ],
+      "answerIndex": 0,
+      "answer": "5 cm",
+      "solutionSketch": [
+        "A rectangle is cyclic; the diagonal is a diameter: AC = 10, radius 5.",
+        "Trap: using a side as diameter."
+      ]
+    },
+    {
+      "id": "brevet-geo-tri-06",
+      "slice": "triangle",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "circumcenter"
+      },
+      "stem": "The perpendicular bisectors of [AB] and [BC] meet at H. Then HA, HB and HC are:",
+      "choices": [
+        "altitudes of triangle ABC",
+        "equal (H is the circumcenter)",
+        "medians",
+        "always parallel to the sides"
+      ],
+      "answerIndex": 1,
+      "answer": "equal (H is the circumcenter)",
+      "solutionSketch": [
+        "The intersection of perpendicular bisectors is the circumcenter: HA = HB = HC = R."
+      ]
+    },
+    {
+      "id": "brevet-geo-sim-04",
+      "slice": "similar",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "right-altitude-length"
+      },
+      "stem": "ABC is right-angled at C, AB = 13, AC = 5, BC = 12. The altitude from C to [AB] has length:",
+      "choices": [
+        "\\(60/13\\)",
+        "6",
+        "5",
+        "12/13"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(60/13\\)",
+      "solutionSketch": [
+        "Area two ways: (AC·BC)/2 = (AB·CH)/2, so CH = (5×12)/13 = 60/13.",
+        "Trap: taking CH as a geometric mean without the product over AB."
+      ],
+      "latex": "CH=\\frac{AC\\cdot BC}{AB}"
+    },
+    {
+      "id": "brevet-geo-sim-05",
+      "slice": "similar",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "geometric-mean"
+      },
+      "stem": "ABC is right-angled at C. H is the foot of the altitude from C to [AB]. Then AH × AB equals:",
+      "choices": [
+        "AC × BC",
+        "AC²",
+        "CH²",
+        "BC²"
+      ],
+      "answerIndex": 1,
+      "answer": "AC²",
+      "solutionSketch": [
+        "Geometric mean: AC² = AH × AB (leg is the geometric mean of hypotenuse and adjacent projection)."
+      ],
+      "latex": "AC^2=AH\\times AB"
+    },
+    {
+      "id": "brevet-geo-tha-04",
+      "slice": "thales",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "thales-third-side"
+      },
+      "stem": "In triangle ABC, (DE)//(BC), AD = 3, DB = 6, BC = 12. Then DE equals:",
+      "choices": [
+        "4",
+        "6",
+        "8",
+        "3"
+      ],
+      "answerIndex": 0,
+      "answer": "4",
+      "solutionSketch": [
+        "AD/AB = 3/9 = 1/3, so DE = BC/3 = 4.",
+        "Trap: DE = BC/2 because D looks like a midpoint (it is not: AD ≠ DB)."
+      ]
+    },
+    {
+      "id": "brevet-geo-trf-04",
+      "slice": "transformation",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "translation-coordinates"
+      },
+      "stem": "In the plane, A(1 ; 2) and vector BC = (4 ; −1). The image of A by the translation of vector BC is:",
+      "choices": [
+        "(5 ; 1)",
+        "(4 ; −1)",
+        "(3 ; 3)",
+        "(1 ; 1)"
+      ],
+      "answerIndex": 0,
+      "answer": "(5 ; 1)",
+      "solutionSketch": [
+        "Image = (1+4 ; 2+(−1)) = (5 ; 1). Trap: writing the vector itself as the image."
+      ],
+      "latex": "(1,2)+(4,-1)=(5,1)"
+    },
+    {
+      "id": "brevet-geo-trig-05",
+      "slice": "trig",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "angle-nearest-degree"
+      },
+      "stem": "ABC is right-angled at C, AC = 5, BC = 12. Rounded to the nearest degree, angle A is nearest to:",
+      "choices": [
+        "\\(22^\\circ\\)",
+        "\\(23^\\circ\\)",
+        "\\(67^\\circ\\)",
+        "\\(45^\\circ\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(67^\\circ\\)",
+      "solutionSketch": [
+        "tan A = 12/5 = 2.4, and tan 67° ≈ 2.36, tan 22° ≈ 0.40.",
+        "So A ≈ 67°. Trap: 23° (that is approximately angle B)."
+      ],
+      "latex": "\\tan A=12/5"
+    }
+  ]
+}

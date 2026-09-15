@@ -1,0 +1,13 @@
+node_modules
+.next
+__pycache__/
+*.pyc
+data/store.json
+data/uploads
+public/uploads
+.env
+.env.local
+.env*.local
+*.zip
+.DS_Store
+tsconfig.tsbuildinfo

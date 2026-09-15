@@ -1,0 +1,160 @@
+{
+  "note": "Lebanese certificate practice is split by official paper topic, not by dumping a session PDF into one quiz. Live banks overlay these slots. Sibling agents seed remaining LS/SE/GS JSON; do not photocopy official PDFs.",
+  "order": "easy → medium → hard inside each bank file",
+  "branches": [
+    {
+      "id": "brevet",
+      "certificate": "Brevet",
+      "track": "grade-9",
+      "title": "Brevet",
+      "arabicTitle": "الشهادة المتوسطة",
+      "heading": "صف 9 · الشهادة المتوسطة",
+      "note": "مسابقة البروفيه عادةً ست أو سبع مسائل. البنوك الخمسة جاهزة للمسابقة.",
+      "sourcePack": "Grade 9 / Brevet official contests pack",
+      "folder": "content/banks/brevet/",
+      "topics": [
+        {
+          "id": "numbers",
+          "file": "content/banks/brevet/numbers.json",
+          "title": "Numbers",
+          "arabicTitle": "الأعداد"
+        },
+        {
+          "id": "algebra",
+          "file": "content/banks/brevet/algebra.json",
+          "title": "Algebra",
+          "arabicTitle": "الجبر"
+        },
+        {
+          "id": "word_problems",
+          "file": "content/banks/brevet/word_problems.json",
+          "title": "Word problems",
+          "arabicTitle": "المسائل اللفظية"
+        },
+        {
+          "id": "geometry",
+          "file": "content/banks/brevet/geometry.json",
+          "title": "Geometry",
+          "arabicTitle": "الهندسة"
+        },
+        {
+          "id": "coordinate",
+          "file": "content/banks/brevet/coordinate.json",
+          "title": "Coordinate geometry",
+          "arabicTitle": "الهندسة التحليلية"
+        }
+      ]
+    },
+    {
+      "id": "ls",
+      "certificate": "LS",
+      "track": "grade-12",
+      "title": "Life Sciences",
+      "arabicTitle": "علوم الحياة",
+      "heading": "صف 12 · علوم الحياة",
+      "note": "النموذج الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم دراسة الدوال. المنفَّذ الآن هو المسألة الرابعة.",
+      "sourcePack": "LS all sessions.pdf",
+      "folder": "content/banks/g12-ls/",
+      "topics": [
+        {
+          "id": "mcq-mixed",
+          "file": null,
+          "title": "I · Mixed MCQ",
+          "arabicTitle": "أولاً · أسئلة مختلطة"
+        },
+        {
+          "id": "space-geometry",
+          "file": "content/banks/g12-ls/space-geometry.json",
+          "title": "II · Space geometry",
+          "arabicTitle": "ثانياً · هندسة الفضاء"
+        },
+        {
+          "id": "probability",
+          "file": "content/banks/g12-ls/probability.json",
+          "title": "III · Probability",
+          "arabicTitle": "ثالثاً · الاحتمالات"
+        },
+        {
+          "id": "functions",
+          "file": "content/banks/g12-ls/functions.json",
+          "title": "IV · Functions analysis",
+          "arabicTitle": "رابعاً · دراسة الدوال"
+        }
+      ]
+    },
+    {
+      "id": "se",
+      "certificate": "SE",
+      "track": "grade-12",
+      "title": "Sociology & Economics",
+      "arabicTitle": "اجتماع واقتصاد",
+      "heading": "صف 12 · اجتماع واقتصاد",
+      "note": "تجميع مقترح بعد تصفية النماذج الرسمية. البنوك يزرعها لاحقاً وكيل آخر — ليست نماذج منسوخة.",
+      "sourcePack": "SE_All Sessions.pdf",
+      "folder": "content/banks/g12-se/",
+      "topics": [
+        {
+          "id": "statistics",
+          "file": "content/banks/g12-se/statistics.json",
+          "title": "Statistics",
+          "arabicTitle": "الإحصاء"
+        },
+        {
+          "id": "probability",
+          "file": "content/banks/g12-se/probability.json",
+          "title": "Probability",
+          "arabicTitle": "الاحتمالات"
+        },
+        {
+          "id": "functions",
+          "file": "content/banks/g12-se/functions.json",
+          "title": "Functions and sequences",
+          "arabicTitle": "الدوال والمتتاليات"
+        },
+        {
+          "id": "applied",
+          "file": "content/banks/g12-se/applied.json",
+          "title": "Applied / financial math",
+          "arabicTitle": "رياضيات تطبيقية ومالية"
+        }
+      ]
+    },
+    {
+      "id": "gs",
+      "certificate": "GS",
+      "track": "grade-12",
+      "title": "General Science",
+      "arabicTitle": "علوم عامة",
+      "heading": "صف 12 · علوم عامة",
+      "note": "تجميع مقترح بعد تصفية النماذج الرسمية. البنوك يزرعها لاحقاً وكيل آخر — ليست نماذج منسوخة.",
+      "sourcePack": "GS-All.pdf",
+      "folder": "content/banks/g12-gs/",
+      "topics": [
+        {
+          "id": "complex",
+          "file": "content/banks/g12-gs/complex.json",
+          "title": "Complex numbers",
+          "arabicTitle": "الأعداد المركبة"
+        },
+        {
+          "id": "space-geometry",
+          "file": "content/banks/g12-gs/space-geometry.json",
+          "title": "Space geometry",
+          "arabicTitle": "هندسة الفضاء"
+        },
+        {
+          "id": "probability",
+          "file": "content/banks/g12-gs/probability.json",
+          "title": "Probability",
+          "arabicTitle": "الاحتمالات"
+        },
+        {
+          "id": "functions",
+          "file": "content/banks/g12-gs/functions.json",
+          "title": "Functions analysis",
+          "arabicTitle": "دراسة الدوال"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2602 @@
+{
+  "id": "g12-ls-functions",
+  "track": "grade-12",
+  "certificate": "LS",
+  "topic": "functions",
+  "title": "Functions",
+  "arabicTitle": "الدوال",
+  "lessonId": "grade-12-ch1",
+  "contestMinutes": 25,
+  "passScore": 70,
+  "sourceModels": [
+    "LS all sessions.pdf"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Grade 12 LS official sessions (LS all sessions.pdf): Problem IV wording — limits at the bounds of I, vertical/horizontal/oblique asymptotes, table of variations, inverse on an interval, tangent, unique root with a numerical sandwich. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "limits",
+      "title": "Limits",
+      "arabicTitle": "النهايات",
+      "note": "First slice. Classroom video + notes: /classroom/grade-12-ch1."
+    },
+    {
+      "id": "continuity",
+      "title": "Continuity",
+      "arabicTitle": "الاستمرار"
+    },
+    {
+      "id": "derivatives",
+      "title": "Derivatives",
+      "arabicTitle": "المشتقات"
+    },
+    {
+      "id": "variation",
+      "title": "Table of variations",
+      "arabicTitle": "جدول التغيرات"
+    },
+    {
+      "id": "asymptotes",
+      "title": "Asymptotes",
+      "arabicTitle": "خطوط التقارب"
+    },
+    {
+      "id": "inverse",
+      "title": "Inverse functions",
+      "arabicTitle": "الدوال العكسية"
+    }
+  ],
+  "order": "easy → medium → hard (within a band: limits, continuity, derivatives, variation, asymptotes, inverse)",
+  "contestTopics": [
+    {
+      "id": "mcq-mixed",
+      "file": null,
+      "title": "I · Mixed MCQ",
+      "arabicTitle": "أولاً · أسئلة مختلطة",
+      "note": "Short mixed items (often ~2.5 pts). Not a separate bank file yet.",
+      "implemented": false
+    },
+    {
+      "id": "space-geometry",
+      "file": "content/banks/g12-ls/space-geometry.json",
+      "title": "II · Space geometry",
+      "arabicTitle": "ثانياً · هندسة الفضاء",
+      "implemented": false
+    },
+    {
+      "id": "probability",
+      "file": "content/banks/g12-ls/probability.json",
+      "title": "III · Probability",
+      "arabicTitle": "ثالثاً · الاحتمالات",
+      "implemented": false
+    },
+    {
+      "id": "functions",
+      "file": "content/banks/g12-ls/functions.json",
+      "title": "IV · Functions analysis (this bank)",
+      "arabicTitle": "رابعاً · دراسة الدوال",
+      "implemented": true
+    }
+  ],
+  "nextTopicFiles": [
+    "content/banks/g12-ls/space-geometry.json",
+    "content/banks/g12-ls/probability.json",
+    "content/banks/g12-ls/integration.json"
+  ],
+  "questions": [
+    {
+      "id": "g12-ls-fn-an-lim-01",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-limit-0"
+      },
+      "stem": "Let f be defined on (0,+∞) by f(x)=3x ln x. Then lim_{x→0+} f(x) equals:",
+      "choices": [
+        "\\(-\\infty\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "Standard: x ln x → 0 as x→0+, so 3x ln x → 0.",
+        "Trap: writing −∞ because ln x → −∞, ignoring the factor x."
+      ],
+      "latex": "f(x)=3x\\ln x\\quad (x>0)"
+    },
+    {
+      "id": "g12-ls-fn-an-lim-02",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-limit-inf"
+      },
+      "stem": "Let f(x)=(ln x)/x on (0,+∞). Then lim_{x→+∞} f(x) equals:",
+      "choices": [
+        "\\(+\\infty\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(-\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "ln x grows slower than x, so (ln x)/x → 0.",
+        "Trap: +∞ because the numerator → +∞."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{\\ln x}{x}"
+    },
+    {
+      "id": "g12-ls-fn-an-lim-05",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-exp-0plus"
+      },
+      "stem": "Let f be defined on (0,+∞) by f(x)=e^{1/x}. Then lim_{x→0+} f(x) equals:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(e\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "As x→0+, 1/x → +∞, hence e^{1/x} → +∞.",
+        "Trap: 1, which is the limit at +∞, not at 0+."
+      ],
+      "latex": "\\lim_{x\\to 0^+}e^{1/x}"
+    },
+    {
+      "id": "grade-12-ch1-q1",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(5\\)",
+        "\\(6\\)",
+        "\\(7\\)",
+        "\\(8\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(7\\)",
+      "solutionSketch": [
+        "الدالة كثير حدود، فالتعويض مباشر.",
+        "\\(2\\cdot 3+1=7\\).",
+        "الفخ الشائع: حساب \\(2\\cdot 3=6\\) ونسيان الحد الثابت."
+      ],
+      "latex": "\\lim_{x\\to 3}(2x+1)",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q10",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(7\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "بسط ثابت ومقام \\(x^3\\to+\\infty\\)، فالكسر → 0.",
+        "لا تكتب 7."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{7}{x^3}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q2",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(3\\)",
+        "\\(2\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "كثير حدود: عوّض.",
+        "\\(3(1)^2-2(1)+1=3-2+1=2\\)."
+      ],
+      "latex": "\\lim_{x\\to 1}(3x^2-2x+1)",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q3",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(5\\)",
+        "غير موجودة",
+        "\\(1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(5\\)",
+      "solutionSketch": [
+        "من أجل \\(x\\neq 0\\) الكسر يساوي 5.",
+        "الاقتراب من 0 لا يمرّ بالنقطة نفسها: النهاية 5 لا 0.",
+        "الفخ: التعويض الأعمى فيعطي 0/0 ثم «غير موجودة»."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{5x}{x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q4",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(+\\infty\\)",
+        "\\(1\\)",
+        "\\(0\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "عندما \\(|x|\\to\\infty\\) المقام يكبر بلا حدود، فالكسر يسعى إلى 0.",
+        "لا تخلط مع نهاية \\(1/x\\) عند 0."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{1}{x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q5",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(-\\infty\\)",
+        "\\(+\\infty\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "من اليمين \\(x>0\\) صغير، فـ \\(1/x\\) كبيرة موجبة.",
+        "النهاية من اليمين \\(+\\infty\\). النهاية الثنائية عند 0 غير موجودة، لكن السؤال من اليمين فقط."
+      ],
+      "latex": "\\lim_{x\\to 0^+}\\frac{1}{x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q6",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "إذا كانت \\(\\lim_{x\\to 1^-}f(x)=2\\) و\\(\\lim_{x\\to 1^+}f(x)=4\\)، فإن نهاية \\(f\\) عندما \\(x\\to 1\\) تساوي:",
+      "choices": [
+        "\\(2\\)",
+        "\\(4\\)",
+        "\\(3\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 3,
+      "answer": "غير موجودة",
+      "solutionSketch": [
+        "النهاية الثنائية توجد فقط إذا تساوت نهايتا اليمين واليسار.",
+        "2 ≠ 4 فلا نهاية ثنائية. الفخ: أخذ المتوسط 3، أو اختيار قيمة f(1) إن وُجدت."
+      ],
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q7",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(3\\)",
+        "\\(+\\infty\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "درجتا البسط والمقام متساويتان (2 و 2).",
+        "النهاية نسبة المعاملين المسيطرين: \\(3/1=3\\).",
+        "الفخ: القول إن النهاية 0 لأن «في اللانهاية نهمل»، أو ∞ بلا نظر إلى الدرجات."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{3x^2+1}{x^2-5}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q8",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(2\\)",
+        "\\(+\\infty\\)",
+        "\\(0\\)",
+        "\\dfrac{1}{2}"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "درجة المقام 2 أكبر من درجة البسط 1، فالكسر يسعى إلى 0.",
+        "الفخ: أخذ نسبة الحدود الخطية 2/1 أو القول ∞ لأن البسط يكبر."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{2x+1}{x^2+3}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q9",
+      "slice": "limits",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\dfrac{1}{3}",
+        "\\(+\\infty\\)",
+        "\\(-\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "درجة البسط أكبر، والمعاملان الموجبان، فالنهاية \\(+\\infty\\).",
+        "الفخ: نسبة المعاملين 1/3 وكأن الدرجتين متساويتان."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{x^2+1}{3x+2}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "g12-ls-fn-cont-01",
+      "slice": "continuity",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-piecewise"
+      },
+      "stem": "لتكن f(x)=x+1 إذا x<1، و f(1)=3، و f(x)=2x إذا x>1. هل f مستمرة عند 1؟",
+      "choices": [
+        "نعم، لأن النهاية موجودة",
+        "لا، لأن النهاية تساوي 2 بينما f(1)=3",
+        "نعم، لأن f(1) موجودة",
+        "لا، لأن النهاية غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "لا، لأن النهاية تساوي 2 بينما f(1)=3",
+      "solutionSketch": [
+        "من اليسار: x+1 → 2. من اليمين: 2x → 2. النهاية 2.",
+        "f(1)=3 ≠ 2، فشرط الاستمرار الثالث يسقط.",
+        "الفخ: الاكتفاء بوجود النهاية أو بوجود القيمة."
+      ]
+    },
+    {
+      "id": "g12-ls-fn-cont-02",
+      "slice": "continuity",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-domain"
+      },
+      "stem": "أي الدوال الآتية مستمرة على كل ℝ؟",
+      "choices": [
+        "\\(1/x\\)",
+        "\\(\\tan x\\)",
+        "\\(|x|\\)",
+        "\\(\\sqrt{x}\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(|x|\\)",
+      "solutionSketch": [
+        "القيمة المطلقة مستمرة على ℝ (مركب كثير حدود مع دالة مستمرة).",
+        "1/x غير معرّفة عند 0. tan x غير معرّفة عند π/2. √x على [0,+∞) فقط."
+      ]
+    },
+    {
+      "id": "g12-ls-fn-cont-03",
+      "slice": "continuity",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-parameter"
+      },
+      "stem": "أوجد k حتى تكون f مستمرة عند 1: f(x)=x² إذا x<1، و f(x)=k إذا x≥1.",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "أي عدد"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "نهاية اليسار: 1. نهاية اليمين والقيمة: k.",
+        "للاستمرار k=1. الفخ: k=2 من مشتقة 2x عند 1 (ذلك للمشتقة لا للاستمرار)."
+      ],
+      "latex": "f(x)=\\begin{cases} x^2 & x<1 \\\\ k & x\\ge 1 \\end{cases}"
+    },
+    {
+      "id": "g12-ls-fn-der-01",
+      "slice": "derivatives",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-polynomial"
+      },
+      "stem": "إذا كانت f(x)=x²+3x فإن f'(2) تساوي:",
+      "choices": [
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(7\\)",
+        "\\(10\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(7\\)",
+      "solutionSketch": [
+        "f'(x)=2x+3، فـ f'(2)=7.",
+        "هذا الحساب يظهر في نماذج علوم الحياة. الفخ: f(2)=10 أو نسيان 3."
+      ],
+      "latex": "f(x)=x^2+3x"
+    },
+    {
+      "id": "g12-ls-fn-der-02",
+      "slice": "derivatives",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-power"
+      },
+      "stem": "احسب المشتقة ثم القيمة:",
+      "choices": [
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(12\\)",
+        "\\(24\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(12\\)",
+      "solutionSketch": [
+        "(x³)'=3x²، عند 2: 3·4=12.",
+        "الفخ: 8=2³ أو 6=3·2."
+      ],
+      "latex": "\\frac{d}{dx}(x^3)\\Big|_{x=2}"
+    },
+    {
+      "id": "g12-ls-fn-der-03",
+      "slice": "derivatives",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-linear"
+      },
+      "stem": "مشتقة f(x)=5x−4 تساوي:",
+      "choices": [
+        "\\(5x\\)",
+        "\\(5\\)",
+        "\\(-4\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(5\\)",
+      "solutionSketch": [
+        "مشتقة دالة خطية ax+b هي a. الفخ: إبقاء 5x أو أخذ الحد الثابت."
+      ],
+      "latex": "f(x)=5x-4"
+    },
+    {
+      "id": "g12-ls-fn-der-04",
+      "slice": "derivatives",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-coefficient"
+      },
+      "stem": "احسب:",
+      "choices": [
+        "\\(3\\)",
+        "\\(4\\)",
+        "\\(12\\)",
+        "\\(81\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(12\\)",
+      "solutionSketch": [
+        "(3x⁴)'=12x³، عند 1 تساوي 12.",
+        "الفخ: 3 أو 3·1⁴."
+      ],
+      "latex": "\\frac{d}{dx}(3x^4)\\Big|_{x=1}"
+    },
+    {
+      "id": "g12-ls-fn-var-01",
+      "slice": "variation",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-variation-sign"
+      },
+      "stem": "The table of f' shows f'(x)>0 for every x in I. Then on I the function f is:",
+      "choices": [
+        "strictly decreasing",
+        "strictly increasing",
+        "constant",
+        "not monotonic"
+      ],
+      "answerIndex": 1,
+      "answer": "strictly increasing",
+      "solutionSketch": [
+        "If f'>0 on an interval, f is strictly increasing. This sentence is how LS sessions justify the inverse later."
+      ]
+    },
+    {
+      "id": "g12-ls-fn-as-01",
+      "slice": "asymptotes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-horizontal"
+      },
+      "stem": "Let f(x)=(2x+1)e^{-x}. A horizontal asymptote of (C) at +∞ is:",
+      "choices": [
+        "\\(y=2x\\)",
+        "\\(y=0\\)",
+        "\\(y=2\\)",
+        "\\(x=0\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(y=0\\)",
+      "solutionSketch": [
+        "x e^{-x} → 0 and e^{-x} → 0, so f(x)→0. The line y=0 is a horizontal asymptote.",
+        "Trap: keeping the linear factor y=2x."
+      ],
+      "latex": "f(x)=(2x+1)e^{-x}"
+    },
+    {
+      "id": "g12-ls-fn-as-02",
+      "slice": "asymptotes",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-vertical"
+      },
+      "stem": "Let f(x)=(ln x)/x on (0,+∞). As x→0+, f(x)→−∞. Graphically:",
+      "choices": [
+        "y=0 is a horizontal asymptote at 0",
+        "the y-axis (x=0) is a vertical asymptote of (C)",
+        "y=x is an asymptote",
+        "no asymptote"
+      ],
+      "answerIndex": 1,
+      "answer": "the y-axis (x=0) is a vertical asymptote of (C)",
+      "solutionSketch": [
+        "ln x → −∞ faster than x → 0+, so f → −∞. The line x=0 is a vertical asymptote.",
+        "This is the usual graphical interpretation asked after lim_{x→0+} f(x)."
+      ],
+      "latex": "f(x)=\\frac{\\ln x}{x}"
+    },
+    {
+      "id": "g12-ls-fn-inv-01",
+      "slice": "inverse",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-inverse-existence"
+      },
+      "stem": "On an interval I, f is continuous and strictly increasing. Then:",
+      "choices": [
+        "f has no inverse",
+        "f admits an inverse function on I",
+        "f' > 0 is still required as an extra hypothesis",
+        "the inverse is f itself"
+      ],
+      "answerIndex": 1,
+      "answer": "f admits an inverse function on I",
+      "solutionSketch": [
+        "This is the exact justification used in LS sessions: continuous and strictly monotonic ⇒ inverse exists.",
+        "f'>0 is sufficient but not necessary (f' may vanish at isolated points)."
+      ]
+    },
+    {
+      "id": "g12-ls-fn-inv-06",
+      "slice": "inverse",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-inverse-strict"
+      },
+      "stem": "Let f(x)=x+3−2e^{-x} on ℝ. Then f admits an inverse on ℝ because:",
+      "choices": [
+        "lim_{x→+∞} f(x)=+∞ is enough",
+        "f'(x)=1+2e^{-x}>0, so f is continuous and strictly increasing on ℝ",
+        "f is a polynomial",
+        "f(0)=1"
+      ],
+      "answerIndex": 1,
+      "answer": "f'(x)=1+2e^{-x}>0, so f is continuous and strictly increasing on ℝ",
+      "solutionSketch": [
+        "Session justification: continuous and strictly monotonic on I ⇒ inverse on I.",
+        "Here f'=1+2e^{-x} never vanishes. Trap: using only a limit at +∞."
+      ],
+      "latex": "f'(x)=1+2e^{-x}>0"
+    },
+    {
+      "id": "g12-ls-fn-an-lim-03",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-exp-limit"
+      },
+      "stem": "Let f(x)=e^{1/x} on (0,+∞). Then lim_{x→+∞} f(x) equals:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "e",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "1/x → 0, so e^{1/x} → e^0 = 1.",
+        "Trap: +∞ by confusing with e^x, or 0 with e^{-x}."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}e^{1/x}"
+    },
+    {
+      "id": "g12-ls-fn-an-lim-04",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-exp-poly"
+      },
+      "stem": "Let f(x)=x+e^{-x}. Then lim_{x→−∞} f(x) equals:",
+      "choices": [
+        "\\(-\\infty\\)",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "As x→−∞, e^{-x}=e^{|x|} dominates and → +∞, so f(x)→+∞.",
+        "Trap: −∞ from the x term alone."
+      ],
+      "latex": "\\lim_{x\\to -\\infty}(x+e^{-x})"
+    },
+    {
+      "id": "grade-12-ch1-q11",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية بعد تبسيط العبارة:",
+      "choices": [
+        "\\(0\\)",
+        "\\(-2\\)",
+        "\\(2\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(-2\\)",
+      "solutionSketch": [
+        "تعويض: 0/0. حلّل: \\(x^2-1=(x-1)(x+1)\\).",
+        "اختزال \\(x+1\\) حيث \\(x\\neq -1\\) يبقى \\(x-1\\).",
+        "عندما \\(x\\to -1\\) نحصل على \\(-2\\).",
+        "الفخ: الإشارة المعكوسة 2، أو التوقف عند 0/0."
+      ],
+      "latex": "\\lim_{x\\to -1}\\frac{x^2-1}{x+1}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q12",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "غير موجودة",
+        "\\(0\\)",
+        "\\(4\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(4\\)",
+      "solutionSketch": [
+        "تعويض: 0/0. \\(x^2-4=(x-2)(x+2)\\).",
+        "اختزال \\(x-2\\) حيث \\(x\\neq 2\\) يبقى \\(x+2\\to 4\\).",
+        "الدالة غير معرّفة عند 2، لكن النهاية 4. الفخ: «غير موجودة» أو نسيان \\(x+2\\) فيبقى 2."
+      ],
+      "latex": "\\lim_{x\\to 2}\\frac{x^2-4}{x-2}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q13",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(3\\)",
+        "\\dfrac{3}{5}",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\dfrac{3}{5}",
+      "solutionSketch": [
+        "اقسم البسط والمقام على \\(x^3\\)، أو احتفظ بالحدّين \\(3x^3\\) و\\(5x^3\\).",
+        "النهاية \\(3/5\\). الفخ: أخذ 3، أو إهمال المعاملات."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{3x^3-2x}{5x^3+x^2}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q14",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(-3\\)",
+        "\\(2\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "الحدّان المسيطران \\(2x^2\\) و\\(x^2\\)، فالنهاية 2.",
+        "الفخ الكلاسيكي: أخذ الحدود الخطية \\(-3x/x=-3\\)."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\frac{2x^2-3x}{x^2+x-1}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q15",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(1\\)",
+        "\\(3\\)",
+        "\\(0\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "0/0. \\(x^3-1=(x-1)(x^2+x+1)\\).",
+        "بعد الاختزال: \\(x^2+x+1\\) عند 1 يساوي 3."
+      ],
+      "latex": "\\lim_{x\\to 1}\\frac{x^3-1}{x-1}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q16",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(1\\)",
+        "\\(5\\)",
+        "\\dfrac{1}{5}",
+        "\\(0\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(5\\)",
+      "solutionSketch": [
+        "\\(\\dfrac{\\sin 5x}{x}=5\\cdot\\dfrac{\\sin 5x}{5x}\\to 5\\cdot 1=5\\).",
+        "الفخ: كتابة 1 لأن \\(\\sin u/u\\to 1\\) ونسيان المعامل 5، أو 1/5."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{\\sin 5x}{x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q17",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(1\\)",
+        "\\dfrac{2}{3}",
+        "\\dfrac{3}{2}",
+        "\\(0\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\dfrac{3}{2}",
+      "solutionSketch": [
+        "\\(\\dfrac{\\sin 3x}{\\sin 2x}=\\dfrac{\\sin 3x}{3x}\\cdot\\dfrac{2x}{\\sin 2x}\\cdot\\dfrac{3}{2}\\to\\dfrac{3}{2}\\).",
+        "الفخ: قلب النسبة 2/3، أو 1 لأن الطرفين يسعيان إلى 0."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{\\sin 3x}{\\sin 2x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q18",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\dfrac{1}{2}",
+        "غير موجودة"
+      ],
+      "answerIndex": 2,
+      "answer": "\\dfrac{1}{2}",
+      "solutionSketch": [
+        "نهاية قياسية: \\((1-\\cos x)/x^2\\to 1/2\\).",
+        "أو اضرب بالرافق \\(1+\\cos x\\): البسط \\(\\sin^2 x\\) فيصير \\((\\sin x/x)^2\\cdot 1/(1+\\cos x)\\to 1\\cdot 1/2\\)."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{1-\\cos x}{x^2}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q19",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(0\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(\\dfrac{1}{4}\\)",
+      "solutionSketch": [
+        "0/0. عقّل: اضرب بـ \\(\\sqrt{x}+2\\).",
+        "أو حلّل المقام: \\(x-4=(\\sqrt{x}-2)(\\sqrt{x}+2)\\).",
+        "يتبقى \\(1/(\\sqrt{x}+2)\\to 1/4\\). الفخ: 1/2 من نسيان الرافق."
+      ],
+      "latex": "\\lim_{x\\to 4}\\frac{\\sqrt{x}-2}{x-4}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q20",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "لتكن \\(f(x)=x+1\\) إذا \\(x<2\\)، و\\(f(2)=5\\)، و\\(f(x)=3x-3\\) إذا \\(x>2\\). نهاية \\(f\\) عندما \\(x\\to 2\\) تساوي:",
+      "choices": [
+        "\\(5\\)",
+        "\\(3\\)",
+        "غير موجودة",
+        "\\(4\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "من اليسار: \\(x+1\\to 3\\). من اليمين: \\(3x-3\\to 3\\).",
+        "الجهتان متساويتان فالنهاية 3. القيمة \\(f(2)=5\\) لا تُغيّر النهاية.",
+        "الفخ: اختيار 5 لأنها «قيمة النقطة»، أو غير موجودة لأن f(2) تختلف."
+      ],
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q21",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 3,
+      "answer": "غير موجودة",
+      "solutionSketch": [
+        "من اليمين: \\(|x-2|=x-2\\) فالنسبة 1.",
+        "من اليسار: \\(|x-2|=2-x=-(x-2)\\) فالنسبة \\(-1\\).",
+        "الجهتان مختلفتان: النهاية الثنائية غير موجودة. الفخ: اختيار جهة واحدة، أو 0 كمتوسط."
+      ],
+      "latex": "\\lim_{x\\to 2}\\frac{|x-2|}{x-2}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q22",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "أوجد \\(k\\) حتى تكون نهاية الدالة موجودة عند \\(x=2\\): \\(f(x)=x+k\\) إذا \\(x<2\\)، و\\(f(x)=3x-1\\) إذا \\(x\\ge 2\\).",
+      "choices": [
+        "\\(5\\)",
+        "\\(3\\)",
+        "\\(1\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "نهاية اليسار: \\(2+k\\). نهاية اليمين: \\(6-1=5\\).",
+        "للوجود: \\(2+k=5\\) إذن \\(k=3\\).",
+        "الفخ: أخذ قيمة القطعة اليمنى 5 كأنها k، أو مساواة المشتقات."
+      ],
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q23",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(3\\)",
+        "\\(1\\)",
+        "\\(4\\)",
+        "\\(0\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(4\\)",
+      "solutionSketch": [
+        "\\(\\dfrac{3x+\\sin x}{x}=3+\\dfrac{\\sin x}{x}\\to 3+1=4\\).",
+        "الفخ: الاكتفاء بـ 3 وإهمال السينوس، أو 1 من النهاية القياسية وحدها."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{3x+\\sin x}{x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q24",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(1\\)",
+        "\\(-1\\)",
+        "\\(0\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(-1\\)",
+      "solutionSketch": [
+        "من اليسار \\(x<3\\) فيكون \\(|x-3|=3-x=-(x-3)\\)، فالنسبة \\(-1\\).",
+        "السؤال من اليسار فقط، فالجواب \\(-1\\) لا «غير موجودة»."
+      ],
+      "latex": "\\lim_{x\\to 3^-}\\frac{x-3}{|x-3|}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q25",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(3\\)",
+        "\\(-6\\)",
+        "\\(6\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(-6\\)",
+      "solutionSketch": [
+        "0/0. \\(x^2-9=(x-3)(x+3)\\). اختزال \\(x+3\\) يبقى \\(x-3\\to -6\\).",
+        "الفخ: الإشارة 6، أو التوقف عند غير موجودة."
+      ],
+      "latex": "\\lim_{x\\to -3}\\frac{x^2-9}{x+3}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q26",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية بالتعقيل:",
+      "choices": [
+        "\\(1\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(0\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(\\dfrac{1}{2}\\)",
+      "solutionSketch": [
+        "0/0. اضرب البسط والمقام بـ \\(\\sqrt{1+x}+1\\).",
+        "البسط يصير \\(x\\)، فيُختزل: \\(1/(\\sqrt{1+x}+1)\\to 1/2\\).",
+        "الفخ: كتابة 1 لأن الجذر «يلغي»، أو 0 لأن البسط يذهب إلى 0."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{\\sqrt{1+x}-1}{x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q27",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(3\\)",
+        "\\(\\dfrac{3}{2}\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(\\dfrac{3}{2}\\)",
+      "solutionSketch": [
+        "شكل \\(\\infty-\\infty\\). اضرب بالرافق \\(\\sqrt{x^2+3x}+x\\).",
+        "البسط \\(3x\\). عند \\(+\\infty\\) لدينا \\(\\sqrt{x^2}=|x|=x\\).",
+        "\\(3x/( \\sqrt{x^2+3x}+x)\\to 3x/(x+x)=3/2\\)."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\bigl(\\sqrt{x^2+3x}-x\\bigr)",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q28",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(\\dfrac{3}{2}\\)",
+        "\\(-\\dfrac{3}{2}\\)",
+        "\\(0\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(+\\infty\\)",
+      "solutionSketch": [
+        "لا تنقل جواب حالة \\(+\\infty\\).",
+        "عند \\(-\\infty\\): \\(\\sqrt{x^2}=|x|=-x\\)، فـ \\(\\sqrt{x^2+3x}-x \\sim -x-x=-2x\\to +\\infty\\).",
+        "الفخ الأكبر في النماذج: كتابة 3/2 كما في الاتجاه الموجب."
+      ],
+      "latex": "\\lim_{x\\to -\\infty}\\bigl(\\sqrt{x^2+3x}-x\\bigr)",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q29",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(2\\)",
+        "\\(0\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "\\((1-\\cos 2x)/x^2 = 4\\cdot(1-\\cos 2x)/(2x)^2 \\to 4\\cdot(1/2)=2\\).",
+        "الفخ: استخدام النهاية القياسية بلا معامل الزاوية فيبقى 1/2."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{1-\\cos 2x}{x^2}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q30",
+      "slice": "limits",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(3\\)",
+        "\\(\\dfrac{1}{3}\\)",
+        "\\(0\\)",
+        "\\(\\dfrac{2}{3}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(\\dfrac{1}{3}\\)",
+      "solutionSketch": [
+        "شكل \\(\\infty-\\infty\\). اضرب بالرافق.",
+        "البسط: \\((9x^2+2x)-9x^2=2x\\).",
+        "المقام \\(\\sqrt{9x^2+2x}+3x \\sim 3x+3x=6x\\) عند \\(+\\infty\\).",
+        "\\(2x/6x=1/3\\). الفخ: 2x/3x=2/3 بنسيان الرافق في المقام، أو 3 من الجذر."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\bigl(\\sqrt{9x^2+2x}-3x\\bigr)",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "g12-ls-fn-cont-04",
+      "slice": "continuity",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-removable"
+      },
+      "stem": "f(x)=(x²−4)/(x−2) إذا x≠2 و f(2)=k. تكون f مستمرة عند 2 إذا وفقط إذا:",
+      "choices": [
+        "\\(k=0\\)",
+        "\\(k=2\\)",
+        "\\(k=4\\)",
+        "لا يوجد مثل هذا k"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(k=4\\)",
+      "solutionSketch": [
+        "النهاية عند 2 تساوي 4 بعد اختزال (x−2).",
+        "الاستمرار يطلب f(2)=النهاية، إذن k=4 (انقطاع قابل للرفع إن k≠4).",
+        "الفخ: k=0 لأن التعويض 0/0، أو «لا يوجد» لأن العبارة الأصلية غير معرّفة."
+      ],
+      "latex": "f(2)=k,\\quad f(x)=\\frac{x^2-4}{x-2}\\ (x\\neq 2)"
+    },
+    {
+      "id": "g12-ls-fn-cont-05",
+      "slice": "continuity",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-vs-derivative"
+      },
+      "stem": "عند x=1 للدالة f(x)=|x−1| تكون العبارة الصحيحة:",
+      "choices": [
+        "مستمرة وقابلة للاشتقاق",
+        "مستمرة وغير قابلة للاشتقاق",
+        "غير مستمرة",
+        "النهاية غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "مستمرة وغير قابلة للاشتقاق",
+      "solutionSketch": [
+        "المطلق مستمر. مشتقتا اليمين واليسار: 1 و −1، فغير قابلة للاشتقاق عند الرأس.",
+        "الفخ الشائع: خلط الاستمرار مع قابلية الاشتقاق."
+      ],
+      "latex": "f(x)=|x-1|"
+    },
+    {
+      "id": "g12-ls-fn-cont-06",
+      "slice": "continuity",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-ivt"
+      },
+      "stem": "f(x)=x³−x−1 على [1,2]. أي الاستنتاجات صحيحة؟",
+      "choices": [
+        "يوجد جذر في (1,2) حسب مبرهنة القيم الوسيطة",
+        "f(1.5)=0",
+        "لا جذر في [1,2]",
+        "الجذر الوحيد في (0,1)"
+      ],
+      "answerIndex": 0,
+      "answer": "يوجد جذر في (1,2) حسب مبرهنة القيم الوسيطة",
+      "solutionSketch": [
+        "f مستمرة على [1,2]. f(1)=−1<0 و f(2)=5>0، فتمر بالصفر.",
+        "المبرهنة لا تعيّن أن 1.5 جذر. الفخ: حساب نقطة وسط بلا تعويض."
+      ],
+      "latex": "f(x)=x^3-x-1"
+    },
+    {
+      "id": "g12-ls-fn-cont-07",
+      "slice": "continuity",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-standard-limit"
+      },
+      "stem": "f(x)=sin(x)/x إذا x≠0 و f(0)=a. تكون f مستمرة عند 0 إذا:",
+      "choices": [
+        "\\(a=0\\)",
+        "\\(a=1\\)",
+        "\\(a=\\pi\\)",
+        "لا يمكن لأي a"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(a=1\\)",
+      "solutionSketch": [
+        "نهاية sin x / x عند 0 تساوي 1، فالاستمرار يطلب a=1.",
+        "الفخ: a=0 لأن sin 0=0."
+      ],
+      "latex": "f(x)=\\frac{\\sin x}{x}\\ (x\\neq 0),\\ f(0)=a"
+    },
+    {
+      "id": "g12-ls-fn-cont-08",
+      "slice": "continuity",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-essential"
+      },
+      "stem": "هل يمكن تمديد f(x)=1/x باستمرار على ℝ بتعريف قيمة عند 0؟",
+      "choices": [
+        "نعم، بوضع f(0)=0",
+        "نعم، بوضع f(0)=1",
+        "لا، لأن النهايتين من الجهتين غير منتهيتين ومختلفتي الإشارة",
+        "نعم، بأي قيمة"
+      ],
+      "answerIndex": 2,
+      "answer": "لا، لأن النهايتين من الجهتين غير منتهيتين ومختلفتي الإشارة",
+      "solutionSketch": [
+        "من اليمين +∞ ومن اليسار −∞. لا نهاية منتهية، فلا تمديد مستمر.",
+        "الفخ: خلط مع الانقطاع القابل للرفع مثل (x²−1)/(x−1)."
+      ],
+      "latex": "f(x)=\\frac{1}{x}"
+    },
+    {
+      "id": "g12-ls-fn-an-tan-01",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-tangent"
+      },
+      "stem": "Let f(x)=x+e^{-x}. An equation of the tangent to (C) at the point of abscissa 0 is:",
+      "choices": [
+        "\\(y=x+1\\)",
+        "\\(y=1\\)",
+        "\\(y=x\\)",
+        "\\(y=e^{-x}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(y=1\\)",
+      "solutionSketch": [
+        "f(0)=1 and f'(0)=1−1=0, so the tangent is the horizontal line y=1.",
+        "Trap: y=x+1 using slope 1 (that is f' at +∞, not at 0)."
+      ],
+      "latex": "f(0)=1,\\ f'(0)=0"
+    },
+    {
+      "id": "g12-ls-fn-an-tan-02",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-tangent-ln"
+      },
+      "stem": "Let f(x)=3x ln x. An equation of the tangent to (C) at the point of abscissa 1 is:",
+      "choices": [
+        "\\(y=0\\)",
+        "\\(y=3x\\)",
+        "\\(y=3(x-1)\\)",
+        "\\(y=x-1\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(y=3(x-1)\\)",
+      "solutionSketch": [
+        "f(1)=0, f'(1)=3(0+1)=3, so y−0=3(x−1).",
+        "Trap: y=3x (not through (1,0))."
+      ],
+      "latex": "f(1)=0,\\ f'(1)=3"
+    },
+    {
+      "id": "g12-ls-fn-der-05",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-product"
+      },
+      "stem": "f(x)=x²(x+1). فإن f'(1) تساوي:",
+      "choices": [
+        "\\(2\\)",
+        "\\(3\\)",
+        "\\(5\\)",
+        "\\(6\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(5\\)",
+      "solutionSketch": [
+        "انشر: x³+x²، فالمشتقة 3x²+2x. عند 1: 3+2=5.",
+        "أو جداء: 2x(x+1)+x². عند 1: 4+1=5. الفخ: 2 من مشتقة العامل الأول فقط."
+      ],
+      "latex": "f(x)=x^2(x+1)"
+    },
+    {
+      "id": "g12-ls-fn-der-06",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-chain"
+      },
+      "stem": "احسب مشتقة (2x−1)³ عند x=1:",
+      "choices": [
+        "\\(3\\)",
+        "\\(6\\)",
+        "\\(8\\)",
+        "\\(24\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(6\\)",
+      "solutionSketch": [
+        "سلسلة: 3(2x−1)²·2. عند 1: 3(1)²·2=6.",
+        "الفخ: نسيان ضرب 2 (مشتقة الداخل) فيبقى 3، أو حساب القيمة 1 لا المشتقة."
+      ],
+      "latex": "\\frac{d}{dx}(2x-1)^3\\Big|_{x=1}"
+    },
+    {
+      "id": "g12-ls-fn-der-07",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-tangent"
+      },
+      "stem": "معادلة المماس لمنحنى y=x² عند النقطة (1,1) هي:",
+      "choices": [
+        "\\(y=x\\)",
+        "\\(y=2x\\)",
+        "\\(y=2x-1\\)",
+        "\\(y=x^2+1\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(y=2x-1\\)",
+      "solutionSketch": [
+        "الميل y'=2x عند 1 يساوي 2. المماس: y−1=2(x−1) أي y=2x−1.",
+        "الفخ: y=2x بنسيان المرور بالنقطة."
+      ],
+      "latex": "y=x^2\\ \\text{at }(1,1)"
+    },
+    {
+      "id": "g12-ls-fn-der-08",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-definition"
+      },
+      "stem": "بحسب التعريف، هذه النهاية تساوي f'(1) لـ f(x)=x². قيمتها:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "( (1+h)²−1 )/h = (1+2h+h²−1)/h = 2+h → 2.",
+        "الفخ: التعويض h=0 مباشرة 0/0 ثم «غير موجودة»."
+      ],
+      "latex": "\\lim_{h\\to 0}\\frac{(1+h)^2-1}{h}"
+    },
+    {
+      "id": "g12-ls-fn-der-09",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-trig"
+      },
+      "stem": "إذا كانت f(x)=sin x فإن f'(0) تساوي:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(-1\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "f'=cos x و cos 0=1. الفخ: sin 0=0."
+      ],
+      "latex": "f(x)=\\sin x"
+    },
+    {
+      "id": "g12-ls-fn-der-10",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-quotient"
+      },
+      "stem": "احسب مشتقة (2x+1)/(x−1) عند x=2:",
+      "choices": [
+        "\\(1\\)",
+        "\\(0\\)",
+        "\\(-3\\)",
+        "\\(5\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(-3\\)",
+      "solutionSketch": [
+        "قاعدة القسمة: [2(x−1)−(2x+1)·1]/(x−1)² = (2x−2−2x−1)/(x−1)² = −3/(x−1)².",
+        "عند 2: −3/1=−3. الفخ: مشتقة البسط فقط أو إشارة موجبة."
+      ],
+      "latex": "f(x)=\\frac{2x+1}{x-1}"
+    },
+    {
+      "id": "g12-ls-fn-der-11",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-variation"
+      },
+      "stem": "f(x)=x³−3x. على أي مجال تكون f متناقصة؟",
+      "choices": [
+        "\\(\\mathbb{R}\\)",
+        "[-1,1]",
+        "[1,+∞)",
+        "(-∞,-1]"
+      ],
+      "answerIndex": 1,
+      "answer": "[-1,1]",
+      "solutionSketch": [
+        "f'(x)=3x²−3=3(x−1)(x+1). الإشارة سالبة على (−1,1).",
+        "متناقصة على [−1,1]. الفخ: قراءة إشارة خاطئة أو أخذ [1,+∞) حيث f'>0."
+      ],
+      "latex": "f(x)=x^3-3x"
+    },
+    {
+      "id": "g12-ls-fn-der-12",
+      "slice": "derivatives",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-root"
+      },
+      "stem": "احسب (√x)' عند x=4:",
+      "choices": [
+        "\\(2\\)",
+        "\\(\\dfrac{1}{2}\\)",
+        "\\(\\dfrac{1}{4}\\)",
+        "\\(\\dfrac{1}{8}\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(\\dfrac{1}{4}\\)",
+      "solutionSketch": [
+        "(√x)'=1/(2√x). عند 4: 1/(2·2)=1/4.",
+        "الفخ: 1/8 من وضع 2·4 في المقام، أو 1/2 من نسيان الجذر في المقام."
+      ],
+      "latex": "\\frac{d}{dx}\\sqrt{x}\\Big|_{x=4}"
+    },
+    {
+      "id": "g12-ls-fn-var-02",
+      "slice": "variation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-variation-ln"
+      },
+      "stem": "Let f(x)=3x ln x on (0,+∞). Then f'(x)=3(ln x+1). The table of variations of f is:",
+      "choices": [
+        "decreasing on (0,+∞)",
+        "decreasing on (0,1/e] and increasing on [1/e,+∞)",
+        "increasing on (0,1/e] and decreasing on [1/e,+∞)",
+        "increasing on (0,+∞)"
+      ],
+      "answerIndex": 1,
+      "answer": "decreasing on (0,1/e] and increasing on [1/e,+∞)",
+      "solutionSketch": [
+        "f'(x)=0 at ln x=−1, i.e. x=1/e. f'<0 on (0,1/e) and f'>0 on (1/e,+∞).",
+        "Minimum value f(1/e)=−3/e. Trap: swapping the two arrows."
+      ],
+      "latex": "f'(x)=3(\\ln x+1)"
+    },
+    {
+      "id": "g12-ls-fn-var-03",
+      "slice": "variation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-extremum"
+      },
+      "stem": "Let f(x)=x ln x − x on (0,+∞). The minimum of f is attained at:",
+      "choices": [
+        "\\(x=e\\)",
+        "\\(x=1\\), and f(1)=−1",
+        "\\(x=0\\)",
+        "no minimum"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(x=1\\), and f(1)=−1",
+      "solutionSketch": [
+        "f'(x)=ln x. Critical point x=1, and f' changes − to +. Minimum f(1)=−1.",
+        "Trap: x=e from confusing with (ln x)/x."
+      ],
+      "latex": "f(x)=x\\ln x-x"
+    },
+    {
+      "id": "g12-ls-fn-var-06",
+      "slice": "variation",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-variation-exp-product"
+      },
+      "stem": "Let f(x)=(2x+1)e^{-x}. Then f'(x)=(1-2x)e^{-x}. The table of variations of f is:",
+      "choices": [
+        "increasing on ℝ",
+        "increasing on (−∞,1/2] and decreasing on [1/2,+∞)",
+        "decreasing on (−∞,1/2] and increasing on [1/2,+∞)",
+        "decreasing on ℝ"
+      ],
+      "answerIndex": 1,
+      "answer": "increasing on (−∞,1/2] and decreasing on [1/2,+∞)",
+      "solutionSketch": [
+        "e^{-x}>0, so the sign of f' is the sign of 1−2x. Critical point x=1/2.",
+        "Maximum f(1/2)=2e^{-1/2}. Trap: swapping the two arrows."
+      ],
+      "latex": "f'(x)=(1-2x)e^{-x}"
+    },
+    {
+      "id": "g12-ls-fn-as-03",
+      "slice": "asymptotes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-oblique-x"
+      },
+      "stem": "Let f(x)=x+e^{-x} and (C) its curve. The line y=x is an asymptote of (C) at +∞ because:",
+      "choices": [
+        "lim f(x)=+∞",
+        "lim_{x→+∞}(f(x)−x)=0",
+        "f'(x)→1",
+        "f(0)=1"
+      ],
+      "answerIndex": 1,
+      "answer": "lim_{x→+∞}(f(x)−x)=0",
+      "solutionSketch": [
+        "Official wording: prove y=x is an asymptote by showing lim (f(x)−x)=0.",
+        "Here f(x)−x=e^{-x}→0. lim f=+∞ alone does not give the asymptote y=x."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\bigl(f(x)-x\\bigr)=0"
+    },
+    {
+      "id": "g12-ls-fn-as-04",
+      "slice": "asymptotes",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-oblique-shift"
+      },
+      "stem": "Let f(x)=x+3−2e^{-x}. An asymptote of (C) at +∞ is:",
+      "choices": [
+        "\\(y=x\\)",
+        "\\(y=x+3\\)",
+        "\\(y=3\\)",
+        "\\(y=x-2\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(y=x+3\\)",
+      "solutionSketch": [
+        "f(x)−(x+3)=−2e^{-x}→0, so y=x+3 is an asymptote at +∞.",
+        "Trap: y=x (forgetting the constant) or y=x−2 (copying a different session)."
+      ],
+      "latex": "f(x)=x+3-2e^{-x}"
+    },
+    {
+      "id": "g12-ls-fn-inv-02",
+      "slice": "inverse",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-inverse-formula"
+      },
+      "stem": "Let f(x)=e^{2x} on ℝ. The inverse function g satisfies:",
+      "choices": [
+        "\\(g(x)=2\\ln x\\) on ℝ",
+        "\\(g(x)=\\frac12\\ln x\\) on (0,+∞)",
+        "\\(g(x)=e^{x/2}\\)",
+        "\\(g(x)=\\ln(2x)\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(g(x)=\\frac12\\ln x\\) on (0,+∞)",
+      "solutionSketch": [
+        "Range of f is (0,+∞). y=e^{2x} ⇒ x=(1/2) ln y.",
+        "Trap: forgetting the factor 1/2 or the domain (0,+∞)."
+      ],
+      "latex": "f(x)=e^{2x}"
+    },
+    {
+      "id": "g12-ls-fn-inv-03",
+      "slice": "inverse",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-inverse-exp"
+      },
+      "stem": "Let f(x)=e^{1/x} on (0,+∞). Then f admits an inverse g defined on:",
+      "choices": [
+        "\\((0,+\\infty)\\)",
+        "\\((1,+\\infty)\\), and g(x)=1/\\ln x",
+        "\\(\\mathbb{R}\\)",
+        "\\([0,1]\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\((1,+\\infty)\\), and g(x)=1/\\ln x",
+      "solutionSketch": [
+        "f' < 0, so f is strictly decreasing from +∞ to 1. Range (1,+∞).",
+        "y=e^{1/x} ⇒ x=1/ln y. Trap: domain (0,+∞) copying the domain of f."
+      ],
+      "latex": "f(x)=e^{1/x}\\quad (x>0)"
+    },
+    {
+      "id": "grade-12-ch1-q31",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(2\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "اضرب بالرافق للفرقين تحت الجذرين.",
+        "البسط: \\((x^2+3x+1)-(x^2+x-2)=2x+3\\).",
+        "المقام مجموع الجذرين \\(\\sim |x|+|x|=2x\\) عند \\(+\\infty\\).",
+        "\\((2x+3)/(2x)\\to 1\\). الفخ: 0 لأن «الجذران يلغى أحدهما الآخر»، أو ∞."
+      ],
+      "latex": "\\lim_{x\\to +\\infty}\\bigl(\\sqrt{x^2+3x+1}-\\sqrt{x^2+x-2}\\bigr)",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q32",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "إذا كان \\(-x^2\\le f(x)\\le x^2\\) لكل \\(x\\) قرب 0، فإن \\(\\lim_{x\\to 0}f(x)\\) تساوي:",
+      "choices": [
+        "غير موجودة",
+        "\\(0\\)",
+        "لا يمكن الجزم",
+        "\\(1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "نهاية الطرفين عند 0 تساوي 0.",
+        "المبرهنة الحصارية تعطي نهاية f تساوي 0 حتى بلا صيغة f.",
+        "الفخ: «لا يمكن الجزم» لأن f مجهولة."
+      ],
+      "latex": "-x^2 \\le f(x) \\le x^2",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q33",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(4\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2\\)",
+      "solutionSketch": [
+        "0/0. اضرب بمجموع الجذرين (رافق البسط).",
+        "البسط: \\((1+2x)-(1-2x)=4x\\).",
+        "بعد اختزال x: \\(4/(\\sqrt{1+2x}+\\sqrt{1-2x})\\to 4/2=2\\).",
+        "الفخ: 4 بنسيان المقام بعد التعقيل، أو 0 لأن البسط → 0."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{\\sqrt{1+2x}-\\sqrt{1-2x}}{x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q34",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(3\\)",
+        "\\(-3\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(-3\\)",
+      "solutionSketch": [
+        "تعويض: 0/0. \\(x^3+8=(x+2)(x^2-2x+4)\\) و\\(x^2-4=(x-2)(x+2)\\).",
+        "اختزال \\(x+2\\) حيث \\(x\\neq -2\\): \\((x^2-2x+4)/(x-2)\\).",
+        "عند \\(-2\\): \\((4+4+4)/(-4)=-3\\).",
+        "الفخ: 3 من إسقاط الإشارة في المقام، أو غير موجودة."
+      ],
+      "latex": "\\lim_{x\\to -2}\\frac{x^3+8}{x^2-4}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q35",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(0\\)",
+        "\\(+\\infty\\)",
+        "\\(1\\)",
+        "\\(\\dfrac{1}{2}\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(\\dfrac{1}{2}\\)",
+      "solutionSketch": [
+        "شكل \\(+\\infty\\cdot 0\\) ظاهرياً. عقّل القوس أولاً.",
+        "\\(x(\\sqrt{x^2+1}-x)=x\\cdot\\dfrac{1}{\\sqrt{x^2+1}+x}=\\dfrac{x}{\\sqrt{x^2+1}+x}\\).",
+        "اقسم على x: \\(1/(\\sqrt{1+1/x^2}+1)\\to 1/2\\).",
+        "الفخ: 0 لأن القوس → 0، أو ∞ لأن x→∞."
+      ],
+      "latex": "\\lim_{x\\to +\\infty} x\\bigl(\\sqrt{x^2+1}-x\\bigr)",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q36",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "احسب النهاية:",
+      "choices": [
+        "\\(2\\)",
+        "\\(\\dfrac{5}{2}\\)",
+        "\\(1\\)",
+        "\\(\\dfrac{2}{5}\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(\\dfrac{2}{5}\\)",
+      "solutionSketch": [
+        "\\(\\dfrac{\\tan 2x}{\\sin 5x}=\\dfrac{\\sin 2x}{\\cos 2x\\cdot\\sin 5x}=\\dfrac{2x}{5x}\\cdot\\dfrac{\\sin 2x}{2x}\\cdot\\dfrac{5x}{\\sin 5x}\\cdot\\dfrac{1}{\\cos 2x}\\).",
+        "النهاية \\((2/5)\\cdot 1\\cdot 1\\cdot 1=2/5\\).",
+        "الفخ: 2 من معامل الظل فقط، أو 5/2 بقلب النسبة."
+      ],
+      "latex": "\\lim_{x\\to 0}\\frac{\\tan 2x}{\\sin 5x}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "grade-12-ch1-q37",
+      "slice": "limits",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "limits"
+      },
+      "stem": "الدالة \\(f(x)=(x^2+ax+b)/(x-1)\\) غير معرّفة عند 1. حتى تكون لها نهاية منتهية عند 1 تساوي 4، يكون \\((a,b)\\):",
+      "choices": [
+        "\\((2,-3)\\)",
+        "\\((4,-5)\\)",
+        "\\((-2,1)\\)",
+        "\\((0,-1)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((2,-3)\\)",
+      "solutionSketch": [
+        "حتى تزول 0/0 إلى قيمة منتهية يجب أن ينعدم البسط عند 1: \\(1+a+b=0\\).",
+        "بعد التحليل: \\(x^2+ax+b=(x-1)(x+(a+1))\\) لأن حاصل الحدّين الثابت \\(-(a+1)=b\\) مع \\(a+b=-1\\).",
+        "أو بالاشتقاق الشكلي: نهاية الكسر = مشتق البسط عند 1 إن انعدم البسط، أي \\(2+a\\).",
+        "\\(2+a=4\\) ⇒ \\(a=2\\)، ثم \\(b=-1-a=-3\\). الزوج (2,−3).",
+        "الفخ (4,−5): فرض f(1)=4 من دون جعل البسط صفراً. الفخ (0,−1): جعل البسط ينعدم فقط بلا شرط النهاية 4."
+      ],
+      "latex": "f(x)=\\frac{x^2+ax+b}{x-1}",
+      "lessonId": "grade-12-ch1"
+    },
+    {
+      "id": "g12-ls-fn-cont-09",
+      "slice": "continuity",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-squeeze"
+      },
+      "stem": "f(x)=x² sin(1/x) إذا x≠0 و f(0)=0. نهاية f عند 0 تساوي:",
+      "choices": [
+        "غير موجودة لأن sin(1/x) يتذبذب",
+        "\\(0\\)",
+        "\\(1\\)",
+        "لا يمكن الجزم"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "\\(|x^2\\sin(1/x)|\\le x^2\\). المبرهنة الحصارية تعطي النهاية 0=f(0)، فالدالة مستمرة عند 0.",
+        "الفخ: التذبذب وحده لا يلغي النهاية عندما يُسحق بالمعامل x²."
+      ],
+      "latex": "f(x)=x^2\\sin\\frac{1}{x}\\ (x\\neq 0),\\ f(0)=0"
+    },
+    {
+      "id": "g12-ls-fn-cont-10",
+      "slice": "continuity",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-two-parameters"
+      },
+      "stem": "f(x)=(x²+ax+b)/(x−1) إذا x≠1 و f(1)=4. حتى تكون f مستمرة عند 1، يكون (a,b):",
+      "choices": [
+        "\\((2,-3)\\)",
+        "\\((4,-5)\\)",
+        "\\((0,-1)\\)",
+        "\\((-2,1)\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\((2,-3)\\)",
+      "solutionSketch": [
+        "يلزم انعدام البسط عند 1: 1+a+b=0، وأن تساوي النهاية 4.",
+        "بعد الاختزال النهاية = 2+a، فـ a=2 ثم b=−3.",
+        "الفخ (4,−5): فرض f(1)=4 من دون جعل البسط صفراً."
+      ],
+      "latex": "f(x)=\\frac{x^2+ax+b}{x-1}\\ (x\\neq 1),\\ f(1)=4"
+    },
+    {
+      "id": "g12-ls-fn-cont-11",
+      "slice": "continuity",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-two-junctions"
+      },
+      "stem": "f(x)=x+1 إذا x<0، و ax+b إذا 0≤x≤2، و x² إذا x>2. حتى تكون مستمرة على ℝ:",
+      "choices": [
+        "\\(a=1,\\ b=1\\)",
+        "\\(a=\\tfrac{3}{2},\\ b=1\\)",
+        "\\(a=2,\\ b=0\\)",
+        "\\(a=1,\\ b=0\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(a=\\tfrac{3}{2},\\ b=1\\)",
+      "solutionSketch": [
+        "عند 0: b = 1 (اتصال مع x+1).",
+        "عند 2: 2a+b = 4، فـ 2a+1=4 و a=3/2.",
+        "الفخ: مساواة المشتقات (ذلك لـ C¹ لا للاستمرار)."
+      ],
+      "latex": "f\\text{ piecewise on }(-\\infty,0),[0,2],(2,+\\infty)"
+    },
+    {
+      "id": "g12-ls-fn-cont-12",
+      "slice": "continuity",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "continuity-jump"
+      },
+      "stem": "f(x)=|x|/x إذا x≠0 و f(0)=0. عند 0 تكون f:",
+      "choices": [
+        "مستمرة",
+        "غير مستمرة لأن نهايتي اليمين واليسار مختلفتان",
+        "مستمرة لأن f(0)=0",
+        "قابلة للاشتقاق"
+      ],
+      "answerIndex": 1,
+      "answer": "غير مستمرة لأن نهايتي اليمين واليسار مختلفتان",
+      "solutionSketch": [
+        "اليمين 1 واليسار −1. النهاية الثنائية غير موجودة، فغير مستمرة مهما كانت f(0).",
+        "الفخ: اختيار 0 كمتوسط الجهتين."
+      ],
+      "latex": "f(x)=\\frac{|x|}{x}\\ (x\\neq 0),\\ f(0)=0"
+    },
+    {
+      "id": "g12-ls-fn-der-13",
+      "slice": "derivatives",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-at-zero"
+      },
+      "stem": "f(x)=x² sin(1/x) إذا x≠0 و f(0)=0. فإن f'(0) تساوي:",
+      "choices": [
+        "غير موجودة بسبب التذبذب",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(+\\infty\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(0\\)",
+      "solutionSketch": [
+        "f'(0)=lim_{h→0} h sin(1/h). |h sin(1/h)|≤|h|→0، فـ f'(0)=0.",
+        "الاستمرار عند 0 لا يكفي وحده؛ هنا التعريف يعطي المشتقة. الفخ: التذبذب ⇒ غير موجودة."
+      ],
+      "latex": "f'(0)=\\lim_{h\\to 0} h\\sin\\frac{1}{h}"
+    },
+    {
+      "id": "g12-ls-fn-der-14",
+      "slice": "derivatives",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-C1-match"
+      },
+      "stem": "f(x)=x² إذا x≤1 و f(x)=ax+b إذا x>1. حتى تكون f قابلة للاشتقاق عند 1 (ومستمرة):",
+      "choices": [
+        "\\(a=1,\\ b=0\\)",
+        "\\(a=2,\\ b=-1\\)",
+        "\\(a=2,\\ b=1\\)",
+        "\\(a=0,\\ b=1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(a=2,\\ b=-1\\)",
+      "solutionSketch": [
+        "الاستمرار: a+b=1. المشتقة من اليسار 2x|₁=2، من اليمين a، فـ a=2 ثم b=−1.",
+        "الفخ: الاستمرار فقط (أزواج أخرى على المستقيم a+b=1)."
+      ],
+      "latex": "f(x)=\\begin{cases} x^2 & x\\le 1 \\\\ ax+b & x>1 \\end{cases}"
+    },
+    {
+      "id": "g12-ls-fn-der-15",
+      "slice": "derivatives",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-parallel-tangent"
+      },
+      "stem": "كم نقطة على منحنى y=x³−x يكون عندها المماس موازياً للمستقيم y=3x؟",
+      "choices": [
+        "لا نقطة",
+        "نقطة واحدة",
+        "نقطتان",
+        "ثلاث نقاط"
+      ],
+      "answerIndex": 2,
+      "answer": "نقطتان",
+      "solutionSketch": [
+        "الميل 3: f'(x)=3x²−1=3 ⇒ 3x²=4 ⇒ نقطتان حقيقيتان.",
+        "الفخ: حل f(x)=3x بدل المشتقة فيعطي ثلاث تقاطعات للمنحنى لا للمماس."
+      ],
+      "latex": "y=x^3-x,\\quad y=3x"
+    },
+    {
+      "id": "g12-ls-fn-der-16",
+      "slice": "derivatives",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-after-extension"
+      },
+      "stem": "f(x)=(x²−1)/(x−1) إذا x≠1 و f(1)=2. فإن f'(1) تساوي:",
+      "choices": [
+        "غير موجودة لأن المقام ينعدم",
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(2\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "بعد الاختزال f(x)=x+1 لكل x بما فيها 1 بعد التمديد المستمر.",
+        "f'(x)=1، فـ f'(1)=1. الفخ: رفض الاشتقاق لأن الكتابة الأصلية تنعدم عند 1."
+      ],
+      "latex": "f(x)=\\frac{x^2-1}{x-1}\\ (x\\neq 1),\\ f(1)=2"
+    },
+    {
+      "id": "g12-ls-fn-der-17",
+      "slice": "derivatives",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original item in Lebanese Grade 12 LS session style. Not a photocopy of the official PDF.",
+        "tag": "derivatives-definition-cubic"
+      },
+      "stem": "هذه النهاية هي مشتقة x³ عند 1. قيمتها:",
+      "choices": [
+        "\\(0\\)",
+        "\\(1\\)",
+        "\\(3\\)",
+        "غير موجودة"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(3\\)",
+      "solutionSketch": [
+        "((1+h)³−1)/h = (1+3h+3h²+h³−1)/h = 3+3h+h² → 3.",
+        "الفخ: 0/0 ⇒ غير موجودة."
+      ],
+      "latex": "\\lim_{h\\to 0}\\frac{(1+h)^3-1}{h}"
+    },
+    {
+      "id": "g12-ls-fn-an-root-01",
+      "slice": "variation",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-root-sandwich"
+      },
+      "stem": "Let f(x)=x+e^{-x}−2 on [0,+∞). The equation f(x)=0 has a unique root α, and:",
+      "choices": [
+        "\\(0<\\alpha<1\\)",
+        "\\(1.8<\\alpha<1.9\\)",
+        "\\(\\alpha=2\\)",
+        "no root"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1.8<\\alpha<1.9\\)",
+      "solutionSketch": [
+        "f'(x)=1−e^{-x}≥0 on [0,+∞), so f is strictly increasing: at most one root.",
+        "f(1.8)≈−0.035<0 and f(1.9)≈0.050>0, hence 1.8<α<1.9 (session sandwich)."
+      ],
+      "latex": "f(x)=x+e^{-x}-2"
+    },
+    {
+      "id": "g12-ls-fn-var-04",
+      "slice": "variation",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-given-fprime"
+      },
+      "stem": "Suppose f'(x)=2(1−ln x)/x^2 on (0,+∞). Then f is:",
+      "choices": [
+        "increasing on (0,+∞)",
+        "increasing on (0,e] and decreasing on [e,+∞)",
+        "decreasing on (0,e] and increasing on [e,+∞)",
+        "decreasing on (0,+∞)"
+      ],
+      "answerIndex": 1,
+      "answer": "increasing on (0,e] and decreasing on [e,+∞)",
+      "solutionSketch": [
+        "x^2>0, so the sign of f' is the sign of 1−ln x, i.e. f'>0 iff x<e.",
+        "Official sessions often give f' already factored and ask only for the table of f."
+      ],
+      "latex": "f'(x)=\\frac{2(1-\\ln x)}{x^2}"
+    },
+    {
+      "id": "g12-ls-fn-var-05",
+      "slice": "variation",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-inflection-from-table"
+      },
+      "stem": "The table of variations of f' shows f' decreasing on (0,e) with f'(e)=0 and f' increasing after, with f'(x)>0 on (0,+∞). Then (C) has:",
+      "choices": [
+        "no inflection and f is not monotonic",
+        "an inflection point at x=e, and f is strictly increasing on (0,+∞)",
+        "a local maximum at x=e",
+        "a vertical asymptote at x=e"
+      ],
+      "answerIndex": 1,
+      "answer": "an inflection point at x=e, and f is strictly increasing on (0,+∞)",
+      "solutionSketch": [
+        "f' changes from decreasing to increasing at e, so f'' changes sign: inflection at x=e.",
+        "f' stays positive, so f remains strictly increasing. Trap: treating a zero of f' as a max of f."
+      ]
+    },
+    {
+      "id": "g12-ls-fn-as-05",
+      "slice": "asymptotes",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-position"
+      },
+      "stem": "Let f(x)=x+(ln x)/x on (0,+∞), and (d): y=x. The relative position of (C) and (d) is:",
+      "choices": [
+        "(C) is above (d) for all x>0",
+        "(C) is above (d) iff x>1, and below iff 0<x<1",
+        "(C) coincides with (d)",
+        "(C) is below (d) for x>1"
+      ],
+      "answerIndex": 1,
+      "answer": "(C) is above (d) iff x>1, and below iff 0<x<1",
+      "solutionSketch": [
+        "f(x)−x=(ln x)/x. The denominator x>0, so the sign is the sign of ln x.",
+        "C above d on (1,+∞); C below d on (0,1). They meet at x=1."
+      ],
+      "latex": "f(x)-x=\\frac{\\ln x}{x}"
+    },
+    {
+      "id": "g12-ls-fn-inv-04",
+      "slice": "inverse",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-inverse-restrict"
+      },
+      "stem": "Let f(x)=x+e^{-x}. On ℝ, f:",
+      "choices": [
+        "admits an inverse because lim_{±∞} f=±∞",
+        "does not admit an inverse on ℝ (not injective: global minimum at 0)",
+        "admits an inverse because f' exists",
+        "is a bijection from ℝ onto ℝ"
+      ],
+      "answerIndex": 1,
+      "answer": "does not admit an inverse on ℝ (not injective: global minimum at 0)",
+      "solutionSketch": [
+        "f'(x)=1−e^{-x} vanishes at 0 and changes − to +. Minimum f(0)=1. f(−1)=f(a) for some a>0.",
+        "On [0,+∞) one may restrict and obtain an inverse onto [1,+∞). The session always specifies the interval."
+      ],
+      "latex": "f(x)=x+e^{-x}"
+    },
+    {
+      "id": "g12-ls-fn-inv-05",
+      "slice": "inverse",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "LS all sessions.pdf"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Grade 12 LS session wording (limits at the bounds of I, asymptotes, table of variations, inverse). Not a photocopy of any past paper.",
+        "tag": "session-style-inverse-domain"
+      },
+      "stem": "Let f(x)=x+e^{-x} on [0,+∞). Then f admits an inverse g defined on:",
+      "choices": [
+        "\\([0,+\\infty)\\)",
+        "\\([1,+\\infty)\\)",
+        "\\(\\mathbb{R}\\)",
+        "\\((0,1)\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\([1,+\\infty)\\)",
+      "solutionSketch": [
+        "On [0,+∞), f'=1−e^{-x}≥0 and f is strictly increasing, f(0)=1, lim_{+∞}=+∞.",
+        "So g is defined on [1,+∞). Trap: copying the domain of f."
+      ],
+      "latex": "f:[0,+\\infty)\\to[1,+\\infty)"
+    }
+  ]
+}

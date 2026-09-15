@@ -1,0 +1,124 @@
+{
+  "results": [
+    {
+      "input": "Functions",
+      "output": {
+        "practice_json": "{\"skill\":\"Functions\",\"prompts\":[\"Find the domain and range of the function $f(x) = \\\\frac{1}{\\\\sqrt{x-3}}$.\",\"Determine if the function $g(x) = x^3 - 2x$ is even, odd, or neither.\",\"Given $f(x) = 2x + 3$ and $g(x) = x^2 - 1$, find $(f \\\\circ g)(2)$.\"]}",
+        "skill": "Functions"
+      },
+      "error": ""
+    },
+    {
+      "input": "Limits",
+      "output": {
+        "practice_json": "{\"skill\":\"Limits\",\"prompts\":[\"Find $\\\\lim_{x \\\\to 2} \\\\frac{x^3 - 8}{x - 2}$ and explain the factoring method / احسب النهاية باستخدام التحليل\",\"Determine the one-sided limit $\\\\lim_{x \\\\to 0^+} \\\\frac{|x|}{x}$ and interpret the result / أوجد النهاية من جهة اليمين وفسر النتيجة\",\"Evaluate $\\\\lim_{x \\\\to \\\\infty} \\\\frac{3x^2 + 5}{2x^2 - 1}$ using leading terms / احسب النهاية عند المالانهاية باستخدام الحدود الرئيسية\"]}",
+        "skill": "Limits"
+      },
+      "error": ""
+    },
+    {
+      "input": "Derivatives",
+      "output": {
+        "practice_json": "{\"skill\":\"Derivatives\",\"prompts\":[\"Find the derivative of f(x) = 3x^4 - 5x^2 + 7 using the power rule.\",\"Calculate the instantaneous rate of change of s(t) = t^3 - 2t at t = 2.\",\"Determine the derivative of g(x) = sin(x) * e^x using the product rule.\"],\"note\":\"All prompts are original and not copied.\"}",
+        "skill": "Derivatives"
+      },
+      "error": ""
+    },
+    {
+      "input": "Integration",
+      "output": {
+        "practice_json": "{\"skill\":\"Integration\",\"prompts\":[\"Evaluate the definite integral \\u222b\\u2080\\u00b2 (3x\\u00b2 - 2x + 1) dx / احسب التكامل المحدود.\",\"Find the indefinite integral using substitution: \\u222b 2x cos(x\\u00b2) dx / جد التكامل غير المحدود باستخدام التعويض.\",\"Calculate the area under the curve f(x) = 4 - x\\u00b2 from x = -2 to x = 2 / احسب المساحة تحت المنحنى.\"]}",
+        "skill": "Integration"
+      },
+      "error": ""
+    },
+    {
+      "input": "Probability",
+      "output": {
+        "practice_json": "{\"skill\":\"Probability\",\"prompts\":[\"Calculate the probability of drawing a red card from a standard 52-card deck, then rolling an even number on a 6-sided die.\",\"A bag contains 4 red marbles and 6 blue marbles. If two marbles are drawn without replacement, what is the probability that both are blue?\",\"In a survey of 100 students, 60 play football, 40 play basketball, and 20 play both. What is the probability that a randomly chosen student plays neither sport?\"]}",
+        "skill": "Probability"
+      },
+      "error": ""
+    },
+    {
+      "input": "Statistics",
+      "output": {
+        "practice_json": "{\"skill\":\"Statistics\",\"prompts\":[\"Calculate the mean, median, and mode for the dataset: {4, 7, 9, 4, 12, 15}.\", \"Find the probability of drawing a red card followed by a face card from a standard 52-card deck without replacement.\", \"Determine the expected value of a discrete random variable X with values 1, 2, 3 and probabilities 0.2, 0.5, 0.3.\"]}",
+        "skill": "Statistics"
+      },
+      "error": ""
+    },
+    {
+      "input": "Percentages",
+      "output": {
+        "practice_json": "{\"skill\": \"Percentages\", \"prompts\": [\"If a student scores 45 out of 60 on a math test, what is their percentage score? / إذا حصل طالب على 45 من 60 في اختبار رياضيات، فما هي نسبته المئوية؟\", \"A jacket priced at $120 is on sale for 25% off. What is the sale price? / سعر سترة 120 دولاراً وعليها خصم بنسبة 25%. ما هو سعر التخفيض؟\", \"Find the final amount if $400 increases by 15%. / أوجد المبلغ النهائي إذا زاد مبلغ 400 دولار بنسبة 15%.\"]}",
+        "skill": "Percentages"
+      },
+      "error": ""
+    },
+    {
+      "input": "Linear models",
+      "output": {
+        "practice_json": "{\"skill\":\"Linear models\",\"prompts\":[\"Find the slope and y-intercept of the linear equation y = 3x - 5, and state their meanings. / أوجد الميل والمقطع الصادي للمعادلة الخطية y = 3x - 5.\",\"Given the data points (2, 4) and (4, 10), derive the linear model equation in slope-intercept form. / بالاستناد إلى نقطتي البيانات (2, 4) و (4, 10)، اشتق معادلة النموذج الخطي بصيغة الميل والمقطع.\",\"A rental service charges a base fee of $50 plus $0.20 per kilometer. Formulate a linear model for the total cost C and solve for 150 km. / تفرض خدمة تأجير رسوماً أساسية 50 دولاراً بالإضافة إلى 0.20 دولار لكل كيلومتر. صغ نموذجاً خطياً للتكلفة الإجمالية C.\"]}}",
+        "skill": "Linear models"
+      },
+      "error": ""
+    },
+    {
+      "input": "Sequences",
+      "output": {
+        "practice_json": "{\"skill\":\"Sequences\",\"prompts\":[\"Find the next two terms of the arithmetic sequence: 3, 7, 11, 15, ... / أوجد الحدين التاليين في المتتالية الحسابية: 3، 7، 11، 15، ...\",\"Determine the common ratio of the geometric sequence: 2, 6, 18, 54, ... / حدد الأساس (النسبة المشتركة) للمتتالية الهندسية: 2، 6، 18، 54، ...\",\"Find the 10th term of an arithmetic sequence where the first term is 5 and the common difference is 3. / أوجد الحد العاشر لمتتالية حسابية حدها الأول 5 وأساسها 3.\"]}",
+        "skill": "Sequences"
+      },
+      "error": ""
+    },
+    {
+      "input": "Complex numbers",
+      "output": {
+        "practice_json": "{\"skill\":\"Complex numbers\",\"prompts\":[\"Find the sum and product of the complex numbers $z_1 = 3 + 4i$ and $z_2 = 1 - 2i$ (أوجد مجموع وحاصل ضرب العددين المركبين)\",\"Express the complex number $z = -1 + i\\\\sqrt{3}$ in polar form (عَبِّر عن العدد المركب في الشكل القطبي)\",\"Solve the quadratic equation $z^2 + 2z + 5 = 0$ for complex roots (حل المعادلة التربيعية لإيجاد الجذور المركبة)\"]}",
+        "skill": "Complex numbers"
+      },
+      "error": ""
+    },
+    {
+      "input": "Trigonometry",
+      "output": {
+        "practice_json": "{\"skill\":\"Trigonometry\",\"prompts\":[\"Calculate the length of the hypotenuse in a right-angled triangle where the opposite side is 6 cm and the angle is 30° / احسب طول الوتر في مثلث قائم الزاوية حيث الضلع المقابل 6 سم والزاوية 30 درجة.\",\"Find the exact value of sin(45°) × cos(45°) / أوجد القيمة الدقيقة لـ sin(45°) × cos(45°).\",\"Determine the period and amplitude of the function f(x) = 3sin(2x) / حدد الدور والسعة للدالة f(x) = 3sin(2x).\"]}",
+        "skill": "Trigonometry"
+      },
+      "error": ""
+    },
+    {
+      "input": "Exponential modeling",
+      "output": {
+        "practice_json": "{\"skill\":\"Exponential modeling\",\"prompts\":[\"Model a bacterial culture starting at 500 cells that triples every 3 hours. Write the function representing the population after t hours and calculate the count after 9 hours.\",\"A car depreciates in value by 12% each year. If its initial purchase price is $28,000, write an exponential decay function and find its value after 4 years.\",\"An investment of $5,000 grows continuously at an annual interest rate of 6%. Set up the exponential growth model to determine the balance after 5 years.\"]}",
+        "skill": "Exponential modeling"
+      },
+      "error": ""
+    },
+    {
+      "input": "Random variables",
+      "output": {
+        "practice_json": "{\"skill\":\"Random variables\",\"prompts\":[\"Calculate the expected value E(X) and variance Var(X) for a discrete random variable X representing the outcome of rolling a biased six-sided die.\",\"Determine the cumulative distribution function (CDF) for a continuous random variable X with probability density function f(x) = 2x for 0 \u003c= x \u003c= 1.\",\"Find the probability P(1 \u003c X \u003c 3) for a Poisson random variable X with mean lambda = 2.\"]}",
+        "skill": "Random variables"
+      },
+      "error": ""
+    },
+    {
+      "input": "Correlation",
+      "output": {
+        "practice_json": "{\"skill\":\"Correlation\",\"prompts\":[\"Calculate the Pearson correlation coefficient (معامل ارتباط بيرسون) between study hours (2, 3, 5, 6, 8) and exam scores (55, 60, 75, 80, 95), and interpret its strength and direction.\",\"Given a dataset with covariance 42.5 and standard deviations 5 (for temperature) and 10 (for ice cream sales), determine the correlation coefficient and explain its implication.\",\"Compare two scatter plots: Plot A has points tightly clustered along an upward trend line; Plot B has points scattered loosely with a slight downward slope. Which exhibits stronger correlation and what is the sign?\"]}",
+        "skill": "Correlation"
+      },
+      "error": ""
+    },
+    {
+      "input": "Quadratic models",
+      "output": {
+        "practice_json": "{\"skill\":\"Quadratic models\",\"prompts\":[\"A local store models its daily profit P(x) in dollars based on the price increase x (in dollars) using P(x) = -2x^2 + 20x + 150. Determine the optimal price increase that maximizes daily profit.\",\"The trajectory of a kicked soccer ball is given by the quadratic model h(d) = -0.05d^2 + 2d, where h is the height and d is the horizontal distance in meters. Calculate the maximum height of the ball and its total horizontal range.\",\"A tech startup's monthly revenue R (in thousands of dollars) is modeled by R(t) = -t^2 + 12t + 28, where t is the number of months since launch. Find how many months it takes for the revenue to reach its peak.\"]}",
+        "skill": "Quadratic models"
+      },
+      "error": ""
+    }
+  ]
+}

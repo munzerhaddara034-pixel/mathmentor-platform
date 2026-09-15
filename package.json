@@ -1,0 +1,27 @@
+{
+  "name": "mathmentor-platform",
+  "version": "1.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "video:limits": "python3 scripts/render-lesson-video.py content/grade-12-ls-limits/intro-video.json public/videos/grade-12-ls-limits-intro.mp4"
+  },
+  "dependencies": {
+    "next": "^15.5.2",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "typescript": "^5.9.2"
+  }
+}

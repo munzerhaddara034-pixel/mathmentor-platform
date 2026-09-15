@@ -1,0 +1,1 @@
+ALTER TABLE `contest_attempts` ADD `contestId` int;

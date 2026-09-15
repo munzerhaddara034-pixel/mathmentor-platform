@@ -1,0 +1,928 @@
+{
+  "id": "brevet-numbers",
+  "track": "grade-9",
+  "certificate": "Brevet",
+  "topic": "numbers",
+  "title": "Numbers",
+  "arabicTitle": "الأعداد",
+  "contestMinutes": 20,
+  "passScore": 70,
+  "sourceModels": [
+    "Grade 9 / Brevet official contests pack"
+  ],
+  "styleNote": "Academy-original items patterned on Lebanese Brevet sessions (الشهادة المتوسطة): official English wording, original numbers. Not photocopies of past papers.",
+  "slices": [
+    {
+      "id": "fraction",
+      "title": "Irreducible fractions",
+      "arabicTitle": "الكسور غير القابلة للاختزال"
+    },
+    {
+      "id": "scientific",
+      "title": "Scientific notation",
+      "arabicTitle": "الكتابة العلمية"
+    },
+    {
+      "id": "radical",
+      "title": "Radicals",
+      "arabicTitle": "الجذور"
+    },
+    {
+      "id": "power",
+      "title": "Powers",
+      "arabicTitle": "القوى"
+    }
+  ],
+  "order": "easy → medium → hard",
+  "contestTopics": [
+    {
+      "id": "numbers",
+      "file": "content/banks/brevet/numbers.json",
+      "title": "Numbers",
+      "arabicTitle": "الأعداد",
+      "implemented": true
+    },
+    {
+      "id": "algebra",
+      "file": "content/banks/brevet/algebra.json",
+      "title": "Algebra",
+      "arabicTitle": "الجبر",
+      "implemented": true
+    },
+    {
+      "id": "word_problems",
+      "file": "content/banks/brevet/word_problems.json",
+      "title": "Word problems",
+      "arabicTitle": "المسائل اللفظية",
+      "implemented": true
+    },
+    {
+      "id": "geometry",
+      "file": "content/banks/brevet/geometry.json",
+      "title": "Geometry",
+      "arabicTitle": "الهندسة",
+      "implemented": true
+    },
+    {
+      "id": "coordinate",
+      "file": "content/banks/brevet/coordinate.json",
+      "title": "Coordinate geometry",
+      "arabicTitle": "الهندسة التحليلية",
+      "implemented": true
+    }
+  ],
+  "questions": [
+    {
+      "id": "brevet-num-frac-01",
+      "slice": "fraction",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "irreducible-basic"
+      },
+      "stem": "Write 18/24 as an irreducible fraction. The result is:",
+      "choices": [
+        "\\(3/4\\)",
+        "\\(9/12\\)",
+        "\\(6/8\\)",
+        "\\(2/3\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(3/4\\)",
+      "solutionSketch": [
+        "Divide numerator and denominator by 6: 18/24 = 3/4.",
+        "Trap: stopping at 9/12, which is not irreducible."
+      ],
+      "latex": "18/24"
+    },
+    {
+      "id": "brevet-num-frac-02",
+      "slice": "fraction",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "add-same-denom"
+      },
+      "stem": "Calculate 2/7 + 3/7. The result is:",
+      "choices": [
+        "\\(5/14\\)",
+        "\\(5/7\\)",
+        "\\(6/7\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(5/7\\)",
+      "solutionSketch": [
+        "Same denominator: (2+3)/7 = 5/7.",
+        "Trap: adding the denominators (5/14)."
+      ],
+      "latex": "\\frac{2}{7}+\\frac{3}{7}"
+    },
+    {
+      "id": "brevet-num-frac-03",
+      "slice": "fraction",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "multiply-cancel"
+      },
+      "stem": "Calculate (3/5) × (10/9). Write the answer as an irreducible fraction:",
+      "choices": [
+        "\\(13/14\\)",
+        "\\(30/45\\)",
+        "\\(2/3\\)",
+        "\\(1/3\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2/3\\)",
+      "solutionSketch": [
+        "Cancel 5 and 10, then 3 and 9: 3/5 × 10/9 = 2/3."
+      ],
+      "latex": "\\frac{3}{5}\\times\\frac{10}{9}"
+    },
+    {
+      "id": "brevet-num-sci-01",
+      "slice": "scientific",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-integer"
+      },
+      "stem": "Write 7200 in the form a × 10^n with 1 ≤ |a| < 10. The result is:",
+      "choices": [
+        "\\(7.2\\times 10^3\\)",
+        "\\(72\\times 10^2\\)",
+        "\\(7.2\\times 10^2\\)",
+        "\\(0.72\\times 10^4\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(7.2\\times 10^3\\)",
+      "solutionSketch": [
+        "7200 = 7.2 × 10^3. Trap: 72 × 10² is not in scientific notation because |a| ≥ 10."
+      ],
+      "latex": "7200"
+    },
+    {
+      "id": "brevet-num-sci-02",
+      "slice": "scientific",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-decimal"
+      },
+      "stem": "Write 0.0081 in the form a × 10^n with 1 ≤ |a| < 10. The result is:",
+      "choices": [
+        "\\(8.1\\times 10^{-2}\\)",
+        "\\(8.1\\times 10^{-3}\\)",
+        "\\(81\\times 10^{-4}\\)",
+        "\\(0.81\\times 10^{-2}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(8.1\\times 10^{-3}\\)",
+      "solutionSketch": [
+        "Move the point three places: 0.0081 = 8.1 × 10^{−3}."
+      ],
+      "latex": "0.0081"
+    },
+    {
+      "id": "brevet-num-rad-01",
+      "slice": "radical",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "perfect-square"
+      },
+      "stem": "√81 equals:",
+      "choices": [
+        "9",
+        "8",
+        "18",
+        "3"
+      ],
+      "answerIndex": 0,
+      "answer": "9",
+      "solutionSketch": [
+        "9² = 81, so √81 = 9. Trap: taking half of 81."
+      ],
+      "latex": "\\sqrt{81}"
+    },
+    {
+      "id": "brevet-num-rad-02",
+      "slice": "radical",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "simplify-radical"
+      },
+      "stem": "Write √20 in the form a√b with a and b positive integers and b square-free. The result is:",
+      "choices": [
+        "\\(10\\sqrt{2}\\)",
+        "\\(4\\sqrt{5}\\)",
+        "\\(2\\sqrt{5}\\)",
+        "\\(5\\sqrt{2}\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(2\\sqrt{5}\\)",
+      "solutionSketch": [
+        "√20 = √(4×5) = 2√5."
+      ],
+      "latex": "\\sqrt{20}"
+    },
+    {
+      "id": "brevet-num-pow-01",
+      "slice": "power",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "power-eval"
+      },
+      "stem": "2^6 equals:",
+      "choices": [
+        "12",
+        "32",
+        "64",
+        "128"
+      ],
+      "answerIndex": 2,
+      "answer": "64",
+      "solutionSketch": [
+        "2^6 = 64. Trap: 2^5 = 32 or 6×2 = 12."
+      ],
+      "latex": "2^6"
+    },
+    {
+      "id": "brevet-num-pow-02",
+      "slice": "power",
+      "difficulty": "easy",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "power-product"
+      },
+      "stem": "10^4 × 10^{−1} equals:",
+      "choices": [
+        "\\(10^5\\)",
+        "\\(10^3\\)",
+        "\\(10^{-4}\\)",
+        "\\(1\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(10^3\\)",
+      "solutionSketch": [
+        "Add the exponents: 10^{4+(−1)} = 10^3."
+      ],
+      "latex": "10^4\\times 10^{-1}"
+    },
+    {
+      "id": "brevet-num-frac-04",
+      "slice": "fraction",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "order-of-ops"
+      },
+      "stem": "Calculate 5/6 − (1/4)×(2/3). The result as an irreducible fraction is:",
+      "choices": [
+        "\\(2/3\\)",
+        "\\(7/18\\)",
+        "\\(1/2\\)",
+        "\\(5/8\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2/3\\)",
+      "solutionSketch": [
+        "Multiplication first: (1/4)×(2/3) = 1/6, then 5/6 − 1/6 = 2/3.",
+        "Trap: computing (5/6 − 1/4)×(2/3) = 7/18."
+      ],
+      "latex": "\\frac{5}{6}-\\frac{1}{4}\\times\\frac{2}{3}"
+    },
+    {
+      "id": "brevet-num-frac-05",
+      "slice": "fraction",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "subtract-unlike"
+      },
+      "stem": "Calculate 7/8 − 1/6. Write the answer as an irreducible fraction:",
+      "choices": [
+        "\\(3\\)",
+        "\\(6/14\\)",
+        "\\(17/24\\)",
+        "\\(17/48\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(17/24\\)",
+      "solutionSketch": [
+        "Common denominator 24: 21/24 − 4/24 = 17/24.",
+        "Trap: subtracting numerators and denominators separately."
+      ],
+      "latex": "\\frac{7}{8}-\\frac{1}{6}"
+    },
+    {
+      "id": "brevet-num-frac-06",
+      "slice": "fraction",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "fraction-chain"
+      },
+      "stem": "Calculate (8/15)×(25/12) ÷ (10/9) and write the result as an irreducible fraction:",
+      "choices": [
+        "\\(1\\)",
+        "\\(2\\)",
+        "\\(4/5\\)",
+        "\\(9/10\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(1\\)",
+      "solutionSketch": [
+        "Division: × 9/10. Then 8/15 × 25/12 × 9/10 = 1 after cancelling.",
+        "8×25×9 = 1800 and 15×12×10 = 1800."
+      ],
+      "latex": "\\frac{8}{15}\\times\\frac{25}{12}\\div\\frac{10}{9}"
+    },
+    {
+      "id": "brevet-num-sci-03",
+      "slice": "scientific",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-quotient"
+      },
+      "stem": "Write (4.8 × 10^6 × 2.5 × 10^{−2}) / (6 × 10^3) in the form a × 10^n with 1 ≤ |a| < 10:",
+      "choices": [
+        "\\(2\\times 10^1\\)",
+        "\\(2\\times 10^2\\)",
+        "\\(1.2\\times 10^2\\)",
+        "\\(2\\times 10^7\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(2\\times 10^1\\)",
+      "solutionSketch": [
+        "(4.8 × 2.5 / 6) × 10^{6−2−3} = 2 × 10^1.",
+        "Trap: forgetting the factor 10^{−2} and writing 2 × 10²."
+      ],
+      "latex": "\\frac{4.8\\times 10^6\\times 2.5\\times 10^{-2}}{6\\times 10^3}"
+    },
+    {
+      "id": "brevet-num-sci-04",
+      "slice": "scientific",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-product"
+      },
+      "stem": "Write (3.5 × 10^{−4}) × (4 × 10^6) in the form a × 10^n with 1 ≤ |a| < 10:",
+      "choices": [
+        "\\(1.4\\times 10^2\\)",
+        "\\(1.4\\times 10^3\\)",
+        "\\(14\\times 10^2\\)",
+        "\\(3.9\\times 10^2\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(1.4\\times 10^3\\)",
+      "solutionSketch": [
+        "3.5 × 4 = 14 and 10^{−4+6} = 10², so 14 × 10² = 1.4 × 10³.",
+        "Trap: leaving 14 × 10² un-normalized."
+      ],
+      "latex": "3.5\\times 10^{-4}\\times 4\\times 10^6"
+    },
+    {
+      "id": "brevet-num-sci-05",
+      "slice": "scientific",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-divide-neg"
+      },
+      "stem": "Write (5.6 × 10^{−3}) / (8 × 10^{−5}) in the form a × 10^n with 1 ≤ |a| < 10:",
+      "choices": [
+        "\\(7\\times 10^1\\)",
+        "\\(7\\times 10^{-8}\\)",
+        "\\(0.7\\times 10^2\\)",
+        "\\(7\\times 10^2\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(7\\times 10^1\\)",
+      "solutionSketch": [
+        "5.6/8 = 0.7 and 10^{−3−(−5)} = 10², so 0.7 × 10² = 7 × 10¹."
+      ],
+      "latex": "\\frac{5.6\\times 10^{-3}}{8\\times 10^{-5}}"
+    },
+    {
+      "id": "brevet-num-rad-03",
+      "slice": "radical",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "combine-radicals"
+      },
+      "stem": "Write √50 − √8 in the form a√2. The result is:",
+      "choices": [
+        "\\(7\\sqrt{2}\\)",
+        "\\(3\\sqrt{2}\\)",
+        "\\(\\sqrt{42}\\)",
+        "\\(3\\sqrt{8}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\sqrt{2}\\)",
+      "solutionSketch": [
+        "√50 = 5√2 and √8 = 2√2, so 5√2 − 2√2 = 3√2.",
+        "Trap: adding the coefficients (7√2)."
+      ],
+      "latex": "\\sqrt{50}-\\sqrt{8}"
+    },
+    {
+      "id": "brevet-num-rad-04",
+      "slice": "radical",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "add-radicals"
+      },
+      "stem": "Write √27 + √12 in the form a√3. The result is:",
+      "choices": [
+        "\\(\\sqrt{39}\\)",
+        "\\(5\\sqrt{6}\\)",
+        "\\(5\\sqrt{3}\\)",
+        "\\(3\\sqrt{3}\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(5\\sqrt{3}\\)",
+      "solutionSketch": [
+        "√27 = 3√3 and √12 = 2√3, so 3√3 + 2√3 = 5√3.",
+        "Trap: √27 + √12 = √39."
+      ],
+      "latex": "\\sqrt{27}+\\sqrt{12}"
+    },
+    {
+      "id": "brevet-num-rad-05",
+      "slice": "radical",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "rationalize"
+      },
+      "stem": "Rationalize 8/√2. The result is:",
+      "choices": [
+        "4",
+        "\\(4\\sqrt{2}\\)",
+        "\\(8\\sqrt{2}\\)",
+        "\\(\\sqrt{2}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(4\\sqrt{2}\\)",
+      "solutionSketch": [
+        "8/√2 × √2/√2 = 8√2 / 2 = 4√2."
+      ],
+      "latex": "\\frac{8}{\\sqrt{2}}"
+    },
+    {
+      "id": "brevet-num-pow-03",
+      "slice": "power",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "power-quotient"
+      },
+      "stem": "5^7 / 5^4 equals:",
+      "choices": [
+        "\\(5^{11}\\)",
+        "5",
+        "25",
+        "125"
+      ],
+      "answerIndex": 3,
+      "answer": "125",
+      "solutionSketch": [
+        "Subtract exponents: 5^{7−4} = 5^3 = 125.",
+        "Trap: adding the exponents (5^{11})."
+      ],
+      "latex": "5^7/5^4"
+    },
+    {
+      "id": "brevet-num-pow-04",
+      "slice": "power",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "factor-power-diff"
+      },
+      "stem": "3^{10} − 3^8 equals:",
+      "choices": [
+        "9",
+        "\\(2\\times 3^8\\)",
+        "\\(8\\times 3^8\\)",
+        "\\(3^{10}\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(8\\times 3^8\\)",
+      "solutionSketch": [
+        "Factor 3^8: 3^{10} − 3^8 = 3^8(3² − 1) = 8 × 3^8.",
+        "Trap: writing 3^{10−8} = 9."
+      ],
+      "latex": "3^{10}-3^8"
+    },
+    {
+      "id": "brevet-num-pow-05",
+      "slice": "power",
+      "difficulty": "medium",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "power-divide"
+      },
+      "stem": "2^{12} / 2^7 equals:",
+      "choices": [
+        "\\(2^{19}\\)",
+        "32",
+        "64",
+        "14"
+      ],
+      "answerIndex": 1,
+      "answer": "32",
+      "solutionSketch": [
+        "2^{12−7} = 2^5 = 32."
+      ],
+      "latex": "2^{12}/2^7"
+    },
+    {
+      "id": "brevet-num-frac-07",
+      "slice": "fraction",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "negative-fraction"
+      },
+      "stem": "Calculate 5/6 − (2/3)×(9/4). The result as an irreducible fraction is:",
+      "choices": [
+        "\\(-2/3\\)",
+        "\\(3/8\\)",
+        "\\(2/3\\)",
+        "\\(1/4\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(-2/3\\)",
+      "solutionSketch": [
+        "(2/3)×(9/4) = 3/2, then 5/6 − 3/2 = 5/6 − 9/6 = −4/6 = −2/3.",
+        "Trap: (5/6 − 2/3)×(9/4) = 3/8, or dropping the sign."
+      ],
+      "latex": "\\frac{5}{6}-\\frac{2}{3}\\times\\frac{9}{4}"
+    },
+    {
+      "id": "brevet-num-frac-08",
+      "slice": "fraction",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "divide-fractions"
+      },
+      "stem": "Write (12/35) ÷ (18/49) as an irreducible fraction. The result is:",
+      "choices": [
+        "\\(2/3\\)",
+        "\\(15/14\\)",
+        "\\(14/15\\)",
+        "\\(2/5\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(14/15\\)",
+      "solutionSketch": [
+        "12/35 × 49/18 = (12×7)/(5×18) = 84/90 = 14/15.",
+        "Trap: inverting the first fraction instead of the second."
+      ],
+      "latex": "\\frac{12}{35}\\div\\frac{18}{49}"
+    },
+    {
+      "id": "brevet-num-sci-06",
+      "slice": "scientific",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-nested"
+      },
+      "stem": "Write (6.4 × 10^5 × 5 × 10^{−8}) / (8 × 10^{−2}) in the form a × 10^n with 1 ≤ |a| < 10:",
+      "choices": [
+        "\\(4\\times 10^{-1}\\)",
+        "\\(4\\times 10^{-3}\\)",
+        "\\(4\\times 10^{1}\\)",
+        "\\(0.4\\times 10^{-1}\\)"
+      ],
+      "answerIndex": 0,
+      "answer": "\\(4\\times 10^{-1}\\)",
+      "solutionSketch": [
+        "(6.4 × 5 / 8) × 10^{5−8−(−2)} = 4 × 10^{−1}.",
+        "Trap: 5 − 8 − 2 = −5 instead of subtracting a negative exponent."
+      ],
+      "latex": "\\frac{6.4\\times 10^5\\times 5\\times 10^{-8}}{8\\times 10^{-2}}"
+    },
+    {
+      "id": "brevet-num-sci-07",
+      "slice": "scientific",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-A"
+      },
+      "stem": "Given A = (4.8 × 10^4 × 10^{−6}) / (1.6 × 10^2). Write A in the form a × 10^n with 1 ≤ |a| < 10:",
+      "choices": [
+        "\\(3\\times 10^{-2}\\)",
+        "\\(3\\times 10^{-4}\\)",
+        "\\(3\\times 10^{0}\\)",
+        "\\(0.3\\times 10^{-3}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(3\\times 10^{-4}\\)",
+      "solutionSketch": [
+        "4.8/1.6 = 3 and 10^{4−6−2} = 10^{−4}, so A = 3 × 10^{−4}."
+      ],
+      "latex": "A=\\frac{4.8\\times 10^4\\times 10^{-6}}{1.6\\times 10^2}"
+    },
+    {
+      "id": "brevet-num-sci-08",
+      "slice": "scientific",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "sci-normalize"
+      },
+      "stem": "Write (9 × 10^{−2} × 5 × 10^6) / (1.5 × 10^3) in the form a × 10^n with 1 ≤ |a| < 10:",
+      "choices": [
+        "\\(3\\times 10^1\\)",
+        "\\(30\\times 10^1\\)",
+        "\\(3\\times 10^2\\)",
+        "\\(3\\times 10^7\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(3\\times 10^2\\)",
+      "solutionSketch": [
+        "9 × 5 / 1.5 = 30 and 10^{−2+6−3} = 10^1, so 30 × 10^1 = 3 × 10²."
+      ],
+      "latex": "\\frac{9\\times 10^{-2}\\times 5\\times 10^6}{1.5\\times 10^3}"
+    },
+    {
+      "id": "brevet-num-rad-06",
+      "slice": "radical",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "expand-binomial-radical"
+      },
+      "stem": "Write (2 + √5)² in the form a + b√5 where a and b are integers. The result is:",
+      "choices": [
+        "\\(4+\\sqrt{5}\\)",
+        "\\(9+4\\sqrt{5}\\)",
+        "\\(9+\\sqrt{5}\\)",
+        "\\(4+4\\sqrt{5}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(9+4\\sqrt{5}\\)",
+      "solutionSketch": [
+        "(2+√5)² = 4 + 4√5 + 5 = 9 + 4√5.",
+        "Trap: forgetting 2×2×√5 or dropping 5."
+      ],
+      "latex": "(2+\\sqrt{5})^2"
+    },
+    {
+      "id": "brevet-num-rad-07",
+      "slice": "radical",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "diff-squares-radicals"
+      },
+      "stem": "Calculate (√7 − √3)(√7 + √3). The result is:",
+      "choices": [
+        "10",
+        "\\(\\sqrt{21}\\)",
+        "4",
+        "\\(4\\sqrt{21}\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "4",
+      "solutionSketch": [
+        "Difference of squares: 7 − 3 = 4.",
+        "Trap: adding 7+3 or writing √21."
+      ],
+      "latex": "(\\sqrt{7}-\\sqrt{3})(\\sqrt{7}+\\sqrt{3})"
+    },
+    {
+      "id": "brevet-num-rad-08",
+      "slice": "radical",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "collect-sqrt5"
+      },
+      "stem": "Write √80 − 2√20 + √5 in the form a√5. The result is:",
+      "choices": [
+        "\\(9\\sqrt{5}\\)",
+        "\\(5\\sqrt{5}\\)",
+        "0",
+        "\\(\\sqrt{5}\\)"
+      ],
+      "answerIndex": 3,
+      "answer": "\\(\\sqrt{5}\\)",
+      "solutionSketch": [
+        "√80 = 4√5 and 2√20 = 4√5, so 4√5 − 4√5 + √5 = √5.",
+        "Trap: adding all three as 9√5."
+      ],
+      "latex": "\\sqrt{80}-2\\sqrt{20}+\\sqrt{5}"
+    },
+    {
+      "id": "brevet-num-pow-06",
+      "slice": "power",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "identity-x-plus-1x"
+      },
+      "stem": "If (x + 1/x)² = 8, then x² + 1/x² equals:",
+      "choices": [
+        "8",
+        "64",
+        "6",
+        "10"
+      ],
+      "answerIndex": 2,
+      "answer": "6",
+      "solutionSketch": [
+        "(x + 1/x)² = x² + 2 + 1/x² = 8, so x² + 1/x² = 6.",
+        "Trap: leaving 8, or adding 2 instead of subtracting (10), or squaring 8."
+      ],
+      "latex": "\\left(x+\\frac{1}{x}\\right)^2=8"
+    },
+    {
+      "id": "brevet-num-pow-07",
+      "slice": "power",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "reciprocal-powers"
+      },
+      "stem": "n is a natural number. (2/5)^{n+1} × (5/2)^n equals:",
+      "choices": [
+        "1",
+        "\\(2/5\\)",
+        "\\(5/2\\)",
+        "\\((2/5)^{2n+1}\\)"
+      ],
+      "answerIndex": 1,
+      "answer": "\\(2/5\\)",
+      "solutionSketch": [
+        "(2/5)^{n+1} × (5/2)^n = (2/5) × [(2/5)×(5/2)]^n = 2/5.",
+        "Trap: cancelling everything to 1."
+      ],
+      "latex": "\\left(\\frac{2}{5}\\right)^{n+1}\\left(\\frac{5}{2}\\right)^n"
+    },
+    {
+      "id": "brevet-num-pow-08",
+      "slice": "power",
+      "difficulty": "hard",
+      "source": {
+        "kind": "generated-in-official-style",
+        "models": [
+          "Grade 9 / Brevet official contests pack"
+        ],
+        "note": "Academy-original. Patterned on Lebanese Brevet (الشهادة المتوسطة) wording. Not a photocopy of any past paper.",
+        "tag": "factor-power-4"
+      },
+      "stem": "4^{12} − 4^{10} equals:",
+      "choices": [
+        "16",
+        "\\(2\\times 4^{10}\\)",
+        "\\(15\\times 4^{10}\\)",
+        "\\(4^{12}\\)"
+      ],
+      "answerIndex": 2,
+      "answer": "\\(15\\times 4^{10}\\)",
+      "solutionSketch": [
+        "4^{12} − 4^{10} = 4^{10}(4² − 1) = 15 × 4^{10}.",
+        "Trap: 4^{12−10} = 16."
+      ],
+      "latex": "4^{12}-4^{10}"
+    }
+  ]
+}

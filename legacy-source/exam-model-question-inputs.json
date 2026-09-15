@@ -1,0 +1,602 @@
+[
+  {
+    "modelId": "grade-9-certificate-model-1",
+    "modelTitle": "Grade 9 Certificate · Model Exam 01",
+    "branch": "Middle School",
+    "grade": "Grade 9",
+    "difficulty": "Foundation",
+    "questionId": "model-grade9-1",
+    "skill": "Algebra",
+    "prompt": "Solve: 3x − 7 = 11.",
+    "arabicPrompt": "حلّ: 3x − 7 = 11.",
+    "options": [
+      "x = 4",
+      "x = 6",
+      "x = 8",
+      "x = 18"
+    ],
+    "correctAnswer": "x = 6",
+    "explanation": "Add 7 to both sides: 3x = 18. Divide by 3, so x = 6.",
+    "arabicExplanation": "نضيف 7 إلى الطرفين: 3x = 18. نقسم على 3 فنحصل على x = 6."
+  },
+  {
+    "modelId": "grade-9-certificate-model-1",
+    "modelTitle": "Grade 9 Certificate · Model Exam 01",
+    "branch": "Middle School",
+    "grade": "Grade 9",
+    "difficulty": "Foundation",
+    "questionId": "model-grade9-2",
+    "skill": "Functions",
+    "prompt": "If f(x) = 2x + 1, what is f(4)?",
+    "arabicPrompt": "إذا كانت f(x) = 2x + 1، فما قيمة f(4)؟",
+    "options": [
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "correctAnswer": "9",
+    "explanation": "Substitute x = 4: f(4) = 2(4) + 1 = 9.",
+    "arabicExplanation": "نعوّض x = 4: ‏f(4) = 2(4) + 1 = 9."
+  },
+  {
+    "modelId": "grade-9-certificate-model-1",
+    "modelTitle": "Grade 9 Certificate · Model Exam 01",
+    "branch": "Middle School",
+    "grade": "Grade 9",
+    "difficulty": "Foundation",
+    "questionId": "model-grade9-3",
+    "skill": "Geometry",
+    "prompt": "A triangle has base 10 cm and height 6 cm. Find its area.",
+    "arabicPrompt": "مثلث قاعدته 10 سم وارتفاعه 6 سم. أوجد مساحته.",
+    "options": [
+      "16 cm²",
+      "30 cm²",
+      "60 cm²",
+      "120 cm²"
+    ],
+    "correctAnswer": "30 cm²",
+    "explanation": "Area = (base × height) ÷ 2 = (10 × 6) ÷ 2 = 30 cm².",
+    "arabicExplanation": "المساحة = (القاعدة × الارتفاع) ÷ 2 = (10 × 6) ÷ 2 = 30 سم²."
+  },
+  {
+    "modelId": "grade-9-certificate-model-1",
+    "modelTitle": "Grade 9 Certificate · Model Exam 01",
+    "branch": "Middle School",
+    "grade": "Grade 9",
+    "difficulty": "Foundation",
+    "questionId": "model-grade9-4",
+    "skill": "Proportionality",
+    "prompt": "If 4 notebooks cost $12, how much do 7 notebooks cost at the same rate?",
+    "arabicPrompt": "إذا كان ثمن 4 دفاتر هو 12 دولارًا، فما ثمن 7 دفاتر بالسعر نفسه؟",
+    "options": [
+      "$18",
+      "$19",
+      "$21",
+      "$28"
+    ],
+    "correctAnswer": "$21",
+    "explanation": "One notebook costs 12 ÷ 4 = $3. Seven cost 7 × 3 = $21.",
+    "arabicExplanation": "ثمن الدفتر الواحد 12 ÷ 4 = 3 دولارات. ثمن 7 دفاتر هو 7 × 3 = 21 دولارًا."
+  },
+  {
+    "modelId": "grade-9-certificate-model-1",
+    "modelTitle": "Grade 9 Certificate · Model Exam 01",
+    "branch": "Middle School",
+    "grade": "Grade 9",
+    "difficulty": "Foundation",
+    "questionId": "model-grade9-5",
+    "skill": "Statistics",
+    "prompt": "Find the mean of 4, 6, 8, and 10.",
+    "arabicPrompt": "أوجد المتوسط الحسابي للأعداد 4 و6 و8 و10.",
+    "options": [
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "correctAnswer": "7",
+    "explanation": "Mean = (4 + 6 + 8 + 10) ÷ 4 = 28 ÷ 4 = 7.",
+    "arabicExplanation": "المتوسط = (4 + 6 + 8 + 10) ÷ 4 = 28 ÷ 4 = 7."
+  },
+  {
+    "modelId": "grade-9-certificate-model-1",
+    "modelTitle": "Grade 9 Certificate · Model Exam 01",
+    "branch": "Middle School",
+    "grade": "Grade 9",
+    "difficulty": "Foundation",
+    "questionId": "model-grade9-6",
+    "skill": "Probability",
+    "prompt": "A fair die is rolled once. What is the probability of an even result?",
+    "arabicPrompt": "رُمي حجر نرد عادل مرة واحدة. ما احتمال الحصول على عدد زوجي؟",
+    "options": [
+      "1/6",
+      "1/3",
+      "1/2",
+      "2/3"
+    ],
+    "correctAnswer": "1/2",
+    "explanation": "Even outcomes are 2, 4, and 6: 3 favorable outcomes out of 6, so 3/6 = 1/2.",
+    "arabicExplanation": "النواتج الزوجية هي 2 و4 و6: ثلاثة نواتج ملائمة من أصل 6، أي 3/6 = 1/2."
+  },
+  {
+    "modelId": "grade-12-life-sciences-model-1",
+    "modelTitle": "Grade 12 Life Sciences · Model Exam 01",
+    "branch": "Life Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-life-sciences-bank-g12ls-log",
+    "skill": "Logarithmic functions",
+    "prompt": "Solve ln(x) = 2 for x > 0.",
+    "arabicPrompt": "حلّ ln(x) = 2 حيث x > 0.",
+    "options": [
+      "x = 2",
+      "x = e²",
+      "x = ln(2)",
+      "x = 10²"
+    ],
+    "correctAnswer": "x = e²",
+    "explanation": "Apply the exponential function to both sides: x = e².",
+    "arabicExplanation": "نطبّق الدالة الأسية على الطرفين فنحصل على x = e²."
+  },
+  {
+    "modelId": "grade-12-life-sciences-model-1",
+    "modelTitle": "Grade 12 Life Sciences · Model Exam 01",
+    "branch": "Life Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-life-sciences-bank-g12ls-integral",
+    "skill": "Integration",
+    "prompt": "Evaluate ∫₀² 3x² dx.",
+    "arabicPrompt": "احسب ∫₀² 3x² dx.",
+    "options": [
+      "4",
+      "6",
+      "8",
+      "12"
+    ],
+    "correctAnswer": "8",
+    "explanation": "An antiderivative is x³. Evaluate x³ from 0 to 2: 8 − 0 = 8.",
+    "arabicExplanation": "دالة أصلية هي x³. نحسب من 0 إلى 2: 8 − 0 = 8."
+  },
+  {
+    "modelId": "grade-12-life-sciences-model-1",
+    "modelTitle": "Grade 12 Life Sciences · Model Exam 01",
+    "branch": "Life Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-life-sciences-bank-g12ls-probability",
+    "skill": "Random variables",
+    "prompt": "A random variable X takes values 0 and 2 with probabilities 0.3 and 0.7. Find E(X).",
+    "arabicPrompt": "يأخذ المتغير العشوائي X القيمتين 0 و2 باحتمالين 0.3 و0.7. أوجد E(X).",
+    "options": [
+      "0.7",
+      "1.0",
+      "1.4",
+      "2.0"
+    ],
+    "correctAnswer": "1.4",
+    "explanation": "E(X) = 0(0.3) + 2(0.7) = 1.4.",
+    "arabicExplanation": "E(X) = 0(0.3) + 2(0.7) = 1.4."
+  },
+  {
+    "modelId": "grade-12-life-sciences-model-1",
+    "modelTitle": "Grade 12 Life Sciences · Model Exam 01",
+    "branch": "Life Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-life-sciences-bank-g12ls-exp-growth",
+    "skill": "Exponential modeling",
+    "prompt": "A culture starts with 240 cells and triples every 4 hours. Which expression gives the number of cells after t hours?",
+    "arabicPrompt": "تبدأ مزرعة بـ240 خلية ويتضاعف عددها ثلاث مرات كل 4 ساعات. أي تعبير يعطي عدد الخلايا بعد t ساعة؟",
+    "options": [
+      "240 + 3t",
+      "240(3)^(t/4)",
+      "3(240)^(t/4)",
+      "240(t/3)^4"
+    ],
+    "correctAnswer": "240(3)^(t/4)",
+    "explanation": "Each 4-hour interval multiplies the population by 3, so the number of intervals is t/4 and N(t)=240·3^(t/4).",
+    "arabicExplanation": "كل فترة من 4 ساعات تضرب العدد في 3، وعدد الفترات هو t/4، لذلك N(t)=240·3^(t/4)."
+  },
+  {
+    "modelId": "grade-12-life-sciences-model-1",
+    "modelTitle": "Grade 12 Life Sciences · Model Exam 01",
+    "branch": "Life Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-life-sciences-bank-g12ls-area-integral-correct",
+    "skill": "Area from an integral",
+    "prompt": "For x in [0, 3], a rate is r(x)=2x+1. What total quantity is accumulated over the interval?",
+    "arabicPrompt": "عندما يكون x ضمن [0, 3]، يكون المعدل r(x)=2x+1. ما الكمية الكلية المتراكمة خلال المجال؟",
+    "options": [
+      "9",
+      "10",
+      "12",
+      "15"
+    ],
+    "correctAnswer": "12",
+    "explanation": "Integrate: ∫₀³(2x+1)dx = [x²+x]₀³ = 9+3 = 12.",
+    "arabicExplanation": "نحسب التكامل: ∫₀³(2x+1)dx = [x²+x]₀³ = 9+3 = 12."
+  },
+  {
+    "modelId": "grade-12-life-sciences-model-1",
+    "modelTitle": "Grade 12 Life Sciences · Model Exam 01",
+    "branch": "Life Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-life-sciences-bank-g12ls-limit-continuity",
+    "skill": "Limits",
+    "prompt": "Let g(x)=(x²−9)/(x−3) for x≠3. Find lim(x→3) g(x).",
+    "arabicPrompt": "لتكن g(x)=(x²−9)/(x−3) عندما x≠3. أوجد النهاية عندما x تقترب من 3.",
+    "options": [
+      "0",
+      "3",
+      "6",
+      "9"
+    ],
+    "correctAnswer": "6",
+    "explanation": "Factor x²−9=(x−3)(x+3), so g(x)=x+3 for x≠3 and the limit is 6.",
+    "arabicExplanation": "نحلل x²−9=(x−3)(x+3)، فتصبح g(x)=x+3 عندما x≠3، والنهاية تساوي 6."
+  },
+  {
+    "modelId": "grade-12-general-sciences-model-1",
+    "modelTitle": "Grade 12 General Sciences · Model Exam 01",
+    "branch": "General Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-general-sciences-bank-g12gs-complex",
+    "skill": "Complex numbers",
+    "prompt": "Find the modulus of z = 3 + 4i.",
+    "arabicPrompt": "أوجد معيار العدد المركب z = 3 + 4i.",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "7"
+    ],
+    "correctAnswer": "5",
+    "explanation": "|z| = √(3² + 4²) = √25 = 5.",
+    "arabicExplanation": "|z| = √(3² + 4²) = √25 = 5."
+  },
+  {
+    "modelId": "grade-12-general-sciences-model-1",
+    "modelTitle": "Grade 12 General Sciences · Model Exam 01",
+    "branch": "General Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-general-sciences-bank-g12gs-trig",
+    "skill": "Trigonometry",
+    "prompt": "If tan(θ) = 3/4 and θ is acute, find sin(θ).",
+    "arabicPrompt": "إذا كان tan(θ) = 3/4 وθ حادة، أوجد sin(θ).",
+    "options": [
+      "3/5",
+      "4/5",
+      "3/4",
+      "5/4"
+    ],
+    "correctAnswer": "3/5",
+    "explanation": "Use a 3–4–5 right triangle: opposite = 3, adjacent = 4, hypotenuse = 5, so sin(θ) = 3/5.",
+    "arabicExplanation": "نستعمل مثلث 3–4–5: المقابل 3 والمجاور 4 والوتر 5، لذلك sin(θ) = 3/5."
+  },
+  {
+    "modelId": "grade-12-general-sciences-model-1",
+    "modelTitle": "Grade 12 General Sciences · Model Exam 01",
+    "branch": "General Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-gs-derivative",
+    "skill": "Derivatives",
+    "prompt": "If f(x)=x²+3x, find f′(2).",
+    "arabicPrompt": "إذا كانت f(x)=x²+3x، أوجد f′(2).",
+    "options": [
+      "5",
+      "7",
+      "9",
+      "11"
+    ],
+    "correctAnswer": "7",
+    "explanation": "f′(x)=2x+3, so f′(2)=7.",
+    "arabicExplanation": "f′(x)=2x+3، لذلك f′(2)=7."
+  },
+  {
+    "modelId": "grade-12-general-sciences-model-1",
+    "modelTitle": "Grade 12 General Sciences · Model Exam 01",
+    "branch": "General Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-gs-vector",
+    "skill": "Vectors",
+    "prompt": "For u=(1,2) and v=(4,−1), find u·v.",
+    "arabicPrompt": "إذا كان u=(1،2) وv=(4،−1)، أوجد u·v.",
+    "options": [
+      "−2",
+      "0",
+      "2",
+      "6"
+    ],
+    "correctAnswer": "2",
+    "explanation": "u·v=1·4+2·(−1)=2.",
+    "arabicExplanation": "u·v=1·4+2·(−1)=2."
+  },
+  {
+    "modelId": "grade-12-general-sciences-model-1",
+    "modelTitle": "Grade 12 General Sciences · Model Exam 01",
+    "branch": "General Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-gs-complex",
+    "skill": "Complex numbers",
+    "prompt": "Find |3−4i|.",
+    "arabicPrompt": "أوجد معيار العدد المركب 3−4i.",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "7"
+    ],
+    "correctAnswer": "5",
+    "explanation": "|z|=√(3²+4²)=5.",
+    "arabicExplanation": "|z|=√(3²+4²)=5."
+  },
+  {
+    "modelId": "grade-12-general-sciences-model-1",
+    "modelTitle": "Grade 12 General Sciences · Model Exam 01",
+    "branch": "General Sciences",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-gs-probability",
+    "skill": "Probability",
+    "prompt": "A fair die is rolled. What is P(result>4)?",
+    "arabicPrompt": "رُمي حجر نرد عادل. ما احتمال أن تكون النتيجة أكبر من 4؟",
+    "options": [
+      "1/6",
+      "1/3",
+      "1/2",
+      "2/3"
+    ],
+    "correctAnswer": "1/3",
+    "explanation": "The favorable results are 5 and 6: 2/6=1/3.",
+    "arabicExplanation": "الناتجان الملائمان هما 5 و6: ‏2/6=1/3."
+  },
+  {
+    "modelId": "grade-12-sociology-economics-model-1",
+    "modelTitle": "Grade 12 Sociology and Economics · Model Exam 01",
+    "branch": "Sociology and Economics",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-sociology-and-economics-bank-g12se-profit",
+    "skill": "Optimization",
+    "prompt": "A profit model is P(x) = −x² + 12x − 20. At which x is profit maximal?",
+    "arabicPrompt": "نموذج الربح هو P(x) = −x² + 12x − 20. عند أي قيمة x يكون الربح أعظميًا؟",
+    "options": [
+      "x = 4",
+      "x = 6",
+      "x = 8",
+      "x = 12"
+    ],
+    "correctAnswer": "x = 6",
+    "explanation": "For ax² + bx + c, the vertex is at x = −b/(2a) = −12/(−2) = 6.",
+    "arabicExplanation": "رأس القطع عند x = −b/(2a) = −12/(−2) = 6."
+  },
+  {
+    "modelId": "grade-12-sociology-economics-model-1",
+    "modelTitle": "Grade 12 Sociology and Economics · Model Exam 01",
+    "branch": "Sociology and Economics",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-sociology-and-economics-bank-g12se-regression",
+    "skill": "Statistics",
+    "prompt": "A positive correlation means that, generally, as one variable increases, the other variable…",
+    "arabicPrompt": "الارتباط الموجب يعني أنه كلما زاد متغير، فإن المتغير الآخر…",
+    "options": [
+      "decreases",
+      "stays constant",
+      "also tends to increase",
+      "becomes zero"
+    ],
+    "correctAnswer": "also tends to increase",
+    "explanation": "Positive correlation describes variables that tend to move in the same direction.",
+    "arabicExplanation": "الارتباط الموجب يصف متغيرين يميلان إلى التحرك في الاتجاه نفسه."
+  },
+  {
+    "modelId": "grade-12-sociology-economics-model-1",
+    "modelTitle": "Grade 12 Sociology and Economics · Model Exam 01",
+    "branch": "Sociology and Economics",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-se-interest",
+    "skill": "Financial mathematics",
+    "prompt": "A $500 deposit earns 6% simple interest for 2 years. Find the interest.",
+    "arabicPrompt": "إيداع قيمته 500 دولار بفائدة بسيطة 6٪ لمدة سنتين. أوجد قيمة الفائدة.",
+    "options": [
+      "$30",
+      "$60",
+      "$530",
+      "$560"
+    ],
+    "correctAnswer": "$60",
+    "explanation": "I=Prt=500×0.06×2=$60.",
+    "arabicExplanation": "الفائدة I=Prt=500×0.06×2=60 دولارًا."
+  },
+  {
+    "modelId": "grade-12-sociology-economics-model-1",
+    "modelTitle": "Grade 12 Sociology and Economics · Model Exam 01",
+    "branch": "Sociology and Economics",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-se-break-even",
+    "skill": "Break-even models",
+    "prompt": "Fixed cost is 240 and unit contribution is 12. How many units reach break-even?",
+    "arabicPrompt": "الكلفة الثابتة 240 وهامش المساهمة للوحدة 12. كم وحدة تحقق نقطة التعادل؟",
+    "options": [
+      "12",
+      "20",
+      "28",
+      "252"
+    ],
+    "correctAnswer": "20",
+    "explanation": "Break-even quantity=240/12=20 units.",
+    "arabicExplanation": "عدد وحدات التعادل=240/12=20 وحدة."
+  },
+  {
+    "modelId": "grade-12-sociology-economics-model-1",
+    "modelTitle": "Grade 12 Sociology and Economics · Model Exam 01",
+    "branch": "Sociology and Economics",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-se-mean",
+    "skill": "Statistics",
+    "prompt": "Find the mean of 12, 15, 15, and 18.",
+    "arabicPrompt": "أوجد المتوسط الحسابي للأعداد 12 و15 و15 و18.",
+    "options": [
+      "14",
+      "15",
+      "16",
+      "60"
+    ],
+    "correctAnswer": "15",
+    "explanation": "The sum is 60 and 60/4=15.",
+    "arabicExplanation": "المجموع 60، و60/4=15."
+  },
+  {
+    "modelId": "grade-12-sociology-economics-model-1",
+    "modelTitle": "Grade 12 Sociology and Economics · Model Exam 01",
+    "branch": "Sociology and Economics",
+    "grade": "Grade 12",
+    "difficulty": "Certificate",
+    "questionId": "model-se-growth",
+    "skill": "Percent change",
+    "prompt": "A quantity falls from 250 to 200. What is the percentage decrease?",
+    "arabicPrompt": "انخفضت كمية من 250 إلى 200. ما نسبة الانخفاض؟",
+    "options": [
+      "20%",
+      "25%",
+      "50%",
+      "80%"
+    ],
+    "correctAnswer": "20%",
+    "explanation": "The decrease is 50; 50/250=20%.",
+    "arabicExplanation": "الانخفاض 50، والنسبة 50/250=20٪."
+  },
+  {
+    "modelId": "sat-math-model-1",
+    "modelTitle": "SAT Math · Model Exam 01",
+    "branch": "SAT Math",
+    "grade": "SAT",
+    "difficulty": "Advanced",
+    "questionId": "model-sat-linear",
+    "skill": "Linear equations",
+    "prompt": "If 3x+5=20, what is x?",
+    "arabicPrompt": "إذا كان 3x+5=20، فما قيمة x؟",
+    "options": [
+      "3",
+      "5",
+      "7",
+      "15"
+    ],
+    "correctAnswer": "5",
+    "explanation": "Subtract 5 and divide by 3: x=5.",
+    "arabicExplanation": "نطرح 5 ثم نقسم على 3: x=5."
+  },
+  {
+    "modelId": "sat-math-model-1",
+    "modelTitle": "SAT Math · Model Exam 01",
+    "branch": "SAT Math",
+    "grade": "SAT",
+    "difficulty": "Advanced",
+    "questionId": "model-sat-quadratic",
+    "skill": "Quadratics",
+    "prompt": "What is the positive solution of x²−9=0?",
+    "arabicPrompt": "ما الحل الموجب للمعادلة x²−9=0؟",
+    "options": [
+      "−9",
+      "−3",
+      "3",
+      "9"
+    ],
+    "correctAnswer": "3",
+    "explanation": "x²=9, so the positive solution is 3.",
+    "arabicExplanation": "x²=9، لذلك الحل الموجب هو 3."
+  },
+  {
+    "modelId": "sat-math-model-1",
+    "modelTitle": "SAT Math · Model Exam 01",
+    "branch": "SAT Math",
+    "grade": "SAT",
+    "difficulty": "Advanced",
+    "questionId": "model-sat-rate",
+    "skill": "Rates",
+    "prompt": "A car travels 180 miles in 3 hours. What is its average speed?",
+    "arabicPrompt": "قطعت سيارة 180 ميلًا في 3 ساعات. ما سرعتها المتوسطة؟",
+    "options": [
+      "30",
+      "45",
+      "60",
+      "90"
+    ],
+    "correctAnswer": "60",
+    "explanation": "Average speed=180/3=60 miles per hour.",
+    "arabicExplanation": "السرعة المتوسطة=180/3=60 ميلًا في الساعة."
+  },
+  {
+    "modelId": "sat-math-model-1",
+    "modelTitle": "SAT Math · Model Exam 01",
+    "branch": "SAT Math",
+    "grade": "SAT",
+    "difficulty": "Advanced",
+    "questionId": "model-sat-data",
+    "skill": "Data analysis",
+    "prompt": "The mean of 4, 7, 9, and x is 8. What is x?",
+    "arabicPrompt": "المتوسط الحسابي للأعداد 4 و7 و9 وx هو 8. أوجد x.",
+    "options": [
+      "0",
+      "4",
+      "8",
+      "12"
+    ],
+    "correctAnswer": "12",
+    "explanation": "The total must be 4×8=32. Since 4+7+9=20, x=12.",
+    "arabicExplanation": "المجموع المطلوب هو 4×8=32. وبما أن 4+7+9=20، فإن x=12."
+  },
+  {
+    "modelId": "sat-math-model-1",
+    "modelTitle": "SAT Math · Model Exam 01",
+    "branch": "SAT Math",
+    "grade": "SAT",
+    "difficulty": "Advanced",
+    "questionId": "model-sat-exponential",
+    "skill": "Exponential models",
+    "prompt": "A population doubles every 5 years. Starting at 800, what is it after 5 years?",
+    "arabicPrompt": "يتضاعف عدد السكان كل 5 سنوات. إذا بدأ بـ800، كم يصبح بعد 5 سنوات؟",
+    "options": [
+      "805",
+      "1,200",
+      "1,600",
+      "4,000"
+    ],
+    "correctAnswer": "1,600",
+    "explanation": "One doubling gives 800×2=1,600.",
+    "arabicExplanation": "بعد تضاعف واحد يصبح العدد 800×2=1600."
+  },
+  {
+    "modelId": "sat-math-model-1",
+    "modelTitle": "SAT Math · Model Exam 01",
+    "branch": "SAT Math",
+    "grade": "SAT",
+    "difficulty": "Advanced",
+    "questionId": "model-sat-geometry",
+    "skill": "Geometry",
+    "prompt": "A circle has radius 4. What is its area in terms of π?",
+    "arabicPrompt": "دائرة نصف قطرها 4. ما مساحتها بدلالة π؟",
+    "options": [
+      "4π",
+      "8π",
+      "16π",
+      "32π"
+    ],
+    "correctAnswer": "16π",
+    "explanation": "Area=πr²=16π.",
+    "arabicExplanation": "المساحة=πr²=16π."
+  }
+]
