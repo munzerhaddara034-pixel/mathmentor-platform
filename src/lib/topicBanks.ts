@@ -1,4 +1,5 @@
 import type { Difficulty, GradeTrack, QuizQuestion } from "./types";
+import certificateCatalogJson from "../../content/banks/certificates.json";
 import functionsBankJson from "../../content/banks/g12-ls/functions.json";
 import numbersBankJson from "../../content/banks/brevet/numbers.json";
 import algebraBankJson from "../../content/banks/brevet/algebra.json";
@@ -63,6 +64,31 @@ export type TopicBank = {
   questions: TopicBankQuestion[];
 };
 
+export type CertificateTopicSlot = {
+  id: string;
+  file: string | null;
+  title: string;
+  arabicTitle?: string;
+  note?: string;
+};
+
+export type CertificateBranchMeta = {
+  id: string;
+  certificate: string;
+  track: string;
+  title: string;
+  arabicTitle: string;
+  heading: string;
+  note: string;
+  sourcePack: string;
+  folder: string;
+  topics: CertificateTopicSlot[];
+};
+
+/**
+ * Live banks. Sibling agents: import the new JSON and append it here with
+ * `certificate` set to Brevet | LS | SE | GS. The practice hub groups by that field.
+ */
 export const topicBanks: TopicBank[] = [
   functionsBankJson as TopicBank,
   numbersBankJson as TopicBank,
@@ -71,6 +97,8 @@ export const topicBanks: TopicBank[] = [
   geometryBankJson as TopicBank,
   coordinateBankJson as TopicBank,
 ];
+
+const certificateCatalog = certificateCatalogJson as { branches: CertificateBranchMeta[] };
 
 export function getTopicBank(id: string): TopicBank | undefined {
   return topicBanks.find((bank) => bank.id === id);
@@ -165,10 +193,59 @@ export function listTopicBankCards() {
   }));
 }
 
-export function groupTopicBankCards() {
+export type TopicBankCard = ReturnType<typeof listTopicBankCards>[number];
+
+function topicIsLive(card: TopicBankCard, topicId: string) {
+  return card.topic === topicId || card.id === topicId || card.id.endsWith(`-${topicId}`) || card.id.includes(`-${topicId}`);
+}
+
+export function listCertificateBranches() {
   const cards = listTopicBankCards();
+  const byCertificate = new Map<string, TopicBankCard[]>();
+  for (const card of cards) {
+    const list = byCertificate.get(card.certificate) ?? [];
+    list.push(card);
+    byCertificate.set(card.certificate, list);
+  }
+
+  const seen = new Set<string>();
+  const branches = certificateCatalog.branches.map((branch) => {
+    seen.add(branch.certificate);
+    const live = byCertificate.get(branch.certificate) ?? [];
+    const topics = branch.topics.map((topic) => ({
+      ...topic,
+      implemented: live.some((card) => topicIsLive(card, topic.id)),
+    }));
+    return { ...branch, topics, cards: live };
+  });
+
+  for (const [certificate, live] of byCertificate) {
+    if (seen.has(certificate)) continue;
+    branches.push({
+      id: certificate.toLowerCase(),
+      certificate,
+      track: String(live[0]?.track ?? "grade-12"),
+      title: certificate,
+      arabicTitle: certificate,
+      heading: certificate,
+      note: "",
+      sourcePack: "",
+      folder: "",
+      topics: [],
+      cards: live,
+    });
+  }
+  return branches;
+}
+
+export function groupTopicBankCards() {
+  const branches = listCertificateBranches();
+  const cardsOf = (certificate: string) => branches.find((branch) => branch.certificate === certificate)?.cards ?? [];
   return {
-    ls: cards.filter((card) => card.certificate === "LS"),
-    brevet: cards.filter((card) => card.certificate === "Brevet"),
+    branches,
+    ls: cardsOf("LS"),
+    brevet: cardsOf("Brevet"),
+    se: cardsOf("SE"),
+    gs: cardsOf("GS"),
   };
 }

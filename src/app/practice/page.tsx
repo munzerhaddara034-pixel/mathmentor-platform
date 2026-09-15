@@ -32,30 +32,23 @@ export default function PracticeHubPage() {
 
       <section className="card" style={{ marginTop: 8 }}>
         <h2>مسابقات الشهادة حسب الموضوع</h2>
-        <p className="muted">مستويان: علوم الحياة (صف 12) والشهادة المتوسطة (صف 9). البنود أكاديمية أصلية بأسلوب النماذج، وليست نسخاً من دورات رسمية.</p>
-
-        <h3 style={{ marginTop: 16 }}>صف 12 · علوم الحياة</h3>
-        <p className="muted">النموذج الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم دراسة الدوال. المنفَّذ الآن هو المسألة الرابعة.</p>
-        {grouped.ls[0]?.contestTopics?.map((topic) => (
-          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
-            {topic.arabicTitle ?? topic.title}
-            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
-          </p>
-        ))}
-        {grouped.ls.map((card) => (
-          <BankCard key={card.id} card={card} />
-        ))}
-
-        <h3 style={{ marginTop: 24 }}>صف 9 · الشهادة المتوسطة</h3>
-        <p className="muted">مسابقة البروفيه عادةً ست أو سبع مسائل. البنوك الخمسة جاهزة للمسابقة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية.</p>
-        {grouped.brevet[0]?.contestTopics?.map((topic) => (
-          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
-            {topic.arabicTitle ?? topic.title}
-            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
-          </p>
-        ))}
-        {grouped.brevet.map((card) => (
-          <BankCard key={card.id} card={card} />
+        <p className="muted">
+          أربعة فروع: الشهادة المتوسطة، علوم الحياة، اجتماع واقتصاد، وعلوم عامة. البنود أكاديمية أصلية بأسلوب النماذج، وليست نسخاً من دورات رسمية.
+        </p>
+        {grouped.branches.map((branch) => (
+          <div key={branch.id}>
+            <h3 style={{ marginTop: 24 }}>{branch.heading}</h3>
+            <p className="muted">{branch.note}</p>
+            {branch.topics.map((topic) => (
+              <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+                {topic.arabicTitle ?? topic.title}
+                {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
+              </p>
+            ))}
+            {branch.cards.map((card) => (
+              <BankCard key={card.id} card={card} />
+            ))}
+          </div>
         ))}
       </section>
 
@@ -112,11 +105,15 @@ function BankCard({
   card: ReturnType<typeof listTopicBankCards>[number];
 }) {
   const blurb =
-    card.id === "g12-ls-functions"
-      ? "أسلوب المسألة الرابعة في نماذج علوم الحياة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+    card.certificate === "LS"
+      ? "أسلوب نماذج علوم الحياة. البنود أكاديمية أصلية وليست نماذج منسوخة."
       : card.certificate === "Brevet"
         ? "أسلوب الشهادة المتوسطة. البنود أكاديمية أصلية وليست نماذج منسوخة."
-        : null;
+        : card.certificate === "SE"
+          ? "أسلوب اجتماع واقتصاد. البنود أكاديمية أصلية وليست نماذج منسوخة."
+          : card.certificate === "GS"
+            ? "أسلوب علوم عامة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+            : "بنود أكاديمية أصلية بأسلوب النماذج اللبنانية وليست نماذج منسوخة.";
   return (
     <article className="card" style={{ marginTop: 12 }}>
       <span className="badge">{card.certificate}</span>

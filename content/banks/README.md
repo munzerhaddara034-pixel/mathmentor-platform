@@ -2,10 +2,12 @@
 
 Certificate practice is split **by topic**, not by dumping a whole session PDF into one quiz.
 
-Two certificate levels:
+Four certificate branches live in `content/banks/certificates.json`. The practice hub lists every branch; live JSON files overlay the slots. Remaining LS / SE / GS banks are for a sibling agent — do not photocopy official PDFs.
 
-1. **Grade 12 LS** (`g12-ls/`) — Functions (Problem IV) is live
-2. **Brevet / الشهادة المتوسطة** (`brevet/`) — five topic banks seeded (numbers, algebra, word problems, geometry, coordinate)
+1. **Brevet / الشهادة المتوسطة** (`brevet/`) — five topic banks seeded
+2. **Grade 12 LS** (`g12-ls/`) — Functions (Problem IV) is live
+3. **Grade 12 SE** (`g12-se/`) — slots listed, banks later
+4. **Grade 12 GS** (`g12-gs/`) — slots listed, banks later
 
 Official packs on Munzer’s PC (not committed; do not photocopy into Git):
 
@@ -44,8 +46,9 @@ content/banks/
   brevet/numbers.json          ← Brevet numbers (now)
   brevet/word_problems.json    ← Brevet word problems (now)
   brevet/coordinate.json       ← Brevet coordinate geometry (now)
-  g12-se/…                     ← SE topics later
-  g12-gs/…                     ← GS topics later
+  g12-se/…                     ← SE topics (hub lists the branch; banks later)
+  g12-gs/…                     ← GS topics (hub lists the branch; banks later)
+  certificates.json            ← four-branch paper map for /practice
 ```
 
 One JSON file = one topic contest. Functions slices (easy → hard within the file):
@@ -69,18 +72,17 @@ Each question:
 
 Keep the array **easy → medium → hard**. Within a band, keep pedagogical slice order (Limits first).
 
-The file also stores `contestTopics`: the official paper split for that certificate (LS four problems, or Brevet’s five topic banks), with `implemented: true` only on live files.
+The file also stores `contestTopics` on some banks. The hub’s implemented flags come from `content/banks/certificates.json` overlaid with live `topicBanks` (`certificate` + `topic`).
 
-## How to add the next LS paper topic (example: space geometry)
+## How to add the next paper topic (sibling agents)
 
-1. Filter the matching official session PDF for that topic only (space geometry, not Functions).
-2. Copy `functions.json` to `content/banks/g12-ls/space-geometry.json`.
-3. Change `id` to `g12-ls-space-geometry`, `topic` / titles, `sourceModels`, and `slices`.
-4. Replace `questions` with new stems in official-session style. Tag genuine extracts `session-extract`; keep academy-original siblings `generated-in-official-style`. Never paste a copyrighted exam page verbatim. Never label generated items as past papers.
-5. Register the file in `src/lib/topicBanks.ts` (`import` + `topicBanks` array). Set that row’s `implemented: true` in `contestTopics` on the Functions file (or a shared LS paper index) when the bank is live.
-6. `npm run build`.
+1. Filter the matching official session PDF for that topic only.
+2. Write `content/banks/<folder>/<topic>.json` in the same shape as `brevet/numbers.json` or `g12-ls/functions.json` (≥30 MCQs, easy → medium → hard).
+3. Set `certificate` to `Brevet` | `LS` | `SE` | `GS` and `topic` to the catalog slot id.
+4. Import the file in `src/lib/topicBanks.ts` and append it to `topicBanks`. The hub lists that branch/card without further page edits.
+5. `npm run build`.
 
-Same steps for `probability.json`. Integration is a later chapter bank, not one of the four typical paper slots.
+Never paste a copyrighted exam page verbatim. Never label generated items as past papers.
 
 Rebuild the Functions extras after editing `scripts/merge-session-style-functions.py`:
 
@@ -97,3 +99,5 @@ python3 scripts/merge-session-style-functions.py
 ## Brevet (Grade 9)
 
 See `content/banks/brevet/README.md`. All five Brevet contests are on `/practice`. Rebuild with `python3 scripts/build-brevet-banks.py`.
+
+SE and GS folders are listed on `/practice` as later slots (`content/banks/g12-se/`, `content/banks/g12-gs/`).
