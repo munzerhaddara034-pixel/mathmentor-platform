@@ -5,6 +5,7 @@ __pycache__/
 data/store.json
 data/uploads
 data/*.db
+data/*.db-*
 public/uploads
 .env
 .env.local
