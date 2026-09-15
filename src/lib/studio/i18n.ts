@@ -63,11 +63,19 @@ export const STUDIO_UI = {
     en: "Demo mode: Professor Munzer still + silent timeline (or HTML5 audio). HeyGen is not called without a key.",
     fr: "Mode démo : photo du professeur Munzer + timeline silencieuse (ou audio HTML5). HeyGen n’est pas appelé sans clé.",
   },
-  videoHint: { en: "HeyGen or local video.", fr: "Vidéo HeyGen ou fichier local." },
+  videoHint: {
+    en: "HeyGen video is the clock: the math canvas seeks from video.currentTime.",
+    fr: "La vidéo HeyGen est l’horloge : le tableau suit video.currentTime.",
+  },
+  demoVideoHint: {
+    en: "Local placeholder video (no HeyGen key). Canvas follows the video, then continues on the silent timeline.",
+    fr: "Vidéo locale de démo (pas de clé HeyGen). Le tableau suit la vidéo, puis continue en silence.",
+  },
+  syncClock: { en: "sync player (video → canvas)", fr: "lecteur sync (vidéo → tableau)" },
   switchToFrench: "🌐 Switch to French / Passer en Français",
   switchToEnglish: "🌐 Switch to English / Passer en anglais",
-  desmos: { en: "Desmos graph", fr: "Graphe Desmos" },
-  fallbackPlot: { en: "SVG fallback plotter", fr: "Traceur SVG (secours)" },
+  desmos: { en: "Desmos graph (optional)", fr: "Graphe Desmos (optionnel)" },
+  fallbackPlot: { en: "Function Plot (SVG)", fr: "Function Plot (SVG)" },
   phases: {
     introduction: { en: "1. Concept definition", fr: "1. Définition" },
     rule_graph: { en: "2. Rule & graph", fr: "2. Règle et graphe" },

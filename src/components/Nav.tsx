@@ -14,6 +14,7 @@ export function Nav() {
       </Link>
       <nav className="links">
         <Link href="/studio/script">السكربت</Link>
+        <Link href="/admin/video-generator">الفيديو</Link>
         <Link href="/lessons/interactive">السبورة</Link>
         <Link href="/practice">الاختبارات</Link>
         <Link href="/bank">بنك الأستاذ</Link>

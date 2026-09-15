@@ -24,6 +24,9 @@ export default function HomePage() {
           <Link href="/studio/script" className="ghost-btn">
             مولّد السكربت
           </Link>
+          <Link href="/admin/video-generator" className="ghost-btn">
+            مولّد الفيديو
+          </Link>
           <Link href="/practice" className="ghost-btn">
             بنك الأسئلة
           </Link>

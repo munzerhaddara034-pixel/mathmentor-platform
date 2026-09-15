@@ -1,8 +1,21 @@
 import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
 import { officialExamFourPhaseLesson } from "@/lib/studio/seedLesson";
+import { getHeyGenJob, resolveJobTimeline, timelineForStudentLesson } from "@/lib/studio/heygenJobs";
 import Link from "next/link";
 
-export default function InteractiveLessonDemoPage() {
+export const dynamic = "force-dynamic";
+
+export default async function InteractiveLessonDemoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ job?: string }>;
+}) {
+  const { job: jobId } = await searchParams;
+  const job = jobId ? await getHeyGenJob(jobId) : undefined;
+  const timeline = job
+    ? resolveJobTimeline(job)
+    : await timelineForStudentLesson("leb-term-func-01", officialExamFourPhaseLesson);
+
   return (
     <main className="shell">
       <p className="eyebrow">Classroom studio · demo</p>
@@ -13,8 +26,12 @@ export default function InteractiveLessonDemoPage() {
         <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>
         {" · "}
         <Link href="/studio/player?lesson=complex">Complex numbers</Link>
+        {" · "}
+        <Link href="/admin/video-generator">HeyGen generator</Link>
+        {timeline.media?.videoUrl ? " · HeyGen / placeholder video attached (canvas follows video.currentTime)" : ""}
+        {timeline.media?.studentEnabled ? " · enabled for students" : ""}
       </p>
-      <InteractiveLessonPlayer timeline={officialExamFourPhaseLesson} initialLanguage="en" />
+      <InteractiveLessonPlayer timeline={timeline} initialLanguage="en" />
     </main>
   );
 }

@@ -431,6 +431,21 @@ textarea { min-height: 120px; resize: vertical; }
   0%, 100% { filter: brightness(1); }
   50% { filter: brightness(1.08); }
 }
+.heygen-jobs { display: grid; gap: 14px; margin-top: 12px; }
+.heygen-job {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: #fbfbfd;
+}
+.heygen-job.active { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(217, 170, 83, 0.25); }
+.heygen-job header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
 @media (max-width: 800px) {
   .studio-avatar-frame img, .studio-avatar-frame video { height: 240px; }
 }

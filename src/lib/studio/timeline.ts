@@ -85,6 +85,8 @@ export const lessonMediaSchema = z
     audioUrl: z.string().optional(),
     poster: z.string().optional(),
     heygenVideoId: z.string().optional(),
+    heygenJobId: z.string().optional(),
+    studentEnabled: z.boolean().optional(),
   })
   .optional();
 

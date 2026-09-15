@@ -1,6 +1,12 @@
 export { bilingualSchema, lessonTimelineSchema, parseLessonTimeline, TIMELINE_STORAGE_KEY } from "./timeline";
 export type { LessonTimeline, LessonLanguage, CertificateTrack } from "./timeline";
-export { createAvatarTalkingVideo, fetchAvatarTalkingVideo, hasHeyGenKey } from "./heygen";
+export {
+  createAvatarTalkingVideo,
+  fetchAvatarTalkingVideo,
+  hasHeyGenKey,
+  buildHeyGenGeneratePayload,
+} from "./heygen";
+export { DEMO_AVATAR_VIDEO, DEMO_POSTER } from "./heygenClient";
 export { disabledGeoGebra, getGeoGebraHook } from "./geogebra";
 export { generateLessonScript, buildTemplateScript } from "./scriptGenerator";
 export { exponentialFunctionsLesson, complexNumbersLesson, getSampleLesson } from "./sampleLessons";

@@ -1,6 +1,7 @@
 node_modules
 .next
 data/store.json
+data/heygen-jobs.json
 data/uploads
 public/uploads
 .env

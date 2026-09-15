@@ -16,11 +16,23 @@ Open:
 | Route | What it is |
 | --- | --- |
 | http://127.0.0.1:3001/studio/script | Script editor (seeded `leb-term-func-01` JSON) |
+| http://localhost:3000/admin/video-generator | Teacher HeyGen generator (script, notes, math, voice, speed) |
 | http://localhost:3000/lessons/interactive | Official exam player — `f(x)=(x-1)e^x`, EN default + FR toggle |
 | http://localhost:3000/studio/player?lesson=leb-term-func-01 | Exact 3-scene seed |
+| http://localhost:3000/studio/player?job=… | Sync player for a HeyGen job |
 | `POST /api/studio/script` | `{ topic, track, language, grade }` → four-phase EN+FR JSON |
+| `POST /api/heygen/generate` | Create HeyGen (or demo) video job |
 
 No secrets are required. Desmos and OpenAI/HeyGen keys are optional (see `.env.example`).
+
+## Daily workflow
+
+1. Write the script in `/studio/script`.
+2. Generate the talking-avatar clip in `/admin/video-generator`.
+3. Wait for webhook or `GET /api/heygen/status?jobId=…`.
+4. Students watch the **sync player** (`/lessons/interactive`): HeyGen video on the left, math canvas on the right, clock = `video.currentTime`.
+
+Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 
 ## Language engine
 
@@ -75,5 +87,6 @@ Template mode includes French on every narration. OpenAI is used only when `OPEN
 
 - **Desmos** (`src/lib/studio/desmos.ts`): loads `https://www.desmos.com/api/v1.8/calculator.js?apiKey=…`. Desmos **requires** a free API key from [their API docs](https://www.desmos.com/api/v1.8/docs/index.html). Set `NEXT_PUBLIC_DESMOS_API_KEY`. If the key is missing or the script fails, the existing SVG function plotter is used (still plots `(x-1)*exp(x)`).
 - **KaTeX** npm package (`katex.renderToString`) on the canvas — no extra client global needed. Optional CDN: `https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js` + matching CSS.
-- **HeyGen**: stub without `HEYGEN_API_KEY` (Munzer still + silent timeline).
+- **HeyGen**: live `POST https://api.heygen.com/v2/video/generate` only when `HEYGEN_API_KEY` is set. Without a key: deterministic mock job + local `/studio/demo-avatar.mp4`. See [HEYGEN.md](./HEYGEN.md).
+- **Function Plot**: SVG engine in `src/lib/studio/functionPlot.ts` always available for canvas sync. Desmos remains optional.
 - **GeoGebra**: still a typed future hook (`src/lib/studio/geogebra.ts`), not required.

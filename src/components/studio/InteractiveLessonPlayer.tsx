@@ -36,8 +36,15 @@ export function InteractiveLessonPlayer({
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
+  const [seekEpoch, setSeekEpoch] = useState(0);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [videoClock, setVideoClock] = useState(Boolean(timeline.media?.videoUrl));
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const lastTick = useRef<number | null>(null);
   const spokenKey = useRef<string | null>(null);
+
+  const videoUrl = videoFailed ? undefined : timeline.media?.videoUrl;
+  const clockMaster = Boolean(videoUrl) && videoClock;
 
   const segment = segmentAt(timeline, currentTime);
   const canvas = useMemo(() => canvasStateAt(timeline, currentTime), [timeline, currentTime]);
@@ -47,7 +54,13 @@ export function InteractiveLessonPlayer({
   const instructor = timeline.instructor ?? "Prof. Munzer Al-Tarah";
 
   useEffect(() => {
-    if (!playing) {
+    setVideoFailed(false);
+    setVideoClock(Boolean(timeline.media?.videoUrl));
+    setVideoDuration(null);
+  }, [timeline.media?.videoUrl]);
+
+  useEffect(() => {
+    if (!playing || clockMaster) {
       lastTick.current = null;
       return;
     }
@@ -68,11 +81,11 @@ export function InteractiveLessonPlayer({
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [playing, speed, timeline.durationSec]);
+  }, [playing, speed, timeline.durationSec, clockMaster]);
 
   const speakSegment = useCallback(
     (id: string | undefined, language: LessonLocale, text: string) => {
-      if (!("speechSynthesis" in window) || !id) return;
+      if (!("speechSynthesis" in window) || !id || videoUrl) return;
       const key = `${id}:${language}`;
       if (spokenKey.current === key) return;
       spokenKey.current = key;
@@ -84,10 +97,11 @@ export function InteractiveLessonPlayer({
       if (voice) utterance.voice = voice;
       window.speechSynthesis.speak(utterance);
     },
-    [speed],
+    [speed, videoUrl],
   );
 
   useEffect(() => {
+    if (videoUrl) return;
     if (!playing || !segment) {
       if (!playing && "speechSynthesis" in window) window.speechSynthesis.cancel();
       if (!playing) spokenKey.current = null;
@@ -95,7 +109,7 @@ export function InteractiveLessonPlayer({
     }
     if (frozen) return;
     speakSegment(segment.id, uiLanguage, pickText(segment.narration, uiLanguage));
-  }, [frozen, playing, segment, speakSegment, uiLanguage]);
+  }, [frozen, playing, segment, speakSegment, uiLanguage, videoUrl]);
 
   useEffect(() => {
     return () => {
@@ -110,9 +124,27 @@ export function InteractiveLessonPlayer({
   };
 
   const seek = (time: number) => {
-    setCurrentTime(Math.max(0, Math.min(timeline.durationSec, time)));
+    const next = Math.max(0, Math.min(timeline.durationSec, time));
+    setCurrentTime(next);
+    setSeekEpoch((value) => value + 1);
     spokenKey.current = null;
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    if (videoUrl && (videoDuration == null || next <= videoDuration - 0.05)) setVideoClock(true);
+    else if (videoUrl) setVideoClock(false);
+  };
+
+  const onVideoTime = (time: number) => {
+    if (!clockMaster) return;
+    setCurrentTime(Math.max(0, Math.min(timeline.durationSec, time)));
+  };
+
+  const onVideoEnded = () => {
+    if (currentTime < timeline.durationSec - 0.05 && playing) {
+      setVideoClock(false);
+      return;
+    }
+    setPlaying(false);
+    setCurrentTime(timeline.durationSec);
   };
 
   const progressPct = (currentTime / timeline.durationSec) * 100;
@@ -129,6 +161,7 @@ export function InteractiveLessonPlayer({
             {instructor}
             {timeline.grade ? ` · ${timeline.grade}` : ""}
             {timeline.topic ? ` · ${timeline.topic}` : ""}
+            {videoUrl ? ` · ${pickText(STUDIO_UI.syncClock, uiLanguage)}` : ""}
           </p>
         </div>
         <button className="btn dark studio-lang-toggle" type="button" onClick={toggleLanguage}>
@@ -156,10 +189,21 @@ export function InteractiveLessonPlayer({
           frozen={frozen}
           playing={playing}
           currentTime={currentTime}
-          videoUrl={timeline.media?.videoUrl}
+          playbackRate={speed}
+          videoUrl={videoUrl}
           audioUrl={timeline.media?.audioUrl}
           poster={timeline.media?.poster ?? "/teachers/munzer.jpg?v=4"}
           teacherName={instructor}
+          clockMaster={clockMaster}
+          seekEpoch={seekEpoch}
+          seekTo={currentTime}
+          onTime={onVideoTime}
+          onEnded={onVideoEnded}
+          onError={() => {
+            setVideoFailed(true);
+            setVideoClock(false);
+          }}
+          onDuration={(duration) => setVideoDuration(duration)}
         />
         <MathCanvas state={canvas} language={uiLanguage} currentTime={currentTime} />
       </div>
@@ -173,7 +217,11 @@ export function InteractiveLessonPlayer({
           className="btn dark"
           type="button"
           onClick={() => {
-            if (currentTime >= timeline.durationSec) setCurrentTime(0);
+            if (currentTime >= timeline.durationSec) {
+              seek(0);
+              setPlaying(true);
+              return;
+            }
             setPlaying((value) => !value);
           }}
         >

@@ -92,8 +92,9 @@ export default function StudioScriptPage() {
       <p className="eyebrow">Studio · AI video script</p>
       <h1>Lesson script editor</h1>
       <p className="muted">
-        Default sample: <code>leb-term-func-01</code> (EN + FR scenes, KaTeX + Desmos). Generate a four-phase official-exam
-        script, edit the JSON, then open the interactive player. Local preview:{" "}
+        Default sample: <code>leb-term-func-01</code> (EN + FR scenes, KaTeX + Function Plot / Desmos). Generate a
+        four-phase official-exam script, edit the JSON, then open the interactive player or send it to{" "}
+        <Link href="/admin/video-generator">/admin/video-generator</Link>. Local preview:{" "}
         <code>http://127.0.0.1:3001/studio/script</code>
       </p>
 
@@ -142,6 +143,9 @@ export default function StudioScriptPage() {
           </button>
           <Link className="btn" href="/lessons/interactive">
             Open player demo
+          </Link>
+          <Link className="btn" href="/admin/video-generator">
+            Generate HeyGen video
           </Link>
         </div>
         {source ? (
