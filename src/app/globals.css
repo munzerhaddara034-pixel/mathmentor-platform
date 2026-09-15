@@ -292,6 +292,7 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-split {
   display: grid;
   gap: 16px;
+  /* Phone: teacher video first, board below (clearer while listening). */
   grid-template-areas:
     "avatar"
     "canvas";
@@ -300,8 +301,8 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-canvas-panel { grid-area: canvas; }
 @media (min-width: 900px) {
   .studio-split {
-    grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.25fr);
-    grid-template-areas: "avatar canvas";
+    grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.9fr);
+    grid-template-areas: "canvas avatar";
     align-items: stretch;
   }
 }
@@ -358,6 +359,13 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-board.drawing { outline: 2px dashed #d9aa53; }
 .studio-eq { margin-bottom: 12px; }
 .studio-eq .katex-display { margin: 8px 0; }
+.studio-eq-fade {
+  animation: studio-eq-fade 0.7s ease;
+}
+@keyframes studio-eq-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
 .studio-steps { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
 .studio-steps li {
   display: grid;
@@ -383,6 +391,26 @@ textarea { min-height: 120px; resize: vertical; }
   font-weight: 700;
 }
 .studio-graph { margin: 12px 0; }
+.studio-graph-interactive { touch-action: none; }
+.studio-graph-svg { width: 100%; height: auto; display: block; cursor: grab; touch-action: none; user-select: none; }
+.studio-graph-svg:active { cursor: grabbing; }
+.studio-interact-hint {
+  color: #61708a;
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.studio-reset-view {
+  margin-top: 8px;
+  border: 1px solid #ead9b0;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--navy);
+}
 .studio-graph-head {
   display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
   color: #10213d; margin-bottom: 8px; align-items: center;

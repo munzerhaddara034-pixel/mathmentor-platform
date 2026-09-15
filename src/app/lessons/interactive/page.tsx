@@ -30,6 +30,7 @@ export default async function InteractiveLessonDemoPage({
         <Link href="/admin/video-generator">HeyGen generator</Link>
         {timeline.media?.videoUrl ? " · HeyGen / placeholder video attached (canvas follows video.currentTime)" : ""}
         {timeline.media?.studentEnabled ? " · enabled for students" : ""}
+        {" · canvas left / video right (video on top on phones)"}
       </p>
       <InteractiveLessonPlayer timeline={timeline} initialLanguage="en" />
     </main>

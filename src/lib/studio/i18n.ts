@@ -72,6 +72,11 @@ export const STUDIO_UI = {
     fr: "Vidéo locale de démo (pas de clé HeyGen). Le tableau suit la vidéo, puis continue en silence.",
   },
   syncClock: { en: "sync player (video → canvas)", fr: "lecteur sync (vidéo → tableau)" },
+  interactHint: {
+    en: "Pan, zoom, and hover the graph — the video keeps playing.",
+    fr: "Déplacez, zoomez et survolez le graphe — la vidéo continue.",
+  },
+  resetView: { en: "Reset view", fr: "Réinitialiser la vue" },
   switchToFrench: "🌐 Switch to French / Passer en Français",
   switchToEnglish: "🌐 Switch to English / Passer en anglais",
   desmos: { en: "Desmos graph (optional)", fr: "Graphe Desmos (optionnel)" },

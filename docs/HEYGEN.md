@@ -7,7 +7,7 @@ Daily teacher workflow for **منصة الأستاذ منذر الطارة / Mat
 3. Click **Generate Video** → `POST /api/heygen/generate`.
 4. Wait for **webhook** (`POST /api/heygen/webhook`) or poll `GET /api/heygen/status?jobId=…`.
 5. When status is `completed`, `videoUrl` is stored on the job **and** the lesson overlay is **enabled for students**.
-6. Students watch [`/lessons/interactive`](/lessons/interactive) (or `/studio/player?job=…`): **left = HeyGen video**, **right = Math Canvas**. Canvas actions follow `video.currentTime`.
+6. Students watch [`/lessons/interactive`](/lessons/interactive) (or `/studio/player?job=…`): **left = Math Canvas**, **right = HeyGen video** (video on top on phones). Canvas actions follow `video.currentTime`.
 
 No `HEYGEN_API_KEY` is required for local demo / `npm run build`. The generate route then returns a **deterministic mock job id** (`demo-<sha1>`) and status polling completes after ~2.5s with `/studio/demo-avatar.mp4` (or silent avatar if that file is missing).
 
@@ -77,7 +77,7 @@ Notes:
 - If `HEYGEN_AVATAR_ID` is empty, `character` is `{ "type": "talking_photo", "talking_photo_id": "<HEYGEN_TALKING_PHOTO_ID>" }`.
 - `voice.speed` is clamped to **0.5–1.5** (HeyGen OpenAPI).
 - `voice.locale`: `en-US` | `fr-FR` | `ar-SA`.
-- Landscape **1280×720** so the clip fits the left avatar panel.
+- Landscape **1280×720** so the clip fits the right-hand avatar panel.
 
 Successful HeyGen response (used fields): `data.video_id`.
 

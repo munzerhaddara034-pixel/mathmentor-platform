@@ -30,6 +30,7 @@ export type AvatarState = z.infer<typeof avatarStateSchema>;
 
 export const canvasActionTypeSchema = z.enum([
   "show_equation",
+  "fade_equation",
   "render_graph",
   "highlight_point",
   "show_step",
@@ -58,11 +59,44 @@ export const certificateTrackSchema = z.enum([
 ]);
 export type CertificateTrack = z.infer<typeof certificateTrackSchema>;
 
-export const canvasActionSchema = z.object({
-  at: z.number().min(0),
-  type: canvasActionTypeSchema,
-  payload: z.record(z.unknown()).default({}),
-});
+/** Lift flat timeline-event fields (`latex`, `expression`, `domain`, `highlights`) into `payload`. */
+function liftTimelineEvent(value: unknown) {
+  if (!value || typeof value !== "object") return value;
+  const rec = value as Record<string, unknown>;
+  const payload: Record<string, unknown> = {
+    ...(rec.payload && typeof rec.payload === "object" ? (rec.payload as Record<string, unknown>) : {}),
+  };
+  for (const key of [
+    "latex",
+    "math_latex",
+    "expression",
+    "fn",
+    "domain",
+    "xDomain",
+    "yDomain",
+    "highlights",
+    "caption",
+    "kind",
+  ]) {
+    if (rec[key] !== undefined && payload[key] === undefined) payload[key] = rec[key];
+  }
+  return { ...rec, payload };
+}
+
+export const canvasActionSchema = z.preprocess(
+  liftTimelineEvent,
+  z
+    .object({
+      at: z.number().min(0),
+      type: canvasActionTypeSchema,
+      payload: z.record(z.unknown()).default({}),
+      latex: z.string().optional(),
+      expression: z.string().optional(),
+      domain: z.array(z.number()).length(2).or(z.tuple([z.number(), z.number()])).optional(),
+      highlights: z.unknown().optional(),
+    })
+    .passthrough(),
+);
 export type CanvasAction = z.infer<typeof canvasActionSchema>;
 
 export const lessonSegmentSchema = z.object({
@@ -103,6 +137,8 @@ export const lessonTimelineSchema = z
     topic: z.string().optional(),
     media: lessonMediaSchema,
     scenes: z.array(z.unknown()).optional(),
+    /** Absolute-time canvas events (`at` is seconds from lesson start). */
+    events: z.array(canvasActionSchema).optional(),
     segments: z.array(lessonSegmentSchema).min(1),
   })
   .superRefine((value, ctx) => {
@@ -151,8 +187,8 @@ export type HighlightPayload = {
 };
 
 export type DerivedCanvasState = {
-  equations: Array<{ latex: string; caption?: Bilingual }>;
-  steps: Array<{ latex?: string; text?: Bilingual; index: number }>;
+  equations: Array<{ latex: string; caption?: Bilingual; appearedAt: number; fade: boolean }>;
+  steps: Array<{ latex?: string; text?: Bilingual; index: number; appearedAt: number }>;
   graph: GraphPayload | null;
   highlights: HighlightPayload[];
   graphStartedAt: number | null;
@@ -211,8 +247,8 @@ function asGraph(value: Record<string, unknown>): GraphPayload {
   return {
     kind: graphKindSchema.safeParse(value.kind).success ? (value.kind as GraphKind) : "function",
     fn,
-    xDomain,
-    yDomain,
+    xDomain: xDomain ?? [-3, 2],
+    yDomain: yDomain ?? [-4, 8],
     title: coerceBilingual(value.title),
     samples: typeof value.samples === "number" ? value.samples : undefined,
     points,
@@ -228,6 +264,52 @@ function asHighlight(value: Record<string, unknown>): HighlightPayload {
     value: typeof value.value === "number" ? value.value : undefined,
     label: coerceBilingual(value.label),
   };
+}
+
+function pairPoint(value: unknown): { x: number; y: number } | undefined {
+  if (Array.isArray(value) && value.length >= 2) {
+    const x = Number(value[0]);
+    const y = Number(value[1]);
+    if (Number.isFinite(x) && Number.isFinite(y)) return { x, y };
+  }
+  if (value && typeof value === "object") {
+    const rec = value as Record<string, unknown>;
+    const x = Number(rec.x);
+    const y = Number(rec.y);
+    if (Number.isFinite(x) && Number.isFinite(y)) return { x, y };
+  }
+  return undefined;
+}
+
+/** `{ roots: [[1,0]], extrema: [[0,-1]], asymptotes: [{ y: 0 }] }` */
+export function parseHighlightsBundle(value: unknown): HighlightPayload[] {
+  if (!value || typeof value !== "object") return [];
+  const rec = value as Record<string, unknown>;
+  const out: HighlightPayload[] = [];
+  if (Array.isArray(rec.roots)) {
+    for (const item of rec.roots) {
+      const point = pairPoint(item);
+      if (point) out.push({ kind: "root", x: point.x, y: point.y, label: coerceBilingual((item as { label?: unknown })?.label) });
+    }
+  }
+  if (Array.isArray(rec.extrema)) {
+    for (const item of rec.extrema) {
+      const point = pairPoint(item);
+      if (point) out.push({ kind: "extrema", x: point.x, y: point.y, label: coerceBilingual((item as { label?: unknown })?.label) });
+    }
+  }
+  if (Array.isArray(rec.asymptotes)) {
+    for (const item of rec.asymptotes) {
+      if (!item || typeof item !== "object") continue;
+      const row = item as Record<string, unknown>;
+      if (typeof row.y === "number") out.push({ kind: "asymptote", axis: "y", value: row.y, label: coerceBilingual(row.label) });
+      else if (typeof row.x === "number") out.push({ kind: "asymptote", axis: "x", value: row.x, label: coerceBilingual(row.label) });
+      else if ((row.axis === "x" || row.axis === "y") && typeof row.value === "number") {
+        out.push({ kind: "asymptote", axis: row.axis, value: row.value, label: coerceBilingual(row.label) });
+      }
+    }
+  }
+  return out;
 }
 
 export function emptyCanvasState(): DerivedCanvasState {
@@ -260,58 +342,91 @@ function stepTextOf(payload: Record<string, unknown>) {
   );
 }
 
+function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: number, stepIndex: number): number {
+  const lifted = liftTimelineEvent(action) as CanvasAction;
+  const type = normalizedActionType(lifted.type);
+  state.lastActionType = type;
+  const payload = (lifted.payload ?? {}) as Record<string, unknown>;
+
+  if (type === "clear") {
+    state.equations = [];
+    state.steps = [];
+    state.graph = null;
+    state.highlights = [];
+    state.graphStartedAt = null;
+    return 0;
+  }
+
+  if (type === "show_equation" || type === "fade_equation") {
+    const latex = latexOf(payload);
+    if (latex) {
+      state.equations.push({
+        latex,
+        caption: coerceBilingual(payload.caption),
+        appearedAt: abs,
+        fade: true,
+      });
+    }
+    const bundled = parseHighlightsBundle(payload.highlights);
+    if (bundled.length) state.highlights.push(...bundled);
+    return stepIndex;
+  }
+
+  if (type === "show_step") {
+    const next = stepIndex + 1;
+    state.steps.push({
+      latex: latexOf(payload) || undefined,
+      text: stepTextOf(payload),
+      index: typeof payload.index === "number" ? payload.index : next,
+      appearedAt: abs,
+    });
+    return next;
+  }
+
+  if (type === "render_graph") {
+    state.graph = asGraph(payload);
+    state.graphStartedAt = abs;
+    const bundled = parseHighlightsBundle(payload.highlights);
+    if (bundled.length) state.highlights.push(...bundled);
+    const latex = latexOf(payload);
+    if (latex && !state.equations.some((item) => item.latex === latex)) {
+      state.equations.push({
+        latex,
+        caption: coerceBilingual(payload.caption),
+        appearedAt: abs,
+        fade: true,
+      });
+    }
+    return stepIndex;
+  }
+
+  if (type === "highlight_point") {
+    const bundled = parseHighlightsBundle(payload.highlights);
+    if (bundled.length) state.highlights.push(...bundled);
+    else state.highlights.push(asHighlight(payload));
+  }
+  return stepIndex;
+}
+
 export function canvasStateAt(timeline: LessonTimeline, timeSec: number): DerivedCanvasState {
   const t = clampTime(timeline, timeSec);
   const state = emptyCanvasState();
   let stepIndex = 0;
 
+  const timed: Array<{ abs: number; action: CanvasAction }> = [];
   for (const segment of timeline.segments) {
-    const actions = [...segment.canvas.actions].sort((a, b) => a.at - b.at);
-    for (const action of actions) {
-      const abs = actionAbsoluteTime(segment, action);
-      if (abs > t) continue;
-      const type = normalizedActionType(action.type);
-      state.lastActionType = type;
-      const payload = action.payload ?? {};
-
-      if (type === "clear") {
-        state.equations = [];
-        state.steps = [];
-        state.graph = null;
-        state.highlights = [];
-        state.graphStartedAt = null;
-        stepIndex = 0;
-        continue;
-      }
-
-      if (type === "show_equation") {
-        const latex = latexOf(payload);
-        if (latex) {
-          state.equations.push({ latex, caption: coerceBilingual(payload.caption) });
-        }
-        continue;
-      }
-
-      if (type === "show_step") {
-        stepIndex += 1;
-        state.steps.push({
-          latex: latexOf(payload) || undefined,
-          text: stepTextOf(payload),
-          index: typeof payload.index === "number" ? payload.index : stepIndex,
-        });
-        continue;
-      }
-
-      if (type === "render_graph") {
-        state.graph = asGraph(payload);
-        state.graphStartedAt = abs;
-        continue;
-      }
-
-      if (type === "highlight_point") {
-        state.highlights.push(asHighlight(payload));
-      }
+    for (const action of segment.canvas.actions) {
+      timed.push({ abs: actionAbsoluteTime(segment, action), action });
     }
+  }
+  for (const action of timeline.events ?? []) {
+    timed.push({ abs: action.at, action });
+  }
+  timed.sort((a, b) => a.abs - b.abs);
+
+  for (const item of timed) {
+    if (item.abs > t) continue;
+    stepIndex = applyAction(state, item.action, item.abs, stepIndex);
   }
 
   return state;
@@ -338,12 +453,11 @@ export function parseLessonTimeline(input: unknown) {
 }
 
 export function hasRenderGraph(timeline: LessonTimeline) {
-  return timeline.segments.some((segment) =>
-    segment.canvas.actions.some((action) => {
-      const type = normalizedActionType(action.type);
-      return type === "render_graph";
-    }),
+  const fromSegments = timeline.segments.some((segment) =>
+    segment.canvas.actions.some((action) => normalizedActionType(action.type) === "render_graph"),
   );
+  const fromEvents = (timeline.events ?? []).some((action) => normalizedActionType(action.type) === "render_graph");
+  return fromSegments || fromEvents;
 }
 
 export function hasStepByStep(timeline: LessonTimeline) {

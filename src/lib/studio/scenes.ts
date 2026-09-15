@@ -79,6 +79,14 @@ export function timelineFromScenes(doc: StudioSceneDocument) {
                 {
                   at: 2,
                   type: "render_graph" as const,
+                  latex: "f(x)=(x-1)e^x",
+                  expression: canvas.expression,
+                  domain: canvas.domain ?? [-3, 2],
+                  highlights: {
+                    roots: [[1, 0]],
+                    extrema: [[0, -1]],
+                    asymptotes: [{ y: 0 }],
+                  },
                   payload: {
                     kind: "function",
                     fn: canvas.expression,
@@ -87,7 +95,6 @@ export function timelineFromScenes(doc: StudioSceneDocument) {
                     xDomain: canvas.domain ?? [-3, 2],
                     yDomain: [-4, 8],
                     title: L("y = (x-1)e^x", "y = (x-1)e^x"),
-                    points: [{ x: 0, y: -1, kind: "extrema", label: L("min (0, −1)", "min (0, −1)") }],
                   },
                 },
                 {
@@ -114,10 +121,9 @@ export function timelineFromScenes(doc: StudioSceneDocument) {
             : [
                 {
                   at: 1,
-                  type: "show_equation" as const,
+                  type: "fade_equation" as const,
+                  latex: canvas.latex,
                   payload: {
-                    latex: canvas.latex,
-                    math_latex: canvas.latex,
                     caption: L("On the board", "Au tableau"),
                   },
                 },
@@ -136,7 +142,7 @@ export function timelineFromScenes(doc: StudioSceneDocument) {
     language: doc.defaultLanguage,
     defaultLanguage: doc.defaultLanguage,
     durationSec: Math.max(1, cursor),
-    media: { poster: "/teachers/munzer.jpg" },
+    media: { poster: "/teachers/munzer.jpg", videoUrl: "/studio/demo-avatar.mp4" },
     scenes: doc.scenes,
     segments,
   };

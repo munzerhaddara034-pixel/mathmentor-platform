@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LessonPhase, LessonTimeline } from "@/lib/studio/timeline";
 import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI, toLessonLocale } from "@/lib/studio/i18n";
-import { canvasStateAt, formatClock, graphIsAnimating, segmentAt } from "@/lib/studio/timeline";
+import { canvasStateAt, formatClock, segmentAt } from "@/lib/studio/timeline";
 import { AvatarPlayer } from "./AvatarPlayer";
 import { MathCanvas } from "./MathCanvas";
 
@@ -48,8 +48,7 @@ export function InteractiveLessonPlayer({
 
   const segment = segmentAt(timeline, currentTime);
   const canvas = useMemo(() => canvasStateAt(timeline, currentTime), [timeline, currentTime]);
-  const animatingGraph = graphIsAnimating(canvas, currentTime, 5);
-  const frozen = Boolean(segment && (segment.avatar.state === "paused" || animatingGraph));
+  const frozen = Boolean(segment && segment.avatar.state === "paused");
   const speaking = Boolean(playing && segment && segment.avatar.state === "speaking" && !frozen);
   const instructor = timeline.instructor ?? "Prof. Munzer Al-Tarah";
 
@@ -183,6 +182,7 @@ export function InteractiveLessonPlayer({
       </div>
 
       <div className="studio-split">
+        <MathCanvas state={canvas} language={uiLanguage} currentTime={currentTime} />
         <AvatarPlayer
           language={uiLanguage}
           speaking={speaking}
@@ -205,7 +205,6 @@ export function InteractiveLessonPlayer({
           }}
           onDuration={(duration) => setVideoDuration(duration)}
         />
-        <MathCanvas state={canvas} language={uiLanguage} currentTime={currentTime} />
       </div>
 
       <div className="studio-caption" aria-live="polite">

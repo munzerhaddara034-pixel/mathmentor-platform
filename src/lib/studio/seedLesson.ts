@@ -1,6 +1,7 @@
 import { timelineFromScenes, type StudioSceneDocument } from "./scenes";
 import { L } from "./i18n";
 import type { LessonTimeline } from "./timeline";
+import { DEMO_AVATAR_VIDEO, DEMO_POSTER } from "./heygenClient";
 
 /** Exact bilingual scene document requested for the studio editor default. */
 export const officialExamSceneDocument: StudioSceneDocument = {
@@ -68,8 +69,23 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
   ),
   language: "en",
   durationSec: 240,
-  media: { poster: "/teachers/munzer.jpg" },
+  media: { poster: DEMO_POSTER, videoUrl: DEMO_AVATAR_VIDEO },
   scenes: officialExamSceneDocument.scenes,
+  events: [
+    {
+      at: 42.5,
+      type: "render_graph",
+      latex: "f(x)=(x-1)e^x",
+      expression: "(x-1)*exp(x)",
+      domain: [-3, 2],
+      highlights: {
+        roots: [[1, 0]],
+        extrema: [[0, -1]],
+        asymptotes: [{ y: 0 }],
+      },
+      payload: {},
+    },
+  ],
   segments: [
     {
       id: "intro",
@@ -86,10 +102,9 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
         actions: [
           {
             at: 2,
-            type: "show_equation",
+            type: "fade_equation",
+            latex: "f(x) = (x-1)e^x \\quad \\text{on } \\mathbb{R}",
             payload: {
-              latex: "f(x) = (x-1)e^x \\quad \\text{on } \\mathbb{R}",
-              math_latex: "f(x) = (x-1)e^x \\quad \\text{on } \\mathbb{R}",
               caption: L("Concept definition", "Définition"),
             },
           },
@@ -111,44 +126,10 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
         actions: [
           {
             at: 2,
-            type: "show_equation",
+            type: "fade_equation",
+            latex: "\\lim_{x \\to -\\infty} f(x) = 0 \\implies y=0 \\text{ (Horizontal Asymptote)}",
             payload: {
-              latex: "\\lim_{x \\to -\\infty} f(x) = 0 \\implies y=0 \\text{ (Horizontal Asymptote)}",
-              math_latex: "\\lim_{x \\to -\\infty} f(x) = 0 \\implies y=0 \\text{ (Horizontal Asymptote)}",
               caption: L("Limit and asymptote", "Limite et asymptote"),
-            },
-          },
-          {
-            at: 12,
-            type: "render_graph",
-            payload: {
-              kind: "function",
-              fn: "(x-1)*exp(x)",
-              expression: "(x-1)*exp(x)",
-              domain: [-3, 2],
-              xDomain: [-3, 2],
-              yDomain: [-4, 8],
-              title: L("y = (x-1)e^x", "y = (x-1)e^x"),
-            },
-          },
-          {
-            at: 22,
-            type: "highlight_point",
-            payload: {
-              kind: "extrema",
-              x: 0,
-              y: -1,
-              label: L("Minimum (0, −1)", "Minimum (0, −1)"),
-            },
-          },
-          {
-            at: 32,
-            type: "highlight_point",
-            payload: {
-              kind: "asymptote",
-              axis: "y",
-              value: 0,
-              label: L("Asymptote y = 0", "Asymptote y = 0"),
             },
           },
           {

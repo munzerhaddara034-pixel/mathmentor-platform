@@ -30,7 +30,7 @@ No secrets are required. Desmos and OpenAI/HeyGen keys are optional (see `.env.e
 1. Write the script in `/studio/script`.
 2. Generate the talking-avatar clip in `/admin/video-generator`.
 3. Wait for webhook or `GET /api/heygen/status?jobId=…`.
-4. Students watch the **sync player** (`/lessons/interactive`): HeyGen video on the left, math canvas on the right, clock = `video.currentTime`.
+4. Students watch the **sync player** (`/lessons/interactive`): math canvas on the **left**, HeyGen video on the **right** (on phones the video is on top). Clock = `video.currentTime`.
 
 Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 
@@ -43,9 +43,37 @@ Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 
 ## Dual view
 
-- **Left**: interactive video / AI avatar
-- **Right**: dynamic math canvas (KaTeX + Desmos, SVG fallback)
-- Mobile: avatar on top, canvas below
+- **Desktop (≥900px)**: **left = interactive math canvas**, **right = HeyGen / avatar video**.
+- **Phone**: **video on top**, canvas below — so the teacher is visible while listening; scroll for the board.
+- The lesson stage stays `dir="ltr"` so graphs and KaTeX are not mirrored. Site chrome (nav) can remain Arabic RTL.
+- Canvas pan / zoom / hover does **not** pause video audio or playback.
+
+## Time-synced math canvas
+
+`video.ontimeupdate` / `seeked` (and the silent RAF clock when there is no clip) set `currentTime`. The canvas reads timeline events and:
+
+1. **Fade-in** KaTeX when `currentTime` reaches `show_equation` / `fade_equation`.
+2. **Plots immediately** on `render_graph` (Function Plot SVG; Desmos if `NEXT_PUBLIC_DESMOS_API_KEY` is set).
+3. Highlights **roots, extrema, asymptotes** from the event payload.
+
+Flat event fields are lifted into `payload` (backward compatible with `{ at, type, payload }`). Absolute-time events may live on `timeline.events`:
+
+```json
+{
+  "at": 42.5,
+  "type": "render_graph",
+  "latex": "f(x)=(x-1)e^x",
+  "expression": "(x-1)*exp(x)",
+  "domain": [-3, 2],
+  "highlights": {
+    "roots": [[1, 0]],
+    "extrema": [[0, -1]],
+    "asymptotes": [{ "y": 0 }]
+  }
+}
+```
+
+`leb-term-func-01` / `/lessons/interactive` seeds this at 42.5s (fade-in limit, then graph + highlights). Wheel or pinch to zoom, drag to pan, hover for `(x, f(x))` — playback continues.
 
 ## Seeded lesson
 

@@ -61,25 +61,6 @@ export function DesmosGraph({ spec, highlights, language, progress }: Props) {
           latex: jsFnToDesmosLatex(spec.fn ?? "x"),
           color: "#d9aa53",
         });
-        highlights.forEach((item, index) => {
-          if (typeof item.x === "number" && typeof item.y === "number") {
-            calculator.setExpression({
-              id: `pt-${index}`,
-              latex: `(${item.x},${item.y})`,
-              label: item.label ? pickText(item.label, language) : "",
-              showLabel: true,
-              color: item.kind === "extrema" ? "#f472b6" : item.kind === "root" ? "#f97316" : "#38bdf8",
-            });
-          }
-          if (item.kind === "asymptote" && item.axis === "y" && typeof item.value === "number") {
-            calculator.setExpression({
-              id: `asy-${index}`,
-              latex: `y=${item.value}`,
-              color: "#38bdf8",
-              lineStyle: "DASHED",
-            });
-          }
-        });
         setEngine("desmos");
       })
       .catch(() => {
@@ -92,11 +73,46 @@ export function DesmosGraph({ spec, highlights, language, progress }: Props) {
       calcRef.current = null;
       if (host) host.innerHTML = "";
     };
-  }, [highlights, language, spec.fn, spec.kind, spec.xDomain, spec.yDomain]);
+  }, [spec.fn, spec.kind, spec.xDomain, spec.yDomain]);
+
+  useEffect(() => {
+    const calculator = calcRef.current;
+    if (!calculator || engine !== "desmos") return;
+    highlights.forEach((item, index) => {
+      if (typeof item.x === "number" && typeof item.y === "number") {
+        calculator.setExpression({
+          id: `pt-${index}`,
+          latex: `(${item.x},${item.y})`,
+          label: item.label ? pickText(item.label, language) : `(${item.x}, ${item.y})`,
+          showLabel: true,
+          color: item.kind === "extrema" ? "#f472b6" : item.kind === "root" ? "#f97316" : "#38bdf8",
+        });
+      }
+      if (item.kind === "asymptote" && item.axis === "y" && typeof item.value === "number") {
+        calculator.setExpression({
+          id: `asy-${index}`,
+          latex: `y=${item.value}`,
+          color: "#38bdf8",
+          lineStyle: "DASHED",
+        });
+      }
+      if (item.kind === "asymptote" && item.axis === "x" && typeof item.value === "number") {
+        calculator.setExpression({
+          id: `asy-x-${index}`,
+          latex: `x=${item.value}`,
+          color: "#38bdf8",
+          lineStyle: "DASHED",
+        });
+      }
+    });
+  }, [engine, highlights, language]);
 
   if (engine === "fallback") {
     return (
-      <div>
+      <div
+        onPointerDown={(event) => event.stopPropagation()}
+        onWheel={(event) => event.stopPropagation()}
+      >
         <p className="studio-engine-tag muted">{pickText(STUDIO_UI.fallbackPlot, language)}</p>
         <FunctionGraph spec={spec} highlights={highlights} language={language} progress={progress} />
       </div>
@@ -104,11 +120,16 @@ export function DesmosGraph({ spec, highlights, language, progress }: Props) {
   }
 
   return (
-    <div className="studio-graph studio-desmos">
+    <div
+      className="studio-graph studio-desmos"
+      onPointerDown={(event) => event.stopPropagation()}
+      onWheel={(event) => event.stopPropagation()}
+    >
       <div className="studio-graph-head">
         <strong>{spec.title ? pickText(spec.title, language) : spec.fn}</strong>
         <span className="studio-engine-tag">{pickText(STUDIO_UI.desmos, language)}</span>
       </div>
+      <p className="studio-interact-hint">{pickText(STUDIO_UI.interactHint, language)}</p>
       <div ref={hostRef} className="studio-desmos-host" />
     </div>
   );
