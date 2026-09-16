@@ -134,6 +134,13 @@ export const lessonMediaSchema = z
   })
   .optional();
 
+export const lessonChapterSchema = z.object({
+  id: z.string().min(1),
+  at: z.number().min(0),
+  label: bilingualSchema,
+});
+export type LessonChapter = z.infer<typeof lessonChapterSchema>;
+
 export const lessonTimelineSchema = z
   .object({
     id: z.string().min(1),
@@ -149,6 +156,8 @@ export const lessonTimelineSchema = z
     scenes: z.array(z.unknown()).optional(),
     /** Absolute-time canvas events (`at` is seconds from lesson start). */
     events: z.array(canvasActionSchema).optional(),
+    /** Chapter markers under the video; tap seeks video + canvas. */
+    chapters: z.array(lessonChapterSchema).optional(),
     segments: z.array(lessonSegmentSchema).min(1),
   })
   .superRefine((value, ctx) => {
@@ -491,6 +500,27 @@ export function formatClock(seconds: number) {
   const m = Math.floor(safe / 60);
   const s = Math.floor(safe % 60);
   return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+/** Explicit chapters, or one marker per segment if the lesson did not seed them. */
+export function chaptersForTimeline(timeline: LessonTimeline): LessonChapter[] {
+  if (timeline.chapters && timeline.chapters.length > 0) {
+    return [...timeline.chapters].sort((a, b) => a.at - b.at);
+  }
+  return timeline.segments.map((segment) => ({
+    id: segment.id,
+    at: segment.start,
+    label: segment.label ?? { en: segment.phase, fr: segment.phase },
+  }));
+}
+
+export function chapterAt(chapters: LessonChapter[], timeSec: number): LessonChapter | undefined {
+  let current = chapters[0];
+  for (const chapter of chapters) {
+    if (timeSec + 0.04 >= chapter.at) current = chapter;
+    else break;
+  }
+  return current;
 }
 
 export function parseLessonTimeline(input: unknown) {

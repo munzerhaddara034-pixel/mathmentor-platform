@@ -50,6 +50,9 @@ Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 - Touch targets are at least 44px; KaTeX on the board scrolls horizontally on small screens.
 - The lesson stage stays `dir="ltr"` so graphs and KaTeX are not mirrored. Site chrome (nav) can remain Arabic RTL.
 - Canvas pan / zoom / hover does **not** pause video audio or playback (a quiz checkpoint is the only auto-pause).
+- **Chapters** sit under the video (`leb-term-func-01`: intro, limits, derivative, quiz, graph, example, mistake). Tap a chapter to seek video + canvas together.
+- **Fullscreen** buttons open the board or the video. On phones: video top, canvas bottom, 44px controls, one-tap swap.
+- **PWA**: `manifest.webmanifest` + `sw.js` so students can **Add to Home Screen**. Name: MathMentor · أكاديمية منذر حداره. Icons from `/brand/`.
 
 ## Time-synced math canvas
 

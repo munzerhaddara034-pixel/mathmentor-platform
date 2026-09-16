@@ -4,9 +4,11 @@ import { useEffect, useRef } from "react";
 import type { DerivedCanvasState } from "@/lib/studio/timeline";
 import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
+import { FunctionGraph } from "./FunctionGraph";
 import { DesmosGraph } from "./DesmosGraph";
 import { Katex } from "./Katex";
 import { IdentityWatermark } from "./IdentityWatermark";
+import { hasDesmosKey } from "@/lib/studio/desmos";
 
 type Props = {
   state: DerivedCanvasState;
@@ -19,7 +21,7 @@ type Props = {
 export function MathCanvas({ state, language, currentTime, watermarkName, watermarkPhone }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const graphProgress =
-    state.graphStartedAt == null ? 1 : Math.max(0.35, Math.min(1, (currentTime - state.graphStartedAt) / 0.4));
+    state.graphStartedAt == null ? 1 : Math.max(0.2, Math.min(1, (currentTime - state.graphStartedAt) / 1.8));
 
   useEffect(() => {
     boardRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -50,7 +52,11 @@ export function MathCanvas({ state, language, currentTime, watermarkName, waterm
         ))}
 
         {state.graph ? (
-          <DesmosGraph spec={state.graph} highlights={state.highlights} language={language} progress={graphProgress} />
+          hasDesmosKey() ? (
+            <DesmosGraph spec={state.graph} highlights={state.highlights} language={language} progress={graphProgress} />
+          ) : (
+            <FunctionGraph spec={state.graph} highlights={state.highlights} language={language} progress={graphProgress} />
+          )
         ) : null}
 
         {state.highlights

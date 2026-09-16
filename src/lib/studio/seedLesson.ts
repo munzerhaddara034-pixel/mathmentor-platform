@@ -123,6 +123,15 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
   language: "en",
   durationSec: 360,
   media: { poster: DEMO_POSTER, videoUrl: DEMO_AVATAR_VIDEO },
+  chapters: [
+    { id: "intro", at: 0, label: L("Intro", "Intro") },
+    { id: "limits", at: 50, label: L("Limits", "Limites") },
+    { id: "derivative", at: 112, label: L("Derivative", "Dérivée") },
+    { id: "quiz", at: 138, label: L("Quiz", "Quiz") },
+    { id: "graph", at: 150, label: L("Graph", "Graphe") },
+    { id: "example", at: 160, label: L("Example", "Exercice") },
+    { id: "mistake", at: 320, label: L("Mistake", "Piège") },
+  ],
   scenes: officialExamSceneDocument.scenes,
   events: [
     {

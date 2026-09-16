@@ -1,12 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { ChatWidget } from "@/components/ChatWidget";
+import { PwaRegister } from "@/components/PwaRegister";
 
 export const metadata: Metadata = {
   title: "MathMentor · أكاديمية منذر حداره",
   description: "Lebanese curriculum learning platform with professor-reviewed AI videos and paper solutions.",
+  applicationName: "MathMentor",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "MathMentor · أكاديمية منذر حداره",
+    statusBarStyle: "black-translucent",
+  },
   icons: {
     icon: [
       { url: "/brand/mathmentor-logo.svg", type: "image/svg+xml" },
@@ -17,6 +25,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0B1F3A",
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar">
@@ -24,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Nav />
         {children}
         <ChatWidget />
+        <PwaRegister />
         <Script id="mathjax-config" strategy="beforeInteractive">
           {`window.MathJax = { tex: { inlineMath: [['\\\\(','\\\\)']], displayMath: [['\\\\[','\\\\]']] } };`}
         </Script>

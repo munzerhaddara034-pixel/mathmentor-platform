@@ -84,6 +84,10 @@ export const STUDIO_UI = {
   swapFocus: { en: "Swap video / board", fr: "Inverser vidéo / tableau" },
   focusVideo: { en: "Video on top", fr: "Vidéo en haut" },
   focusBoard: { en: "Board on top", fr: "Tableau en haut" },
+  chapters: { en: "Chapters", fr: "Chapitres" },
+  fullscreenVideo: { en: "Fullscreen video", fr: "Vidéo plein écran" },
+  fullscreenBoard: { en: "Fullscreen board", fr: "Tableau plein écran" },
+  exitFullscreen: { en: "Exit fullscreen", fr: "Quitter le plein écran" },
   quizEyebrow: { en: "In-video checkpoint", fr: "Point d’arrêt dans la vidéo" },
   quizRule: {
     en: "The lesson is paused. Check your answer to retry if it is wrong. Show solution unlocks Continue.",

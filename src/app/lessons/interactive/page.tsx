@@ -49,7 +49,7 @@ export default async function InteractiveLessonDemoPage({
         ) : null}
         {timeline.media?.videoUrl ? " · HeyGen / placeholder video attached (canvas follows video.currentTime)" : ""}
         {timeline.media?.studentEnabled ? " · enabled for students" : ""}
-        {" · canvas left / video right (video on top on phones; swap focus on mobile)"}
+        {" · canvas left / video right (video on top on phones; swap or fullscreen on mobile) · chapters under the video"}
       </p>
       <InteractiveLessonPlayer
         timeline={timeline}

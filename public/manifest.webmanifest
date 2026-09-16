@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "MathMentor · أكاديمية منذر حداره",
+  "short_name": "MathMentor",
+  "description": "Lebanese curriculum mathematics with Prof. Munzer Haddara — interactive board, quizzes, and lessons.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B1F3A",
+  "theme_color": "#0B1F3A",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/brand/mathmentor-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/mathmentor-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

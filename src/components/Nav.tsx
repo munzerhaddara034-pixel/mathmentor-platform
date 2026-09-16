@@ -9,11 +9,13 @@ export async function Nav() {
 
   return (
     <header className="nav">
-      <Link href="/" className="brand">
+      <Link href="/" className="brand" dir="ltr">
         <img className="brand-logo" src="/brand/mathmentor-logo.svg" alt="" width={40} height={40} />
         <span className="brand-text">
           MathMentor
-          <span className="brand-kicker">أكاديمية منذر حداره</span>
+          <span className="brand-kicker" lang="ar" dir="rtl">
+            أكاديمية منذر حداره
+          </span>
         </span>
       </Link>
       <nav className="links">

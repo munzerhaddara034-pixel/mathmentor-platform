@@ -6,6 +6,7 @@ import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI, toLessonLocale } from "@/lib/studio/i18n";
 import {
   canvasStateAt,
+  chaptersForTimeline,
   DEMO_ROLE_STORAGE_KEY,
   eventsStorageKey,
   formatClock,
@@ -16,6 +17,7 @@ import {
 import { blockingQuizAt, firstUnresolvedQuiz } from "@/lib/studio/quiz";
 import type { VideoClockSource } from "./AvatarPlayer";
 import { AvatarPlayer } from "./AvatarPlayer";
+import { ChapterScrubBar } from "./ChapterScrubBar";
 import { MathCanvas } from "./MathCanvas";
 import { QuizOverlay } from "./QuizOverlay";
 import { TeacherTimelineEditor } from "./TeacherTimelineEditor";
@@ -83,6 +85,9 @@ export function InteractiveLessonPlayer({
   const seekingRef = useRef(false);
   const timeRef = useRef(0);
   const videoClockRef = useRef(Boolean(initialTimeline.media?.videoUrl));
+  const canvasHostRef = useRef<HTMLDivElement>(null);
+  const videoHostRef = useRef<HTMLDivElement>(null);
+  const [fullscreenTarget, setFullscreenTarget] = useState<"board" | "video" | null>(null);
   timeRef.current = currentTime;
 
   const videoUrl = videoFailed ? undefined : timeline.media?.videoUrl;
@@ -92,7 +97,9 @@ export function InteractiveLessonPlayer({
   videoClockRef.current = videoClock;
 
   const segment = segmentAt(timeline, currentTime);
-  const canvas = useMemo(() => canvasStateAt(timeline, currentTime), [timeline, currentTime]);
+  const canvasClock = Math.round(currentTime * 24) / 24;
+  const canvas = useMemo(() => canvasStateAt(timeline, canvasClock), [timeline, canvasClock]);
+  const chapters = useMemo(() => chaptersForTimeline(timeline), [timeline]);
   const frozen = Boolean(segment && segment.avatar.state === "paused");
   const speaking = Boolean(playing && segment && segment.avatar.state === "speaking" && !frozen);
   const instructor = timeline.instructor ?? "Prof. Munzer Haddara";
@@ -304,6 +311,28 @@ export function InteractiveLessonPlayer({
     window.history.replaceState({}, "", url);
   };
 
+  const toggleFullscreen = (target: "board" | "video") => {
+    const node = target === "board" ? canvasHostRef.current : videoHostRef.current;
+    if (!node) return;
+    const active = document.fullscreenElement;
+    if (active === node) {
+      void document.exitFullscreen().catch(() => undefined);
+      return;
+    }
+    void node.requestFullscreen().catch(() => undefined);
+  };
+
+  useEffect(() => {
+    const onFs = () => {
+      const active = document.fullscreenElement;
+      if (active === canvasHostRef.current) setFullscreenTarget("board");
+      else if (active === videoHostRef.current) setFullscreenTarget("video");
+      else setFullscreenTarget(null);
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, []);
+
   const applyEventsLive = (events: CanvasAction[]) => {
     setTimeline((current) => ({ ...current, events }));
     setResolvedQuizzes([]);
@@ -334,6 +363,16 @@ export function InteractiveLessonPlayer({
           >
             {boardFocus ? pickText(STUDIO_UI.focusVideo, uiLanguage) : pickText(STUDIO_UI.focusBoard, uiLanguage)}
           </button>
+          <button className="btn" type="button" onClick={() => toggleFullscreen("board")}>
+            {fullscreenTarget === "board"
+              ? pickText(STUDIO_UI.exitFullscreen, uiLanguage)
+              : pickText(STUDIO_UI.fullscreenBoard, uiLanguage)}
+          </button>
+          <button className="btn" type="button" onClick={() => toggleFullscreen("video")}>
+            {fullscreenTarget === "video"
+              ? pickText(STUDIO_UI.exitFullscreen, uiLanguage)
+              : pickText(STUDIO_UI.fullscreenVideo, uiLanguage)}
+          </button>
           {staffUnlock ? (
             <button className="btn" type="button" onClick={() => setTeacherUnlock(!teacherMode)}>
               {teacherMode ? pickText(STUDIO_UI.teacherLock, uiLanguage) : pickText(STUDIO_UI.teacherUnlock, uiLanguage)}
@@ -362,45 +401,56 @@ export function InteractiveLessonPlayer({
       </div>
 
       <div className={`studio-split ${boardFocus ? "board-focus" : ""}`}>
-        <MathCanvas
-          state={canvas}
-          language={uiLanguage}
-          currentTime={currentTime}
-          watermarkName={identity.name}
-          watermarkPhone={identity.phone}
-        />
-        <AvatarPlayer
-          language={uiLanguage}
-          speaking={speaking}
-          frozen={frozen}
-          playing={playing && !blockingQuiz}
-          currentTime={currentTime}
-          playbackRate={speed}
-          videoUrl={videoUrl}
-          audioUrl={timeline.media?.audioUrl}
-          poster={timeline.media?.poster ?? "/teachers/munzer.jpg?v=4"}
-          teacherName={instructor}
-          watermarkName={identity.name}
-          watermarkPhone={identity.phone}
-          clockMaster={clockMaster}
-          seekEpoch={seekEpoch}
-          seekTo={currentTime}
-          onTime={onVideoTime}
-          onEnded={onVideoEnded}
-          onError={() => {
-            setVideoFailed(true);
-            videoClockRef.current = false;
-            clockMasterRef.current = false;
-            setVideoClock(false);
-          }}
-          onDuration={(duration) => {
-            setVideoDuration(duration);
-            const drive = timeRef.current < duration - 0.04;
-            videoClockRef.current = drive;
-            clockMasterRef.current = Boolean(videoUrl) && drive;
-            setVideoClock(drive);
-          }}
-        />
+        <div ref={canvasHostRef} className="studio-fs-host studio-canvas-host">
+          <MathCanvas
+            state={canvas}
+            language={uiLanguage}
+            currentTime={canvasClock}
+            watermarkName={identity.name}
+            watermarkPhone={identity.phone}
+          />
+        </div>
+        <div ref={videoHostRef} className="studio-fs-host studio-avatar-column">
+          <AvatarPlayer
+            language={uiLanguage}
+            speaking={speaking}
+            frozen={frozen}
+            playing={playing && !blockingQuiz}
+            currentTime={currentTime}
+            playbackRate={speed}
+            videoUrl={videoUrl}
+            audioUrl={timeline.media?.audioUrl}
+            poster={timeline.media?.poster ?? "/teachers/munzer.jpg?v=4"}
+            teacherName={instructor}
+            watermarkName={identity.name}
+            watermarkPhone={identity.phone}
+            clockMaster={clockMaster}
+            seekEpoch={seekEpoch}
+            seekTo={currentTime}
+            onTime={onVideoTime}
+            onEnded={onVideoEnded}
+            onError={() => {
+              setVideoFailed(true);
+              videoClockRef.current = false;
+              clockMasterRef.current = false;
+              setVideoClock(false);
+            }}
+            onDuration={(duration) => {
+              setVideoDuration(duration);
+              const drive = timeRef.current < duration - 0.04;
+              videoClockRef.current = drive;
+              clockMasterRef.current = Boolean(videoUrl) && drive;
+              setVideoClock(drive);
+            }}
+          />
+          <ChapterScrubBar
+            chapters={chapters}
+            durationSec={timeline.durationSec}
+            currentTime={currentTime}
+            language={uiLanguage}
+            onSeek={seek}
+          />
+        </div>
       </div>
 
       {blockingQuiz ? (

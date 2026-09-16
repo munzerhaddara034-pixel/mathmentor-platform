@@ -124,7 +124,7 @@ export function AvatarPlayer({
     if (!video) return;
     let frame = 0;
     const loop = () => {
-      emitTime(video, "raf");
+      if (!video.paused) emitTime(video, "raf");
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
