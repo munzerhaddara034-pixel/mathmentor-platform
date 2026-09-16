@@ -293,6 +293,14 @@ textarea { min-height: 120px; resize: vertical; }
   margin: 0 0 20px;
   color: var(--navy);
 }
+.login-title {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.4rem;
+  direction: ltr;
+}
 .login-card {
   margin: 0 auto;
   text-align: start;

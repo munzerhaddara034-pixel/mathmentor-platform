@@ -50,7 +50,11 @@ function LoginForm() {
   return (
     <main className="shell login-page" dir="ltr">
       <img className="login-logo" src="/brand/mathmentor-logo.svg" alt="MathMentor" width={96} height={96} />
-      <h1 dir="ltr">MathMentor · أكاديمية منذر حداره</h1>
+      <h1 className="login-title">
+        <span>MathMentor</span>
+        <span className="login-title-sep">·</span>
+        <span lang="ar">أكاديمية منذر حداره</span>
+      </h1>
       {replaced ? (
         <div className="studio-teacher-error" role="alert">
           <p>This account signed in on another device. That session was closed.</p>
