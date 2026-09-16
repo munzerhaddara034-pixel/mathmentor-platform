@@ -1,23 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-
-const DEMO_ROWS = [
-  { email: "student@mathmentor.local", role: "student", name: "Sara Nassar" },
-  { email: "pending@mathmentor.local", role: "student (locked)", name: "Karim Fares" },
-  { email: "parent@mathmentor.local", role: "parent", name: "Rania Fares" },
-  { email: "teacher@mathmentor.local", role: "teacher", name: "Prof. Munzer Haddara" },
-  { email: "admin@mathmentor.local", role: "admin", name: "Academy Admin" },
-] as const;
 
 function LoginForm() {
   const params = useSearchParams();
   const next = params.get("next") || "";
   const reason = params.get("reason");
-  const [email, setEmail] = useState("student@mathmentor.local");
-  const [password, setPassword] = useState("demo-student");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [errorAr, setErrorAr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -57,12 +48,9 @@ function LoginForm() {
   };
 
   return (
-    <main className="shell" dir="ltr">
-      <p className="eyebrow">MathMentor · Prof. Munzer Haddara</p>
-      <h1>Sign in / تسجيل الدخول</h1>
-      <p className="muted">
-        Interactive lessons are private. Students need an active promo/card. Teachers and admins use staff accounts.
-      </p>
+    <main className="shell login-page">
+      <img className="login-logo" src="/brand/mathmentor-logo.svg" alt="MathMentor" width={96} height={96} />
+      <h1>MathMentor · أكاديمية منذر حداره</h1>
       {replaced ? (
         <div className="studio-teacher-error" role="alert">
           <p>This account signed in on another device. That session was closed.</p>
@@ -71,10 +59,16 @@ function LoginForm() {
           </p>
         </div>
       ) : null}
-      <form className="card activate-card" onSubmit={(event) => void submit(event)}>
+      <form className="card activate-card login-card" onSubmit={(event) => void submit(event)}>
         <label>
           Email / البريد
-          <input type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required />
+          <input
+            type="email"
+            autoComplete="username"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
         </label>
         <label>
           Password / كلمة المرور
@@ -98,32 +92,13 @@ function LoginForm() {
           {busy ? "Signing in…" : "Sign in / دخول"}
         </button>
       </form>
-      <section className="teacher-checklist" style={{ marginTop: 18 }}>
-        <p className="eyebrow">Demo accounts · حسابات التجربة</p>
-        <p className="muted">Local / Netlify QA only. A new login kicks the previous device.</p>
-        <ul>
-          {DEMO_ROWS.map((account) => (
-            <li key={account.email}>
-              <strong>{account.role}</strong> — {account.name}
-              <div>
-                <code>{account.email}</code>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <p className="muted">
-          Passwords: <code>demo-student</code>, <code>demo-pending</code> (no subscription), <code>demo-parent</code>,{" "}
-          <code>demo-teacher</code>, <code>demo-admin</code>. Unlock a pending student with card <code>MUNZER-GOLD-9A</code>{" "}
-          on <Link href="/redeem">/redeem</Link>.
-        </p>
-      </section>
     </main>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="shell">Loading sign-in…</main>}>
+    <Suspense fallback={<main className="shell login-page">Loading sign-in…</main>}>
       <LoginForm />
     </Suspense>
   );

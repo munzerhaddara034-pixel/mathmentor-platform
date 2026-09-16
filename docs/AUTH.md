@@ -26,6 +26,8 @@ The cookie is `Secure` only on HTTPS (or `AUTH_COOKIE_SECURE=1`). `npm start` on
 
 ## Demo accounts (local / Netlify)
 
+The login screen is **logo + title + email/password + Sign in** only. Demo credentials live in this file, not on `/login`.
+
 Seeded on first boot of `data/auth.json`:
 
 | Email | Password | Notes |

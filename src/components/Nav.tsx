@@ -10,12 +10,10 @@ export async function Nav() {
   return (
     <header className="nav">
       <Link href="/" className="brand">
-        <span className="mark">M</span>
-        <span>
-          Munzer Haddara
-          <div className="muted" style={{ fontSize: 12, fontWeight: 600 }}>
-            MATH ACADEMY
-          </div>
+        <img className="brand-logo" src="/brand/mathmentor-logo.svg" alt="" width={40} height={40} />
+        <span className="brand-text">
+          MathMentor
+          <span className="brand-kicker">أكاديمية منذر حداره</span>
         </span>
       </Link>
       <nav className="links">

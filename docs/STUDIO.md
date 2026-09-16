@@ -18,7 +18,7 @@ Open:
 | http://127.0.0.1:3001/studio/script | Script editor (seeded `leb-term-func-01` JSON) |
 | http://localhost:3000/admin/video-generator | Teacher HeyGen generator (script, notes, math, voice, speed) |
 | http://localhost:3000/lessons/interactive | Official exam player (login required) |
-| http://localhost:3000/login | Demo accounts |
+| http://localhost:3000/login | Sign in (demo accounts: [AUTH.md](./AUTH.md)) |
 | http://localhost:3000/redeem | Promo/card unlock (signed in) |
 | http://localhost:3000/studio/player?lesson=leb-term-func-01 | Exact 3-scene seed |
 | http://localhost:3000/studio/player?job=… | Sync player for a HeyGen job |

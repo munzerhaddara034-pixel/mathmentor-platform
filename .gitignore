@@ -1,5 +1,6 @@
 node_modules
 .next
+.netlify
 data/store.json
 data/heygen-jobs.json
 data/studio-events.json

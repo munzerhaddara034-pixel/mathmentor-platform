@@ -16,7 +16,7 @@ export const PUBLIC_PATHS = [
   "/subscribe",
 ];
 
-const PUBLIC_PREFIXES = ["/_next", "/favicon", "/teachers/", "/classroom/students", "/studio/demo-avatar"];
+const PUBLIC_PREFIXES = ["/_next", "/favicon", "/brand/", "/teachers/", "/classroom/students", "/studio/demo-avatar"];
 
 const PRIVATE_PREFIXES = [
   "/lessons",

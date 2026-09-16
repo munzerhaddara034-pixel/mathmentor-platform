@@ -5,8 +5,16 @@ import { Nav } from "@/components/Nav";
 import { ChatWidget } from "@/components/ChatWidget";
 
 export const metadata: Metadata = {
-  title: "Munzer Haddara Math Academy",
+  title: "MathMentor · أكاديمية منذر حداره",
   description: "Lebanese curriculum learning platform with professor-reviewed AI videos and paper solutions.",
+  icons: {
+    icon: [
+      { url: "/brand/mathmentor-logo.svg", type: "image/svg+xml" },
+      { url: "/brand/mathmentor-logo.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: { url: "/brand/mathmentor-logo.png", sizes: "512x512" },
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
