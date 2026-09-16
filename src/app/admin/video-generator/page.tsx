@@ -165,8 +165,8 @@ export default function AdminVideoGeneratorPage() {
       <section className="card" style={{ marginTop: 18, background: "#fff8e8" }}>
         <p className="eyebrow">Auth</p>
         <p>
-          This build has <strong>no teacher login</strong>. Leave the token empty for local demo. If{" "}
-          <code>HEYGEN_ADMIN_TOKEN</code> is set, paste it below. The API key stays server-side only.
+          Sign in as <strong>teacher or admin</strong> to generate. Optional{" "}
+          <code>HEYGEN_ADMIN_TOKEN</code> is a bearer override for scripts. The HeyGen API key stays server-side only.
         </p>
         <label>
           Optional admin token

@@ -26,7 +26,7 @@ Copy from `.env.example` (never commit real secrets):
 | `NEXT_PUBLIC_APP_URL` | optional | `{url}/api/heygen/webhook` sent as `callback_url` |
 | `HEYGEN_ADMIN_TOKEN` | optional | locks generate/list if set |
 
-This app has **no login**. Without `HEYGEN_ADMIN_TOKEN`, generate is open and the admin UI shows a demo-mode notice. With the token, send `x-admin-token` or `Authorization: Bearer …`.
+This app requires a **teacher/admin session** for generate/list (`teacher@mathmentor.local` / `demo-teacher`). `HEYGEN_ADMIN_TOKEN` remains an optional bearer override (`x-admin-token` or `Authorization: Bearer …`). See [AUTH.md](./AUTH.md).
 
 ## Exact v2 generate payload
 

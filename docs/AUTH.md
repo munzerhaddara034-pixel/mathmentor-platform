@@ -22,6 +22,8 @@ Private pages send `X-Robots-Tag: noindex, nofollow, noarchive` and `<meta name=
 
 Each login issues a new opaque cookie (`mm_session`) and **deletes every previous session** for that user. The next request with the old cookie is treated as logged out and sent to `/login?reason=replaced` (English + Arabic message).
 
+The cookie is `Secure` only on HTTPS (or `AUTH_COOKIE_SECURE=1`). `npm start` on `http://localhost` still stores the session.
+
 ## Demo accounts (local / Netlify)
 
 Seeded on first boot of `data/auth.json`:

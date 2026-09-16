@@ -361,6 +361,7 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .studio-demo-hint { color: #c7d4e6; font-size: 13px; margin-top: 10px; }
 .studio-board {
+  position: relative;
   background: #f7f4ea;
   color: var(--navy);
   border-radius: 18px;
@@ -685,17 +686,17 @@ textarea { min-height: 120px; resize: vertical; }
   z-index: 6;
 }
 .identity-watermark .dynamic-watermark {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
   white-space: nowrap;
 }
 .identity-watermark.dark .dynamic-watermark {
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.48);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
 .identity-watermark.light .dynamic-watermark {
-  color: rgba(16, 33, 61, 0.28);
-  text-shadow: none;
+  color: rgba(16, 33, 61, 0.42);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .dynamic-watermark.diagonal {
   top: 62%;

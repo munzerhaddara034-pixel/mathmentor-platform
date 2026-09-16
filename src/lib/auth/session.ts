@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { SESSION_COOKIE } from "./paths";
 import {
   createExclusiveSession,
@@ -9,6 +9,19 @@ import {
 import { newSessionToken } from "./passwords";
 
 const MAX_AGE = 60 * 60 * 24 * 30;
+
+/** Secure cookies only on HTTPS so `next start` on localhost still stores the session. */
+async function sessionCookieSecure() {
+  if (process.env.AUTH_COOKIE_SECURE === "0") return false;
+  if (process.env.AUTH_COOKIE_SECURE === "1") return true;
+  const h = await headers();
+  const proto = (h.get("x-forwarded-proto") ?? "").split(",")[0]?.trim().toLowerCase();
+  if (proto === "https") return true;
+  if (proto === "http") return false;
+  const host = (h.get("host") ?? "").split(":")[0];
+  if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") return false;
+  return process.env.NODE_ENV === "production";
+}
 
 export type LiveSession =
   | { ok: true; user: PublicUser; sessionId: string }
@@ -25,7 +38,7 @@ export async function writeSessionCookie(token: string) {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    secure: process.env.NODE_ENV === "production",
+    secure: await sessionCookieSecure(),
     maxAge: MAX_AGE,
   });
 }
@@ -36,7 +49,7 @@ export async function clearSessionCookie() {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    secure: process.env.NODE_ENV === "production",
+    secure: await sessionCookieSecure(),
     maxAge: 0,
   });
 }

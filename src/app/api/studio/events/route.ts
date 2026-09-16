@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
-import { guardHeyGenAdmin } from "@/lib/studio/heygenAuth";
 import { getStudioEvents, saveStudioEvents } from "@/lib/studio/studioEventsStore";
 import { canvasActionSchema } from "@/lib/studio/timeline";
 
@@ -37,8 +36,6 @@ export async function POST(request: Request) {
       { status: 403 },
     );
   }
-  const guard = guardHeyGenAdmin(request, { write: true });
-  if (!guard.ok) return guard.response;
 
   let json: unknown;
   try {
@@ -69,7 +66,6 @@ export async function POST(request: Request) {
     lessonId: parsed.data.lessonId,
     events: saved.events,
     updatedAt: saved.updatedAt,
-    notice: guard.notice,
-    demoMode: guard.demoAuth,
+    notice: "Saved as signed-in teacher/admin.",
   });
 }

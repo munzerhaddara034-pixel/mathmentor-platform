@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { guardHeyGenAdmin } from "@/lib/studio/heygenAuth";
+import { requireHeyGenStaff } from "@/lib/studio/heygenAuth";
 import {
   buildHeyGenGeneratePayload,
   clampHeyGenSpeed,
@@ -27,7 +27,7 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const guard = guardHeyGenAdmin(request, { write: true });
+  const guard = await requireHeyGenStaff(request, { write: true });
   if (!guard.ok) return guard.response;
 
   let json: unknown;

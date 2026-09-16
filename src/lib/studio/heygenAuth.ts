@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { getLiveSession } from "@/lib/auth/session";
+import { isStaffRole } from "@/lib/auth/paths";
 
 /**
- * There is no login in this build. If `HEYGEN_ADMIN_TOKEN` (or `ADMIN_TOKEN`)
- * is set, generate/list routes require that bearer / x-admin-token header.
- * Otherwise the route stays open and the API returns a demoMode notice.
+ * HeyGen write routes prefer a logged-in teacher/admin session.
+ * `HEYGEN_ADMIN_TOKEN` (or `ADMIN_TOKEN`) remains an optional bearer override.
  */
 export function adminToken() {
   return process.env.HEYGEN_ADMIN_TOKEN?.trim() || process.env.ADMIN_TOKEN?.trim() || "";
@@ -26,7 +27,7 @@ export function guardHeyGenAdmin(request: Request, { write }: { write: boolean }
   const required = adminToken();
   const notice = required
     ? "Teacher/admin token accepted."
-    : "Demo mode: this build has no teacher login. Generation is open locally. Set HEYGEN_ADMIN_TOKEN to require a bearer token.";
+    : "Sign in as teacher/admin, or set HEYGEN_ADMIN_TOKEN for bearer access.";
   if (!required) {
     return { ok: true, demoAuth: true, notice };
   }
@@ -41,6 +42,25 @@ export function guardHeyGenAdmin(request: Request, { write }: { write: boolean }
     ok: false,
     response: NextResponse.json(
       { error: "Teacher/admin token required.", demoMode: false },
+      { status: 401 },
+    ),
+  };
+}
+
+export async function requireHeyGenStaff(request: Request, { write }: { write: boolean }): Promise<HeyGenGuard> {
+  const live = await getLiveSession();
+  if (live.ok && isStaffRole(live.user.role)) {
+    return { ok: true, demoAuth: false, notice: "Signed in as teacher/admin." };
+  }
+  const tokenGuard = guardHeyGenAdmin(request, { write });
+  if (tokenGuard.ok && !tokenGuard.demoAuth) return tokenGuard;
+  return {
+    ok: false,
+    response: NextResponse.json(
+      {
+        error: "Teacher or admin sign-in required.",
+        errorAr: "يلزم دخول أستاذ أو مدير.",
+      },
       { status: 401 },
     ),
   };

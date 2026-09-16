@@ -31,10 +31,10 @@ export function MathCanvas({ state, language, currentTime, watermarkName, waterm
       aria-label={pickText(STUDIO_UI.canvas, language)}
       onPointerDown={(event) => event.stopPropagation()}
     >
-      <IdentityWatermark name={watermarkName ?? "طالب المنصة"} phone={watermarkPhone ?? "76532421"} variant="light" />
       <p className="eyebrow">{pickText(STUDIO_UI.canvas, language)}</p>
       <h2>{pickText(STUDIO_UI.canvasSub, language)}</h2>
       <div ref={boardRef} className="studio-board">
+        <IdentityWatermark name={watermarkName ?? "طالب المنصة"} phone={watermarkPhone ?? "76532421"} variant="light" />
         {state.equations.length === 0 && !state.graph && state.steps.length === 0 ? (
           <p className="muted">{pickText(STUDIO_UI.waiting, language)}</p>
         ) : null}
