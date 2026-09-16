@@ -194,7 +194,7 @@ export async function addQuizAttempt(attempt: QuizAttempt) {
   return attempt;
 }
 
-export async function redeemCard(code: string, studentName: string, phone?: string) {
+export async function redeemCard(code: string, studentName: string, phone?: string, userId?: string) {
   const store = await readStore();
   const card = store.scratchCards.find((item) => item.code.toLowerCase() === code.trim().toLowerCase());
   if (!card) return { ok: false as const, error: "رمز غير صحيح" };
@@ -211,6 +211,7 @@ export async function redeemCard(code: string, studentName: string, phone?: stri
     phone,
     planId: card.planId,
     unlockedAt: new Date().toISOString(),
+    userId,
   };
   store.entitlements.unshift(entitlement);
   await writeStore(store);

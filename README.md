@@ -20,3 +20,17 @@
 See [docs/STUDIO.md](docs/STUDIO.md) for the lesson timeline JSON schema, HeyGen demo mode, and script-generator contract. HeyGen request fields and the teacher workflow are in [docs/HEYGEN.md](docs/HEYGEN.md).
 
 Copy `.env.example` to `.env.local` only if you add keys. The demo runs with **no** `HEYGEN_API_KEY` and **no** `OPENAI_API_KEY`. Daily path: write script → `/admin/video-generator` → webhook/status → students watch the sync player.
+
+## Auth, promo unlock, and demo accounts
+
+Interactive lessons and studio routes are **private**. See [docs/AUTH.md](./docs/AUTH.md).
+
+| Account | Password | Access |
+| --- | --- | --- |
+| `student@mathmentor.local` | `demo-student` | Lessons (subscribed) |
+| `pending@mathmentor.local` | `demo-pending` | Login only → `/redeem` |
+| `parent@mathmentor.local` | `demo-parent` | Lessons |
+| `teacher@mathmentor.local` | `demo-teacher` | Studio + lessons |
+| `admin@mathmentor.local` | `demo-admin` | Studio + lessons |
+
+Promo card for local unlock: `MUNZER-GOLD-9A` on `/redeem` (must be signed in). A second login on the same account kicks the first device.

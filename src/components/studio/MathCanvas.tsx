@@ -6,14 +6,17 @@ import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import { DesmosGraph } from "./DesmosGraph";
 import { Katex } from "./Katex";
+import { IdentityWatermark } from "./IdentityWatermark";
 
 type Props = {
   state: DerivedCanvasState;
   language: LessonLocale;
   currentTime: number;
+  watermarkName?: string;
+  watermarkPhone?: string;
 };
 
-export function MathCanvas({ state, language, currentTime }: Props) {
+export function MathCanvas({ state, language, currentTime, watermarkName, watermarkPhone }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const graphProgress =
     state.graphStartedAt == null ? 1 : Math.max(0.35, Math.min(1, (currentTime - state.graphStartedAt) / 0.4));
@@ -28,6 +31,7 @@ export function MathCanvas({ state, language, currentTime }: Props) {
       aria-label={pickText(STUDIO_UI.canvas, language)}
       onPointerDown={(event) => event.stopPropagation()}
     >
+      <IdentityWatermark name={watermarkName ?? "طالب المنصة"} phone={watermarkPhone ?? "76532421"} variant="light" />
       <p className="eyebrow">{pickText(STUDIO_UI.canvas, language)}</p>
       <h2>{pickText(STUDIO_UI.canvasSub, language)}</h2>
       <div ref={boardRef} className="studio-board">

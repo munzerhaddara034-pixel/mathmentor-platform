@@ -134,6 +134,7 @@ export type Entitlement = {
   phone?: string;
   planId: string;
   unlockedAt: string;
+  userId?: string;
 };
 
 export type QuizAttempt = {

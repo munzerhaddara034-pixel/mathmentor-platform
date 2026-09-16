@@ -53,10 +53,14 @@ export function InteractiveLessonPlayer({
   timeline: initialTimeline,
   initialLanguage,
   teacherMode: teacherModeProp,
+  canTeach = false,
+  viewer,
 }: {
   timeline: LessonTimeline;
   initialLanguage?: LessonLocale;
   teacherMode?: boolean;
+  canTeach?: boolean;
+  viewer?: { name: string; phone: string };
 }) {
   const [timeline, setTimeline] = useState(initialTimeline);
   const [uiLanguage, setUiLanguage] = useState<LessonLocale>(
@@ -70,7 +74,9 @@ export function InteractiveLessonPlayer({
   const [videoClock, setVideoClock] = useState(Boolean(initialTimeline.media?.videoUrl));
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [boardFocus, setBoardFocus] = useState(false);
-  const [teacherMode, setTeacherMode] = useState(Boolean(teacherModeProp));
+  const [teacherMode, setTeacherMode] = useState(Boolean(teacherModeProp && canTeach));
+  const [identity, setIdentity] = useState(viewer ?? { name: "طالب المنصة", phone: "76532421" });
+  const [staffUnlock, setStaffUnlock] = useState(canTeach);
   const [resolvedQuizzes, setResolvedQuizzes] = useState<string[]>([]);
   const lastTick = useRef<number | null>(null);
   const spokenKey = useRef<string | null>(null);
@@ -104,9 +110,34 @@ export function InteractiveLessonPlayer({
   }, [initialTimeline.id, initialTimeline.media?.videoUrl]);
 
   useEffect(() => {
-    if (teacherModeProp) setTeacherMode(true);
-    else setTeacherMode(readTeacherUnlock());
-  }, [teacherModeProp]);
+    if (teacherModeProp && (canTeach || staffUnlock)) setTeacherMode(true);
+    else if (!canTeach && !staffUnlock) setTeacherMode(false);
+    else setTeacherMode(readTeacherUnlock() && (canTeach || staffUnlock));
+  }, [teacherModeProp, canTeach, staffUnlock]);
+
+  useEffect(() => {
+    if (viewer) setIdentity(viewer);
+  }, [viewer]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/auth/session", { credentials: "same-origin" })
+      .then((response) => response.json())
+      .then((payload: { ok?: boolean; user?: { name?: string; phone?: string }; canTeach?: boolean; reason?: string }) => {
+        if (cancelled) return;
+        if (payload.ok && payload.user) {
+          setIdentity({
+            name: payload.user.name || "طالب المنصة",
+            phone: payload.user.phone || "76532421",
+          });
+          if (payload.canTeach) setStaffUnlock(true);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -303,9 +334,11 @@ export function InteractiveLessonPlayer({
           >
             {boardFocus ? pickText(STUDIO_UI.focusVideo, uiLanguage) : pickText(STUDIO_UI.focusBoard, uiLanguage)}
           </button>
-          <button className="btn" type="button" onClick={() => setTeacherUnlock(!teacherMode)}>
-            {teacherMode ? pickText(STUDIO_UI.teacherLock, uiLanguage) : pickText(STUDIO_UI.teacherUnlock, uiLanguage)}
-          </button>
+          {staffUnlock ? (
+            <button className="btn" type="button" onClick={() => setTeacherUnlock(!teacherMode)}>
+              {teacherMode ? pickText(STUDIO_UI.teacherLock, uiLanguage) : pickText(STUDIO_UI.teacherUnlock, uiLanguage)}
+            </button>
+          ) : null}
           <button className="btn dark studio-lang-toggle" type="button" onClick={toggleLanguage}>
             {uiLanguage === "en" ? STUDIO_UI.switchToFrench : STUDIO_UI.switchToEnglish}
           </button>
@@ -329,7 +362,13 @@ export function InteractiveLessonPlayer({
       </div>
 
       <div className={`studio-split ${boardFocus ? "board-focus" : ""}`}>
-        <MathCanvas state={canvas} language={uiLanguage} currentTime={currentTime} />
+        <MathCanvas
+          state={canvas}
+          language={uiLanguage}
+          currentTime={currentTime}
+          watermarkName={identity.name}
+          watermarkPhone={identity.phone}
+        />
         <AvatarPlayer
           language={uiLanguage}
           speaking={speaking}
@@ -341,6 +380,8 @@ export function InteractiveLessonPlayer({
           audioUrl={timeline.media?.audioUrl}
           poster={timeline.media?.poster ?? "/teachers/munzer.jpg?v=4"}
           teacherName={instructor}
+          watermarkName={identity.name}
+          watermarkPhone={identity.phone}
           clockMaster={clockMaster}
           seekEpoch={seekEpoch}
           seekTo={currentTime}

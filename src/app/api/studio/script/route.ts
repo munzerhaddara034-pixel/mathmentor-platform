@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateLessonScript } from "@/lib/studio/scriptGenerator";
+import { apiSession } from "@/lib/auth/guards";
+import { isStaffRole } from "@/lib/auth/paths";
 import { certificateTrackSchema, countExampleSteps, hasGradedExample, hasRenderGraph, hasStepByStep, lessonLanguageSchema } from "@/lib/studio/timeline";
 
 export const runtime = "nodejs";
@@ -13,6 +15,11 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const auth = await apiSession();
+  if (auth.error) return auth.error;
+  if (!isStaffRole(auth.live.user.role)) {
+    return NextResponse.json({ error: "Teacher or admin required." }, { status: 403 });
+  }
   let json: unknown;
   try {
     json = await request.json();

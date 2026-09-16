@@ -2,7 +2,7 @@
 
 import { defaultSettings } from "@/lib/settings";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function RedeemPage() {
   const [code, setCode] = useState("");
@@ -11,6 +11,19 @@ export default function RedeemPage() {
   const [message, setMessage] = useState("");
   const [ok, setOk] = useState(false);
   const [planName, setPlanName] = useState("");
+  const [need, setNeed] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setNeed(params.get("need") === "subscription");
+    void fetch("/api/auth/session", { credentials: "same-origin" })
+      .then((response) => response.json())
+      .then((payload: { user?: { name?: string; phone?: string } }) => {
+        if (payload.user?.name) setName(payload.user.name);
+        if (payload.user?.phone) setPhone(payload.user.phone);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const submit = async () => {
     const response = await fetch("/api/redeem", {
@@ -29,6 +42,15 @@ export default function RedeemPage() {
       <p className="eyebrow">تفعيل الاشتراك</p>
       <h1>أدخل كود البطاقة</h1>
       <p className="muted">اشترِ البطاقة من مكتب معتمد. للتجربة: MUNZER-GOLD-9A</p>
+      {need ? (
+        <p className="studio-teacher-error" role="alert">
+          Your account is signed in but the subscription is not active. Redeem a card to open lessons.
+          <br />
+          <span dir="rtl" lang="ar">
+            الحساب مسجّل لكن الاشتراك غير مفعّل. أدخل كود البطاقة لفتح الدروس.
+          </span>
+        </p>
+      ) : null}
       <div className="card activate-card">
         <label>
           الاسم
@@ -50,7 +72,7 @@ export default function RedeemPage() {
           <div className="welcome-banner">
             <h2>تم الاشتراك</h2>
             <p>مرحباً {name || "بك"} في منصة الأستاذ منذر. فُتحت لك: {planName}.</p>
-            <Link className="btn ok" href="/classroom">
+            <Link className="btn ok" href="/lessons/interactive">
               ابدأ الدروس
             </Link>
           </div>

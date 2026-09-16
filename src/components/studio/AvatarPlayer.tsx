@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import { DEMO_AVATAR_VIDEO } from "@/lib/studio/heygenClient";
+import { IdentityWatermark } from "./IdentityWatermark";
 
 export type VideoClockSource = "raf" | "timeupdate" | "seeked" | "play" | "pause" | "ratechange";
 
@@ -18,6 +19,8 @@ type Props = {
   audioUrl?: string;
   poster?: string;
   teacherName?: string;
+  watermarkName?: string;
+  watermarkPhone?: string;
   /** When true, this panel is the clock: video.currentTime drives the canvas. */
   clockMaster?: boolean;
   seekEpoch?: number;
@@ -41,6 +44,8 @@ export function AvatarPlayer({
   audioUrl,
   poster = DEFAULT_POSTER,
   teacherName = "Prof. Munzer Haddara · الأستاذ منذر حداره",
+  watermarkName,
+  watermarkPhone,
   clockMaster = false,
   seekEpoch = 0,
   seekTo = 0,
@@ -207,7 +212,11 @@ export function AvatarPlayer({
         ) : (
           <img src={poster} alt={teacherName} draggable={false} />
         )}
-        <span className="dynamic-watermark">MathMentor · {teacherName}</span>
+        <IdentityWatermark
+          name={watermarkName ?? "طالب المنصة"}
+          phone={watermarkPhone ?? "76532421"}
+          variant="dark"
+        />
         {frozen ? <div className="studio-freeze">{pickText(STUDIO_UI.freeze, language)}</div> : null}
         <p className="teacher-nameplate">{teacherName}</p>
       </div>

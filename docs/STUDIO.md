@@ -17,7 +17,9 @@ Open:
 | --- | --- |
 | http://127.0.0.1:3001/studio/script | Script editor (seeded `leb-term-func-01` JSON) |
 | http://localhost:3000/admin/video-generator | Teacher HeyGen generator (script, notes, math, voice, speed) |
-| http://localhost:3000/lessons/interactive | Official exam player — `f(x)=(x-1)e^x`, EN default + FR toggle |
+| http://localhost:3000/lessons/interactive | Official exam player (login required) |
+| http://localhost:3000/login | Demo accounts |
+| http://localhost:3000/redeem | Promo/card unlock (signed in) |
 | http://localhost:3000/studio/player?lesson=leb-term-func-01 | Exact 3-scene seed |
 | http://localhost:3000/studio/player?job=… | Sync player for a HeyGen job |
 | `POST /api/studio/script` | `{ topic, track, language, grade }` → four-phase EN+FR JSON |
@@ -85,7 +87,7 @@ A **Teacher Quality Checklist** sits on `/studio/script` and `/admin/video-gener
 
 ## Teacher timeline editor
 
-There is no login in this build. Open `/lessons/interactive?teacher=1` (or tap **Teacher tools**, or set `localStorage.mathmentor.demoRole` to `teacher` / `admin`). The mini-panel edits absolute `timeline.events`: time, type (`show_equation`, `render_graph`, `highlight_point`, `quiz_mcq`, …), LaTeX / expression / domain / highlights, and quiz fields. **Apply live** updates the player without a reload. **Save** writes `sessionStorage` (`mathmentor.timelineEvents:<id>`) and `POST /api/studio/events` → `data/studio-events.json`. Validation errors are shown in English and Arabic.
+Open `/lessons/interactive?teacher=1` **while signed in as teacher or admin** (`teacher@mathmentor.local` / `demo-teacher`). The mini-panel edits absolute `timeline.events`. **Apply live** updates the player without a reload. **Save** writes `sessionStorage` and `POST /api/studio/events`. Auth, single-session, noindex, and watermarks: [AUTH.md](./AUTH.md).
 
 ## In-video quiz
 

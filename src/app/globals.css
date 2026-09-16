@@ -303,7 +303,7 @@ textarea { min-height: 120px; resize: vertical; }
     "avatar";
 }
 .studio-avatar-panel { grid-area: avatar; }
-.studio-canvas-panel { grid-area: canvas; }
+.studio-canvas-panel { grid-area: canvas; position: relative; }
 @media (min-width: 900px) {
   .studio-split,
   .studio-split.board-focus {
@@ -677,3 +677,41 @@ textarea { min-height: 120px; resize: vertical; }
   padding: 8px 10px;
   min-height: 40px;
 }
+.identity-watermark {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 6;
+}
+.identity-watermark .dynamic-watermark {
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.identity-watermark.dark .dynamic-watermark {
+  color: rgba(255, 255, 255, 0.38);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+.identity-watermark.light .dynamic-watermark {
+  color: rgba(16, 33, 61, 0.28);
+  text-shadow: none;
+}
+.dynamic-watermark.diagonal {
+  top: 62%;
+  left: 4%;
+  animation: drift-diag 17s linear infinite;
+}
+@keyframes drift-diag {
+  0% { transform: translate(0, 0) rotate(-18deg); }
+  50% { transform: translate(38%, 55%) rotate(-18deg); }
+  100% { transform: translate(8%, 12%) rotate(-18deg); }
+}
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--navy);
+}
+

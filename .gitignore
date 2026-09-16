@@ -3,6 +3,7 @@ node_modules
 data/store.json
 data/heygen-jobs.json
 data/studio-events.json
+data/auth.json
 data/uploads
 public/uploads
 .env

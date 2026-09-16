@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { apiSession } from "@/lib/auth/guards";
+import { isStaffRole } from "@/lib/auth/paths";
 import { guardHeyGenAdmin } from "@/lib/studio/heygenAuth";
 import { getStudioEvents, saveStudioEvents } from "@/lib/studio/studioEventsStore";
 import { canvasActionSchema } from "@/lib/studio/timeline";
@@ -12,6 +14,8 @@ const bodySchema = z.object({
 });
 
 export async function GET(request: Request) {
+  const auth = await apiSession();
+  if (auth.error) return auth.error;
   const url = new URL(request.url);
   const lessonId = url.searchParams.get("lessonId")?.trim();
   if (!lessonId) {
@@ -25,6 +29,14 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const auth = await apiSession();
+  if (auth.error) return auth.error;
+  if (!isStaffRole(auth.live.user.role)) {
+    return NextResponse.json(
+      { error: "Teacher or admin required.", errorAr: "يلزم حساب أستاذ أو مدير." },
+      { status: 403 },
+    );
+  }
   const guard = guardHeyGenAdmin(request, { write: true });
   if (!guard.ok) return guard.response;
 
