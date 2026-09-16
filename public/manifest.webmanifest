@@ -6,14 +6,14 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#0B1F3A",
   "theme_color": "#0B1F3A",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
     {
-      "src": "/brand/mathmentor-logo.png",
+      "src": "/brand/mathmentor-logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
@@ -22,7 +22,13 @@
       "src": "/brand/mathmentor-logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/mathmentor-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

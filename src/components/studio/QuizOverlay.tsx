@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import type { QuizMcq } from "@/lib/studio/quiz";
@@ -26,11 +26,26 @@ export function QuizOverlay({
   language: LessonLocale;
   onResolved: () => void;
 }) {
+  const titleId = useId();
   const [picked, setPicked] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const correct = picked === quiz.correctId;
   const canContinue = (checked && correct) || revealed;
+
+  useEffect(() => {
+    setPicked(null);
+    setChecked(false);
+    setRevealed(false);
+  }, [quiz.id]);
+
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
 
   const check = () => {
     if (!picked) return;
@@ -39,10 +54,10 @@ export function QuizOverlay({
   };
 
   return (
-    <div className="studio-quiz-overlay" role="dialog" aria-modal="true" aria-labelledby="studio-quiz-title">
+    <div className="studio-quiz-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className="studio-quiz-card">
         <p className="eyebrow">{pickText(STUDIO_UI.quizEyebrow, language)}</p>
-        <h2 id="studio-quiz-title">{maybeKatex(pickText(quiz.question, language))}</h2>
+        <h2 id={titleId}>{maybeKatex(pickText(quiz.question, language))}</h2>
         <p className="muted studio-quiz-rule">{pickText(STUDIO_UI.quizRule, language)}</p>
         <div className="studio-quiz-choices" role="radiogroup">
           {quiz.choices.map((choice) => {

@@ -20,7 +20,10 @@ export const metadata: Metadata = {
       { url: "/brand/mathmentor-logo.svg", type: "image/svg+xml" },
       { url: "/brand/mathmentor-logo.png", type: "image/png", sizes: "512x512" },
     ],
-    apple: { url: "/brand/mathmentor-logo.png", sizes: "512x512" },
+    apple: [
+      { url: "/brand/mathmentor-logo-192.png", sizes: "192x192" },
+      { url: "/brand/mathmentor-logo.png", sizes: "512x512" },
+    ],
     shortcut: "/favicon.ico",
   },
 };

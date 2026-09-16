@@ -310,12 +310,35 @@ textarea { min-height: 120px; resize: vertical; }
   .nav, .chat-widget, .btn { display: none !important; }
 }
 @media (max-width: 800px) {
-  .nav { flex-direction: column; align-items: stretch; }
-  .links { justify-content: flex-start; }
+  .nav { flex-wrap: nowrap; align-items: center; }
+  .links {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    max-width: 100%;
+    padding-bottom: 2px;
+  }
+  .links a, .links .nav-user { flex: 0 0 auto; white-space: nowrap; }
 }
 
 /* Interactive avatar + smart board */
-.studio-player { margin-top: 8px; }
+.studio-lesson-notes {
+  margin: 8px 0 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 8px 12px;
+}
+.studio-lesson-notes summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--navy);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.studio-lesson-notes .muted { margin: 8px 0 4px; }
 .studio-head {
   display: flex;
   justify-content: space-between;
@@ -663,6 +686,7 @@ textarea { min-height: 120px; resize: vertical; }
   .studio-avatar-frame img, .studio-avatar-frame video { height: 240px; }
 }
 @media (max-width: 899px) {
+  body:has(.studio-player) .chat-widget { display: none; }
   .studio-focus-toggle { display: inline-flex; }
   .studio-shell { padding-left: 12px; padding-right: 12px; }
   .studio-head h1 { font-size: 1.45rem; line-height: 1.25; }

@@ -93,7 +93,11 @@ export function AvatarPlayer({
     const onPlay = () => emitTime(video, "play");
     const onPause = () => emitTime(video, "pause");
     const onRate = () => emitTime(video, "ratechange");
-    const onTimeUpdate = () => emitTime(video, "timeupdate");
+    const onTimeUpdate = () => {
+      // RAF is the clock while the video is master — skip duplicate React ticks.
+      if (clockMasterRef.current) return;
+      emitTime(video, "timeupdate");
+    };
 
     video.addEventListener("ended", emitEnded);
     video.addEventListener("error", emitError);

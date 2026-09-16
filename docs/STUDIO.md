@@ -56,7 +56,7 @@ Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 
 ## Time-synced math canvas
 
-The video element is the clock whenever the playhead is inside the clip (`video.currentTime`, plus `seeked` / `play` / `pause` / `ratechange`, polled on animation frames). Seeking **recomputes** the board from an empty state (`canvasStateAt`) so going backward or forward is idempotent. After a short placeholder clip ends, a RAF lesson clock continues so a 6-minute script can outlive an 8-second demo file — the clip may loop visually, but it no longer overwrites the canvas. Pan/zoom never pauses audio.
+The video element is the clock whenever the playhead is inside the clip (`video.currentTime`, with `seeked` / `play` / `pause` / `ratechange` plus **animation-frame** polling). `timeupdate` is ignored while that RAF clock is active so the canvas does not double-tick. Seeking **recomputes** the board from an empty state (`canvasStateAt`) so going backward or forward is idempotent. After a short placeholder clip ends, a RAF lesson clock continues so a 6-minute script can outlive an 8-second demo file — the clip may loop visually, but it no longer overwrites the canvas. Pan/zoom never pauses audio.
 
 1. **Fade-in** KaTeX when `currentTime` reaches `show_equation` / `fade_equation`.
 2. **Plots immediately** on `render_graph` (Function Plot SVG; Desmos if `NEXT_PUBLIC_DESMOS_API_KEY` is set).

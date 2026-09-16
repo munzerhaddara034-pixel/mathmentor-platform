@@ -97,7 +97,7 @@ export function InteractiveLessonPlayer({
   videoClockRef.current = videoClock;
 
   const segment = segmentAt(timeline, currentTime);
-  const canvasClock = Math.round(currentTime * 24) / 24;
+  const canvasClock = Math.round(currentTime * 30) / 30;
   const canvas = useMemo(() => canvasStateAt(timeline, canvasClock), [timeline, canvasClock]);
   const chapters = useMemo(() => chaptersForTimeline(timeline), [timeline]);
   const frozen = Boolean(segment && segment.avatar.state === "paused");
@@ -245,7 +245,7 @@ export function InteractiveLessonPlayer({
         next = gate.at;
         setPlaying(false);
       }
-      setCurrentTime((prev) => (opts?.fromVideo && Math.abs(prev - next) < 1 / 90 ? prev : next));
+      setCurrentTime((prev) => (opts?.fromVideo && Math.abs(prev - next) < 1 / 30 ? prev : next));
       if (!opts?.fromVideo) {
         spokenKey.current = null;
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -314,12 +314,19 @@ export function InteractiveLessonPlayer({
   const toggleFullscreen = (target: "board" | "video") => {
     const node = target === "board" ? canvasHostRef.current : videoHostRef.current;
     if (!node) return;
+    const video = node.querySelector("video") as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
     const active = document.fullscreenElement;
     if (active === node) {
       void document.exitFullscreen().catch(() => undefined);
       return;
     }
-    void node.requestFullscreen().catch(() => undefined);
+    if (typeof node.requestFullscreen !== "function" && target === "video" && video?.webkitEnterFullscreen) {
+      video.webkitEnterFullscreen();
+      return;
+    }
+    void node.requestFullscreen?.().catch(() => {
+      if (target === "video" && video?.webkitEnterFullscreen) video.webkitEnterFullscreen();
+    });
   };
 
   useEffect(() => {
@@ -455,6 +462,7 @@ export function InteractiveLessonPlayer({
 
       {blockingQuiz ? (
         <QuizOverlay
+          key={blockingQuiz.id}
           quiz={blockingQuiz}
           language={uiLanguage}
           onResolved={() => {

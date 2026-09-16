@@ -30,27 +30,28 @@ export default async function InteractiveLessonDemoPage({
   return (
     <main className="shell studio-shell">
       <p className="eyebrow">Classroom studio · protected lesson</p>
-      <p className="muted">
-        Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — domain, justified limits,
-        product rule, table of variation, timed graph, in-video MCQ at 2:18, exercise <code>f(x)=−1/2</code>, exam trap.
-        English default, live French toggle. Prof. Munzer Haddara / الأستاذ منذر حداره. Editor:{" "}
-        <Link href="/studio/script">/studio/script</Link>
-        {" · "}
-        <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>
-        {" · "}
-        <Link href="/studio/player?lesson=complex">Complex numbers</Link>
-        {" · "}
-        <Link href="/admin/video-generator">HeyGen generator</Link>
-        {staff ? (
-          <>
-            {" · "}
-            <Link href="/lessons/interactive?teacher=1">teacher timeline</Link>
-          </>
-        ) : null}
-        {timeline.media?.videoUrl ? " · HeyGen / placeholder video attached (canvas follows video.currentTime)" : ""}
-        {timeline.media?.studentEnabled ? " · enabled for students" : ""}
-        {" · canvas left / video right (video on top on phones; swap or fullscreen on mobile) · chapters under the video"}
-      </p>
+      <details className="studio-lesson-notes">
+        <summary>Prof. Munzer Haddara / الأستاذ منذر حداره · lesson notes</summary>
+        <p className="muted">
+          Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — domain, justified limits,
+          product rule, table of variation, timed graph, in-video MCQ at 2:18, exercise <code>f(x)=−1/2</code>, exam trap.
+          English default, live French toggle. Editor: <Link href="/studio/script">/studio/script</Link>
+          {" · "}
+          <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>
+          {" · "}
+          <Link href="/studio/player?lesson=complex">Complex numbers</Link>
+          {" · "}
+          <Link href="/admin/video-generator">HeyGen generator</Link>
+          {staff ? (
+            <>
+              {" · "}
+              <Link href="/lessons/interactive?teacher=1">teacher timeline</Link>
+            </>
+          ) : null}
+          {timeline.media?.videoUrl ? " · canvas follows video.currentTime" : ""}
+          {timeline.media?.studentEnabled ? " · enabled for students" : ""}
+        </p>
+      </details>
       <InteractiveLessonPlayer
         timeline={timeline}
         initialLanguage="en"

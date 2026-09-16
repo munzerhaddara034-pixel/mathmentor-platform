@@ -1,10 +1,11 @@
-const CACHE = "mathmentor-shell-v1";
+const CACHE = "mathmentor-shell-v2";
 const PRECACHE = [
   "/",
   "/login",
   "/manifest.webmanifest",
   "/brand/mathmentor-logo.svg",
   "/brand/mathmentor-logo.png",
+  "/brand/mathmentor-logo-192.png",
   "/favicon.ico",
 ];
 
