@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateLessonScript } from "@/lib/studio/scriptGenerator";
-import { certificateTrackSchema, hasRenderGraph, hasStepByStep, lessonLanguageSchema } from "@/lib/studio/timeline";
+import { certificateTrackSchema, countExampleSteps, hasGradedExample, hasRenderGraph, hasStepByStep, lessonLanguageSchema } from "@/lib/studio/timeline";
 
 export const runtime = "nodejs";
 
@@ -43,6 +43,8 @@ export async function POST(request: Request) {
         phases,
         hasRenderGraph: hasRenderGraph(result.timeline),
         hasStepByStepEquations: hasStepByStep(result.timeline),
+        gradedSteps: countExampleSteps(result.timeline),
+        gradedExampleReady: hasGradedExample(result.timeline),
       },
     });
   } catch (error) {

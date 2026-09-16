@@ -20,7 +20,9 @@ export default async function InteractiveLessonDemoPage({
     <main className="shell">
       <p className="eyebrow">Classroom studio · demo</p>
       <p className="muted">
-        Official exam pattern: <code>f(x)=(x-1)e^x</code>. English default, live French toggle. Editor:{" "}
+        Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — domain, justified limits,
+        product rule, table of variation, timed graph, exercise <code>f(x)=−1/2</code>, exam trap. English default, live
+        French toggle. Prof. Munzer Haddara / الأستاذ منذر حداره. Editor:{" "}
         <Link href="/studio/script">/studio/script</Link>
         {" · "}
         <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>

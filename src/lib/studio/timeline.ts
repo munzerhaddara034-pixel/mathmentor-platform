@@ -474,12 +474,18 @@ export function hasRenderGraph(timeline: LessonTimeline) {
   return fromSegments || fromEvents;
 }
 
+export function countExampleSteps(timeline: LessonTimeline) {
+  const example = timeline.segments.find((segment) => segment.phase === "real_example");
+  if (!example) return 0;
+  return example.canvas.actions.filter((action) => normalizedActionType(action.type) === "show_step").length;
+}
+
 export function hasStepByStep(timeline: LessonTimeline) {
-  return timeline.segments.some(
-    (segment) =>
-      segment.phase === "real_example" &&
-      segment.canvas.actions.some((action) => normalizedActionType(action.type) === "show_step"),
-  );
+  return countExampleSteps(timeline) >= 1;
+}
+
+export function hasGradedExample(timeline: LessonTimeline, minSteps = 3) {
+  return countExampleSteps(timeline) >= minSteps;
 }
 
 export function phaseOf(timeline: LessonTimeline, phase: LessonPhase) {

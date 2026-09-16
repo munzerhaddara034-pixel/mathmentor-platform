@@ -82,9 +82,9 @@ export const STUDIO_UI = {
   desmos: { en: "Desmos graph (optional)", fr: "Graphe Desmos (optionnel)" },
   fallbackPlot: { en: "Function Plot (SVG)", fr: "Function Plot (SVG)" },
   phases: {
-    introduction: { en: "1. Concept definition", fr: "1. Définition" },
-    rule_graph: { en: "2. Rule & graph", fr: "2. Règle et graphe" },
-    real_example: { en: "3. Worked example", fr: "3. Exemple résolu" },
-    common_mistake: { en: "4. Common mistake", fr: "4. Erreur fréquente" },
+    introduction: { en: "1. Exam framing & domain", fr: "1. Cadre d’épreuve" },
+    rule_graph: { en: "2. Limits, derivative, graph", fr: "2. Limites, dérivée, graphe" },
+    real_example: { en: "3. Official exercise", fr: "3. Exercice d’épreuve" },
+    common_mistake: { en: "4. Official-exam trap", fr: "4. Piège d’épreuve" },
   },
 } as const;

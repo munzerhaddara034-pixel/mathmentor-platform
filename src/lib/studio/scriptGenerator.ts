@@ -78,35 +78,53 @@ function cloneTimeline(base: LessonTimeline, request: ScriptRequest): LessonTime
 
 function quadraticLesson(request: ScriptRequest): LessonTimeline {
   const scope = scopeFor(String(request.track));
+  const grade = request.grade?.trim() || "";
   return ensurePedagogy({
     id: createId("script"),
     topic: request.topic,
     track: coerceTrack(String(request.track)),
-    grade: request.grade,
+    grade,
     language: request.language === "fr" ? "fr" : "en",
-    durationSec: 240,
+    durationSec: 350,
     instructor: "Prof. Munzer Haddara",
-    title: L(`${request.topic} — ${scope.en}`, `${request.topic} — ${scope.fr}`, `${request.topic} — ${scope.ar}`),
+    title: L(
+      `${request.topic} — ${scope.en} official pattern`,
+      `${request.topic} — modèle d’épreuve ${scope.fr}`,
+      `${request.topic} — ${scope.ar}`,
+    ),
     media: { poster: "/teachers/munzer.jpg" },
     segments: [
       {
         id: "intro",
         start: 0,
-        end: 30,
+        end: 50,
         phase: "introduction",
+        label: L("1. Exam framing & domain", "1. Cadre d’épreuve et ensemble de définition"),
         avatar: { state: "speaking" },
         narration: L(
-          `We define ${request.topic} for ${scope.en}. The quadratic y = ax² + bx + c appears with roots and a vertex.`,
-          `Nous définissons ${request.topic} pour ${scope.fr}. La quadratique y = ax² + bx + c apparaît avec racines et sommet.`,
+          `${request.topic} on the ${scope.en} paper is a complete quadratic study, not a slogan. Domain first: a polynomial is defined on R. We will need the discriminant, the axis of symmetry, the table of variation, and a sketch. Model: f(x)=x²−4x+3. Grade: ${grade || "Terminale / Brevet as listed"}.`,
+          `${request.topic} dans l’épreuve ${scope.fr} est une étude complète de trinôme, pas un slogan. D’abord D_f = R. Il faudra le discriminant, l’axe de symétrie, le tableau de variation et une allure. Modèle : f(x)=x²−4x+3. Classe : ${grade || "Terminale / Brevet selon l’énoncé"}.`,
         ),
         canvas: {
           actions: [
             {
               at: 3,
-              type: "show_equation",
+              type: "fade_equation",
+              latex: "f(x)=x^{2}-4x+3=(x-1)(x-3)",
+              payload: { caption: L("Given on the paper", "Donnée de l’énoncé") },
+            },
+            {
+              at: 16,
+              type: "show_step",
               payload: {
-                latex: "f(x)=ax^{2}+bx+c",
-                caption: { ar: "تعريف", en: "Concept definition" },
+                latex: "D_f=\\mathbb{R}",
+                math_latex: "D_f=\\mathbb{R}",
+                step_en: "A polynomial has domain R. Do not write x≠0 unless a denominator appears.",
+                step_fr: "Un polynôme a pour ensemble de définition R. On n’écrit x≠0 que s’il y a un dénominateur.",
+                text: L(
+                  "A polynomial has domain R. Do not write x≠0 unless a denominator appears.",
+                  "Un polynôme a pour ensemble de définition R. On n’écrit x≠0 que s’il y a un dénominateur.",
+                ),
               },
             },
           ],
@@ -114,55 +132,59 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
       },
       {
         id: "rule-graph",
-        start: 30,
-        end: 90,
+        start: 50,
+        end: 150,
         phase: "rule_graph",
+        label: L("2. Proof sketch & graph", "2. Esquisse de preuve et graphe"),
         avatar: { state: "paused" },
         narration: L(
-          "We freeze on y = (x − 1)(x − 3). Roots 1 and 3. The vertex (minimum) is at x = 2.",
-          "Nous gelons sur y = (x − 1)(x − 3). Racines 1 et 3. Le sommet (minimum) est en x = 2.",
+          "Look at the board. Discriminant Δ=b²−4ac=16−12=4>0, so two real roots x=1 and x=3. Axis of symmetry: x=−b/(2a)=4/2=2. f(2)=4−8+3=−1, a global minimum because a=1>0. Sketch: roots on the axis, vertex (2,−1).",
+          "Regardez le tableau. Discriminant Δ=b²−4ac=16−12=4>0, donc deux racines réelles x=1 et x=3. Axe de symétrie : x=−b/(2a)=4/2=2. f(2)=4−8+3=−1, minimum global car a=1>0. Allure : racines sur l’axe, sommet (2,−1).",
         ),
         canvas: {
           actions: [
             {
               at: 4,
+              type: "show_step",
+              payload: {
+                latex: "\\Delta=16-12=4,\\quad x=\\dfrac{4\\pm 2}{2}\\in\\{1,3\\}",
+                math_latex: "\\Delta=16-12=4,\\quad x=\\dfrac{4\\pm 2}{2}\\in\\{1,3\\}",
+                step_en: "Proof sketch: compute Δ, then the quadratic formula. Factor as (x−1)(x−3).",
+                step_fr: "Esquisse : calculer Δ, puis la formule. On factorise (x−1)(x−3).",
+                text: L(
+                  "Proof sketch: compute Δ, then the quadratic formula. Factor as (x−1)(x−3).",
+                  "Esquisse : calculer Δ, puis la formule. On factorise (x−1)(x−3).",
+                ),
+              },
+            },
+            {
+              at: 22,
               type: "render_graph",
+              expression: "(x-1)*(x-3)",
+              domain: [-1, 5],
+              highlights: {
+                roots: [
+                  [1, 0],
+                  [3, 0],
+                ],
+                extrema: [[2, -1]],
+              },
               payload: {
                 kind: "function",
                 fn: "(x-1)*(x-3)",
                 xDomain: [-1, 5],
                 yDomain: [-5, 8],
-                title: { ar: "y=(x-1)(x-3)", en: "y = (x − 1)(x − 3)" },
+                title: L("y = (x−1)(x−3)", "y = (x−1)(x−3)"),
               },
             },
             {
-              at: 16,
-              type: "highlight_point",
-              payload: {
-                kind: "root",
-                x: 1,
-                y: 0,
-                label: { ar: "جذر x=1", en: "Root x = 1" },
-              },
-            },
-            {
-              at: 26,
-              type: "highlight_point",
-              payload: {
-                kind: "root",
-                x: 3,
-                y: 0,
-                label: { ar: "جذر x=3", en: "Root x = 3" },
-              },
-            },
-            {
-              at: 38,
+              at: 40,
               type: "highlight_point",
               payload: {
                 kind: "extrema",
                 x: 2,
                 y: -1,
-                label: { ar: "نهاية صغرى (2,−1)", en: "Minimum (2, −1)" },
+                label: L("Vertex (2, −1)", "Sommet (2, −1)"),
               },
             },
           ],
@@ -170,46 +192,77 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
       },
       {
         id: "real-example",
-        start: 90,
-        end: 210,
+        start: 150,
+        end: 310,
         phase: "real_example",
+        label: L("3. Official exercise", "3. Exercice d’épreuve"),
         avatar: { state: "speaking" },
         narration: L(
-          "Solve x² − 4x + 3 = 0 by factoring, then substitute back.",
-          "Résolvez x² − 4x + 3 = 0 par factorisation, puis substituez.",
+          "Exam exercise: solve f(x)≤0. Step 1 — roots 1 and 3 from the factorisation already proved. Step 2 — a>0 so the parabola is below the axis between the roots. Step 3 — substitute a test point, x=2: f(2)=−1≤0. Step 4 — box the closed interval [1,3]. Endpoints are included because the inequality is not strict.",
+          "Exercice d’épreuve : résoudre f(x)≤0. Étape 1 — racines 1 et 3 déjà prouvées. Étape 2 — a>0 donc la parabole est sous l’axe entre les racines. Étape 3 — point test x=2 : f(2)=−1≤0. Étape 4 — encadrer l’intervalle fermé [1,3]. Les bornes sont incluses car l’inégalité n’est pas stricte.",
         ),
         canvas: {
           actions: [
             {
               at: 4,
-              type: "show_equation",
-              payload: {
-                latex: "x^{2}-4x+3=0",
-                caption: { ar: "المسألة", en: "Given" },
-              },
+              type: "fade_equation",
+              latex: "x^{2}-4x+3\\le 0",
+              payload: { caption: L("Solve on R", "Résoudre sur R") },
             },
             {
               at: 16,
               type: "show_step",
               payload: {
-                latex: "(x-1)(x-3)=0",
-                text: { ar: "الخطوة 1 — التحليل.", en: "Step 1 — factor." },
+                latex: "(x-1)(x-3)=0\\Rightarrow x=1\\text{ or }x=3",
+                math_latex: "(x-1)(x-3)=0\\Rightarrow x=1\\text{ or }x=3",
+                step_en: "Step 1 — factoring already justified by Δ=4. Roots 1 and 3.",
+                step_fr: "Étape 1 — factorisation déjà justifiée par Δ=4. Racines 1 et 3.",
+                text: L(
+                  "Step 1 — factoring already justified by Δ=4. Roots 1 and 3.",
+                  "Étape 1 — factorisation déjà justifiée par Δ=4. Racines 1 et 3.",
+                ),
               },
             },
             {
-              at: 40,
+              at: 48,
               type: "show_step",
               payload: {
-                latex: "x=1 \\text{ or } x=3",
-                text: { ar: "الخطوة 2 — الجذران.", en: "Step 2 — the roots." },
+                latex: "a=1>0\\Rightarrow f\\le 0\\text{ on }[1,3]",
+                math_latex: "a=1>0\\Rightarrow f\\le 0\\text{ on }[1,3]",
+                step_en: "Step 2 — sign of a. The parabola opens up, so f is negative between the roots.",
+                step_fr: "Étape 2 — signe de a. La parabole tourne vers le haut, donc f est négative entre les racines.",
+                text: L(
+                  "Step 2 — sign of a. The parabola opens up, so f is negative between the roots.",
+                  "Étape 2 — signe de a. La parabole tourne vers le haut, donc f est négative entre les racines.",
+                ),
               },
             },
             {
-              at: 70,
+              at: 88,
               type: "show_step",
               payload: {
-                latex: "1-4+3=0,\\quad 9-12+3=0",
-                text: { ar: "الخطوة 3 — التعويض.", en: "Step 3 — substitution check." },
+                latex: "f(2)=4-8+3=-1\\le 0",
+                math_latex: "f(2)=4-8+3=-1\\le 0",
+                step_en: "Step 3 — substitution check at the vertex. Never skip this line on an official paper.",
+                step_fr: "Étape 3 — substitution au sommet. On ne saute jamais cette ligne en épreuve officielle.",
+                text: L(
+                  "Step 3 — substitution check at the vertex. Never skip this line on an official paper.",
+                  "Étape 3 — substitution au sommet. On ne saute jamais cette ligne en épreuve officielle.",
+                ),
+              },
+            },
+            {
+              at: 120,
+              type: "show_step",
+              payload: {
+                latex: "S=[1,3]",
+                math_latex: "S=[1,3]",
+                step_en: "Step 4 — box S=[1,3]. Closed because ≤ includes the roots.",
+                step_fr: "Étape 4 — encadrer S=[1,3]. Fermé car ≤ inclut les racines.",
+                text: L(
+                  "Step 4 — box S=[1,3]. Closed because ≤ includes the roots.",
+                  "Étape 4 — encadrer S=[1,3]. Fermé car ≤ inclut les racines.",
+                ),
               },
             },
           ],
@@ -217,33 +270,35 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
       },
       {
         id: "common-mistake",
-        start: 210,
-        end: 240,
+        start: 310,
+        end: 350,
         phase: "common_mistake",
+        label: L("4. Official-exam trap", "4. Piège d’épreuve"),
         avatar: { state: "speaking" },
         narration: L(
-          "Common trap: dropping the sign of b in x = −b/(2a).",
-          "Piège fréquent : oublier le signe de b dans x = −b/(2a).",
+          "Trap: writing the vertex as x=b/(2a) and dropping the minus. Here b=−4, so −b/(2a)=4/2=2, not −2. Students who write −2 then sketch the minimum in the wrong half-plane and lose the inequality. Correct: x_v=−b/(2a)=2, f(2)=−1.",
+          "Piège : écrire le sommet x=b/(2a) en oubliant le moins. Ici b=−4, donc −b/(2a)=4/2=2, pas −2. Qui écrit −2 dessine le minimum du mauvais côté et perd l’inéquation. Correct : x_v=−b/(2a)=2, f(2)=−1.",
         ),
         canvas: {
           actions: [
             {
               at: 3,
-              type: "show_equation",
-              payload: {
-                latex: "x_{v}=-\\dfrac{b}{2a}",
-                caption: { ar: "لا تسقط الإشارة", en: "Keep the minus" },
-              },
+              type: "fade_equation",
+              latex: "x_{v}=-\\dfrac{b}{2a}\\neq\\dfrac{b}{2a}",
+              payload: { caption: L("Wrong reasoning", "Raisonnement faux") },
             },
             {
-              at: 12,
+              at: 14,
               type: "show_step",
               payload: {
-                latex: "a=1,\\; b=-4 \\Rightarrow x_v=2",
-                text: {
-                  ar: "b سالبة هنا، فالرأس عند 2 وليس −2.",
-                  en: "Here b is negative, so the vertex is at 2, not −2.",
-                },
+                latex: "b=-4,\\; a=1\\Rightarrow x_v=2,\\; f(2)=-1",
+                math_latex: "b=-4,\\; a=1\\Rightarrow x_v=2,\\; f(2)=-1",
+                step_en: "Correction: keep the minus, substitute b=−4, then check f(2) by substitution.",
+                step_fr: "Correction : garder le moins, substituer b=−4, puis vérifier f(2) par substitution.",
+                text: L(
+                  "Correction: keep the minus, substitute b=−4, then check f(2) by substitution.",
+                  "Correction : garder le moins, substituer b=−4, puis vérifier f(2) par substitution.",
+                ),
               },
             },
           ],
@@ -257,46 +312,49 @@ function genericLesson(request: ScriptRequest): LessonTimeline {
   const scope = scopeFor(String(request.track));
   const topic = request.topic.trim();
   const safe = topic.replace(/[\\{}]/g, "");
+  const grade = request.grade?.trim() || "";
   return ensurePedagogy({
     id: createId("script"),
     topic,
     track: coerceTrack(String(request.track)),
-    grade: request.grade,
+    grade,
     language: request.language === "fr" ? "fr" : "en",
-    durationSec: 240,
+    durationSec: 350,
     instructor: "Prof. Munzer Haddara",
-    title: L(`${topic} — ${scope.en}`, `${topic} — ${scope.fr}`, `${topic} — ${scope.ar}`),
+    title: L(`${topic} — ${scope.en} official pattern`, `${topic} — modèle d’épreuve ${scope.fr}`, `${topic} — ${scope.ar}`),
     media: { poster: "/teachers/munzer.jpg" },
     segments: [
       {
         id: "intro",
         start: 0,
-        end: 30,
+        end: 50,
         phase: "introduction",
+        label: L("1. Exam framing & domain", "1. Cadre d’épreuve et ensemble de définition"),
         avatar: { state: "speaking" },
         narration: L(
-          `A lesson on ${topic} for ${scope.en}. We start with the definition, then the rule and graph, then a worked example, then the official-exam trap.`,
-          `Une leçon sur ${topic} pour ${scope.fr}. Nous commençons par la définition, puis la règle et le graphe, un exemple résolu, puis le piège d’examen.`,
+          `${topic} on the ${scope.en} paper (${grade || "as listed"}) is marked as a complete study: write the definition, the domain, a proof sketch of the rule, a graph when the question asks for an allure, then a graded exercise. We do not sell a slogan. Model quantity: Q(x)=5e^x on R.`,
+          `${topic} dans l’épreuve ${scope.fr} (${grade || "selon l’énoncé"}) se note comme une étude complète : définition, ensemble de définition, esquisse de preuve de la règle, graphe si l’allure est demandée, puis un exercice noté. On ne vend pas un slogan. Quantité modèle : Q(x)=5e^x sur R.`,
         ),
         canvas: {
           actions: [
             {
               at: 3,
-              type: "show_equation",
-              payload: {
-                latex: `\\text{${safe}}`,
-                caption: { ar: "تعريف الفكرة ونطاق الامتحان", en: "Idea and exam scope" },
-              },
+              type: "fade_equation",
+              latex: `\\text{${safe}}`,
+              payload: { caption: L("Topic on this paper", "Thème de l’épreuve") },
             },
             {
-              at: 14,
+              at: 16,
               type: "show_step",
               payload: {
-                latex: "\\text{given }\\to\\text{ rule }\\to\\text{ check}",
-                text: {
-                  ar: "أربع أسطر: معطى، قانون، خطوات، تحقق.",
-                  en: "Four lines: given, rule, steps, check.",
-                },
+                latex: "Q(x)=5e^{x},\\quad D_Q=\\mathbb{R}",
+                math_latex: "Q(x)=5e^{x},\\quad D_Q=\\mathbb{R}",
+                step_en: "e^x is defined on R, so a constant multiple is defined on R. State the domain before any formula.",
+                step_fr: "e^x est définie sur R, donc un multiple constant l’est aussi. On écrit D_Q avant toute formule.",
+                text: L(
+                  "e^x is defined on R, so a constant multiple is defined on R. State the domain before any formula.",
+                  "e^x est définie sur R, donc un multiple constant l’est aussi. On écrit D_Q avant toute formule.",
+                ),
               },
             },
           ],
@@ -304,45 +362,53 @@ function genericLesson(request: ScriptRequest): LessonTimeline {
       },
       {
         id: "rule-graph",
-        start: 30,
-        end: 90,
+        start: 50,
+        end: 150,
         phase: "rule_graph",
+        label: L("2. Proof sketch & graph", "2. Esquisse de preuve et graphe"),
         avatar: { state: "paused" },
         narration: L(
-          `We freeze the avatar to graph a model tied to ${topic}. We mark an asymptote when it applies.`,
-          `Nous gelons l’avatar pour tracer un modèle lié à ${topic}. Nous marquons une asymptote si elle existe.`,
+          `Look at the board. Proof sketch: the derivative of e^x is e^x, so Q'(x)=5e^x>0 on R. Q is strictly increasing. Q(0)=5, limit 0 at minus infinity (horizontal asymptote y=0), plus infinity at plus infinity. This graph is required because the ${scope.en} question will ask for the allure and the asymptote.`,
+          `Regardez le tableau. Esquisse : la dérivée de e^x est e^x, donc Q'(x)=5e^x>0 sur R. Q est strictement croissante. Q(0)=5, limite 0 en −∞ (asymptote y=0), +∞ en +∞. Le graphe est obligatoire car la question ${scope.fr} demandera l’allure et l’asymptote.`,
         ),
         canvas: {
           actions: [
             {
-              at: 5,
-              type: "render_graph",
+              at: 4,
+              type: "show_step",
               payload: {
-                kind: "function",
-                fn: "exp(x)",
-                xDomain: [-2, 2],
-                yDomain: [-1, 8],
-                title: { ar: `نموذج لـ ${topic}`, en: `Model for ${topic}` },
+                latex: "Q'(x)=5e^{x}>0",
+                math_latex: "Q'(x)=5e^{x}>0",
+                step_en: "Proof sketch: chain the constant 5 with (e^x)'=e^x. Strictly increasing on R.",
+                step_fr: "Esquisse : le 5 constant et (e^x)'=e^x. Strictement croissante sur R.",
+                text: L(
+                  "Proof sketch: chain the constant 5 with (e^x)'=e^x. Strictly increasing on R.",
+                  "Esquisse : le 5 constant et (e^x)'=e^x. Strictement croissante sur R.",
+                ),
               },
             },
             {
               at: 18,
+              type: "render_graph",
+              expression: "5*exp(x)",
+              domain: [-2, 2],
+              highlights: { extrema: [], roots: [], asymptotes: [{ y: 0 }] },
+              payload: {
+                kind: "function",
+                fn: "5*exp(x)",
+                xDomain: [-2, 2],
+                yDomain: [-1, 12],
+                title: L(`Model for ${topic}`, `Modèle pour ${topic}`),
+              },
+            },
+            {
+              at: 36,
               type: "highlight_point",
               payload: {
                 kind: "asymptote",
                 axis: "y",
                 value: 0,
-                label: { ar: "تقارب إن وُجد", en: "Asymptote if present" },
-              },
-            },
-            {
-              at: 32,
-              type: "highlight_point",
-              payload: {
-                kind: "point",
-                x: 0,
-                y: 1,
-                label: { ar: "نقطة تحقق", en: "Check point" },
+                label: L("Horizontal asymptote y = 0", "Asymptote horizontale y = 0"),
               },
             },
           ],
@@ -350,49 +416,77 @@ function genericLesson(request: ScriptRequest): LessonTimeline {
       },
       {
         id: "real-example",
-        start: 90,
-        end: 210,
+        start: 150,
+        end: 310,
         phase: "real_example",
+        label: L("3. Official exercise", "3. Exercice d’épreuve"),
         avatar: { state: "speaking" },
         narration: L(
-          `Worked example: a quantity starts at 5 and follows e^x. Evaluate at x = 0 and x = 1, then substitute back.`,
-          `Exemple résolu : une quantité part de 5 et suit e^x. Évaluez en x = 0 puis x = 1, puis substituez.`,
+          `Worked exercise on ${topic}: a quantity follows Q(x)=5e^x. Evaluate Q(0) and Q(1), then the ratio Q(1)/Q(0), then solve Q(x)=5e. Every line is substitution or algebra — nothing is quoted from memory without a check.`,
+          `Exercice résolu sur ${topic} : une quantité suit Q(x)=5e^x. Calculer Q(0) et Q(1), puis le rapport Q(1)/Q(0), puis résoudre Q(x)=5e. Chaque ligne est une substitution ou de l’algèbre — on ne cite rien de mémoire sans vérification.`,
         ),
         canvas: {
           actions: [
             {
               at: 4,
-              type: "show_equation",
-              payload: {
-                latex: "Q(x)=5e^{x}",
-                caption: { ar: "المسألة", en: "Given" },
-              },
+              type: "fade_equation",
+              latex: "Q(x)=5e^{x}",
+              payload: { caption: L("Given", "Donnée") },
             },
             {
-              at: 18,
+              at: 16,
               type: "show_step",
               payload: {
                 latex: "Q(0)=5e^{0}=5",
-                text: { ar: "الخطوة 1 — التعويض x=0.", en: "Step 1 — substitute x = 0." },
+                math_latex: "Q(0)=5e^{0}=5",
+                step_en: "Step 1 — substitute x=0. e^0=1 is a theorem, not a slogan: write it.",
+                step_fr: "Étape 1 — substituer x=0. e^0=1 est un théorème : on l’écrit.",
+                text: L(
+                  "Step 1 — substitute x=0. e^0=1 is a theorem, not a slogan: write it.",
+                  "Étape 1 — substituer x=0. e^0=1 est un théorème : on l’écrit.",
+                ),
               },
             },
             {
               at: 48,
               type: "show_step",
               payload: {
-                latex: "Q(1)=5e",
-                text: { ar: "الخطوة 2 — التعويض x=1.", en: "Step 2 — substitute x = 1." },
+                latex: "Q(1)=5e^{1}=5e",
+                math_latex: "Q(1)=5e^{1}=5e",
+                step_en: "Step 2 — substitute x=1. Do not replace e by 2.7 unless the paper asks for a decimal.",
+                step_fr: "Étape 2 — substituer x=1. On ne remplace pas e par 2,7 sauf si l’énoncé demande une décimale.",
+                text: L(
+                  "Step 2 — substitute x=1. Do not replace e by 2.7 unless the paper asks for a decimal.",
+                  "Étape 2 — substituer x=1. On ne remplace pas e par 2,7 sauf si l’énoncé demande une décimale.",
+                ),
               },
             },
             {
-              at: 80,
+              at: 88,
               type: "show_step",
               payload: {
-                latex: "Q(1)/Q(0)=e",
-                text: {
-                  ar: "الخطوة 3 — النسبة تتحقق من القانون.",
-                  en: "Step 3 — the ratio checks the rule.",
-                },
+                latex: "\\dfrac{Q(1)}{Q(0)}=e",
+                math_latex: "\\dfrac{Q(1)}{Q(0)}=e",
+                step_en: "Step 3 — the ratio checks the functional equation Q(x+1)=e Q(x).",
+                step_fr: "Étape 3 — le rapport vérifie l’équation fonctionnelle Q(x+1)=e Q(x).",
+                text: L(
+                  "Step 3 — the ratio checks the functional equation Q(x+1)=e Q(x).",
+                  "Étape 3 — le rapport vérifie l’équation fonctionnelle Q(x+1)=e Q(x).",
+                ),
+              },
+            },
+            {
+              at: 120,
+              type: "show_step",
+              payload: {
+                latex: "Q(x)=5e\\Rightarrow 5e^{x}=5e\\Rightarrow x=1",
+                math_latex: "Q(x)=5e\\Rightarrow 5e^{x}=5e\\Rightarrow x=1",
+                step_en: "Step 4 — solve by algebra (injectivity of exp), then box x=1. Substitution check: Q(1)=5e.",
+                step_fr: "Étape 4 — résoudre par injectivité de exp, puis encadrer x=1. Vérification : Q(1)=5e.",
+                text: L(
+                  "Step 4 — solve by algebra (injectivity of exp), then box x=1. Substitution check: Q(1)=5e.",
+                  "Étape 4 — résoudre par injectivité de exp, puis encadrer x=1. Vérification : Q(1)=5e.",
+                ),
               },
             },
           ],
@@ -400,32 +494,35 @@ function genericLesson(request: ScriptRequest): LessonTimeline {
       },
       {
         id: "common-mistake",
-        start: 210,
-        end: 240,
+        start: 310,
+        end: 350,
         phase: "common_mistake",
+        label: L("4. Official-exam trap", "4. Piège d’épreuve"),
         avatar: { state: "speaking" },
         narration: L(
-          `The typical ${scope.en} trap: quoting the slogan without the domain condition. Write the hypothesis before the formula.`,
-          `Le piège typique de ${scope.fr} : citer le slogan sans le domaine. Écrivez l’hypothèse avant la formule.`,
+          `The ${scope.en} trap on ${topic}: quoting the formula before the hypothesis. Example: writing (e^x)'=e^x without stating that the function is the exponential, or applying a neighbour's rule (ln, power) on the same line. Write the hypothesis, then the rule, then one substitution check.`,
+          `Le piège ${scope.fr} sur ${topic} : citer la formule avant l’hypothèse. Exemple : écrire (e^x)'=e^x sans nommer la fonction, ou coller la règle voisine (ln, puissance) sur la même ligne. On écrit l’hypothèse, puis la règle, puis une substitution de contrôle.`,
         ),
         canvas: {
           actions: [
             {
               at: 3,
-              type: "show_equation",
-              payload: {
-                latex: "\\text{hypothesis first, then the rule}",
-                caption: { ar: "شرط ثم قانون", en: "Hypothesis then rule" },
-              },
+              type: "fade_equation",
+              latex: "\\text{hypothesis first, then the rule}",
+              payload: { caption: L("Wrong: slogan without domain", "Faux : slogan sans domaine") },
             },
             {
-              at: 12,
+              at: 14,
               type: "show_step",
               payload: {
-                text: {
-                  ar: `لا تخلط ${topic} مع قانون الجار دون تحقق.`,
-                  en: `Do not mix ${topic} with a neighbouring rule without a check.`,
-                },
+                latex: "Q'(x)=5e^{x}\\quad(\\text{not }5x e^{x-1})",
+                math_latex: "Q'(x)=5e^{x}\\quad(\\text{not }5x e^{x-1})",
+                step_en: "Correction: this is not a power of x. Do not apply nx^{n−1} to e^x.",
+                step_fr: "Correction : ce n’est pas une puissance de x. On n’applique pas nx^{n−1} à e^x.",
+                text: L(
+                  "Correction: this is not a power of x. Do not apply nx^{n−1} to e^x.",
+                  "Correction : ce n’est pas une puissance de x. On n’applique pas nx^{n−1} à e^x.",
+                ),
               },
             },
           ],
@@ -486,14 +583,14 @@ Return ONE JSON object only, matching this schema:
 }
 
 Hard rules:
-1. ALWAYS include exactly these four phases in order, with durations about 30s, 60s, 120s, 30s (total ~240s).
-2. introduction: concept definition + Lebanese exam scope (Brevet / LS / SE / GS / LH). Canvas: show_equation / renderMath.
-3. rule_graph: state the rule. MUST include a canvas action type "render_graph" (or plotFunction). Set avatar.state to "paused". Highlight roots, asymptotes, extrema when they apply. payload.fn / expression must be a JS expression in x such as "(x-1)*exp(x)".
-4. real_example: a full worked problem with substitution. MUST include two or more type "show_step" actions with math_latex, step_en, and step_fr.
-5. common_mistake: a typical official-exam error warning (~30s).
+1. ALWAYS include exactly these four phases in order. Durations about 50s, 100s, 160s, 40s (total ~350s). instructor is always "Prof. Munzer Haddara".
+2. introduction: Lebanese certificate scope (Brevet / LS / GS / SE / LH) + domain with justification (not a slogan). Canvas: fade_equation / show_equation.
+3. rule_graph: a proof sketch of the rule (named hypotheses, algebra lines). MUST include type "render_graph" (fn is a JS expression in x). avatar.state = "paused". Highlight roots, extrema, asymptotes when they exist.
+4. real_example: one full official-exam exercise. MUST include at least THREE show_step actions with math_latex, step_en, AND step_fr of equal quality (not machine-gibberish). Include substitution or factoring and a boxed conclusion.
+5. common_mistake: name the WRONG reasoning, then the correction. ~40s.
 6. "at" is seconds from the start of THAT segment.
-7. Every narration, title, caption, and step MUST have English AND French (Lebanese English-section curriculum with a French toggle).
-8. Default language is English.`;
+7. Every narration, title, caption, and step MUST have English AND French (Lebanese English-section with a French toggle). French must read like a French-section paper (ensemble de définition, tableau de variation, barème), not a literal calque.
+8. Default language is English. Ready to charge: a paying student should be able to copy the board into an official booklet.`;
 
 async function generateWithOpenAI(request: ScriptRequest): Promise<LessonTimeline> {
   const key = openaiKey();

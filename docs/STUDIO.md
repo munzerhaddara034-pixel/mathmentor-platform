@@ -73,13 +73,13 @@ Flat event fields are lifted into `payload` (backward compatible with `{ at, typ
 }
 ```
 
-`leb-term-func-01` / `/lessons/interactive` seeds a fade at 40s, `render_graph` at 42.5s (roots / extrema / asymptotes), then `highlight_point` at 45s. Wheel or pinch to zoom, drag to pan, hover for `(x, f(x))` — playback continues. If the attached clip is shorter than the lesson (local demo mp4), it **loops** after handing the clock to RAF so audio stays up while you inspect the graph.
+`leb-term-func-01` / `/lessons/interactive` is a **full Terminale LS/GS/SE study** of `f(x)=(x-1)e^x` (~6 min): domain, limits rewritten as a quotient, product-rule algebra, table of variation, timed graph (root / min / asymptote around 2:30), official exercise `f(x)=m` and `f(x)=−1/2` with four graded steps, then the exam trap `(−∞)×0` and `f'=e^x`. EN and FR are written as parallel papers, not a calque. Wheel or pinch to zoom — playback continues. Short demo clips loop after they hand the clock to RAF.
 
 ## Seeded lesson
 
-`leb-term-func-01` is preloaded in `/studio/script`. Scene 1–2 use `renderMath` (KaTeX). Scene 3 uses `plotFunction` with `(x-1)*exp(x)` on `[-3, 2]` (Desmos, or SVG if no key).
+`leb-term-func-01` is preloaded in `/studio/script` as the **four-phase timeline** (not a three-line slogan). `/studio/player?lesson=leb-term-func-01` still plays the compact scene document (same math, shorter audio).
 
-The interactive demo wraps the same content in the four pedagogical phases (intro / rule+graph / product-rule example / common mistake).
+A **Teacher Quality Checklist** sits on `/studio/script` and `/admin/video-generator`: exam alignment, step completeness, graph necessity, trap+correction, monetization ready. Instructor: **Prof. Munzer Haddara** / **الأستاذ منذر حداره**.
 
 ## Timeline schema
 
@@ -104,12 +104,12 @@ Step payloads may use:
 
 `POST /api/studio/script` always returns four phases:
 
-1. **introduction** (~30s) — definition + Lebanese exam scope
-2. **rule_graph** (~60s) — rule + mandatory `render_graph` / plot (avatar paused)
-3. **real_example** (~120s) — worked substitution + `show_step` (`step_en` / `step_fr` / `math_latex`)
-4. **common_mistake** (~30s)
+1. **introduction** (~50s) — certificate scope + domain with justification
+2. **rule_graph** (~100s) — proof sketch + mandatory `render_graph` (avatar paused)
+3. **real_example** (~160s) — official exercise with **≥3** `show_step` lines (`step_en` / `step_fr` / `math_latex`)
+4. **common_mistake** (~40s) — wrong reasoning named, then the correction
 
-Template mode includes French on every narration. OpenAI is used only when `OPENAI_API_KEY` or `LLM_API_KEY` is set.
+Template mode includes French on every narration at the same rigor. OpenAI is used only when `OPENAI_API_KEY` or `LLM_API_KEY` is set.
 
 ## Integrations
 

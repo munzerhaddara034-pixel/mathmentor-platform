@@ -1,6 +1,7 @@
 import { L } from "./i18n";
 import {
   REQUIRED_PHASES,
+  hasGradedExample,
   hasRenderGraph,
   hasStepByStep,
   type CanvasAction,
@@ -11,10 +12,10 @@ import {
 } from "./timeline";
 
 const PHASE_DURATION: Record<LessonPhase, number> = {
-  introduction: 30,
-  rule_graph: 60,
-  real_example: 120,
-  common_mistake: 30,
+  introduction: 50,
+  rule_graph: 100,
+  real_example: 160,
+  common_mistake: 40,
 };
 
 function bilingual(en: string, fr: string) {
@@ -81,29 +82,59 @@ export function ensurePedagogy(timeline: LessonTimeline): LessonTimeline {
   }
 
   const example = next.segments.find((segment) => segment.phase === "real_example")!;
-  if (!example.canvas.actions.some((action) => action.type === "show_step")) {
-    example.canvas.actions.push(
+  const existingSteps = example.canvas.actions.filter((action) => action.type === "show_step").length;
+  if (existingSteps < 3) {
+    const fillers: CanvasAction[] = [
       {
-        at: 6,
+        at: 8,
         type: "show_step",
         payload: {
-          latex: "\\text{Given} \\to \\text{rule} \\to \\text{substitute}",
-          text: bilingual("Write given, then the rule, then substitution.", "Écrivez les données, puis la règle, puis la substitution."),
+          latex: "\\text{Given }\\to\\text{ hypothesis }\\to\\text{ rule}",
+          math_latex: "\\text{Given }\\to\\text{ hypothesis }\\to\\text{ rule}",
+          step_en: "Step 1 — copy the given and the domain or hypothesis from the paper.",
+          step_fr: "Étape 1 — recopier les données et l’hypothèse (ou le domaine) de l’énoncé.",
+          text: bilingual(
+            "Step 1 — copy the given and the domain or hypothesis from the paper.",
+            "Étape 1 — recopier les données et l’hypothèse (ou le domaine) de l’énoncé.",
+          ),
         },
       },
       {
-        at: 18,
+        at: 36,
         type: "show_step",
         payload: {
-          latex: "\\text{Check by substitution}",
-          text: bilingual("Check by substitution before boxing the answer.", "Vérifiez par substitution avant d’encadrer la réponse."),
+          latex: "\\text{algebra: expand / factor / substitute}",
+          math_latex: "\\text{algebra: expand / factor / substitute}",
+          step_en: "Step 2 — every algebra line (expand, factor, substitute). No skipped equals.",
+          step_fr: "Étape 2 — chaque ligne d’algèbre (développer, factoriser, substituer). Aucune égalité sautée.",
+          text: bilingual(
+            "Step 2 — every algebra line (expand, factor, substitute). No skipped equals.",
+            "Étape 2 — chaque ligne d’algèbre (développer, factoriser, substituer). Aucune égalité sautée.",
+          ),
         },
       },
-    );
+      {
+        at: 70,
+        type: "show_step",
+        payload: {
+          latex: "\\text{check by substitution, then box}",
+          math_latex: "\\text{check by substitution, then box}",
+          step_en: "Step 3 — substitute back and box the conclusion the marker wants.",
+          step_fr: "Étape 3 — substituer et encadrer la conclusion attendue par le barème.",
+          text: bilingual(
+            "Step 3 — substitute back and box the conclusion the marker wants.",
+            "Étape 3 — substituer et encadrer la conclusion attendue par le barème.",
+          ),
+        },
+      },
+    ];
+    for (const extra of fillers.slice(existingSteps)) {
+      example.canvas.actions.push(extra);
+    }
   }
 
-  if (!hasRenderGraph(next) || !hasStepByStep(next)) {
-    throw new Error("Pedagogy repair failed: missing Render Graph or Show Step triggers.");
+  if (!hasRenderGraph(next) || !hasStepByStep(next) || !hasGradedExample(next)) {
+    throw new Error("Pedagogy repair failed: missing graph, or fewer than 3 graded example steps.");
   }
 
   return next;
@@ -187,8 +218,24 @@ function placeholderSegment(
             at: 4,
             type: "show_step",
             payload: {
-              latex: "\\text{step 1}",
-              text: bilingual("Step by step", "Étape par étape"),
+              latex: "\\text{Step 1 — given and hypothesis}",
+              text: bilingual("Copy the given and the hypothesis.", "Recopiez les données et l’hypothèse."),
+            },
+          },
+          {
+            at: 20,
+            type: "show_step",
+            payload: {
+              latex: "\\text{Step 2 — algebra}",
+              text: bilingual("Expand, factor, or substitute. No skipped line.", "Développez, factorisez ou substituez. Aucune ligne sautée."),
+            },
+          },
+          {
+            at: 40,
+            type: "show_step",
+            payload: {
+              latex: "\\text{Step 3 — check and box}",
+              text: bilingual("Substitute back, then box the conclusion.", "Substituez, puis encadrez la conclusion."),
             },
           },
         ],

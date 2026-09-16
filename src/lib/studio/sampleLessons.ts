@@ -23,8 +23,8 @@ export const complexNumbersLesson: LessonTimeline = {
       phase: "introduction",
       avatar: { state: "speaking" },
       narration: L(
-        "Complex numbers in the Lebanese Baccalaureate — especially LS and GS. Each z = a + bi is a point in the plane. The modulus is the distance from the origin.",
-        "Les nombres complexes au baccalauréat libanais — surtout LS et GS. Chaque z = a + bi est un point du plan. Le module est la distance à l’origine.",
+        "Complex numbers on the Lebanese Baccalaureate — especially LS and GS — are a plane geometry question: write z=a+bi, i²=−1, then the modulus as a length. Domain is the whole plane. Official papers mark the identification of Re and Im, the modulus formula with the square root, and one product expanded correctly.",
+        "Les nombres complexes au baccalauréat libanais — surtout SV et SG — sont une question de géométrie du plan : écrire z=a+bi, i²=−1, puis le module comme une longueur. L’ensemble est tout le plan. Le barème note l’identification de Re et Im, la formule du module avec la racine, et un produit correctement développé.",
       ),
       canvas: {
         actions: [
@@ -143,9 +143,23 @@ export const complexNumbersLesson: LessonTimeline = {
             payload: {
               latex: "6+1+(-2i+3i)=7+i",
               math_latex: "6+1+(-2i+3i)=7+i",
-              step_en: "Step 3 — collect terms.",
-              step_fr: "Étape 3 — rassembler les termes.",
-              text: L("Step 3 — collect terms.", "Étape 3 — rassembler les termes."),
+              step_en: "Step 3 — collect real and imaginary parts.",
+              step_fr: "Étape 3 — rassembler parties réelle et imaginaire.",
+              text: L("Step 3 — collect real and imaginary parts.", "Étape 3 — rassembler parties réelle et imaginaire."),
+            },
+          },
+          {
+            at: 88,
+            type: "show_step",
+            payload: {
+              latex: "|2+i|\\,|3-i|=\\sqrt{5}\\,\\sqrt{10}=\\sqrt{50},\\quad |7+i|=\\sqrt{50}",
+              math_latex: "|2+i|\\,|3-i|=\\sqrt{5}\\,\\sqrt{10}=\\sqrt{50},\\quad |7+i|=\\sqrt{50}",
+              step_en: "Step 4 — modulus check: |z w|=|z||w|. Substitution confirms 7+i.",
+              step_fr: "Étape 4 — contrôle du module : |z w|=|z||w|. La substitution confirme 7+i.",
+              text: L(
+                "Step 4 — modulus check: |z w|=|z||w|. Substitution confirms 7+i.",
+                "Étape 4 — contrôle du module : |z w|=|z||w|. La substitution confirme 7+i.",
+              ),
             },
           },
         ],
@@ -158,8 +172,8 @@ export const complexNumbersLesson: LessonTimeline = {
       phase: "common_mistake",
       avatar: { state: "speaking" },
       narration: L(
-        "The official trap: claiming |z1 + z2| = |z1| + |z2| always. Write the triangle inequality instead.",
-        "Le piège officiel : affirmer |z1 + z2| = |z1| + |z2| toujours. Écrivez plutôt l’inégalité triangulaire.",
+        "The official trap: claiming |z1+z2|=|z1|+|z2| always. Counter-example: z1=1, z2=−1 gives |0|=0, not 2. Write the triangle inequality and check equality only when the arguments agree.",
+        "Le piège officiel : affirmer |z1+z2|=|z1|+|z2| toujours. Contre-exemple : z1=1, z2=−1 donne |0|=0, pas 2. On écrit l’inégalité triangulaire et l’égalité n’a lieu que si les arguments coïncident.",
       ),
       canvas: {
         actions: [

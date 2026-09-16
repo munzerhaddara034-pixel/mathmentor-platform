@@ -474,6 +474,32 @@ textarea { min-height: 120px; resize: vertical; }
   align-items: center;
   margin-bottom: 6px;
 }
+.teacher-checklist {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid #ead9b0;
+  background: #fff8e8;
+}
+.teacher-checklist h2 { margin: 4px 0 8px; font-size: 1.25rem; }
+.teacher-checklist ol {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.teacher-checklist li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #ead9b0;
+}
+.teacher-checklist li strong { color: var(--navy); }
+.teacher-checklist-ar { font-weight: 700; color: #61708a; }
+.teacher-checklist li span { color: #3d4a5c; font-size: 14px; line-height: 1.45; }
 @media (max-width: 800px) {
   .studio-avatar-frame img, .studio-avatar-frame video { height: 240px; }
 }

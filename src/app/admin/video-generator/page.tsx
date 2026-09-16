@@ -1,7 +1,8 @@
 "use client";
 
-import { officialExamFourPhaseLesson, officialExamSceneDocument } from "@/lib/studio/seedLesson";
+import { officialExamFourPhaseLesson } from "@/lib/studio/seedLesson";
 import { pickText } from "@/lib/studio/i18n";
+import { TeacherQualityChecklist } from "@/components/studio/TeacherQualityChecklist";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -33,14 +34,15 @@ const DEFAULT_SCRIPT = officialExamFourPhaseLesson.segments
   .join("\n\n");
 
 const DEFAULT_NOTES =
-  "Four pedagogical phases: (1) definition of f(x)=(x-1)e^x on R, (2) limit / horizontal asymptote + Function Plot of (x-1)*exp(x) on [-3,2], (3) product rule worked example, (4) common exam trap f'(x)=e^x.";
+  "Paid-lesson bar: (1) LS/GS/SE framing + domain R with justification, (2) limit at −∞ rewritten as −(t+1)/e^t + product-rule proof of f'=x e^x + table of variation + timed graph (root, min, asymptote), (3) official exercise f(x)=m and f(x)=−1/2 with ≥3 graded steps, (4) trap: (−∞)×0 and f'=e^x corrected. EN+FR equal quality. Instructor: Prof. Munzer Haddara.";
 
-const DEFAULT_MATH = `f(x)=(x-1)e^{x}
-\\lim_{x \\to -\\infty} f(x)=0
-f'(x)=x e^{x}
-\\min(0,-1)`;
+const DEFAULT_MATH = `f(x)=(x-1)e^{x},\\ D_f=\\mathbb{R}
+\\lim_{x\\to-\\infty}f(x)=0\\ (t=-x)
+f'(x)=xe^{x}
+\\min(0,-1),\\ f(1)=0,\\ y=0
+f(x)=-1/2:\\ two\\ roots`;
 
-const DEFAULT_TIMELINE = JSON.stringify(officialExamSceneDocument, null, 2);
+const DEFAULT_TIMELINE = JSON.stringify(officialExamFourPhaseLesson, null, 2);
 
 function statusClass(status: JobStatus) {
   if (status === "completed") return "badge approved";
@@ -154,8 +156,11 @@ export default function AdminVideoGeneratorPage() {
       <p className="muted">
         Write the lesson in{" "}
         <Link href="/studio/script">/studio/script</Link>, generate a talking-avatar video here, wait for webhook or
-        status polling, then open the sync player. Seeded lesson: <code>leb-term-func-01</code>.
+        status polling, then open the sync player. Seeded lesson: <code>leb-term-func-01</code> (full Terminale study).
+        Instructor: Prof. Munzer Haddara / الأستاذ منذر حداره.
       </p>
+
+      <TeacherQualityChecklist />
 
       <section className="card" style={{ marginTop: 18, background: "#fff8e8" }}>
         <p className="eyebrow">Auth</p>

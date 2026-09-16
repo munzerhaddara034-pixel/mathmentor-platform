@@ -1,7 +1,8 @@
 "use client";
 
-import { officialExamSceneDocument } from "@/lib/studio/seedLesson";
+import { officialExamFourPhaseLesson } from "@/lib/studio/seedLesson";
 import { parseLessonTimeline, TIMELINE_STORAGE_KEY, type LessonTimeline } from "@/lib/studio/timeline";
+import { TeacherQualityChecklist } from "@/components/studio/TeacherQualityChecklist";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -18,7 +19,7 @@ const TRACKS = [
   { id: "sat", label: "SAT Math" },
 ] as const;
 
-const SEEDED_JSON = JSON.stringify(officialExamSceneDocument, null, 2);
+const SEEDED_JSON = JSON.stringify(officialExamFourPhaseLesson, null, 2);
 
 export default function StudioScriptPage() {
   const router = useRouter();
@@ -35,6 +36,8 @@ export default function StudioScriptPage() {
     phases: string[];
     hasRenderGraph: boolean;
     hasStepByStepEquations: boolean;
+    gradedSteps?: number;
+    gradedExampleReady?: boolean;
   } | null>(null);
 
   const parsed = useMemo(() => {
@@ -61,7 +64,13 @@ export default function StudioScriptPage() {
         source?: "openai" | "template";
         warning?: string;
         error?: string;
-        pedagogy?: { phases: string[]; hasRenderGraph: boolean; hasStepByStepEquations: boolean };
+        pedagogy?: {
+          phases: string[];
+          hasRenderGraph: boolean;
+          hasStepByStepEquations: boolean;
+          gradedSteps?: number;
+          gradedExampleReady?: boolean;
+        };
       };
       if (!response.ok || !payload.timeline) {
         setError(payload.error ?? "Could not generate script.");
@@ -92,11 +101,14 @@ export default function StudioScriptPage() {
       <p className="eyebrow">Studio · AI video script</p>
       <h1>Lesson script editor</h1>
       <p className="muted">
-        Default sample: <code>leb-term-func-01</code> (EN + FR scenes, KaTeX + Function Plot / Desmos). Generate a
-        four-phase official-exam script, edit the JSON, then open the interactive player or send it to{" "}
-        <Link href="/admin/video-generator">/admin/video-generator</Link>. Local preview:{" "}
-        <code>http://127.0.0.1:3001/studio/script</code>
+        Default sample: <code>leb-term-func-01</code> — full Terminale study of <code>f(x)=(x-1)e^x</code> (domain,
+        justified limits, product rule, table of variation, timed graph, official exercise, exam trap). EN default + FR
+        of equal quality. Then send the JSON to{" "}
+        <Link href="/admin/video-generator">/admin/video-generator</Link>. Instructor: Prof. Munzer Haddara / الأستاذ
+        منذر حداره.
       </p>
+
+      <TeacherQualityChecklist />
 
       <section className="card" style={{ marginTop: 20 }}>
         <div className="grid two">
@@ -150,15 +162,16 @@ export default function StudioScriptPage() {
         </div>
         {source ? (
           <p className="muted" style={{ marginTop: 12 }}>
-            Source: {source === "openai" ? "OpenAI" : source === "seed" ? "seeded leb-term-func-01 scenes" : "EN+FR template (no LLM key)"}
+            Source: {source === "openai" ? "OpenAI" : source === "seed" ? "seeded leb-term-func-01 (full exam study)" : "EN+FR template (no LLM key)"}
           </p>
         ) : null}
         {warning ? <p className="muted">{warning}</p> : null}
         {error ? <p className="error">{error}</p> : null}
         {pedagogy ? (
-          <p className={pedagogy.hasRenderGraph && pedagogy.hasStepByStepEquations ? "success" : "error"}>
-            phases: {pedagogy.phases.join(" → ")} · Render Graph: {pedagogy.hasRenderGraph ? "yes" : "no"} · Step-by-step:{" "}
-            {pedagogy.hasStepByStepEquations ? "yes" : "no"}
+          <p className={pedagogy.hasRenderGraph && pedagogy.gradedExampleReady !== false ? "success" : "error"}>
+            phases: {pedagogy.phases.join(" → ")} · Render Graph: {pedagogy.hasRenderGraph ? "yes" : "no"} · Graded
+            steps: {pedagogy.gradedSteps ?? (pedagogy.hasStepByStepEquations ? "yes" : "no")}
+            {pedagogy.gradedExampleReady === false ? " (need ≥3)" : ""}
           </p>
         ) : null}
       </section>
