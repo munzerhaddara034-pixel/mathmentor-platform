@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
 const DEMO_ROWS = [
@@ -13,7 +13,6 @@ const DEMO_ROWS = [
 ] as const;
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "";
   const reason = params.get("reason");
@@ -34,6 +33,7 @@ function LoginForm() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify({ email, password, next }),
       });
       const payload = (await response.json()) as {
@@ -45,14 +45,13 @@ function LoginForm() {
       if (!response.ok || !payload.ok) {
         setError(payload.error ?? "Login failed.");
         setErrorAr(payload.errorAr ?? "فشل تسجيل الدخول.");
+        setBusy(false);
         return;
       }
-      router.replace(payload.redirectTo || "/lessons/interactive");
-      router.refresh();
+      window.location.assign(payload.redirectTo || "/lessons/interactive");
     } catch {
       setError("Could not reach the login service.");
       setErrorAr("تعذّر الوصول إلى خدمة الدخول.");
-    } finally {
       setBusy(false);
     }
   };
