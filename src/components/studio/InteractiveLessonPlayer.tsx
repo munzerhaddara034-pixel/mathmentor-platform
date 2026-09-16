@@ -174,7 +174,10 @@ export function InteractiveLessonPlayer({
             key={item.id}
             type="button"
             className={`phase-chip ${segment?.id === item.id ? "active" : ""}`}
-            onClick={() => seek(item.start + 0.05)}
+            onClick={() => {
+              const first = item.canvas.actions.find((action) => action.type !== "clear");
+              seek(item.start + (first?.at ?? 0.5) + 0.08);
+            }}
           >
             {phaseLabel(item.phase, item.label)}
           </button>
