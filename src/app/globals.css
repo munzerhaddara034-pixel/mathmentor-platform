@@ -690,6 +690,8 @@ textarea { min-height: 120px; resize: vertical; }
   .studio-caption { font-size: 16px; padding: 12px 14px; }
   .studio-controls { gap: 8px; }
   .studio-seek { min-width: 100%; }
+  .studio-chapter-row { flex-wrap: wrap; overflow: visible; }
+  .studio-chapter-btn { flex: 1 1 calc(33.33% - 8px); min-width: 88px; }
   .studio-lang-toggle { white-space: normal; }
   .studio-desmos-host { height: 240px; }
 }
