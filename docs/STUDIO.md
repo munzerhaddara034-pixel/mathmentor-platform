@@ -44,17 +44,19 @@ Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 ## Dual view
 
 - **Desktop (≥900px)**: **left = interactive math canvas**, **right = HeyGen / avatar video**.
-- **Phone**: **video on top**, canvas below — so the teacher is visible while listening; scroll for the board.
+- **Phone**: **video on top**, canvas below — so the teacher is visible while listening; tap **Board on top** to swap.
+- Touch targets are at least 44px; KaTeX on the board scrolls horizontally on small screens.
 - The lesson stage stays `dir="ltr"` so graphs and KaTeX are not mirrored. Site chrome (nav) can remain Arabic RTL.
-- Canvas pan / zoom / hover does **not** pause video audio or playback.
+- Canvas pan / zoom / hover does **not** pause video audio or playback (a quiz checkpoint is the only auto-pause).
 
 ## Time-synced math canvas
 
-`video.ontimeupdate` / `seeked` (and the silent RAF clock when there is no clip) set `currentTime`. The canvas reads timeline events and:
+The video element is the clock whenever the playhead is inside the clip (`video.currentTime`, plus `seeked` / `play` / `pause` / `ratechange`, polled on animation frames). Seeking **recomputes** the board from an empty state (`canvasStateAt`) so going backward or forward is idempotent. After a short placeholder clip ends, a RAF lesson clock continues so a 6-minute script can outlive an 8-second demo file — the clip may loop visually, but it no longer overwrites the canvas. Pan/zoom never pauses audio.
 
 1. **Fade-in** KaTeX when `currentTime` reaches `show_equation` / `fade_equation`.
 2. **Plots immediately** on `render_graph` (Function Plot SVG; Desmos if `NEXT_PUBLIC_DESMOS_API_KEY` is set).
 3. Highlights **roots, extrema, asymptotes** from the event payload.
+4. **`quiz_mcq`** auto-pauses the video, shows an MCQ overlay, and resumes only after a correct check **or** after **Show solution** (which unlocks **Continue**). Wrong answers stay retryable.
 
 Flat event fields are lifted into `payload` (backward compatible with `{ at, type, payload }`). Absolute-time events may live on `timeline.events`:
 
@@ -73,13 +75,21 @@ Flat event fields are lifted into `payload` (backward compatible with `{ at, typ
 }
 ```
 
-`leb-term-func-01` / `/lessons/interactive` is a **full Terminale LS/GS/SE study** of `f(x)=(x-1)e^x` (~6 min): domain, limits rewritten as a quotient, product-rule algebra, table of variation, timed graph (root / min / asymptote around 2:30), official exercise `f(x)=m` and `f(x)=−1/2` with four graded steps, then the exam trap `(−∞)×0` and `f'=e^x`. EN and FR are written as parallel papers, not a calque. Wheel or pinch to zoom — playback continues. Short demo clips loop after they hand the clock to RAF.
+`leb-term-func-01` / `/lessons/interactive` is a **full Terminale LS/GS/SE study** of `f(x)=(x-1)e^x` (~6 min): domain, limits rewritten as a quotient, product-rule algebra, in-video MCQ at **2:18** (`f'(x)=x e^x`), table of variation, timed graph (root / min / asymptote around 2:30), official exercise `f(x)=m` and `f(x)=−1/2` with four graded steps, then the exam trap `(−∞)×0` and `f'=e^x`. EN and FR are written as parallel papers, not a calque. Wheel or pinch to zoom — playback continues. Short demo clips loop after they hand the clock to RAF.
 
 ## Seeded lesson
 
 `leb-term-func-01` is preloaded in `/studio/script` as the **four-phase timeline** (not a three-line slogan). `/studio/player?lesson=leb-term-func-01` still plays the compact scene document (same math, shorter audio).
 
 A **Teacher Quality Checklist** sits on `/studio/script` and `/admin/video-generator`: exam alignment, step completeness, graph necessity, trap+correction, monetization ready. Instructor: **Prof. Munzer Haddara** / **الأستاذ منذر حداره**.
+
+## Teacher timeline editor
+
+There is no login in this build. Open `/lessons/interactive?teacher=1` (or tap **Teacher tools**, or set `localStorage.mathmentor.demoRole` to `teacher` / `admin`). The mini-panel edits absolute `timeline.events`: time, type (`show_equation`, `render_graph`, `highlight_point`, `quiz_mcq`, …), LaTeX / expression / domain / highlights, and quiz fields. **Apply live** updates the player without a reload. **Save** writes `sessionStorage` (`mathmentor.timelineEvents:<id>`) and `POST /api/studio/events` → `data/studio-events.json`. Validation errors are shown in English and Arabic.
+
+## In-video quiz
+
+A `quiz_mcq` event pauses playback when `currentTime` reaches `at`. Skipping past an unanswered quiz is clamped. Resume after **Check answer** (correct) or **Show solution** then **Continue**. Seeded in `leb-term-func-01` at 138s.
 
 ## Timeline schema
 

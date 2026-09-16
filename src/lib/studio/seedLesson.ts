@@ -151,6 +151,28 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
       },
     },
     {
+      at: 138,
+      type: "quiz_mcq",
+      payload: {
+        id: "leb-term-func-01-derivative",
+        question: cap(
+          "After the product rule, what is the simplified derivative f'(x)?",
+          "Après la règle du produit, quelle est la dérivée simplifiée f'(x) ?",
+        ),
+        choices: [
+          { id: "a", text: cap("e^{x}", "e^{x}") },
+          { id: "b", text: cap("x e^{x}", "x e^{x}") },
+          { id: "c", text: cap("(x-1)e^{x}", "(x-1)e^{x}") },
+          { id: "d", text: cap("e^{x}+1", "e^{x}+1") },
+        ],
+        correctId: "b",
+        explanation: cap(
+          "u=x−1, v=e^x ⇒ f'=e^x+(x−1)e^x=x e^x. The trap e^x treats (x−1) as a constant.",
+          "u=x−1, v=e^x ⇒ f'=e^x+(x−1)e^x=x e^x. Le piège e^x traite (x−1) comme une constante.",
+        ),
+      },
+    },
+    {
       at: 155,
       type: "highlight_point",
       payload: {

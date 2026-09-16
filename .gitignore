@@ -2,6 +2,7 @@ node_modules
 .next
 data/store.json
 data/heygen-jobs.json
+data/studio-events.json
 data/uploads
 public/uploads
 .env

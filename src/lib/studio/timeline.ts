@@ -28,16 +28,19 @@ export type LessonPhase = z.infer<typeof lessonPhaseSchema>;
 export const avatarStateSchema = z.enum(["speaking", "paused"]);
 export type AvatarState = z.infer<typeof avatarStateSchema>;
 
-export const canvasActionTypeSchema = z.enum([
+export const CANVAS_ACTION_TYPES = [
   "show_equation",
   "fade_equation",
   "render_graph",
   "highlight_point",
   "show_step",
   "clear",
+  "quiz_mcq",
   "renderMath",
   "plotFunction",
-]);
+] as const;
+
+export const canvasActionTypeSchema = z.enum(CANVAS_ACTION_TYPES);
 export type CanvasActionType = z.infer<typeof canvasActionTypeSchema>;
 
 export const highlightKindSchema = z.enum(["root", "asymptote", "extrema", "point"]);
@@ -77,6 +80,13 @@ function liftTimelineEvent(value: unknown) {
     "highlights",
     "caption",
     "kind",
+    "question",
+    "choices",
+    "options",
+    "correctId",
+    "answer",
+    "explanation",
+    "prompt",
   ]) {
     if (rec[key] !== undefined && payload[key] === undefined) payload[key] = rec[key];
   }
@@ -203,6 +213,28 @@ export const REQUIRED_PHASES: LessonPhase[] = [
 ];
 
 export const TIMELINE_STORAGE_KEY = "mathmentor.lessonTimeline";
+export const TEACHER_MODE_STORAGE_KEY = "mathmentor.teacherMode";
+export const DEMO_ROLE_STORAGE_KEY = "mathmentor.demoRole";
+export const EVENTS_STORAGE_KEY_PREFIX = "mathmentor.timelineEvents:";
+
+export function eventsStorageKey(lessonId: string) {
+  return `${EVENTS_STORAGE_KEY_PREFIX}${lessonId}`;
+}
+
+export function validateTimelineEvents(input: unknown):
+  | { ok: true; events: CanvasAction[] }
+  | { ok: false; messageEn: string; messageAr: string } {
+  const parsed = z.array(canvasActionSchema).safeParse(input);
+  if (parsed.success) return { ok: true, events: parsed.data };
+  const issue = parsed.error.issues[0];
+  const path = issue?.path?.length ? issue.path.join(".") : "events";
+  const detail = issue?.message ?? "Invalid event";
+  return {
+    ok: false,
+    messageEn: `Invalid timeline JSON (${path}): ${detail}`,
+    messageAr: `JSON الخط الزمني غير صالح (${path}): ${detail}`,
+  };
+}
 
 export function segmentAt(timeline: LessonTimeline, timeSec: number): LessonSegment | undefined {
   const t = clampTime(timeline, timeSec);
@@ -359,6 +391,7 @@ function mergeHighlights(state: DerivedCanvasState, items: HighlightPayload[]) {
 function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: number, stepIndex: number): number {
   const lifted = liftTimelineEvent(action) as CanvasAction;
   const type = normalizedActionType(lifted.type);
+  if (type === "quiz_mcq") return stepIndex;
   state.lastActionType = type;
   const payload = (lifted.payload ?? {}) as Record<string, unknown>;
 
@@ -419,6 +452,8 @@ function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: numbe
     if (bundled.length) mergeHighlights(state, bundled);
     else mergeHighlights(state, [asHighlight(payload)]);
   }
+
+  // quiz_mcq and unknown types do not mutate the board — canvasStateAt stays idempotent.
   return stepIndex;
 }
 

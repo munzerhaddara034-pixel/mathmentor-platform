@@ -5,6 +5,8 @@ import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import { DEMO_AVATAR_VIDEO } from "@/lib/studio/heygenClient";
 
+export type VideoClockSource = "raf" | "timeupdate" | "seeked" | "play" | "pause" | "ratechange";
+
 type Props = {
   language: LessonLocale;
   speaking: boolean;
@@ -16,11 +18,11 @@ type Props = {
   audioUrl?: string;
   poster?: string;
   teacherName?: string;
-  /** When true, this panel is the clock: timeupdate drives the canvas. */
+  /** When true, this panel is the clock: video.currentTime drives the canvas. */
   clockMaster?: boolean;
   seekEpoch?: number;
   seekTo?: number;
-  onTime?: (time: number) => void;
+  onTime?: (time: number, source?: VideoClockSource) => void;
   onEnded?: () => void;
   onError?: () => void;
   onDuration?: (duration: number) => void;
@@ -53,10 +55,19 @@ export function AvatarPlayer({
   const onEndedRef = useRef(onEnded);
   const onErrorRef = useRef(onError);
   const onDurationRef = useRef(onDuration);
+  const seekingRef = useRef(false);
+  const clockMasterRef = useRef(clockMaster);
   onTimeRef.current = onTime;
   onEndedRef.current = onEnded;
   onErrorRef.current = onError;
   onDurationRef.current = onDuration;
+  clockMasterRef.current = clockMaster;
+
+  const emitTime = (video: HTMLVideoElement, source: VideoClockSource) => {
+    if (!clockMasterRef.current) return;
+    if (seekingRef.current && source !== "seeked") return;
+    onTimeRef.current?.(video.currentTime, source);
+  };
 
   useEffect(() => {
     const video = videoRef.current;
@@ -67,16 +78,53 @@ export function AvatarPlayer({
     const emitMeta = () => {
       if (Number.isFinite(video.duration) && video.duration > 0) onDurationRef.current?.(video.duration);
     };
+    const onSeeking = () => {
+      seekingRef.current = true;
+    };
+    const onSeeked = () => {
+      seekingRef.current = false;
+      emitTime(video, "seeked");
+    };
+    const onPlay = () => emitTime(video, "play");
+    const onPause = () => emitTime(video, "pause");
+    const onRate = () => emitTime(video, "ratechange");
+    const onTimeUpdate = () => emitTime(video, "timeupdate");
 
     video.addEventListener("ended", emitEnded);
     video.addEventListener("error", emitError);
     video.addEventListener("loadedmetadata", emitMeta);
+    video.addEventListener("seeking", onSeeking);
+    video.addEventListener("seeked", onSeeked);
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("ratechange", onRate);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    if (Number.isFinite(video.duration) && video.duration > 0) emitMeta();
     return () => {
       video.removeEventListener("ended", emitEnded);
       video.removeEventListener("error", emitError);
       video.removeEventListener("loadedmetadata", emitMeta);
+      video.removeEventListener("seeking", onSeeking);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("ratechange", onRate);
+      video.removeEventListener("timeupdate", onTimeUpdate);
     };
   }, [videoUrl]);
+
+  useEffect(() => {
+    if (!clockMaster || !videoUrl) return;
+    const video = videoRef.current;
+    if (!video) return;
+    let frame = 0;
+    const loop = () => {
+      emitTime(video, "raf");
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, [clockMaster, videoUrl]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -100,7 +148,18 @@ export function AvatarPlayer({
     const video = videoRef.current;
     if (!video || !videoUrl || !clockMaster) return;
     if (seekEpoch <= 0) return;
-    if (Math.abs(video.currentTime - seekTo) > 0.12) video.currentTime = seekTo;
+    const duration = Number.isFinite(video.duration) ? video.duration : Number.NaN;
+    if (Number.isFinite(duration) && seekTo >= duration - 0.02) {
+      seekingRef.current = false;
+      return;
+    }
+    if (Math.abs(video.currentTime - seekTo) <= 0.08) {
+      seekingRef.current = false;
+      onTimeRef.current?.(video.currentTime, "seeked");
+      return;
+    }
+    seekingRef.current = true;
+    video.currentTime = seekTo;
   }, [clockMaster, seekEpoch, seekTo, videoUrl]);
 
   useEffect(() => {
@@ -143,14 +202,6 @@ export function AvatarPlayer({
             playsInline
             controls={false}
             disablePictureInPicture
-            onTimeUpdate={(event) => {
-              if (!clockMaster) return;
-              onTimeRef.current?.(event.currentTarget.currentTime);
-            }}
-            onSeeked={(event) => {
-              if (!clockMaster) return;
-              onTimeRef.current?.(event.currentTarget.currentTime);
-            }}
             onContextMenu={(event) => event.preventDefault()}
           />
         ) : (

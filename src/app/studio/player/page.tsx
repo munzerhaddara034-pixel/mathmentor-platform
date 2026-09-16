@@ -71,7 +71,7 @@ function StudioPlayerInner() {
   }, [jobId, lesson, src]);
 
   return (
-    <main className="shell">
+    <main className="shell studio-shell">
       <p className="muted">
         <Link href="/studio/script">Script editor</Link>
         {" · "}
