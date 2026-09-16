@@ -7,7 +7,7 @@ export function ChatWidget() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<{ role: "user" | "bot"; text: string }[]>([
-    { role: "bot", text: "أهلاً بك في منصة الأستاذ منذر حدارة. كيف أساعدك؟" },
+    { role: "bot", text: "أهلاً بك في منصة الأستاذ منذر حداره. كيف أساعدك؟" },
   ]);
 
   const send = async () => {

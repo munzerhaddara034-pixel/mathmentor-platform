@@ -137,7 +137,7 @@ export function timelineFromScenes(doc: StudioSceneDocument) {
     topic: doc.topic ?? doc.title.en,
     track: "ls" as const,
     grade: doc.grade ?? "Terminale LS / GS / SE",
-    instructor: doc.instructor,
+    instructor: doc.instructor ?? "Prof. Munzer Haddara",
     title: L(doc.title.en, doc.title.fr),
     language: doc.defaultLanguage,
     defaultLanguage: doc.defaultLanguage,

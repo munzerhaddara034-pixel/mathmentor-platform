@@ -1,6 +1,6 @@
 # Interactive avatar & explanation studio
 
-Demo for **مشغل الدروس الشارحة والسبورة الذكية** — Prof. Munzer Al-Tarah / الأستاذ منذر حدارة.
+Demo for **مشغل الدروس الشارحة والسبورة الذكية** — Prof. Munzer Haddara / الأستاذ منذر حداره.
 
 ## Run locally
 

@@ -1,6 +1,6 @@
 # HeyGen hybrid lesson videos
 
-Daily teacher workflow for **منصة الأستاذ منذر الطارة / MathMentor**:
+Daily teacher workflow for **منصة الأستاذ منذر حداره / MathMentor**:
 
 1. Write (or generate) the bilingual lesson in [`/studio/script`](/studio/script) (`leb-term-func-01` is seeded).
 2. Open [`/admin/video-generator`](/admin/video-generator), paste the narration, notes, math examples, language, speed, and timeline JSON / lesson id.

@@ -50,7 +50,7 @@ export function InteractiveLessonPlayer({
   const canvas = useMemo(() => canvasStateAt(timeline, currentTime), [timeline, currentTime]);
   const frozen = Boolean(segment && segment.avatar.state === "paused");
   const speaking = Boolean(playing && segment && segment.avatar.state === "speaking" && !frozen);
-  const instructor = timeline.instructor ?? "Prof. Munzer Al-Tarah";
+  const instructor = timeline.instructor ?? "Prof. Munzer Haddara";
 
   useEffect(() => {
     setVideoFailed(false);

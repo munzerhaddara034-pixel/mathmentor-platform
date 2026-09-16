@@ -38,7 +38,7 @@ export function AvatarPlayer({
   videoUrl,
   audioUrl,
   poster = DEFAULT_POSTER,
-  teacherName = "Prof. Munzer Al-Tarah · الأستاذ منذر حدارة",
+  teacherName = "Prof. Munzer Haddara · الأستاذ منذر حداره",
   clockMaster = false,
   seekEpoch = 0,
   seekTo = 0,

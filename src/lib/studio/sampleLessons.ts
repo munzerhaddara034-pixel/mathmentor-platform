@@ -13,6 +13,7 @@ export const complexNumbersLesson: LessonTimeline = {
   title: L("Complex Numbers — the Argand plane", "Nombres complexes — le plan d’Argand"),
   language: "en",
   durationSec: 240,
+  instructor: "Prof. Munzer Haddara",
   media: { poster: "/teachers/munzer.jpg" },
   segments: [
     {

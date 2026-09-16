@@ -11,7 +11,7 @@ export const officialExamSceneDocument: StudioSceneDocument = {
     en: "Exponential Functions - Official Exam Patterns",
     fr: "Fonctions Exponentielles - Modèles d'Examens Officiels",
   },
-  instructor: "Prof. Munzer Al-Tarah",
+  instructor: "Prof. Munzer Haddara",
   topic: "Exponential Functions",
   grade: "Terminale LS / GS / SE",
   track: "ls",
@@ -61,7 +61,7 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
   topic: "Exponential Functions",
   track: "ls",
   grade: "Terminale LS / GS / SE",
-  instructor: "Prof. Munzer Al-Tarah",
+  instructor: "Prof. Munzer Haddara",
   defaultLanguage: "en",
   title: L(
     "Exponential Functions - Official Exam Patterns",

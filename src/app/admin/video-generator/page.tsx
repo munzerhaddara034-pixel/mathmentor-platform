@@ -149,7 +149,7 @@ export default function AdminVideoGeneratorPage() {
 
   return (
     <main className="shell" dir="ltr">
-      <p className="eyebrow">Admin · منصة الأستاذ منذر الطارة</p>
+      <p className="eyebrow">Admin · منصة الأستاذ منذر حداره</p>
       <h1>HeyGen video generator</h1>
       <p className="muted">
         Write the lesson in{" "}

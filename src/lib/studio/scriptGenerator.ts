@@ -67,6 +67,7 @@ function cloneTimeline(base: LessonTimeline, request: ScriptRequest): LessonTime
     track: coerceTrack(String(request.track)),
     grade,
     language: request.language === "fr" ? "fr" : "en",
+    instructor: base.instructor ?? "Prof. Munzer Haddara",
     title: L(
       `${request.topic} — ${scope.en}${grade ? ` · ${grade}` : ""}`,
       `${request.topic} — ${scope.fr}${grade ? ` · ${grade}` : ""}`,
@@ -84,6 +85,7 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
     grade: request.grade,
     language: request.language === "fr" ? "fr" : "en",
     durationSec: 240,
+    instructor: "Prof. Munzer Haddara",
     title: L(`${request.topic} — ${scope.en}`, `${request.topic} — ${scope.fr}`, `${request.topic} — ${scope.ar}`),
     media: { poster: "/teachers/munzer.jpg" },
     segments: [
@@ -262,6 +264,7 @@ function genericLesson(request: ScriptRequest): LessonTimeline {
     grade: request.grade,
     language: request.language === "fr" ? "fr" : "en",
     durationSec: 240,
+    instructor: "Prof. Munzer Haddara",
     title: L(`${topic} — ${scope.en}`, `${topic} — ${scope.fr}`, `${topic} — ${scope.ar}`),
     media: { poster: "/teachers/munzer.jpg" },
     segments: [
@@ -447,6 +450,7 @@ Return ONE JSON object only, matching this schema:
   "id": string,
   "title": { "en": string, "fr": string },
   "language": "en" | "fr",
+  "instructor": "Prof. Munzer Haddara",
   "defaultLanguage": "en",
   "durationSec": number,
   "track": string,
