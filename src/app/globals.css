@@ -869,11 +869,45 @@ textarea { min-height: 120px; resize: vertical; }
   50% { transform: translate(38%, 55%) rotate(-18deg); }
   100% { transform: translate(8%, 12%) rotate(-18deg); }
 }
-.nav-user {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
+.solver-card { max-width: 720px; }
+.solver-form .sample-chips { margin: 0 0 12px; }
+.chip {
+  border: 1px solid var(--line);
+  background: var(--gold-soft);
   color: var(--navy);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
 }
+.latex-preview {
+  background: #fffdf7;
+  border: 1px dashed var(--gold);
+  border-radius: 16px;
+  padding: 12px 16px;
+  overflow-x: auto;
+}
+.final-box {
+  background: var(--navy);
+  color: white;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.final-box .muted { color: #c7d4e6; }
+.solver-steps { padding-left: 20px; }
+.solver-steps li { margin-bottom: 16px; }
+.slot-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.slot-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+.admin-tabs { margin-top: 8px; }
+.solver-result { display: grid; gap: 24px; }
+.welcome-banner .row { margin-top: 12px; }
+
 

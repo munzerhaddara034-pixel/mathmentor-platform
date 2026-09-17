@@ -26,6 +26,8 @@ export async function Nav() {
           </>
         ) : null}
         <Link href="/lessons/interactive">السبورة</Link>
+        <Link href="/math-solver">الحلّال</Link>
+        <Link href="/live">مباشر</Link>
         <Link href="/practice">الاختبارات</Link>
         {staff ? <Link href="/bank">بنك الأستاذ</Link> : null}
         <Link href="/classroom">الصف</Link>
@@ -35,6 +37,7 @@ export async function Nav() {
         <Link href="/subscribe">الاشتراك</Link>
         {staff ? (
           <>
+            <Link href="/admin">الإدارة</Link>
             <Link href="/dashboard">لوحة الأستاذ</Link>
             <Link href="/assistant">الموظف</Link>
             <Link href="/professor">الأستاذ</Link>

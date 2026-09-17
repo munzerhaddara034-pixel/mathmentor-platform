@@ -163,6 +163,8 @@ export type SubscriptionPlan = {
   usdMonthly: number;
   usdTerm: number;
   includes: string;
+  tier?: "AI_TIER" | "LIVE_TIER" | "BOTH";
+  liveCredits?: number;
 };
 
 export type PlatformSettings = {

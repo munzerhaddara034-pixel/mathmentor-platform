@@ -7,10 +7,12 @@ export default async function SubscribePage() {
   const settings = store.settings;
   return (
     <main className="shell">
-      <p className="eyebrow">Subscription</p>
+      <p className="eyebrow">Subscription · dual tier</p>
       <h1>رسوم الاشتراك ورقم الهاتف</h1>
       <p className="muted">
-        Academy phone / WhatsApp: {settings.phone}. The AI employee can change this number by command after you confirm.
+        Academy phone / WhatsApp: {settings.phone}. Tier 1 = lessons + AI solver + auto explanations. Tier 2 = live 1-on-1
+        credits with Prof. Munzer Haddara / الأستاذ منذر حداره. Redeem a card on /redeem (MUNZER-AI-3K, MUNZER-LIVE-4C,
+        MUNZER-BOTH-1X).
       </p>
       <div className="grid two">
         {settings.plans.map((plan) => (

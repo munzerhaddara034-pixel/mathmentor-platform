@@ -44,6 +44,9 @@ function seed(): StoreData {
       { code: "MUNZER-GOLD-9A", planId: "all", used: false },
       { code: "MUNZER-G12-7K", planId: "g11-12", used: false },
       { code: "BREVET-29-MX", planId: "g7-9", used: false },
+      { code: "MUNZER-AI-3K", planId: "ai", used: false },
+      { code: "MUNZER-LIVE-4C", planId: "live", used: false },
+      { code: "MUNZER-BOTH-1X", planId: "both", used: false },
     ],
     quizAttempts: [],
     customQuestions: [],
@@ -79,6 +82,18 @@ async function ensureStore(): Promise<StoreData> {
     parsed.customQuestions ??= [];
     parsed.entitlements ??= [];
     parsed.exams ??= [];
+    const planIds = new Set((parsed.settings.plans ?? []).map((plan) => plan.id));
+    for (const plan of defaultSettings.plans) {
+      if (!planIds.has(plan.id)) parsed.settings.plans.push(plan);
+    }
+    const codes = new Set((parsed.scratchCards ?? []).map((card) => card.code));
+    for (const card of [
+      { code: "MUNZER-AI-3K", planId: "ai", used: false },
+      { code: "MUNZER-LIVE-4C", planId: "live", used: false },
+      { code: "MUNZER-BOTH-1X", planId: "both", used: false },
+    ]) {
+      if (!codes.has(card.code)) parsed.scratchCards.push(card);
+    }
     return withFeaturedLesson(parsed);
   } catch {
     const initial = withFeaturedLesson(seed());

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getLiveSession } from "@/lib/auth/session";
-import { userHasSubscription } from "@/lib/auth/store";
+import { userAccess } from "@/lib/auth/store";
 import { isStaffRole } from "@/lib/auth/paths";
 
 export const runtime = "nodejs";
@@ -24,11 +24,17 @@ export async function GET() {
       { status: 401 },
     );
   }
-  const subscribed = isStaffRole(live.user.role) ? true : await userHasSubscription(live.user);
+  const access = isStaffRole(live.user.role)
+    ? { aiAccess: true, liveAccess: true, subscribed: true, subscriptionType: live.user.subscriptionType, liveCredits: live.user.liveCredits }
+    : await userAccess(live.user);
   return NextResponse.json({
     ok: true,
     user: live.user,
-    subscribed,
+    subscribed: access.aiAccess,
+    aiAccess: access.aiAccess,
+    liveAccess: access.liveAccess,
+    subscriptionType: access.subscriptionType,
+    liveCredits: access.liveCredits,
     canTeach: isStaffRole(live.user.role),
   });
 }

@@ -43,6 +43,8 @@ const PRIVATE_PREFIXES = [
   "/leaderboard",
   "/redeem",
   "/activate",
+  "/math-solver",
+  "/live",
 ];
 
 const STAFF_PREFIXES = [

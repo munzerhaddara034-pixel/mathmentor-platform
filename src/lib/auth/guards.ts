@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { getLiveSession, type LiveSession } from "./session";
 import { isStaffRole, loginUrl } from "./paths";
-import { userHasSubscription } from "./store";
+import { userHasAiAccess, userHasLiveAccess, userHasSubscription } from "./store";
 
 export async function requireAuth(nextPath: string) {
   const live = await getLiveSession();
@@ -26,6 +26,22 @@ export async function requireLessonAccess(nextPath: string) {
   if (isStaffRole(live.user.role)) return live;
   const subscribed = await userHasSubscription(live.user);
   if (!subscribed) redirect(`/redeem?need=subscription&next=${encodeURIComponent(nextPath)}`);
+  return live;
+}
+
+export async function requireAiAccess(nextPath: string) {
+  const live = await requireAuth(nextPath);
+  if (isStaffRole(live.user.role)) return live;
+  const allowed = await userHasAiAccess(live.user);
+  if (!allowed) redirect(`/redeem?need=ai&next=${encodeURIComponent(nextPath)}`);
+  return live;
+}
+
+export async function requireLiveAccess(nextPath: string) {
+  const live = await requireAuth(nextPath);
+  if (isStaffRole(live.user.role)) return live;
+  const allowed = await userHasLiveAccess(live.user);
+  if (!allowed) redirect(`/subscribe?need=live&next=${encodeURIComponent(nextPath)}`);
   return live;
 }
 

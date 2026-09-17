@@ -12,10 +12,13 @@ export default function RedeemPage() {
   const [ok, setOk] = useState(false);
   const [planName, setPlanName] = useState("");
   const [need, setNeed] = useState(false);
+  const [needKind, setNeedKind] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setNeed(params.get("need") === "subscription");
+    const kind = params.get("need") ?? "";
+    setNeed(kind === "subscription" || kind === "ai" || kind === "live");
+    setNeedKind(kind);
     void fetch("/api/auth/session", { credentials: "same-origin" })
       .then((response) => response.json())
       .then((payload: { user?: { name?: string; phone?: string } }) => {
@@ -41,13 +44,19 @@ export default function RedeemPage() {
     <main className="shell" dir="rtl">
       <p className="eyebrow">تفعيل الاشتراك</p>
       <h1>أدخل كود البطاقة</h1>
-      <p className="muted">اشترِ البطاقة من مكتب معتمد. للتجربة: MUNZER-GOLD-9A</p>
+      <p className="muted">اشترِ البطاقة من مكتب معتمد. للتجربة: MUNZER-GOLD-9A · MUNZER-AI-3K · MUNZER-LIVE-4C · MUNZER-BOTH-1X</p>
       {need ? (
         <p className="studio-teacher-error" role="alert">
-          Your account is signed in but the subscription is not active. Redeem a card to open lessons.
+          {needKind === "ai"
+            ? "AI_TIER or BOTH is required for the math solver and interactive lessons."
+            : needKind === "live"
+              ? "LIVE_TIER or BOTH is required to book Prof. Munzer Haddara."
+              : "Your account is signed in but the subscription is not active. Redeem a card to open lessons."}
           <br />
           <span dir="rtl" lang="ar">
-            الحساب مسجّل لكن الاشتراك غير مفعّل. أدخل كود البطاقة لفتح الدروس.
+            {needKind === "live"
+              ? "يلزم اشتراك الحصص المباشرة مع الأستاذ منذر حداره."
+              : "الحساب مسجّل لكن الاشتراك غير مفعّل. أدخل كود البطاقة لفتح الدروس أو الحلّال."}
           </span>
         </p>
       ) : null}
@@ -72,8 +81,14 @@ export default function RedeemPage() {
           <div className="welcome-banner">
             <h2>تم الاشتراك</h2>
             <p>مرحباً {name || "بك"} في منصة الأستاذ منذر. فُتحت لك: {planName}.</p>
-            <Link className="btn ok" href="/lessons/interactive">
+            <Link className="btn ok" href="/math-solver">
+              الحلّال
+            </Link>
+            <Link className="btn" href="/lessons/interactive">
               ابدأ الدروس
+            </Link>
+            <Link className="btn" href="/live">
+              حجز مباشرة
             </Link>
           </div>
         ) : null}

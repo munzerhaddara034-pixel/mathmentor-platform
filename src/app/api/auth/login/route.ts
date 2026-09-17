@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findUserByEmail, asPublicUser, userHasSubscription } from "@/lib/auth/store";
+import { findUserByEmail, asPublicUser, userAccess } from "@/lib/auth/store";
 import { verifyPassword } from "@/lib/auth/passwords";
 import { startExclusiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
@@ -36,13 +36,17 @@ export async function POST(request: Request) {
   }
   await startExclusiveSession(user.id, request.headers.get("user-agent") ?? undefined);
   const publicUser = asPublicUser(user);
-  const subscribed = await userHasSubscription(user);
+  const access = await userAccess(user);
   const requested = body.next && body.next.startsWith("/") ? body.next : "";
-  let redirectTo = requested || "/lessons/interactive";
+  let redirectTo = requested || (access.aiAccess ? "/lessons/interactive" : access.liveAccess ? "/live" : "/redeem");
   if (isStaffRole(user.role) && (!requested || requested === "/lessons/interactive")) {
     redirectTo = requested || "/studio/script";
-  } else if (!isStaffRole(user.role) && !subscribed) {
+  } else if (!isStaffRole(user.role) && !access.aiAccess && !access.liveAccess) {
     redirectTo = `/redeem?need=subscription${requested ? `&next=${encodeURIComponent(requested)}` : ""}`;
+  } else if (!isStaffRole(user.role) && requested.startsWith("/live") && !access.liveAccess) {
+    redirectTo = `/subscribe?need=live&next=${encodeURIComponent(requested)}`;
+  } else if (!isStaffRole(user.role) && (requested.startsWith("/math-solver") || requested.startsWith("/lessons")) && !access.aiAccess) {
+    redirectTo = `/redeem?need=ai&next=${encodeURIComponent(requested)}`;
   }
   return NextResponse.json({
     ok: true,

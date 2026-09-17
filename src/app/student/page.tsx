@@ -60,6 +60,12 @@ export default function StudentPage() {
             <Link className="btn dark" href={`/classroom/${next?.id}`}>
               Continue classroom video
             </Link>
+            <Link className="btn" href="/math-solver">
+              AI solver
+            </Link>
+            <Link className="btn" href="/live">
+              Book Prof. Munzer
+            </Link>
             <Link className="btn" href="/subscribe">
               Subscription
             </Link>

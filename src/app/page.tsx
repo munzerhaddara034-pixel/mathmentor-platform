@@ -18,8 +18,14 @@ export default function HomePage() {
           <Link href="/classroom" className="btn">
             Classroom studio
           </Link>
+          <Link href="/math-solver" className="ghost-btn">
+            حلّال الرياضيات
+          </Link>
           <Link href="/lessons/interactive" className="ghost-btn">
             السبورة الذكية
+          </Link>
+          <Link href="/live" className="ghost-btn">
+            حصة مباشرة
           </Link>
           <Link href="/studio/script" className="ghost-btn">
             مولّد السكربت

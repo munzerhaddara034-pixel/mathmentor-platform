@@ -56,6 +56,8 @@ export default function DashboardPage() {
       <div className="row" style={{ marginTop: 8 }}>
         <a className="btn dark" href="/studio/script">مولّد سكربت الدرس</a>
         <a className="btn" href="/lessons/interactive">السبورة الذكية</a>
+        <a className="btn" href="/admin">سجلات الذكاء والحصص</a>
+        <a className="btn" href="/math-solver">الحلّال</a>
       </div>
       <div className="grid three">
         <article className="card">

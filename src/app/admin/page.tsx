@@ -1,5 +1,18 @@
-import { redirect } from "next/navigation";
+import { AdminConsole } from "@/components/admin/AdminConsole";
+import Link from "next/link";
 
-export default function AdminIndexPage() {
-  redirect("/admin/video-generator");
+export const dynamic = "force-dynamic";
+
+export default function AdminPage() {
+  return (
+    <main className="shell">
+      <p className="eyebrow">Admin · MathMentor · أكاديمية منذر حداره</p>
+      <h1>لوحة الإدارة</h1>
+      <p className="muted">
+        AI query logs, live session manager, and student analytics. Video generator remains at{" "}
+        <Link href="/admin/video-generator">/admin/video-generator</Link>.
+      </p>
+      <AdminConsole />
+    </main>
+  );
 }

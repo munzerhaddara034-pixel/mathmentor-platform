@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export function AuthClientGuard({ mode = "lesson" }: { mode?: "auth" | "lesson" | "staff" }) {
+export function AuthClientGuard({ mode = "lesson" }: { mode?: "auth" | "lesson" | "staff" | "ai" | "live" }) {
   useEffect(() => {
     let cancelled = false;
     void fetch("/api/auth/session", { credentials: "same-origin" })
@@ -11,6 +11,8 @@ export function AuthClientGuard({ mode = "lesson" }: { mode?: "auth" | "lesson" 
           ok?: boolean;
           reason?: string;
           subscribed?: boolean;
+          aiAccess?: boolean;
+          liveAccess?: boolean;
           canTeach?: boolean;
         };
         if (cancelled) return;
@@ -27,8 +29,12 @@ export function AuthClientGuard({ mode = "lesson" }: { mode?: "auth" | "lesson" 
           window.location.replace("/lessons/interactive");
           return;
         }
-        if (mode === "lesson" && payload.subscribed === false && !payload.canTeach) {
-          window.location.replace(`/redeem?need=subscription&next=${encodeURIComponent(next)}`);
+        if ((mode === "lesson" || mode === "ai") && payload.aiAccess === false && payload.subscribed === false && !payload.canTeach) {
+          window.location.replace(`/redeem?need=${mode === "ai" ? "ai" : "subscription"}&next=${encodeURIComponent(next)}`);
+          return;
+        }
+        if (mode === "live" && payload.liveAccess === false && !payload.canTeach) {
+          window.location.replace(`/subscribe?need=live&next=${encodeURIComponent(next)}`);
         }
       })
       .catch(() => undefined);

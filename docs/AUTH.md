@@ -8,11 +8,12 @@ This build uses a **file-store session** (`data/auth.json`) — the same style a
 
 Unauthenticated visitors to private routes are redirected to `/login` (middleware + server layouts + client fallback).
 
-| Role | Lessons (`/lessons/*`, `/studio/player`, classroom, practice…) | Staff (`/studio/script`, `/admin`, `/professor`…) |
-| --- | --- | --- |
-| Student / parent with active plan | yes | no |
-| Student without plan | `/redeem` (promo/card) | no |
-| Teacher / admin | yes | yes |
+| Role | Lessons + solver (`/lessons/*`, `/math-solver`, `/studio/player`…) | Live booking (`/live`) | Staff (`/studio/script`, `/admin`, `/professor`…) |
+| --- | --- | --- | --- |
+| Student / parent with **AI_TIER** or **BOTH** | yes | BOTH only | no |
+| Student with **LIVE_TIER** only | no → `/redeem?need=ai` | yes | no |
+| Student without plan | `/redeem` | `/subscribe?need=live` | no |
+| Teacher / admin | yes | yes | yes |
 
 `?teacher=1` still requires a **logged-in teacher or admin**. Students cannot open the timeline editor.
 
@@ -32,13 +33,21 @@ Seeded on first boot of `data/auth.json`:
 
 | Email | Password | Notes |
 | --- | --- | --- |
-| `student@mathmentor.local` | `demo-student` | Sara Nassar · 76111111 · plan `all` |
+| `student@mathmentor.local` | `demo-student` | Sara Nassar · 76111111 · **BOTH** · 4 live credits |
+| `ai@mathmentor.local` | `demo-ai` | Nour Khalil · **AI_TIER** (solver + lessons) |
+| `live@mathmentor.local` | `demo-live` | Hassan Mansour · **LIVE_TIER** · 4 credits |
 | `pending@mathmentor.local` | `demo-pending` | Karim Fares · no plan → redeem |
-| `parent@mathmentor.local` | `demo-parent` | family plan `all` |
+| `parent@mathmentor.local` | `demo-parent` | family **AI_TIER** |
 | `teacher@mathmentor.local` | `demo-teacher` | Prof. Munzer Haddara |
 | `admin@mathmentor.local` | `demo-admin` | staff |
 
-Unlock a pending student while signed in: `/redeem` or `/activate` with card **`MUNZER-GOLD-9A`**.
+Unlock while signed in on `/redeem` or `/activate`:
+
+- **`MUNZER-GOLD-9A`** / **`MUNZER-AI-3K`** — AI lessons + solver
+- **`MUNZER-LIVE-4C`** — live 1-on-1 (+4 credits)
+- **`MUNZER-BOTH-1X`** — bundle (+8 credits)
+
+AI solver and dual-tier live booking: [AI_SOLVER.md](./AI_SOLVER.md).
 
 On Netlify the JSON file store is ephemeral per instance; demo users are re-seeded if the file is missing.
 
