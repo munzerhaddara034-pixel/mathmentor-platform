@@ -81,7 +81,6 @@ export async function notifyVideoReady(query: MathQueryRecord) {
     return undefined;
   }
   const origin = appOrigin();
-  const path = `/math-solver/result/${encodeURIComponent(query.id)}`;
   const url = origin ? `${origin}${path}` : path;
   const message = await sendWhatsApp({
     to: phone,
