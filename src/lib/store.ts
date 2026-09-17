@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { platformDataDir } from "./dataDir";
 import { lebaneseCatalog } from "./curriculum";
 import { GRADE_12_LS_CH1_ID, grade12LsCh1Draft } from "./grade12LsCh1";
 import { createId } from "./ids";
@@ -21,7 +22,7 @@ import type {
   StudentChatMessage,
 } from "./types";
 
-const dataDir = path.join(process.cwd(), "data");
+const dataDir = platformDataDir();
 const storePath = path.join(dataDir, "store.json");
 
 function seed(): StoreData {

@@ -11,6 +11,9 @@
 - `/admin/video-generator` مولّد فيديو HeyGen (سكربت، ملاحظات، أمثلة، لغة الصوت، السرعة)
 - `/math-solver` حلّال الذكاء (نص، لاتكس، صورة) ثم شرح تفاعلي
 - `/lessons/interactive-explanation` مشغّل الفيديو والسبورة لزمن حل المسألة
+- `/exams` محاكاة الامتحان الرسمي (Brevet + Terminale)
+- `/wallet` رصيد الذكاء وساعات الحصص المباشرة
+- `/profile` الأوسمة والسلسلة
 - `/live` حجز حصة مباشرة مع الأستاذ منذر حداره
 - `/admin` سجلات الذكاء وطلبات الحصص المباشرة
 - `/studio/player` المشغّل التفاعلي (عيّنات أو سكربت مولَّد أو `?job=` بعد HeyGen)
@@ -20,7 +23,7 @@
 
 ## Interactive studio
 
-See [docs/STUDIO.md](docs/STUDIO.md) for the lesson timeline JSON schema, HeyGen demo mode, and script-generator contract. HeyGen request fields and the teacher workflow are in [docs/HEYGEN.md](docs/HEYGEN.md). AI solver + dual-tier live sessions: [docs/AI_SOLVER.md](docs/AI_SOLVER.md).
+See [docs/STUDIO.md](docs/STUDIO.md) for the lesson timeline JSON schema, HeyGen demo mode, and script-generator contract. HeyGen request fields and the teacher workflow are in [docs/HEYGEN.md](docs/HEYGEN.md). AI solver + dual-tier live sessions: [docs/AI_SOLVER.md](docs/AI_SOLVER.md). Anti-sharing, official exam simulator, streaks, notifications, wallet: [docs/RETENTION.md](docs/RETENTION.md).
 
 Copy `.env.example` to `.env.local` only if you add keys. The demo runs with **no** `HEYGEN_API_KEY` and **no** `OPENAI_API_KEY`. Daily path: write script → `/admin/video-generator` → webhook/status → students watch the sync player.
 
@@ -38,4 +41,4 @@ Interactive lessons and studio routes are **private**. See [docs/AUTH.md](./docs
 | `teacher@mathmentor.local` | `demo-teacher` | Studio + lessons |
 | `admin@mathmentor.local` | `demo-admin` | Studio + lessons |
 
-Promo card for local unlock: `MUNZER-GOLD-9A` (AI), `MUNZER-LIVE-4C` (live), `MUNZER-BOTH-1X` (bundle) on `/redeem` (must be signed in). A second login on the same account kicks the first device.
+Promo card for local unlock: `MUNZER-GOLD-9A` (AI), `MUNZER-LIVE-4C` (live), `MUNZER-BOTH-1X` (bundle), live-hour top-up `MUNZER-HRS-2H` on `/redeem` (must be signed in). A second login of the **same device class** (phone or computer) kicks the previous session of that class; one mobile + one desktop may stay signed in.

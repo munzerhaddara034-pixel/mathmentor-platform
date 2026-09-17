@@ -45,6 +45,9 @@ const PRIVATE_PREFIXES = [
   "/activate",
   "/math-solver",
   "/live",
+  "/exams",
+  "/wallet",
+  "/profile",
 ];
 
 const STAFF_PREFIXES = [

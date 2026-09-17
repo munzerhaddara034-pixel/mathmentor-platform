@@ -1,3 +1,4 @@
+import { classifyDevice, type DeviceFingerprint } from "./device";
 import { cookies, headers } from "next/headers";
 import { SESSION_COOKIE } from "./paths";
 import {
@@ -62,11 +63,15 @@ export async function getLiveSession(): Promise<LiveSession> {
   return { ok: true, user: found.publicUser, sessionId: found.session.id };
 }
 
-export async function startExclusiveSession(userId: string, userAgent?: string) {
+export async function startExclusiveSession(userId: string, userAgent?: string, fingerprint?: DeviceFingerprint) {
   const token = newSessionToken();
-  await createExclusiveSession(userId, token, userAgent);
+  const created = await createExclusiveSession(userId, token, userAgent, fingerprint);
   await writeSessionCookie(token);
-  return token;
+  return {
+    token,
+    ...created,
+    deviceClass: created.session.deviceClass ?? classifyDevice(userAgent, fingerprint?.deviceClass),
+  };
 }
 
 export async function endCurrentSession() {

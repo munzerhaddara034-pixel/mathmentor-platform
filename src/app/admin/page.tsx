@@ -10,7 +10,12 @@ export default function AdminPage() {
       <h1>لوحة الإدارة</h1>
       <p className="muted">
         AI query logs, live session manager, teacher audit, WhatsApp outbox, and student analytics. Video generator remains at{" "}
-        <Link href="/admin/video-generator">/admin/video-generator</Link>.
+        <Link href="/admin/video-generator">/admin/video-generator</Link>
+        {" · "}
+        <Link href="/admin/exams">exam simulations</Link>
+        {" · "}
+        <Link href="/dashboard">promo + live-hour codes</Link>
+        .
       </p>
       <AdminConsole />
     </main>

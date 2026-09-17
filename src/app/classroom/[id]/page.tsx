@@ -24,6 +24,13 @@ export default function ClassroomLessonPage() {
         setCustom((store.customLessons ?? []) as AcademyLesson[]);
         setProgress(store.progress ?? []);
       });
+    void fetch("/api/auth/session", { credentials: "same-origin" })
+      .then((response) => response.json())
+      .then((payload: { user?: { name?: string; phone?: string } }) => {
+        if (payload.user?.name) setStudentName(payload.user.name);
+        if (payload.user?.phone) setPhone(payload.user.phone);
+      })
+      .catch(() => undefined);
   }, []);
 
   const lesson = useMemo(() => getAcademyLesson(params.id, custom), [params.id, custom]);
@@ -75,14 +82,9 @@ export default function ClassroomLessonPage() {
         {lesson.title}. No direct download. Bunny / Vimeo OTT / Wistia connect through environment variables when available.
       </p>
       <div className="grid two">
-        <label>
-          اسمك على الفيديو
-          <input value={studentName} onChange={(event) => setStudentName(event.target.value)} />
-        </label>
-        <label>
-          رقم هاتفك للعلامة المائية
-          <input value={phone} onChange={(event) => setPhone(event.target.value)} />
-        </label>
+        <p>
+          Watermark identity (from profile): <strong>{studentName}</strong> · {phone}
+        </p>
       </div>
       {hostedEmbedSrc() ? (
         <div className="secure-embed">

@@ -13,6 +13,9 @@ export default function StudentPage() {
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [xp, setXp] = useState(0);
+  const [badges, setBadges] = useState<string[]>([]);
 
   useEffect(() => {
     void fetch("/api/content")
@@ -24,6 +27,14 @@ export default function StudentPage() {
     void fetch("/api/tutor")
       .then((response) => response.json())
       .then((payload) => setMessages(payload.messages ?? []));
+    void fetch("/api/gamification/me", { credentials: "same-origin" })
+      .then((response) => response.json())
+      .then((payload: { profile?: { streakDays?: number; xp?: number; badges?: string[] } }) => {
+        setStreak(payload.profile?.streakDays ?? 0);
+        setXp(payload.profile?.xp ?? 0);
+        setBadges(payload.profile?.badges ?? []);
+      })
+      .catch(() => undefined);
   }, []);
 
   const done = new Set(progress.map((item) => item.lessonId));
@@ -50,6 +61,26 @@ export default function StudentPage() {
       <p className="muted">
         Completed {progress.length} lessons. Next: {next?.title}. WhatsApp {settings.phone}.
       </p>
+      <div className="card" style={{ marginTop: 12 }}>
+        <h2>
+          🔥 {streak} Days Streak · {xp} XP
+        </h2>
+        <p className="muted">{badges.length ? badges.join(" · ") : "Earn Calculus Master, Probability Pro, Brevet Champ."}</p>
+        <div className="row">
+          <Link className="btn" href="/profile">
+            Profile / badges
+          </Link>
+          <Link className="btn" href="/wallet">
+            Wallet
+          </Link>
+          <Link className="btn" href="/exams">
+            Official exam sim
+          </Link>
+          <Link className="btn" href="/leaderboard">
+            Monthly XP
+          </Link>
+        </div>
+      </div>
       <div className="grid two">
         <article className="card">
           <h2>Keep moving</h2>

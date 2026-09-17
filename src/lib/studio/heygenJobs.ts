@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { platformDataDir } from "../dataDir";
 import { createId } from "../ids";
 import { getSampleLesson } from "./sampleLessons";
 import { officialExamFourPhaseLesson } from "./seedLesson";
@@ -11,7 +12,7 @@ import {
   type HeyGenLanguage,
 } from "./heygen";
 
-const dataDir = path.join(process.cwd(), "data");
+const dataDir = platformDataDir();
 const jobsPath = path.join(dataDir, "heygen-jobs.json");
 
 export const HEYGEN_JOB_STATUSES = ["queued", "processing", "completed", "failed"] as const;

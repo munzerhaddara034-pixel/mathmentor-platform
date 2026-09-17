@@ -8,6 +8,10 @@ data/auth.json
 data/math-queries.json
 data/live-sessions.json
 data/whatsapp-outbox.json
+data/notifications.json
+data/gamification.json
+data/billing.json
+data/exam-attempts.json
 data/uploads
 public/uploads
 .env

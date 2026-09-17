@@ -36,5 +36,17 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ error: "rating must be 1 or -1." }, { status: 400 });
   }
   const next = await patchMathQuery(id, { rating: body.rating });
+  if (body.rating === -1) {
+    const { notifyStaff } = await import("@/lib/notifications/store");
+    await notifyStaff({
+      kind: "solver_issue",
+      title: `${guard.live.user.name} reported an AI solution`,
+      titleAr: `${guard.live.user.name} بلّغ عن حلّ الذكاء`,
+      body: query.question.slice(0, 180),
+      bodyAr: query.question.slice(0, 180),
+      href: "/admin",
+      relatedId: `issue-${id}`,
+    });
+  }
   return NextResponse.json({ query: next });
 }

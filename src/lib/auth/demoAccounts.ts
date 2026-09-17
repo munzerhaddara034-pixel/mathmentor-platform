@@ -12,6 +12,7 @@ export const DEMO_ACCOUNTS: Array<{
   entitlementPlanId?: string;
   subscriptionType?: SubscriptionType;
   liveCredits?: number;
+  aiExpiresAt?: string | null;
 }> = [
   {
     id: "user-demo-student",
@@ -23,6 +24,7 @@ export const DEMO_ACCOUNTS: Array<{
     entitlementPlanId: "both",
     subscriptionType: "BOTH",
     liveCredits: 4,
+    aiExpiresAt: "2026-12-31T21:00:00.000Z",
   },
   {
     id: "user-demo-pending",
@@ -42,6 +44,7 @@ export const DEMO_ACCOUNTS: Array<{
     entitlementPlanId: "all",
     subscriptionType: "AI_TIER",
     liveCredits: 0,
+    aiExpiresAt: "2026-12-01T21:00:00.000Z",
   },
   {
     id: "user-demo-ai",
@@ -53,6 +56,7 @@ export const DEMO_ACCOUNTS: Array<{
     entitlementPlanId: "ai",
     subscriptionType: "AI_TIER",
     liveCredits: 0,
+    aiExpiresAt: "2026-11-15T21:00:00.000Z",
   },
   {
     id: "user-demo-live",
@@ -64,6 +68,7 @@ export const DEMO_ACCOUNTS: Array<{
     entitlementPlanId: "live",
     subscriptionType: "LIVE_TIER",
     liveCredits: 4,
+    aiExpiresAt: null,
   },
   {
     id: "user-demo-teacher",
@@ -74,6 +79,7 @@ export const DEMO_ACCOUNTS: Array<{
     role: "teacher",
     subscriptionType: "BOTH",
     liveCredits: 99,
+    aiExpiresAt: "2036-09-17T21:00:00.000Z",
   },
   {
     id: "user-demo-admin",
@@ -84,5 +90,6 @@ export const DEMO_ACCOUNTS: Array<{
     role: "admin",
     subscriptionType: "BOTH",
     liveCredits: 99,
+    aiExpiresAt: "2036-09-17T21:00:00.000Z",
   },
 ];

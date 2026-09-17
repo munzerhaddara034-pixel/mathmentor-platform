@@ -1,7 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createId } from "../ids";
+import { platformDataDir } from "../dataDir";
 import { DEMO_ACCOUNTS } from "./demoAccounts";
+import { classifyDevice, fingerprintHash, type DeviceClass, type DeviceFingerprint } from "./device";
 import { hashPassword, hashToken } from "./passwords";
 import type { AuthRole } from "./paths";
 import {
@@ -12,8 +14,10 @@ import {
   type SubscriptionType,
 } from "./tiers";
 
-const dataDir = path.join(process.cwd(), "data");
+const dataDir = platformDataDir();
 const authPath = path.join(dataDir, "auth.json");
+
+export const AI_ACCESS_DAYS = 90;
 
 export type AuthUser = {
   id: string;
@@ -25,6 +29,7 @@ export type AuthUser = {
   entitlementPlanId?: string;
   subscriptionType?: SubscriptionType | null;
   liveCredits?: number;
+  aiExpiresAt?: string | null;
   createdAt: string;
 };
 
@@ -34,6 +39,11 @@ export type AuthSession = {
   tokenHash: string;
   createdAt: string;
   userAgent?: string;
+  deviceClass?: DeviceClass;
+  fingerprintHash?: string;
+  timezone?: string;
+  screen?: string;
+  deviceId?: string;
 };
 
 export type AuthStoreData = {
@@ -50,7 +60,19 @@ export type PublicUser = {
   entitlementPlanId?: string;
   subscriptionType: SubscriptionType | null;
   liveCredits: number;
+  aiExpiresAt: string | null;
 };
+
+export function defaultAiExpiry(from = new Date(), days = AI_ACCESS_DAYS) {
+  return new Date(from.getTime() + days * 24 * 60 * 60 * 1000).toISOString();
+}
+
+export function extendAiExpiry(current: string | null | undefined, days = AI_ACCESS_DAYS) {
+  const now = Date.now();
+  const existing = current ? Date.parse(current) : NaN;
+  const base = Number.isFinite(existing) && existing > now ? existing : now;
+  return new Date(base + days * 24 * 60 * 60 * 1000).toISOString();
+}
 
 function migrateUser(user: AuthUser): AuthUser {
   const inferred = user.subscriptionType ?? planIdToSubscriptionType(user.entitlementPlanId);
@@ -62,7 +84,14 @@ function migrateUser(user: AuthUser): AuthUser {
       : staff
         ? 99
         : liveCreditsForPlan(user.entitlementPlanId);
-  return { ...user, subscriptionType, liveCredits };
+  let aiExpiresAt = user.aiExpiresAt ?? null;
+  if (staff && !aiExpiresAt) aiExpiresAt = defaultAiExpiry(new Date(), 3650);
+  const aiType = subscriptionType === "AI_TIER" || subscriptionType === "BOTH";
+  if (aiType && !aiExpiresAt) {
+    const created = user.createdAt ? new Date(user.createdAt) : new Date();
+    aiExpiresAt = defaultAiExpiry(Number.isNaN(created.getTime()) ? new Date() : created);
+  }
+  return { ...user, subscriptionType, liveCredits, aiExpiresAt };
 }
 
 function toPublic(user: AuthUser): PublicUser {
@@ -76,6 +105,7 @@ function toPublic(user: AuthUser): PublicUser {
     entitlementPlanId: migrated.entitlementPlanId,
     subscriptionType: migrated.subscriptionType ?? null,
     liveCredits: migrated.liveCredits ?? 0,
+    aiExpiresAt: migrated.aiExpiresAt ?? null,
   };
 }
 
@@ -91,6 +121,7 @@ async function seedAuth(): Promise<AuthStoreData> {
     entitlementPlanId: account.entitlementPlanId,
     subscriptionType: account.subscriptionType ?? planIdToSubscriptionType(account.entitlementPlanId),
     liveCredits: account.liveCredits ?? liveCreditsForPlan(account.entitlementPlanId),
+    aiExpiresAt: account.aiExpiresAt ?? null,
     createdAt: now,
   }));
   return { users, sessions: [] };
@@ -124,6 +155,7 @@ async function readAuthStore(): Promise<AuthStoreData> {
           entitlementPlanId: account.entitlementPlanId,
           subscriptionType: account.subscriptionType ?? planIdToSubscriptionType(account.entitlementPlanId),
           liveCredits: account.liveCredits ?? liveCreditsForPlan(account.entitlementPlanId),
+          aiExpiresAt: account.aiExpiresAt ?? null,
           createdAt: now,
         });
       }
@@ -172,13 +204,21 @@ export async function setUserEntitlement(userId: string, planId: string) {
   user.subscriptionType = mergeSubscription(user.subscriptionType ?? null, incoming);
   const extraCredits = liveCreditsForPlan(planId);
   user.liveCredits = (user.liveCredits ?? 0) + extraCredits;
+  if (incoming === "AI_TIER" || incoming === "BOTH") {
+    user.aiExpiresAt = extendAiExpiry(user.aiExpiresAt);
+  }
   await writeAuthStore(store);
   return toPublic(user);
 }
 
 export async function setUserSubscription(
   userId: string,
-  patch: { subscriptionType?: SubscriptionType | null; liveCredits?: number; entitlementPlanId?: string },
+  patch: {
+    subscriptionType?: SubscriptionType | null;
+    liveCredits?: number;
+    entitlementPlanId?: string;
+    aiExpiresAt?: string | null;
+  },
 ) {
   const store = await readAuthStore();
   const user = store.users.find((item) => item.id === userId);
@@ -186,6 +226,7 @@ export async function setUserSubscription(
   if (patch.subscriptionType !== undefined) user.subscriptionType = patch.subscriptionType;
   if (typeof patch.liveCredits === "number") user.liveCredits = Math.max(0, patch.liveCredits);
   if (patch.entitlementPlanId) user.entitlementPlanId = patch.entitlementPlanId;
+  if (patch.aiExpiresAt !== undefined) user.aiExpiresAt = patch.aiExpiresAt;
   await writeAuthStore(store);
   return toPublic(user);
 }
@@ -204,27 +245,37 @@ export async function listPublicUsers() {
   return store.users.map(toPublic);
 }
 
-function accessFor(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits">) {
-  return accessFromSubscription(user.role, user.subscriptionType ?? planIdToSubscriptionType(user.entitlementPlanId), user.liveCredits ?? 0);
+function accessFor(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits" | "aiExpiresAt">) {
+  const base = accessFromSubscription(user.role, user.subscriptionType ?? planIdToSubscriptionType(user.entitlementPlanId), user.liveCredits ?? 0);
+  if (user.role === "teacher" || user.role === "admin") return base;
+  const expired = Boolean(user.aiExpiresAt && Date.parse(user.aiExpiresAt) < Date.now());
+  if (expired && base.aiAccess) {
+    return {
+      ...base,
+      aiAccess: false,
+      subscribed: false,
+    };
+  }
+  return base;
 }
 
-export async function userHasSubscription(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits">) {
+export async function userHasSubscription(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits" | "aiExpiresAt">) {
   return (await userAccess(user)).aiAccess;
 }
 
-export async function userHasAiAccess(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits">) {
+export async function userHasAiAccess(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits" | "aiExpiresAt">) {
   return (await userAccess(user)).aiAccess;
 }
 
-export async function userHasLiveAccess(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits">) {
+export async function userHasLiveAccess(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits" | "aiExpiresAt">) {
   return (await userAccess(user)).liveAccess;
 }
 
-export async function userAccess(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits">) {
+export async function userAccess(user: Pick<AuthUser, "id" | "role" | "entitlementPlanId" | "phone" | "subscriptionType" | "liveCredits" | "aiExpiresAt">) {
   const base = accessFor(user);
   if (base.aiAccess || base.liveAccess || user.role === "teacher" || user.role === "admin") return base;
   if (user.entitlementPlanId) {
-    return accessFromSubscription(user.role, planIdToSubscriptionType(user.entitlementPlanId), user.liveCredits ?? 0);
+    return accessFor({ ...user, subscriptionType: planIdToSubscriptionType(user.entitlementPlanId) });
   }
   const { readStore } = await import("../store");
   const data = await readStore();
@@ -234,22 +285,74 @@ export async function userAccess(user: Pick<AuthUser, "id" | "role" | "entitleme
       (user.phone && item.phone && item.phone.replace(/\s/g, "") === user.phone.replace(/\s/g, "")),
   );
   if (!entitlement) return base;
-  return accessFromSubscription(user.role, planIdToSubscriptionType(entitlement.planId), user.liveCredits ?? liveCreditsForPlan(entitlement.planId));
+  return accessFor({
+    ...user,
+    subscriptionType: planIdToSubscriptionType(entitlement.planId),
+    liveCredits: user.liveCredits ?? liveCreditsForPlan(entitlement.planId),
+  });
 }
 
-export async function createExclusiveSession(userId: string, token: string, userAgent?: string) {
+export type SessionCreateResult = {
+  session: AuthSession;
+  replaced: boolean;
+  replacedClass: DeviceClass | null;
+};
+
+export async function createExclusiveSession(
+  userId: string,
+  token: string,
+  userAgent?: string,
+  fingerprint?: DeviceFingerprint,
+): Promise<SessionCreateResult> {
   const store = await readAuthStore();
-  store.sessions = store.sessions.filter((session) => session.userId !== userId);
+  const deviceClass = classifyDevice(fingerprint?.userAgent || userAgent, fingerprint?.deviceClass);
+  const previousSameClass = store.sessions.filter(
+    (session) =>
+      session.userId === userId &&
+      classifyDevice(session.userAgent, session.deviceClass) === deviceClass,
+  );
+  store.sessions = store.sessions.filter(
+    (session) =>
+      session.userId !== userId || classifyDevice(session.userAgent, session.deviceClass) !== deviceClass,
+  );
   const session: AuthSession = {
     id: createId("sess"),
     userId,
     tokenHash: hashToken(token),
     createdAt: new Date().toISOString(),
-    userAgent,
+    userAgent: fingerprint?.userAgent || userAgent,
+    deviceClass,
+    fingerprintHash: fingerprintHash({
+      userAgent: fingerprint?.userAgent || userAgent,
+      screen: fingerprint?.screen,
+      timezone: fingerprint?.timezone,
+      deviceId: fingerprint?.deviceId,
+    }),
+    timezone: fingerprint?.timezone,
+    screen: fingerprint?.screen,
+    deviceId: fingerprint?.deviceId,
   };
   store.sessions.push(session);
   await writeAuthStore(store);
-  return session;
+  return {
+    session,
+    replaced: previousSameClass.length > 0,
+    replacedClass: previousSameClass.length ? deviceClass : null,
+  };
+}
+
+export async function listUserSessions(userId: string) {
+  const store = await readAuthStore();
+  return store.sessions
+    .filter((session) => session.userId === userId)
+    .map((session) => ({
+      id: session.id,
+      deviceClass: classifyDevice(session.userAgent, session.deviceClass),
+      createdAt: session.createdAt,
+      userAgent: session.userAgent ?? "",
+      timezone: session.timezone ?? "",
+      fingerprintHash: session.fingerprintHash ?? "",
+    }));
 }
 
 export async function findSessionByToken(token: string) {

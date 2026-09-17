@@ -2,6 +2,7 @@
 
 import { defaultSettings } from "@/lib/settings";
 import type { ScratchCard } from "@/lib/types";
+import type { TopUpCode } from "@/lib/billing/store";
 import { useEffect, useState } from "react";
 
 type Dashboard = {
@@ -17,12 +18,15 @@ type Dashboard = {
 export default function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [cards, setCards] = useState<ScratchCard[]>([]);
+  const [topups, setTopups] = useState<TopUpCode[]>([]);
   const [planId, setPlanId] = useState("all");
   const [prefix, setPrefix] = useState("MUNZER");
   const [count, setCount] = useState(10);
   const [expiresAt, setExpiresAt] = useState("");
   const [note, setNote] = useState("");
   const [status, setStatus] = useState("");
+  const [liveHours, setLiveHours] = useState(2);
+  const [topupPrefix, setTopupPrefix] = useState("MUNZER-HRS");
 
   const load = () => {
     void fetch("/api/dashboard")
@@ -31,6 +35,9 @@ export default function DashboardPage() {
     void fetch("/api/cards")
       .then((response) => response.json())
       .then((payload: { cards?: ScratchCard[] }) => setCards(payload.cards ?? []));
+    void fetch("/api/billing/topup")
+      .then((response) => response.json())
+      .then((payload: { codes?: TopUpCode[] }) => setTopups(payload.codes ?? []));
   };
 
   useEffect(() => {
@@ -57,6 +64,8 @@ export default function DashboardPage() {
         <a className="btn dark" href="/studio/script">مولّد سكربت الدرس</a>
         <a className="btn" href="/lessons/interactive">السبورة الذكية</a>
         <a className="btn" href="/admin">سجلات الذكاء والحصص</a>
+        <a className="btn" href="/admin/exams">تصحيح المحاكاة</a>
+        <a className="btn" href="/exams">المحاكاة</a>
         <a className="btn" href="/math-solver">الحلّال</a>
       </div>
       <div className="grid three">
@@ -110,6 +119,54 @@ export default function DashboardPage() {
           توليد الأكواد
         </button>
         {status ? <p className="success">{status}</p> : null}
+      </section>
+      <section className="card" style={{ marginTop: 20 }}>
+        <h2>أكواد شحن ساعات الحصص المباشرة</h2>
+        <label>
+          عدد الساعات لكل رمز
+          <input type="number" min={1} max={40} value={liveHours} onChange={(event) => setLiveHours(Number(event.target.value))} />
+        </label>
+        <label>
+          بادئة الرمز
+          <input value={topupPrefix} onChange={(event) => setTopupPrefix(event.target.value)} />
+        </label>
+        <button
+          className="btn dark"
+          type="button"
+          onClick={() => {
+            void fetch("/api/billing/topup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prefix: topupPrefix, liveHours, count: 1, note }),
+            }).then(async (response) => {
+              const payload = (await response.json()) as { created?: TopUpCode[]; error?: string };
+              setStatus(payload.error ?? `شحن: ${payload.created?.map((item) => item.code).join(", ")}`);
+              load();
+            });
+          }}
+        >
+          توليد رمز شحن ساعات
+        </button>
+        <table className="data-table" style={{ marginTop: 12 }}>
+          <thead>
+            <tr>
+              <th>الرمز</th>
+              <th>ساعات</th>
+              <th>الحالة</th>
+              <th>الطالب</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topups.map((code) => (
+              <tr key={code.code}>
+                <td>{code.code}</td>
+                <td>{code.liveHours}</td>
+                <td>{code.used ? "مستخدم" : "متاح"}</td>
+                <td>{code.usedBy ?? "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
       <section className="card" style={{ marginTop: 20, overflowX: "auto" }}>
         <h2>متابعة الأكواد</h2>

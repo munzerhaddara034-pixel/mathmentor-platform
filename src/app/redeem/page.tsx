@@ -44,7 +44,7 @@ export default function RedeemPage() {
     <main className="shell" dir="rtl">
       <p className="eyebrow">تفعيل الاشتراك</p>
       <h1>أدخل كود البطاقة</h1>
-      <p className="muted">اشترِ البطاقة من مكتب معتمد. للتجربة: MUNZER-GOLD-9A · MUNZER-AI-3K · MUNZER-LIVE-4C · MUNZER-BOTH-1X</p>
+      <p className="muted">اشترِ البطاقة من مكتب معتمد. للتجربة: MUNZER-GOLD-9A · MUNZER-AI-3K · MUNZER-LIVE-4C · MUNZER-BOTH-1X · شحن ساعات: MUNZER-HRS-2H</p>
       {need ? (
         <p className="studio-teacher-error" role="alert">
           {needKind === "ai"

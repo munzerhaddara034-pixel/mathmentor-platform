@@ -1,8 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { platformDataDir } from "../dataDir";
 import { canvasActionSchema, type CanvasAction } from "./timeline";
 
-const dataDir = path.join(process.cwd(), "data");
+const dataDir = platformDataDir();
 const eventsPath = path.join(dataDir, "studio-events.json");
 
 type StudioEventsStore = {

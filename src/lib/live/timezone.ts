@@ -14,14 +14,14 @@ export function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
 
-export function weekdayInZone(date: Date, timeZone: string) {
-  const wd = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short" }).format(date);
+export function weekdayInZone(date: Date, tz: string) {
+  const wd = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short" }).format(date);
   return WEEKDAY_SHORT[wd] ?? date.getUTCDay();
 }
 
-export function formatInTimeZone(date: Date, timeZone: string) {
+export function formatInTimeZone(date: Date, tz: string) {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
+    timeZone: tz,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -33,7 +33,7 @@ export function formatInTimeZone(date: Date, timeZone: string) {
   return {
     date: `${get("year")}-${get("month")}-${get("day")}`,
     time: `${get("hour")}:${get("minute")}`,
-    weekday: weekdayInZone(date, timeZone),
+    weekday: weekdayInZone(date, tz),
   };
 }
 
@@ -44,12 +44,12 @@ export function addYmd(ymd: string, days: number) {
 }
 
 /** Convert a civil wall time in `timeZone` to a UTC Date. */
-export function wallTimeToUtc(dateYmd: string, timeHm: string, timeZone: string): Date {
+export function wallTimeToUtc(dateYmd: string, timeHm: string, tz: string): Date {
   const [year, month, day] = dateYmd.split("-").map(Number);
   const [hour, minute] = timeHm.split(":").map(Number);
   let utc = Date.UTC(year, month - 1, day, hour, minute, 0);
   for (let i = 0; i < 8; i += 1) {
-    const local = formatInTimeZone(new Date(utc), timeZone);
+    const local = formatInTimeZone(new Date(utc), tz);
     const [ly, lm, ld] = local.date.split("-").map(Number);
     const [lh, lmin] = local.time.split(":").map(Number);
     const localAsUtc = Date.UTC(ly, lm - 1, ld, lh, lmin, 0);
