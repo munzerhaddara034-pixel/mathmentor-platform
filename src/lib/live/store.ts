@@ -1,33 +1,75 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createId } from "@/lib/ids";
-import type { LiveBooking, LiveSlot, LiveStoreData, BookingStatus } from "./types";
+import { createMeetingLink } from "./meeting";
+import { addYmd, formatInTimeZone, wallTimeToUtc } from "./timezone";
+import {
+  DEFAULT_AVAILABILITY,
+  type BookingStatus,
+  type LiveBooking,
+  type LiveSlot,
+  type LiveStoreData,
+  type TeacherAvailability,
+} from "./types";
 
 const dataDir = path.join(process.cwd(), "data");
 const storePath = path.join(dataDir, "live-sessions.json");
 
-function seedSlots(): LiveSlot[] {
+export function generateSlotsFromAvailability(availability: TeacherAvailability, existing: LiveSlot[] = []): LiveSlot[] {
+  const tz = availability.timezone || "Asia/Beirut";
+  const duration = availability.durationMinutes || 45;
+  const horizon = Math.max(7, availability.horizonDays || 21);
+  const today = formatInTimeZone(new Date(), tz).date;
+  const bookedTimes = new Set(existing.map((slot) => slot.startsAt));
   const slots: LiveSlot[] = [];
-  const now = new Date();
-  now.setUTCHours(13, 0, 0, 0);
-  for (let day = 1; day <= 14; day += 1) {
-    const date = new Date(now.getTime() + day * 24 * 60 * 60 * 1000);
-    const weekday = date.getUTCDay();
-    if (weekday === 0 || weekday === 5) continue;
-    for (const hour of [13, 15, 17]) {
-      const starts = new Date(date);
-      starts.setUTCHours(hour, 0, 0, 0);
-      slots.push({
-        id: createId("slot"),
-        startsAt: starts.toISOString(),
-        durationMinutes: 45,
-        capacity: 1,
-        note: "1-on-1 with Prof. Munzer Haddara",
-        createdAt: new Date().toISOString(),
-      });
+  const now = Date.now();
+
+  for (let day = 0; day < horizon; day += 1) {
+    const ymd = addYmd(today, day);
+    const weekday = wallTimeToUtc(ymd, "12:00", tz);
+    const wd = formatInTimeZone(weekday, tz).weekday;
+    for (const window of availability.windows) {
+      if (window.weekday !== wd) continue;
+      let cursor = wallTimeToUtc(ymd, window.start, tz);
+      const end = wallTimeToUtc(ymd, window.end, tz);
+      while (cursor.getTime() + duration * 60_000 <= end.getTime() + 1000) {
+        const startsAt = cursor.toISOString();
+        if (cursor.getTime() > now && !bookedTimes.has(startsAt)) {
+          slots.push({
+            id: createId("slot"),
+            startsAt,
+            durationMinutes: duration,
+            capacity: 1,
+            note: "1-on-1 with Prof. Munzer Haddara · Asia/Beirut",
+            createdAt: new Date().toISOString(),
+          });
+          bookedTimes.add(startsAt);
+        }
+        cursor = new Date(cursor.getTime() + duration * 60_000);
+      }
     }
   }
   return slots;
+}
+
+function normalizeAvailability(value: Partial<TeacherAvailability> | undefined): TeacherAvailability {
+  const windows = Array.isArray(value?.windows)
+    ? value!.windows.filter(
+        (item) =>
+          item &&
+          Number.isInteger(item.weekday) &&
+          item.weekday >= 0 &&
+          item.weekday <= 6 &&
+          /^\d{2}:\d{2}$/.test(item.start) &&
+          /^\d{2}:\d{2}$/.test(item.end),
+      )
+    : DEFAULT_AVAILABILITY.windows;
+  return {
+    timezone: value?.timezone?.trim() || DEFAULT_AVAILABILITY.timezone,
+    durationMinutes: value?.durationMinutes || DEFAULT_AVAILABILITY.durationMinutes,
+    horizonDays: value?.horizonDays || DEFAULT_AVAILABILITY.horizonDays,
+    windows: windows.length ? windows : DEFAULT_AVAILABILITY.windows,
+  };
 }
 
 async function readLiveStore(): Promise<LiveStoreData> {
@@ -35,16 +77,26 @@ async function readLiveStore(): Promise<LiveStoreData> {
   try {
     const raw = await readFile(storePath, "utf8");
     const parsed = JSON.parse(raw) as Partial<LiveStoreData>;
-    const slots = Array.isArray(parsed.slots) ? parsed.slots : [];
     const bookings = Array.isArray(parsed.bookings) ? parsed.bookings : [];
-    if (!slots.length) {
-      const seeded = { slots: seedSlots(), bookings };
-      await writeFile(storePath, JSON.stringify(seeded, null, 2), "utf8");
-      return seeded;
+    const availability = normalizeAvailability(parsed.availability);
+    let slots = Array.isArray(parsed.slots) ? parsed.slots : [];
+    if (!slots.length || !parsed.availability) {
+      const generated = generateSlotsFromAvailability(availability, slots.filter((slot) => bookings.some((b) => b.slotId === slot.id && b.status !== "cancelled")));
+      const bookedIds = new Set(bookings.filter((item) => item.status !== "cancelled").map((item) => item.slotId));
+      const keep = slots.filter((slot) => bookedIds.has(slot.id));
+      slots = [...keep, ...generated];
+      const next = { slots, bookings, availability };
+      await writeFile(storePath, JSON.stringify(next, null, 2), "utf8");
+      return next;
     }
-    return { slots, bookings };
+    return { slots, bookings, availability };
   } catch {
-    const initial = { slots: seedSlots(), bookings: [] as LiveBooking[] };
+    const availability = DEFAULT_AVAILABILITY;
+    const initial: LiveStoreData = {
+      slots: generateSlotsFromAvailability(availability),
+      bookings: [],
+      availability,
+    };
     await writeFile(storePath, JSON.stringify(initial, null, 2), "utf8");
     return initial;
   }
@@ -53,6 +105,23 @@ async function readLiveStore(): Promise<LiveStoreData> {
 async function writeLiveStore(store: LiveStoreData) {
   await mkdir(dataDir, { recursive: true });
   await writeFile(storePath, JSON.stringify(store, null, 2), "utf8");
+}
+
+export async function getAvailability() {
+  const store = await readLiveStore();
+  return store.availability;
+}
+
+export async function setAvailability(input: Partial<TeacherAvailability>) {
+  const store = await readLiveStore();
+  const availability = normalizeAvailability({ ...store.availability, ...input, windows: input.windows ?? store.availability.windows });
+  store.availability = availability;
+  const bookedIds = new Set(store.bookings.filter((item) => item.status !== "cancelled").map((item) => item.slotId));
+  const keepBooked = store.slots.filter((slot) => bookedIds.has(slot.id));
+  const generated = generateSlotsFromAvailability(availability, keepBooked);
+  store.slots = [...keepBooked, ...generated];
+  await writeLiveStore(store);
+  return store;
 }
 
 export async function listSlots() {
@@ -84,7 +153,7 @@ export async function addSlot(input: { startsAt: string; durationMinutes?: numbe
   const slot: LiveSlot = {
     id: createId("slot"),
     startsAt: input.startsAt,
-    durationMinutes: input.durationMinutes ?? 45,
+    durationMinutes: input.durationMinutes ?? store.availability.durationMinutes ?? 45,
     capacity: input.capacity ?? 1,
     note: input.note,
     createdAt: new Date().toISOString(),
@@ -120,8 +189,17 @@ export async function bookSlot(input: {
   if (store.bookings.some((item) => item.studentId === input.studentId && item.slotId === slot.id && item.status !== "cancelled")) {
     return { ok: false as const, error: "You already booked this slot.", errorAr: "لقد حجزت هذا الموعد مسبقاً." };
   }
+
+  const bookingId = createId("live");
+  const meeting = await createMeetingLink({
+    id: bookingId,
+    topic: `MathMentor live · ${input.studentName} · Prof. Munzer Haddara`,
+    startsAt: slot.startsAt,
+    durationMinutes: slot.durationMinutes,
+  });
+
   const booking: LiveBooking = {
-    id: createId("live"),
+    id: bookingId,
     slotId: slot.id,
     startsAt: slot.startsAt,
     durationMinutes: slot.durationMinutes,
@@ -129,7 +207,9 @@ export async function bookSlot(input: {
     studentName: input.studentName,
     studentEmail: input.studentEmail,
     studentPhone: input.studentPhone,
-    status: "requested",
+    status: "confirmed",
+    meetingLink: meeting.url,
+    meetingProvider: meeting.provider,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -138,7 +218,16 @@ export async function bookSlot(input: {
   return { ok: true as const, booking };
 }
 
-export async function patchBooking(id: string, patch: { status?: BookingStatus; meetingLink?: string; teacherNote?: string }) {
+export async function patchBooking(
+  id: string,
+  patch: {
+    status?: BookingStatus;
+    meetingLink?: string;
+    meetingProvider?: string;
+    teacherNote?: string;
+    reminderSentAt?: string;
+  },
+) {
   const store = await readLiveStore();
   const index = store.bookings.findIndex((item) => item.id === id);
   if (index < 0) return undefined;
@@ -149,4 +238,16 @@ export async function patchBooking(id: string, patch: { status?: BookingStatus; 
   };
   await writeLiveStore(store);
   return store.bookings[index];
+}
+
+export async function bookingsNeedingReminder(windowMin = 20, windowMax = 40) {
+  const store = await readLiveStore();
+  const now = Date.now();
+  return store.bookings.filter((booking) => {
+    if (booking.status === "cancelled" || booking.reminderSentAt) return false;
+    const start = Date.parse(booking.startsAt);
+    if (!Number.isFinite(start)) return false;
+    const minutes = (start - now) / 60_000;
+    return minutes >= windowMin && minutes <= windowMax;
+  });
 }

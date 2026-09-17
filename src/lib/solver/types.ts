@@ -7,10 +7,23 @@ export type SolverStep = {
   titleFr?: string;
   titleAr?: string;
   latex: string;
+  theoremEn?: string;
+  theoremFr?: string;
+  theoremAr?: string;
   explanationEn: string;
   explanationFr: string;
   explanationAr?: string;
 };
+
+export type SolverGiven = {
+  latex: string;
+  aimEn: string;
+  aimFr?: string;
+  aimAr: string;
+};
+
+export type AuditStatus = "pending" | "verified" | "needs_fix";
+export type StudentRating = 1 | -1;
 
 export type CanvasTimelineEvent = {
   at: number;
@@ -41,16 +54,21 @@ export type MathSolution = {
   summary: string;
   finalAnswer: string;
   finalAnswerLatex: string;
+  given: SolverGiven;
   steps: SolverStep[];
   avatarScript: AvatarScript;
   canvasTimeline: CanvasTimelineJson;
   timeline: LessonTimeline;
   topic: string;
+  topicTag: string;
   track: CertificateTrack;
   language: LessonLanguage;
   source: SolverSource;
   warning?: string;
   recognizedFromImage?: string;
+  needsRetake: boolean;
+  retakeMessageEn?: string;
+  retakeMessageAr?: string;
 };
 
 export type VideoJobStatus = "none" | "queued" | "processing" | "completed" | "failed" | "demo";
@@ -67,7 +85,9 @@ export type MathQueryRecord = {
   language: LessonLanguage;
   track: CertificateTrack;
   topic?: string;
+  topicTag?: string;
   summary: string;
+  given?: SolverGiven;
   finalAnswer: string;
   finalAnswerLatex: string;
   steps: SolverStep[];
@@ -79,6 +99,13 @@ export type MathQueryRecord = {
   videoStatus: VideoJobStatus;
   heygenJobId?: string;
   videoUrl?: string;
+  videoNotifiedAt?: string;
+  needsRetake?: boolean;
+  retakeMessageEn?: string;
+  retakeMessageAr?: string;
+  rating?: StudentRating;
+  auditStatus?: AuditStatus;
+  auditNote?: string;
   createdAt: string;
   updatedAt: string;
 };

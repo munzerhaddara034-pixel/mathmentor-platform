@@ -1,5 +1,6 @@
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
 import { assembleSolution, type GraphSpec, type TrapSpec } from "./assemble";
+import { isGarbledPrompt, retakeSolution } from "./retake";
 import type { MathSolution, SolverStep } from "./types";
 
 export type SolveRequest = {
@@ -156,6 +157,8 @@ function quadraticSolution(a: number, b: number, c: number, language: LessonLang
       titleFr: "Forme canonique",
       titleAr: "الشكل العام",
       latex: polyLatex(a, b, c),
+      theoremEn: "Canonical form ax^{2}+bx+c=0 with a ≠ 0",
+      theoremAr: "الشكل العام ax^{2}+bx+c=0 بشرط a ≠ 0",
       explanationEn: "A Lebanese Brevet / Terminale quadratic is written ax^2+bx+c=0 with a ≠ 0 before any formula.",
       explanationFr: "On écrit ax^2+bx+c=0 avec a ≠ 0 avant toute formule, comme sur une copie Brevet / Terminale.",
       explanationAr: "نكتب المعادلة من الدرجة الثانية بالشكل العام قبل أي قانون.",
@@ -165,6 +168,8 @@ function quadraticSolution(a: number, b: number, c: number, language: LessonLang
       titleFr: "Discriminant",
       titleAr: "المميّز",
       latex: `\\Delta=b^{2}-4ac=${fmt(b)}^{2}-4(${fmt(a)})(${fmt(c)})=${fmt(d)}`,
+      theoremEn: "Discriminant Δ = b^{2} − 4ac",
+      theoremAr: "المميّز Δ = b^{2} − 4ac",
       explanationEn: "Δ = b² − 4ac. The sign of Δ decides two real roots, a double root, or no real root.",
       explanationFr: "Δ = b² − 4ac. Le signe de Δ décide deux racines réelles, une racine double, ou aucune racine réelle.",
       explanationAr: "المميّز Δ=b²−4ac يحدد عدد الجذور الحقيقية.",
@@ -218,6 +223,8 @@ function quadraticSolution(a: number, b: number, c: number, language: LessonLang
       titleFr: "Formule quadratique",
       titleAr: "القانون العام",
       latex: rootsLatex,
+      theoremEn: "x = (-b ± √Δ) / (2a) when Δ > 0",
+      theoremAr: "x = (-b ± √Δ) / (2a) عندما Δ > 0",
       explanationEn: "Two real roots. If Δ is a perfect square, factor over the integers as a Brevet paper expects.",
       explanationFr: "Deux racines réelles. Si Δ est un carré parfait, on factorise sur les entiers comme au Brevet.",
       explanationAr: "جذران حقيقيان. إذا كان Δ مربعاً كاملاً نفكك على الأعداد الصحيحة.",
@@ -252,6 +259,13 @@ function quadraticSolution(a: number, b: number, c: number, language: LessonLang
     graph,
     trap,
     topic: "Quadratic equations",
+    topicTag: "quadratic",
+    given: {
+      latex: polyLatex(a, b, c),
+      aimEn: "Solve over \\mathbb{R} and box the roots.",
+      aimFr: "Résoudre sur R et encadrer les racines.",
+      aimAr: "حلّ المعادلة على R ووضع الجذور في إطار.",
+    },
     track,
     language,
     source: "demo",
@@ -304,6 +318,12 @@ function linearSolution(a: number, b: number, c: number, language: LessonLanguag
       latex: `x=${fmt(x)}`,
     },
     topic: "Linear equations",
+    topicTag: "linear",
+    given: {
+      latex: `${fmt(a)}x+${fmt(b)}=${fmt(c)}`,
+      aimEn: "Solve for x and substitute back.",
+      aimAr: "إيجاد x ثم التعويض للتحقق.",
+    },
     track,
     language,
     source: "demo",
@@ -381,7 +401,8 @@ function systemSolution(
       correctionFr: "Toute opération de ligne multiplie toute l’équation, second membre compris.",
       latex: `x=${fmt(x)},\\ y=${fmt(y)}`,
     },
-    topic: "Systems of linear equations",
+      topic: "Systems of linear equations",
+      topicTag: "systems",
     track,
     language,
     source: "demo",
@@ -405,11 +426,13 @@ function exponentialSolution(language: LessonLanguage, track: CertificateTrack):
         explanationAr: "الدالة الأسية معرفة على R وكذلك كثير الحدود فالجداء معرف على R.",
       },
       {
-        title: "Product rule",
-        titleFr: "Règle du produit",
-        titleAr: "مشتق الجداء",
-        latex: "f'(x)=1\\cdot e^{x}+(x-1)e^{x}=x e^{x}",
-        explanationEn: "Write u=x−1, v=e^x, u'=1, v'=e^x. Then f'=u'v+uv' and factor e^x. Do not quote f'=e^x.",
+      title: "Product rule",
+      titleFr: "Règle du produit",
+      titleAr: "مشتق الجداء",
+      latex: "f'(x)=1\\cdot e^{x}+(x-1)e^{x}=x e^{x}",
+      theoremEn: "(uv)' = u'v + uv'",
+      theoremAr: "(uv)' = u'v + uv'",
+      explanationEn: "Write u=x−1, v=e^x, u'=1, v'=e^x. Then f'=u'v+uv' and factor e^x. Do not quote f'=e^x.",
         explanationFr: "u=x−1, v=e^x. f'=u'v+uv', puis on factorise e^x. On ne cite pas f'=e^x.",
         explanationAr: "نكتب قانون الجداء ثم نبسط إلى x e^x.",
       },
@@ -446,6 +469,12 @@ function exponentialSolution(language: LessonLanguage, track: CertificateTrack):
       latex: "f'(x)=x e^{x}",
     },
     topic: "Exponential functions",
+    topicTag: "exponential",
+    given: {
+      latex: "f(x)=(x-1)e^{x}",
+      aimEn: "Domain, f'(x), and the minimum.",
+      aimAr: "مجموعة التعريف، المشتق، والحد الأدنى.",
+    },
     track,
     language,
     source: "demo",
@@ -492,6 +521,12 @@ function limitSolution(question: string, language: LessonLanguage, track: Certif
         latex: "\\lim_{x\\to 0}\\dfrac{\\sin x}{x}=1",
       },
       topic: "Limits",
+      topicTag: "limits",
+      given: {
+        latex: "\\lim_{x\\to 0}\\dfrac{\\sin x}{x}",
+        aimEn: "Evaluate the standard trigonometric limit.",
+        aimAr: "حساب نهاية الجيب المعيارية.",
+      },
       track,
       language,
       source: "demo",
@@ -537,6 +572,12 @@ function limitSolution(question: string, language: LessonLanguage, track: Certif
         latex: "\\lim=3",
       },
       topic: "Limits at infinity",
+      topicTag: "limits",
+      given: {
+        latex: "\\lim_{x\\to\\infty}\\dfrac{3x^{2}+1}{x^{2}-2}",
+        aimEn: "Evaluate the rational limit at infinity.",
+        aimAr: "حساب نهاية الكسر عند اللانهاية.",
+      },
       track,
       language,
       source: "demo",
@@ -554,6 +595,7 @@ function limitSolution(question: string, language: LessonLanguage, track: Certif
       { title: "Conclude", titleFr: "Conclure", latex: "\\lim f(x)=L", explanationEn: "Name L and, if required, the theorem used.", explanationFr: "On nomme L et le théorème utilisé." },
     ],
     topic: "Limits",
+    topicTag: "limits",
     track,
     language,
     source: "demo",
@@ -662,6 +704,12 @@ function pythagorasSolution(language: LessonLanguage, track: CertificateTrack): 
       latex: "c=5",
     },
     topic: "Right triangles",
+    topicTag: "geometry",
+    given: {
+      latex: "a=3,\\ b=4,\\ \\widehat{C}=90^{\\circ}",
+      aimEn: "Find the hypotenuse c.",
+      aimAr: "إيجاد الوتر c.",
+    },
     track,
     language,
     source: "demo",
@@ -732,17 +780,13 @@ export function demoSolve(request: SolveRequest): MathSolution {
   const raw = `${request.latex ?? ""} ${request.question ?? ""}`.trim();
   const n = normalize(raw).toLowerCase();
 
-  if (!raw && request.imageName) {
-    const fromName = demoSolve({
-      question: "x^2 - 5x + 6 = 0",
+  if (isGarbledPrompt(raw)) {
+    return retakeSolution({
+      question: raw,
       language,
-      track: "brevet",
+      imageName: request.imageName,
+      source: "demo",
     });
-    fromName.recognizedFromImage = request.imageName;
-    fromName.warning =
-      "No GEMINI_API_KEY — demo vision mapped this photo to a Brevet quadratic x^2−5x+6=0 (very common Lebanese pattern).";
-    fromName.summary = `${fromName.summary} Photo: ${request.imageName}.`;
-    return fromName;
   }
 
   if (/\(x-1\)\s*\*?\s*e\^x|(x-1)e\^x|أسي.*\(x-1\)/i.test(n) || (/exp/.test(n) && /x-1/.test(n))) {
@@ -777,6 +821,12 @@ export function demoSolve(request: SolveRequest): MathSolution {
       ],
       graph: { fn: "0", domain: [-1, 5], highlights: { roots: [[3, 4]] } },
       topic: "Complex numbers",
+      topicTag: "complex",
+      given: {
+        latex: "z=3+4i",
+        aimEn: "Find the modulus |z|.",
+        aimAr: "إيجاد طويلة z.",
+      },
       track,
       language,
       source: "demo",
@@ -795,6 +845,12 @@ export function demoSolve(request: SolveRequest): MathSolution {
         { title: "Differentiate back", titleFr: "Revérifier par dérivation", latex: "(x^{2}+C)'=2x", explanationEn: "The official check of an antiderivative is differentiation.", explanationFr: "Le contrôle officiel d’une primitive est la dérivation." },
       ],
       topic: "Integrals",
+      topicTag: "integrals",
+      given: {
+        latex: "\\int 2x\\,dx",
+        aimEn: "Find the antiderivative (+C).",
+        aimAr: "إيجاد الدالة الأصلية (+C).",
+      },
       track,
       language,
       source: "demo",

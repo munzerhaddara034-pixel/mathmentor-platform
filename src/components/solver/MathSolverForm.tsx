@@ -141,7 +141,8 @@ export function MathSolverForm() {
       {preview ? <img className="question-image" src={preview} alt="Uploaded problem" /> : null}
       <p className="muted">
         Without <code>GEMINI_API_KEY</code> the demo solver covers Brevet/Terminale patterns (quadratics, limits,
-        <code> (x-1)e^x </code>, systems, Pythagoras). With a key, Gemini Vision reads photos.
+        <code> (x-1)e^x </code>, systems, Pythagoras) when the given is readable. Unclear or incomplete photos return{" "}
+        <code>needsRetake</code> — the engine will not invent a problem.
       </p>
       {error ? (
         <div className="studio-teacher-error" role="alert">

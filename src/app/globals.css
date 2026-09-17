@@ -890,11 +890,57 @@ textarea { min-height: 120px; resize: vertical; }
 .final-box {
   background: var(--navy);
   color: white;
+  border: 3px solid var(--gold);
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.18);
+}
+.final-box .muted { color: #c7d4e6; }
+.given-box {
+  border: 2px solid var(--gold);
+  background: var(--gold-soft);
   border-radius: 16px;
   padding: 16px 20px;
   margin: 16px 0;
 }
-.final-box .muted { color: #c7d4e6; }
+.theorem {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 4px 0 8px;
+}
+.retake-banner {
+  border: 2px solid #b45309;
+  background: #fff7ed;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+.rating-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 16px;
+}
+.audit-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.audit-note {
+  min-width: 140px;
+  margin-bottom: 6px;
+}
+.weekday-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+.ghost-chip { background: transparent; }
 .solver-steps { padding-left: 20px; }
 .solver-steps li { margin-bottom: 16px; }
 .slot-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchAvatarTalkingVideo, hasHeyGenKey } from "@/lib/studio/heygen";
 import { getHeyGenJob, listHeyGenJobs, patchHeyGenJob, playerPathForJob, resolveJobTimeline } from "@/lib/studio/heygenJobs";
+import { notifyVideoJobIfReady } from "@/lib/whatsapp/notify";
 
 export const runtime = "nodejs";
 
@@ -28,6 +29,9 @@ async function statusPayload(jobId: string) {
   const job = await refreshLiveJob(jobId);
   if (!job) {
     return NextResponse.json({ error: "Unknown jobId." }, { status: 404 });
+  }
+  if (job.status === "completed") {
+    await notifyVideoJobIfReady(job.id);
   }
   return NextResponse.json({
     job,

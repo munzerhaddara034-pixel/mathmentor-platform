@@ -7,6 +7,7 @@ import { newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygenJobs";
 import { attachDemoMedia } from "./assemble";
 import { demoSolve, type SolveRequest } from "./demoSolver";
 import { demoFallback, hasGeminiKey, openaiSolverKey, solveWithGemini, solveWithOpenAI } from "./llm";
+import { looksLikeMath, retakeSolution } from "./retake";
 import { saveMathQuery } from "./store";
 import type { MathQueryRecord, MathSolution } from "./types";
 import type { PublicUser } from "@/lib/auth/store";
@@ -39,16 +40,26 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
     track: input.track,
     imageName: input.imageName,
   };
+  const typed = `${input.question ?? ""} ${input.latex ?? ""}`.trim();
+  const typedIsMath = looksLikeMath(typed);
 
-  if (hasGeminiKey() && (input.question.trim() || input.latex?.trim() || input.imageBase64)) {
+  if (hasGeminiKey() && (typed || input.imageBase64)) {
     try {
       return await solveWithGemini({ ...request, imageBase64: input.imageBase64, mimeType: input.mimeType });
     } catch (error) {
+      if (input.imageBase64 && !typedIsMath) {
+        return retakeSolution({
+          question: typed,
+          language: request.language,
+          imageName: request.imageName,
+          source: "demo",
+        });
+      }
       return demoFallback(request, error instanceof Error ? error.message : "Gemini failed; used demo solver.");
     }
   }
 
-  if (openaiSolverKey() && (input.question.trim() || input.latex?.trim()) && !input.imageBase64) {
+  if (openaiSolverKey() && typedIsMath && !input.imageBase64) {
     try {
       return await solveWithOpenAI(request);
     } catch (error) {
@@ -56,11 +67,19 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
     }
   }
 
+  if (input.imageBase64 && !typedIsMath) {
+    return retakeSolution({
+      question: typed,
+      language: request.language,
+      imageName: request.imageName,
+      source: "demo",
+    });
+  }
+
   const solution = demoSolve(request);
-  if (!hasGeminiKey() && input.imageBase64) {
+  if (!hasGeminiKey() && input.imageBase64 && typedIsMath) {
     solution.warning =
-      solution.warning ||
-      "No GEMINI_API_KEY — demo vision used a Lebanese Brevet/Terminale pattern so the build works without keys.";
+      "No GEMINI_API_KEY — solved the typed given. Photo OCR needs Gemini Vision; the image was not invented from.";
   } else if (!hasGeminiKey() && !openaiSolverKey()) {
     solution.warning =
       solution.warning ||
@@ -70,10 +89,10 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
 }
 
 export async function recordSolution(user: PublicUser, input: EngineInput, solution: MathSolution): Promise<MathQueryRecord> {
-  const demoVideo = !hasHeyGenKey();
+  const demoVideo = !hasHeyGenKey() && !solution.needsRetake;
   const timeline = attachDemoMedia(solution.timeline, demoVideo ? DEMO_AVATAR_VIDEO : solution.timeline.media?.videoUrl);
   let heygenJobId: string | undefined;
-  let videoStatus: MathQueryRecord["videoStatus"] = demoVideo ? "demo" : "none";
+  let videoStatus: MathQueryRecord["videoStatus"] = solution.needsRetake ? "none" : demoVideo ? "demo" : "none";
   let videoUrl = demoVideo ? DEMO_AVATAR_VIDEO : undefined;
 
   if (demoVideo) {
@@ -107,7 +126,9 @@ export async function recordSolution(user: PublicUser, input: EngineInput, solut
     language: solution.language,
     track: solution.track,
     topic: solution.topic,
+    topicTag: solution.topicTag,
     summary: solution.summary,
+    given: solution.given,
     finalAnswer: solution.finalAnswer,
     finalAnswerLatex: solution.finalAnswerLatex,
     steps: solution.steps,
@@ -116,6 +137,10 @@ export async function recordSolution(user: PublicUser, input: EngineInput, solut
     timeline,
     source: solution.source,
     warning: solution.warning,
+    needsRetake: solution.needsRetake,
+    retakeMessageEn: solution.retakeMessageEn,
+    retakeMessageAr: solution.retakeMessageAr,
+    auditStatus: "pending",
     videoStatus,
     heygenJobId,
     videoUrl,

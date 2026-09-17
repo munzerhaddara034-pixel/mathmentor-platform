@@ -16,6 +16,7 @@ import {
 import { getHeyGenJob, newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygenJobs";
 import { DEMO_AVATAR_VIDEO } from "@/lib/studio/heygenClient";
 import { lessonLanguageSchema } from "@/lib/studio/timeline";
+import { notifyQueryVideoById } from "@/lib/whatsapp/notify";
 
 export const runtime = "nodejs";
 
@@ -113,6 +114,7 @@ export async function POST(request: Request) {
   }
 
   if (demo) {
+    if (query) await notifyQueryVideoById(query.id);
     return NextResponse.json({
       ok: true,
       job,

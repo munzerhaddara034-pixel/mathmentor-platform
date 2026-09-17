@@ -123,6 +123,11 @@ export async function POST(request: Request) {
     source: record.source,
     warning: record.warning,
     videoStatus: record.videoStatus,
+    needsRetake: record.needsRetake,
+    retakeMessageEn: record.retakeMessageEn,
+    retakeMessageAr: record.retakeMessageAr,
+    given: record.given,
+    topicTag: record.topicTag,
     playerPath: `/lessons/interactive-explanation?id=${encodeURIComponent(record.id)}`,
     resultPath: `/math-solver/result/${encodeURIComponent(record.id)}`,
   });

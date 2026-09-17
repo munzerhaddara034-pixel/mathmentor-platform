@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { webhookSecretOk } from "@/lib/studio/heygenAuth";
 import { mapHeyGenStatus } from "@/lib/studio/heygen";
 import { getHeyGenJob, patchHeyGenJob } from "@/lib/studio/heygenJobs";
+import { listMathQueries, setQueryVideo } from "@/lib/solver";
+import { notifyVideoJobIfReady } from "@/lib/whatsapp/notify";
 
 export const runtime = "nodejs";
 
@@ -77,6 +79,19 @@ export async function POST(request: Request) {
         : job.message,
     error: parsed.status === "failed" ? parsed.eventType || "failed" : undefined,
   });
+
+  if (completed) {
+    const queries = await listMathQueries({ limit: 400 });
+    const query = queries.find((item) => item.heygenJobId === job.id);
+    if (query) {
+      await setQueryVideo(query.id, {
+        videoStatus: "completed",
+        heygenJobId: job.id,
+        videoUrl: parsed.videoUrl ?? job.videoUrl,
+      });
+    }
+    await notifyVideoJobIfReady(job.id);
+  }
 
   return NextResponse.json({ ok: true, job: updated });
 }

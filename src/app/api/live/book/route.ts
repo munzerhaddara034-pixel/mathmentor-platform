@@ -39,7 +39,8 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     booking: result.booking,
-    message: "Requested. Prof. Munzer Haddara will confirm and add a meeting link.",
-    messageAr: "تم الطلب. يؤكد الأستاذ منذر حداره الموعد ويضع رابط اللقاء.",
+    meetingLink: result.booking.meetingLink,
+    message: "Booked. 1 live credit used. Meeting link is in your calendar.",
+    messageAr: "تم الحجز. خُصم رصيد حصة واحدة. رابط اللقاء في رزنامتك.",
   });
 }

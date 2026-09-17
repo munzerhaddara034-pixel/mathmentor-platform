@@ -3,6 +3,7 @@ import { redeemCard } from "@/lib/store";
 import { defaultSettings } from "@/lib/settings";
 import { getLiveSession } from "@/lib/auth/session";
 import { setUserEntitlement } from "@/lib/auth/store";
+import { notifyActivation } from "@/lib/whatsapp/notify";
 
 export async function POST(request: Request) {
   const live = await getLiveSession();
@@ -24,10 +25,18 @@ export async function POST(request: Request) {
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
   await setUserEntitlement(live.user.id, result.planId);
   const plan = defaultSettings.plans.find((item) => item.id === result.planId);
+  const planName = plan?.arabicName ?? result.planId;
+  await notifyActivation({
+    phone: phone,
+    name,
+    planName,
+    code: body.code,
+    userId: live.user.id,
+  });
   return NextResponse.json({
     ok: true,
     planId: result.planId,
-    planName: plan?.arabicName ?? result.planId,
-    message: `أهلاً ${name}! تم تفعيل ${plan?.arabicName ?? "الاشتراك"} بنجاح.`,
+    planName,
+    message: `أهلاً ${name}! تم تفعيل ${planName} بنجاح.`,
   });
 }

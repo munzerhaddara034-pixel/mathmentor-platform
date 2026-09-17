@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
 import { userHasLiveAccess } from "@/lib/auth/store";
-import { addSlot, availableSlots, listBookings, listSlots, removeSlot } from "@/lib/live/store";
+import { addSlot, availableSlots, getAvailability, listBookings, listSlots, removeSlot } from "@/lib/live/store";
 
 export const runtime = "nodejs";
 
@@ -14,12 +14,16 @@ export async function GET() {
   if (!allowed) {
     return NextResponse.json({ error: "LIVE_TIER or BOTH required.", errorAr: "يلزم اشتراك الحصص المباشرة." }, { status: 403 });
   }
-  const slots = staff ? await listSlots() : await availableSlots();
+  const credits = guard.live.user.liveCredits ?? 0;
+  const slots = staff ? await listSlots() : credits > 0 ? await availableSlots() : [];
   const bookings = await listBookings(staff ? undefined : { studentId: guard.live.user.id });
+  const availability = await getAvailability();
   return NextResponse.json({
     slots,
     bookings,
-    liveCredits: guard.live.user.liveCredits,
+    availability,
+    liveCredits: credits,
+    timezone: availability.timezone,
   });
 }
 

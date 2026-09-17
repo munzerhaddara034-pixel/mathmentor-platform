@@ -38,9 +38,36 @@ export type AssembleInput = {
   source: SolverSource;
   warning?: string;
   recognizedFromImage?: string;
+  given?: import("./types").SolverGiven;
+  topicTag?: string;
+  needsRetake?: boolean;
+  retakeMessageEn?: string;
+  retakeMessageAr?: string;
 };
 
-const INSTRUCTOR = "Prof. Munzer Haddara";
+function topicTagFrom(topic: string) {
+  const t = topic.toLowerCase();
+  if (/quad|تربيع/.test(t)) return "quadratic";
+  if (/limit|نهاي/.test(t)) return "limits";
+  if (/exp|أسي/.test(t)) return "exponential";
+  if (/system|جملة/.test(t)) return "systems";
+  if (/triangle|فيثاغ|geom/.test(t)) return "geometry";
+  if (/linear|خطي/.test(t)) return "linear";
+  if (/complex|مركب/.test(t)) return "complex";
+  if (/integral|تكامل/.test(t)) return "integrals";
+  if (/percent|نسبة/.test(t)) return "percentages";
+  if (/unclear/.test(t)) return "unclear";
+  return "general";
+}
+
+function withTheorems(steps: SolverStep[]): SolverStep[] {
+  return steps.map((step) => ({
+    ...step,
+    theoremEn: step.theoremEn || step.title,
+    theoremFr: step.theoremFr || step.titleFr,
+    theoremAr: step.theoremAr || step.titleAr || "قانون معلّل",
+  }));
+}
 
 function stepSeconds(count: number) {
   return Math.max(12, Math.min(22, 48 / Math.max(1, count)));
@@ -49,7 +76,7 @@ function stepSeconds(count: number) {
 export function assembleSolution(input: AssembleInput): MathSolution {
   const language: LessonLanguage = input.language === "fr" ? "fr" : input.language === "ar" ? "ar" : "en";
   const track: CertificateTrack = input.track ?? "ls";
-  const steps = input.steps.length ? input.steps : fallbackSteps(input.question, input.finalAnswerLatex);
+  const steps = withTheorems(input.steps.length ? input.steps : fallbackSteps(input.question, input.finalAnswerLatex));
   const trap = input.trap ?? defaultTrap(input.finalAnswerLatex);
   const graph = input.graph ?? { fn: "x*x - 5*x + 6", domain: [-1, 6] as [number, number], highlights: { roots: [[2, 0], [3, 0]] } };
 
@@ -112,6 +139,12 @@ export function assembleSolution(input: AssembleInput): MathSolution {
     summary: input.summary,
     finalAnswer: input.finalAnswer,
     finalAnswerLatex: input.finalAnswerLatex,
+    given: input.given ?? {
+      latex: input.finalAnswerLatex || input.question.slice(0, 120),
+      aimEn: input.summary,
+      aimFr: input.summary,
+      aimAr: `المطلوب: ${input.finalAnswer}`,
+    },
     steps,
     avatarScript,
     canvasTimeline: {
@@ -121,11 +154,15 @@ export function assembleSolution(input: AssembleInput): MathSolution {
     },
     timeline,
     topic: input.topic,
+    topicTag: input.topicTag || topicTagFrom(input.topic),
     track,
     language,
     source: input.source,
     warning: input.warning,
     recognizedFromImage: input.recognizedFromImage,
+    needsRetake: Boolean(input.needsRetake),
+    retakeMessageEn: input.retakeMessageEn,
+    retakeMessageAr: input.retakeMessageAr,
   };
 }
 
@@ -136,6 +173,8 @@ function fallbackSteps(question: string, latex: string): SolverStep[] {
       titleFr: "Lire les données",
       titleAr: "قراءة المعطيات",
       latex: latex || question,
+      theoremEn: "Copy the given before any formula",
+      theoremAr: "كتابة المعطيات قبل أي قانون",
       explanationEn: "Copy the given information before any calculation, as on a Lebanese official paper.",
       explanationFr: "On recopie les données avant tout calcul, comme sur une copie officielle libanaise.",
       explanationAr: "نكتب المعطيات قبل أي حساب كما في ورقة رسمية لبنانية.",
@@ -270,7 +309,7 @@ function buildTimeline(input: {
     language: input.language === "fr" ? "fr" : "en",
     defaultLanguage: input.language === "fr" ? "fr" : "en",
     durationSec: trapEnd,
-    instructor: INSTRUCTOR,
+    instructor: "Prof. Munzer Haddara",
     track: input.track,
     topic: input.topic,
     media: {

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { assembleSolution, type GraphSpec } from "./assemble";
 import { demoSolve, type SolveRequest } from "./demoSolver";
+import { retakeSolution } from "./retake";
 import type { MathSolution, SolverStep } from "./types";
 
 const geminiStepSchema = z.object({
@@ -8,18 +9,33 @@ const geminiStepSchema = z.object({
   titleFr: z.string().optional(),
   titleAr: z.string().optional(),
   latex: z.string(),
+  theoremEn: z.string().optional(),
+  theoremFr: z.string().optional(),
+  theoremAr: z.string().optional(),
   explanationEn: z.string(),
   explanationFr: z.string(),
   explanationAr: z.string().optional(),
 });
 
 const geminiJsonSchema = z.object({
-  summary: z.string(),
-  finalAnswer: z.string(),
-  finalAnswerLatex: z.string(),
+  needsRetake: z.boolean().optional(),
+  retakeMessageEn: z.string().optional(),
+  retakeMessageAr: z.string().optional(),
+  summary: z.string().optional(),
+  finalAnswer: z.string().optional(),
+  finalAnswerLatex: z.string().optional(),
   topic: z.string().optional(),
+  topicTag: z.string().optional(),
   track: z.string().optional(),
-  steps: z.array(geminiStepSchema).min(3),
+  given: z
+    .object({
+      latex: z.string(),
+      aimEn: z.string(),
+      aimFr: z.string().optional(),
+      aimAr: z.string(),
+    })
+    .optional(),
+  steps: z.array(geminiStepSchema).optional(),
   graph: z
     .object({
       fn: z.string(),
@@ -57,30 +73,106 @@ Never use the name Al-Tarah or الطارة. The academy is MathMentor · أكا
 
 Return ONE JSON object only:
 {
+  "needsRetake": boolean,
+  "retakeMessageEn": string,
+  "retakeMessageAr": string,
   "summary": string,
+  "given": { "latex": string, "aimEn": string, "aimFr": string, "aimAr": string },
   "finalAnswer": string,
   "finalAnswerLatex": string,
   "topic": string,
+  "topicTag": "quadratic" | "limits" | "exponential" | "systems" | "geometry" | "linear" | "complex" | "integrals" | "percentages" | "general",
   "track": "brevet" | "ls" | "se" | "gs" | "lh" | "sat",
   "steps": [
-    { "title": string, "titleFr": string, "latex": string, "explanationEn": string, "explanationFr": string, "explanationAr": string }
+    {
+      "title": string,
+      "titleAr": string,
+      "latex": string,
+      "theoremEn": string,
+      "theoremAr": string,
+      "explanationEn": string,
+      "explanationFr": string,
+      "explanationAr": string
+    }
   ],
   "graph": { "fn": "JS expression in x", "domain": [number, number], "highlights": { "roots": [[x,y]], "extrema": [[x,y]], "asymptotes": [{"y": number}] } },
   "trap": { "wrong": string, "wrongFr": string, "correction": string, "correctionFr": string, "latex": string }
 }
 
-Rules:
-- At least 3 graded steps. Each step has real LaTeX and EN+FR of equal quality (Lebanese English-section / French-section papers).
-- Name theorems with hypotheses. No jumping to a boxed number.
-- graph.fn is a JavaScript expression in x (e.g. "(x-1)*exp(x)").
-- If the photo is a handwritten problem, transcribe it first then solve.
-- Instructor voice: calm, precise, official-exam barème.`;
+Hard rules (Lebanese exam accuracy):
+1. ALL mathematics MUST be pure LaTeX (never Unicode mini-math). Use f'(x), \\int, \\lim, \\ln, e^{x}, z=a+ib, \\mathbb{R}.
+2. Always three pedagogical sections:
+   a) Given & Aim (المعطيات والمطلوب) in "given"
+   b) Step-by-step: every step names the theorem/reason (theoremEn / theoremAr) then the algebra
+   c) Final Answer Box: finalAnswerLatex is the boxed line
+3. HALLUCINATION GUARD: if the uploaded image is blurry, cropped, or incomplete, set needsRetake=true, fill retakeMessageEn AND retakeMessageAr, and DO NOT invent a problem or a number. Ask the student to rephotograph.
+4. At least 3 graded steps when needsRetake is false. EN+FR+AR of equal quality.
+5. graph.fn is a JavaScript expression in x.
+6. Instructor voice: calm official-exam barème.`;
 
 function geminiModels() {
   const pinned = process.env.GEMINI_MODEL?.trim();
   return pinned
     ? [pinned]
     : ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+}
+
+function solutionFromLlm(
+  parsed: z.infer<typeof geminiJsonSchema>,
+  request: SolveRequest & { imageBase64?: string; imageName?: string },
+  source: MathSolution["source"],
+): MathSolution {
+  const question = request.question || request.latex || (request.imageName ? `(image) ${request.imageName}` : "Problem");
+  if (parsed.needsRetake) {
+    const retake = retakeSolution({
+      question,
+      language: request.language,
+      imageName: request.imageName,
+      source,
+    });
+    if (parsed.retakeMessageEn) retake.retakeMessageEn = parsed.retakeMessageEn;
+    if (parsed.retakeMessageAr) retake.retakeMessageAr = parsed.retakeMessageAr;
+    return retake;
+  }
+
+  const steps: SolverStep[] = (parsed.steps ?? []).map((step) => ({
+    title: step.title,
+    titleFr: step.titleFr,
+    titleAr: step.titleAr,
+    latex: step.latex,
+    theoremEn: step.theoremEn,
+    theoremFr: step.theoremFr,
+    theoremAr: step.theoremAr,
+    explanationEn: step.explanationEn,
+    explanationFr: step.explanationFr,
+    explanationAr: step.explanationAr,
+  }));
+
+  const graph: GraphSpec | undefined = parsed.graph
+    ? {
+        fn: parsed.graph.fn,
+        domain: parsed.graph.domain,
+        yDomain: parsed.graph.yDomain,
+        highlights: parsed.graph.highlights as GraphSpec["highlights"],
+      }
+    : undefined;
+
+  return assembleSolution({
+    question,
+    summary: parsed.summary || parsed.given?.aimEn || "Graded Lebanese-curriculum solution.",
+    finalAnswer: parsed.finalAnswer || parsed.finalAnswerLatex || "",
+    finalAnswerLatex: parsed.finalAnswerLatex || parsed.finalAnswer || "",
+    steps,
+    graph,
+    trap: parsed.trap,
+    topic: parsed.topic || "AI solution",
+    topicTag: parsed.topicTag,
+    track: (parsed.track as MathSolution["track"]) || request.track || "ls",
+    language: request.language,
+    source,
+    recognizedFromImage: request.imageBase64 ? request.imageName : undefined,
+    given: parsed.given,
+  });
 }
 
 function extractJson(text: string) {
@@ -141,29 +233,7 @@ export async function solveWithGemini(
       };
       const text = json.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("\n") ?? "";
       const parsed = geminiJsonSchema.parse(extractJson(text));
-      const steps: SolverStep[] = parsed.steps;
-      const graph: GraphSpec | undefined = parsed.graph
-        ? {
-            fn: parsed.graph.fn,
-            domain: parsed.graph.domain,
-            yDomain: parsed.graph.yDomain,
-            highlights: parsed.graph.highlights as GraphSpec["highlights"],
-          }
-        : undefined;
-      return assembleSolution({
-        question: request.question || request.latex || "Image problem",
-        summary: parsed.summary,
-        finalAnswer: parsed.finalAnswer,
-        finalAnswerLatex: parsed.finalAnswerLatex,
-        steps,
-        graph,
-        trap: parsed.trap,
-        topic: parsed.topic || "AI solution",
-        track: (parsed.track as MathSolution["track"]) || request.track || "ls",
-        language: request.language,
-        source: "gemini",
-        recognizedFromImage: request.imageBase64 ? request.imageName : undefined,
-      });
+      return solutionFromLlm(parsed, request, "gemini");
     } catch (error) {
       lastError = error instanceof Error ? error.message : lastError;
     }
@@ -196,21 +266,7 @@ export async function solveWithOpenAI(request: SolveRequest): Promise<MathSoluti
   }
   const json = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const parsed = geminiJsonSchema.parse(JSON.parse(json.choices?.[0]?.message?.content ?? "{}"));
-  return assembleSolution({
-    question: request.question || request.latex || "Problem",
-    summary: parsed.summary,
-    finalAnswer: parsed.finalAnswer,
-    finalAnswerLatex: parsed.finalAnswerLatex,
-    steps: parsed.steps,
-    graph: parsed.graph
-      ? { fn: parsed.graph.fn, domain: parsed.graph.domain, yDomain: parsed.graph.yDomain, highlights: parsed.graph.highlights as GraphSpec["highlights"] }
-      : undefined,
-    trap: parsed.trap,
-    topic: parsed.topic || "AI solution",
-    track: request.track || "ls",
-    language: request.language,
-    source: "openai",
-  });
+  return solutionFromLlm(parsed, request, "openai");
 }
 
 export function demoFallback(request: SolveRequest, warning: string): MathSolution {
