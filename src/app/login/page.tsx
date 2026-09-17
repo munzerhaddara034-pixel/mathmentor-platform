@@ -1,5 +1,6 @@
 "use client";
 
+import { collectDeviceFingerprint } from "@/lib/auth/clientFingerprint";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
@@ -25,7 +26,7 @@ function LoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ email, password, next }),
+        body: JSON.stringify({ email, password, next, fingerprint: collectDeviceFingerprint() }),
       });
       const payload = (await response.json()) as {
         ok?: boolean;
@@ -57,9 +58,9 @@ function LoginForm() {
       </h1>
       {replaced ? (
         <div className="studio-teacher-error" role="alert">
-          <p>This account signed in on another device. That session was closed.</p>
+          <p>This account signed in on another device of the same type (phone or computer). That session was closed.</p>
           <p dir="rtl" lang="ar">
-            تم تسجيل الدخول لهذا الحساب من جهاز آخر. أُغلقت الجلسة السابقة.
+            تم تسجيل الدخول لهذا الحساب من جهاز آخر من النوع نفسه (هاتف أو حاسوب). أُغلقت الجلسة السابقة.
           </p>
         </div>
       ) : null}

@@ -109,6 +109,16 @@ export async function POST(request: Request) {
     solution,
   );
 
+  if (!record.needsRetake) {
+    const { recordActivity } = await import("@/lib/gamification/store");
+    await recordActivity({
+      userId: user.id,
+      name: user.name,
+      kind: "solver",
+      topic: record.topicTag?.includes("prob") ? "probability" : "calculus",
+    });
+  }
+
   return NextResponse.json({
     ok: true,
     id: record.id,

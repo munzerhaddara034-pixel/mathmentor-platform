@@ -1,4 +1,5 @@
 import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
+import { PageWatermark } from "@/components/studio/IdentityWatermark";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
 import { getMathQuery } from "@/lib/solver";
@@ -45,7 +46,8 @@ export default async function InteractiveExplanationPage({
   const viewer = live.ok ? { name: live.user.name, phone: live.user.phone } : { name: "طالب المنصة", phone: "76532421" };
 
   return (
-    <main className="shell studio-shell">
+    <main className="shell studio-shell relative-watermark">
+      <PageWatermark name={viewer.name} phone={viewer.phone} />
       <p className="eyebrow">Interactive explanation · Prof. Munzer Haddara / الأستاذ منذر حداره</p>
       <h1>{query ? query.topic || query.question : "Avatar + math canvas"}</h1>
       <p className="muted">

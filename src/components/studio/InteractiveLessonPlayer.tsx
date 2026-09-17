@@ -127,6 +127,15 @@ export function InteractiveLessonPlayer({
   }, [viewer]);
 
   useEffect(() => {
+    void fetch("/api/gamification/activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ kind: "lesson", lessonId: initialTimeline.id, topic: "calculus" }),
+    }).catch(() => undefined);
+  }, [initialTimeline.id]);
+
+  useEffect(() => {
     let cancelled = false;
     void fetch("/api/auth/session", { credentials: "same-origin" })
       .then((response) => response.json())

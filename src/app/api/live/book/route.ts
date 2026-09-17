@@ -34,7 +34,30 @@ export async function POST(request: Request) {
 
   if (!isStaffRole(user.role)) {
     await adjustLiveCredits(user.id, -1);
+    const { recordLiveBookingDebit } = await import("@/lib/billing/store");
+    await recordLiveBookingDebit(user.id, result.booking.id, user.name);
   }
+  const { notifyStaff, pushNotification } = await import("@/lib/notifications/store");
+  await notifyStaff({
+    kind: "live_booked",
+    title: `${user.name} booked a live session`,
+    titleAr: `${user.name} حجز حصة مباشرة`,
+    body: new Date(result.booking.startsAt).toLocaleString("en-GB", { timeZone: "Asia/Beirut" }),
+    bodyAr: `${user.name} حجز موعداً.`,
+    href: "/live",
+    relatedId: result.booking.id,
+  });
+  await pushNotification({
+    userId: user.id,
+    audience: "student",
+    kind: "live_booked",
+    title: "Live session confirmed",
+    titleAr: "تم تأكيد الحصة المباشرة",
+    body: result.booking.meetingLink || "See /live for the join link.",
+    bodyAr: "راجع صفحة المباشر لرابط الدخول.",
+    href: "/live",
+    relatedId: `stu-${result.booking.id}`,
+  });
 
   return NextResponse.json({
     ok: true,

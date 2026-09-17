@@ -1,9 +1,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { platformDataDir } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import type { MathQueryRecord, VideoJobStatus } from "./types";
 
-const dataDir = path.join(process.cwd(), "data");
+const dataDir = platformDataDir();
 const storePath = path.join(dataDir, "math-queries.json");
 
 type QueryStore = { queries: MathQueryRecord[] };

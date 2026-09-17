@@ -1,4 +1,5 @@
 import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
+import { PageWatermark } from "@/components/studio/IdentityWatermark";
 import { officialExamFourPhaseLesson } from "@/lib/studio/seedLesson";
 import { getHeyGenJob, resolveJobTimeline, timelineForStudentLesson } from "@/lib/studio/heygenJobs";
 import { getStudioEvents } from "@/lib/studio/studioEventsStore";
@@ -28,7 +29,8 @@ export default async function InteractiveLessonDemoPage({
     : { name: "طالب المنصة", phone: "76532421" };
 
   return (
-    <main className="shell studio-shell">
+    <main className="shell studio-shell relative-watermark">
+      <PageWatermark name={viewer.name} phone={viewer.phone} />
       <p className="eyebrow">Classroom studio · protected lesson</p>
       <details className="studio-lesson-notes">
         <summary>Prof. Munzer Haddara / الأستاذ منذر حداره · lesson notes</summary>

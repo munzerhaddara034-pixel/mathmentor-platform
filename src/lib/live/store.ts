@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { platformDataDir } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import { createMeetingLink } from "./meeting";
 import { addYmd, formatInTimeZone, wallTimeToUtc } from "./timezone";
@@ -12,7 +13,7 @@ import {
   type TeacherAvailability,
 } from "./types";
 
-const dataDir = path.join(process.cwd(), "data");
+const dataDir = platformDataDir();
 const storePath = path.join(dataDir, "live-sessions.json");
 
 export function generateSlotsFromAvailability(availability: TeacherAvailability, existing: LiveSlot[] = []): LiveSlot[] {

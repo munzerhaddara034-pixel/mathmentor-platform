@@ -19,11 +19,13 @@ Unauthenticated visitors to private routes are redirected to `/login` (middlewar
 
 Private pages send `X-Robots-Tag: noindex, nofollow, noarchive` and `<meta name="robots" content="noindex, nofollow" />`.
 
-## Single session
+## Device sessions (1 mobile + 1 desktop)
 
-Each login issues a new opaque cookie (`mm_session`) and **deletes every previous session** for that user. The next request with the old cookie is treated as logged out and sent to `/login?reason=replaced` (English + Arabic message).
+Each login issues a new opaque cookie (`mm_session`) and records a device fingerprint (`userAgent + screen + timezone + localStorage deviceId`). The account may keep **one mobile and one desktop** session. A second login of the *same class* deletes the previous session of that class. The old cookie is then treated as logged out and sent to `/login?reason=replaced` (English + Arabic).
 
 The cookie is `Secure` only on HTTPS (or `AUTH_COOKIE_SECURE=1`). `npm start` on `http://localhost` still stores the session.
+
+On Netlify/Lambda, JSON stores live under `/tmp/mathmentor-data`.
 
 ## Demo accounts (local / Netlify)
 
@@ -49,8 +51,10 @@ Unlock while signed in on `/redeem` or `/activate`:
 
 AI solver, live booking, WhatsApp, teacher audit: [AI_SOLVER.md](./AI_SOLVER.md) · [LIVE_WHATSAPP.md](./LIVE_WHATSAPP.md).
 
-On Netlify the JSON file store is ephemeral per instance; demo users are re-seeded if the file is missing.
+On Netlify the JSON file store is ephemeral per instance (`/tmp/mathmentor-data`); demo users are re-seeded if the file is missing.
 
 ## Watermark
 
-The interactive player overlays **student name + phone** on both the video frame and the math canvas (`pointer-events: none`, slow drift + diagonal copy). Identity comes from the session profile. Missing phone falls back to `76532421`.
+Video players, `/lessons/interactive`, and AI solution pages overlay drifting **`[Student Name] - [Phone Number] - [Current Date]`** (Asia/Beirut). Identity comes from the session profile. Missing phone falls back to `76532421`. Demo student: Sara Nassar · 76111111.
+
+Retention modules (exam simulator, streaks, bell, wallet): [RETENTION.md](./RETENTION.md).

@@ -21,9 +21,22 @@ export async function POST(request: Request) {
   if (!body.code) return NextResponse.json({ error: "أدخل رمز البطاقة" }, { status: 400 });
   const name = body.name?.trim() || live.user.name;
   const phone = body.phone?.trim() || live.user.phone;
+  const { redeemTopUp } = await import("@/lib/billing/store");
+  const topup = await redeemTopUp(body.code, live.user.id, name);
+  if (topup.ok) {
+    return NextResponse.json({
+      ok: true,
+      planId: "live-topup",
+      planName: `${topup.hours} live hours`,
+      liveCredits: topup.liveCredits,
+      message: `أهلاً ${name}! تم شحن ${topup.hours} ساعة مباشرة. الرصيد ${topup.liveCredits}.`,
+    });
+  }
   const result = await redeemCard(body.code, name, phone, live.user.id);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 400 });
   await setUserEntitlement(live.user.id, result.planId);
+  const { recordActivation } = await import("@/lib/billing/store");
+  await recordActivation(live.user.id, result.planId, body.code.trim());
   const plan = defaultSettings.plans.find((item) => item.id === result.planId);
   const planName = plan?.arabicName ?? result.planId;
   await notifyActivation({

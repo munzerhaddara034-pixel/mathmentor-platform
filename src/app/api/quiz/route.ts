@@ -55,6 +55,22 @@ export async function POST(request: Request) {
     score: body.score,
     passedQuiz: passed,
   });
+  try {
+    const { getLiveSession } = await import("@/lib/auth/session");
+    const { recordActivity } = await import("@/lib/gamification/store");
+    const live = await getLiveSession();
+    if (live.ok) {
+      await recordActivity({
+        userId: live.user.id,
+        name: live.user.name,
+        kind: "quiz",
+        examPercent: body.score,
+        lessonId: body.lessonId,
+      });
+    }
+  } catch {
+    /* optional XP */
+  }
   const store = await readStore();
   return NextResponse.json({ passed, progress: store.progress, attempts: store.quizAttempts.slice(0, 20) });
 }

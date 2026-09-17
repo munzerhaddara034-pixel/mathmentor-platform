@@ -36,6 +36,12 @@ export default function HomePage() {
           <Link href="/practice" className="ghost-btn">
             بنك الأسئلة
           </Link>
+          <Link href="/exams" className="ghost-btn">
+            محاكاة رسمية
+          </Link>
+          <Link href="/wallet" className="ghost-btn">
+            المحفظة
+          </Link>
           <Link href="/subscribe" className="ghost-btn">
             Subscription
           </Link>

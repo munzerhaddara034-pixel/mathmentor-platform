@@ -8,8 +8,17 @@ export const videoSecurity = {
   dynamicWatermark: true,
 };
 
-export function watermarkText(studentName = "طالب المنصة", phone = "76532421") {
-  return `${studentName} · ${phone}`;
+export function watermarkDate(date = new Date()) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Beirut",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+export function watermarkText(studentName = "طالب المنصة", phone = "76532421", date = watermarkDate()) {
+  return `${studentName || "طالب المنصة"} - ${phone || "76532421"} - ${date}`;
 }
 
 export function hostedEmbedSrc() {
