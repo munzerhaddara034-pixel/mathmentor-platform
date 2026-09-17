@@ -1,0 +1,404 @@
+[
+  {
+    "model_id": "grade-9-certificate-model-1",
+    "question_id": "model-grade9-1",
+    "skill": "Algebra",
+    "written_explanation_en": "Step 1: Identify the equation to solve: 3x - 7 = 11.\nStep 2: Isolate the term with the variable by adding 7 to both sides of the equation: 3x = 11 + 7, which simplifies to 3x = 18.\nStep 3: Solve for x by dividing both sides by the coefficient 3: x = 18 / 3.\nStep 4: Compute the final value: x = 6.\nStep 5: Verify by substitution: 3(6) - 7 = 18 - 7 = 11, which matches the right side.",
+    "written_explanation_ar": "الخطوة 1: حدد المعادلة المراد حلها: 3x - 7 = 11.\nالخطوة 2: عزل الحد الذي يحتوي على المتغير بإضافة 7 إلى طرفي المعادلة: 3x = 11 + 7، أي 3x = 18.\nالخطوة 3: أوجد قيمة x بالقسمة على معامل x وهو 3: x = 18 / 3.\nالخطوة 4: احسب النتيجة النهائية: x = 6.\nالخطوة 5: تحقق بالتعويض: 3(6) - 7 = 18 - 7 = 11، وهو المطابق للطرف الأيمن.",
+    "video_script_en": "Narrator: Welcome to Munzer Haddara Math Academy. Today we solve a fundamental linear equation: three x minus seven equals eleven. First, our goal is to isolate the variable term three x. To undo subtracting seven, we add seven to both sides. On the left, minus seven plus seven cancels out, leaving three x. On the right, eleven plus seven equals eighteen. Now we have three x equals eighteen. To find x, we divide both sides by three. Eighteen divided by three gives us x equals six. Let's double-check: three times six is eighteen, minus seven is eleven. Perfect! The correct option is x equals six.",
+    "video_script_ar": "الراوي: أهلاً بكم في أكاديمية منذر حداره للرياضيات. اليوم نحل معادلة خطية أساسية: ثلاثة x ناقص سبعة يساوي أحد عشر. أولاً، هدفنا هو عزل الحد المتغير ثلاثة x. لعكس طرح سبعة، نضيف سبعة إلى الطرفين. في الطرف الأيسر، ناقص سبعة زائد سبعة تلغيان بعضهما، فيبقى ثلاثة x. وفي الطرف الأيمن، أحد عشر زائد سبعة يساوي ثمانية عشر. الآن لدينا ثلاثة x يساوي ثمانية عشر. لإيجاد x، نقسم الطرفين على ثلاثة. ثمانية عشر تقسيم ثلاثة يعطينا x يساوي ستة. لن تتحقق: ثلاثة ضرب ستة يساوي ثمانية عشر، ناقص سبعة يساوي أحد عشر. ممتاز! الخيار الصحيح هو x يساوي ستة.",
+    "storyboard_en": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "Display the problem statement 3x - 7 = 11 clearly on screen.",
+        "math_direction": "Highlight '- 7' and show '+ 7' added to both sides."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "Show simplification step: 3x = 18.",
+        "math_direction": "Draw arrow pointing to the addition result 18."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "Show division by coefficient 3: x = 18 / 3.",
+        "math_direction": "Highlight division operator '/ 3' on both sides."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "Display final boxed answer: x = 6 and quick check.",
+        "math_direction": "Box final result 'x = 6'."
+      }
+    ],
+    "storyboard_ar": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "عرض نص المسألة 3x - 7 = 11 بوضوح على الشاشة.",
+        "math_direction": "تحديد '- 7' وإظهار إضافة '+ 7' للطرفين."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "إظهار خطوة التبسيط: 3x = 18.",
+        "math_direction": "رسم سهم يشير إلى نتيجة الجمع 18."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "إظهار القسمة على المعامل 3: x = 18 / 3.",
+        "math_direction": "تحديد عملية القسمة على 3 في الطرفين."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "عرض الإجابة النهائية في إطار: x = 6 مع التحقق السريع.",
+        "math_direction": "وضع إطار حول النتيجة النهائية 'x = 6'."
+      }
+    ],
+    "printable_solution_en": "Printable Solution Summary:\nGiven equation: 3x - 7 = 11\n1. Add 7 to both sides: 3x = 11 + 7 => 3x = 18\n2. Divide by 3: x = 18 / 3 => x = 6\nAnswer: x = 6",
+    "printable_solution_ar": "ملخص الحل للطباعة:\nالمعطى: 3x - 7 = 11\n1. نضيف 7 للطرفين: 3x = 11 + 7 => 3x = 18\n2. نقسم على 3: x = 18 / 3 => x = 6\nالإجابة: x = 6",
+    "common_mistake_en": "Common Mistake: Forgetting to change the sign when moving terms across the equals sign, or incorrectly subtracting 7 instead of adding 7 to both sides.",
+    "common_mistake_ar": "خطأ شائع: نسيان تغيير الاشارة عند نقل الحدود عبر إشاعة المساواة، أو طرح 7 بشكل خاطئ بدلاً من جمع 7 للطرفين.",
+    "status": "awaiting_approval",
+    "approval_note": "Professor Munzer must review and approve before student publication"
+  },
+  {
+    "model_id": "grade-9-certificate-model-1",
+    "question_id": "model-grade9-2",
+    "skill": "Functions",
+    "written_explanation_en": "Step 1: Understand the given function rule: f(x) = 2x + 1.\nStep 2: Identify the input value to substitute: x = 4.\nStep 3: Substitute 4 into the function in place of x: f(4) = 2(4) + 1.\nStep 4: Evaluate multiplication first according to order of operations: 2 × 4 = 8.\nStep 5: Perform addition: 8 + 1 = 9, so f(4) = 9.",
+    "written_explanation_ar": "الخطوة 1: فهم قاعدة الدالة المعطاة: f(x) = 2x + 1.\nالخطوة 2: تحديد قيمة المدخلة المراد تعويضها: x = 4.\nالخطوة 3: تعويض 4 مكان x في الدالة: f(4) = 2(4) + 1.\nالخطوة 4: حساب الضرب أولاً حسب ترتيب العمليات: 2 × 4 = 8.\nالخطوة 5: إجراء الجمع: 8 + 1 = 9، إذن f(4) = 9.",
+    "video_script_en": "Narrator: In this function evaluation problem, we are given f of x equals two x plus one, and we need to find f of four. Functions act like a machine: whatever input goes in for x, we substitute into the expression. Here, our input is four. We replace every x with four, giving us two times four plus one. Following order of operations, we multiply two by four to get eight. Then we add one. Eight plus one is nine. Therefore, f of four equals nine. The correct option is nine.",
+    "video_script_ar": "الراوي: في مسألة تقييم الدوال هذه، لدينا f لـ x تساوي اثنين x زائد واحد، وعلينا إيجاد f لـ 4. الدوال تعمل كآلة: أي مدخلة تدخل لـ x نقوم بتعويضها في التعبير. هنا، المدخلة هي 4. نستبدل كل x بالعدد 4، فيصبح لدينا 2 ضرب 4 زائد 1. حسب ترتيب العمليات، نضرب 2 في 4 لنحصل على 8. ثم نضيف 1. 8 زائد 1 يساوي 9. إذن، f لـ 4 يساوي 9. الخيار الصحيح هو 9.",
+    "storyboard_en": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "Display function definition f(x) = 2x + 1.",
+        "math_direction": "Point out input variable x."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "Show substitution of x = 4: f(4) = 2(4) + 1.",
+        "math_direction": "Highlight substitution of 4 in parentheses."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "Show multiplication step: 2 × 4 = 8.",
+        "math_direction": "Underline 8."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "Show final addition: 8 + 1 = 9 and box result.",
+        "math_direction": "Box final result '9'."
+      }
+    ],
+    "storyboard_ar": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "عرض تعريف الدالة f(x) = 2x + 1.",
+        "math_direction": "الإشارة إلى المتغير المدخل x."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "إظهار تعويض x = 4: f(4) = 2(4) + 1.",
+        "math_direction": "تحديد تعويض 4 بين قوسين."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "إظهار خطوة الضرب: 2 × 4 = 8.",
+        "math_direction": "وضع خط تحت 8."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "إظهار الجمع الأخير: 8 + 1 = 9 ووضع النتيجة في إطار.",
+        "math_direction": "إطار حول النتيجة النهائية '9'."
+      }
+    ],
+    "printable_solution_en": "Printable Solution Summary:\nGiven: f(x) = 2x + 1\n1. Substitute x = 4: f(4) = 2(4) + 1\n2. Multiply: 2 × 4 = 8\n3. Add 1: 8 + 1 = 9\nAnswer: 9",
+    "printable_solution_ar": "ملخص الحل للطباعة:\nالمعطى: f(x) = 2x + 1\n1. نعوض x = 4: f(4) = 2(4) + 1\n2. نضرب: 2 × 4 = 8\n3. نضيف 1: 8 + 1 = 9\nالإجابة: 9",
+    "common_mistake_en": "Common Mistake: Adding 1 to 2 first and then multiplying by 4 (violating order of operations), resulting in 12 instead of 9.",
+    "common_mistake_ar": "خطأ شائع: جمع 1 مع 2 أولاً ثم الضرب في 4 (مخالفة ترتيب العمليات)، مما ينتج 12 بدلاً من 9.",
+    "status": "awaiting_approval",
+    "approval_note": "Professor Munzer must review and approve before student publication"
+  },
+  {
+    "model_id": "grade-9-certificate-model-1",
+    "question_id": "model-grade9-3",
+    "skill": "Geometry",
+    "written_explanation_en": "Step 1: Identify the formula for the area of a triangle: Area = (base × height) / 2.\nStep 2: Note the given dimensions: base = 10 cm, height = 6 cm.\nStep 3: Substitute the values into the formula: Area = (10 × 6) / 2.\nStep 4: Compute the numerator: 10 × 6 = 60.\nStep 5: Divide by 2: 60 / 2 = 30 cm².",
+    "written_explanation_ar": "الخطوة 1: تحديد قانون مساحة المثلث: المساحة = (القاعدة × الارتفاع) ÷ 2.\nالخطوة 2: ملاحظة الأبعاد المعطاة: القاعدة = 10 سم، الارتفاع = 6 سم.\nالخطوة 3: تعويض القيم في القانون: المساحة = (10 × 6) ÷ 2.\nالخطوة 4: حساب البسط: 10 × 6 = 60.\nالخطوة 5: القسمة على 2: 60 ÷ 2 = 30 سم².",
+    "video_script_en": "Narrator: Let's calculate the area of a triangle with a base of ten centimeters and a height of six centimeters. The standard formula for triangle area is one-half times base times height, or base times height divided by two. We substitute ten for the base and six for the height. Ten multiplied by six gives sixty square centimeters in the numerator. Dividing sixty by two gives thirty. Therefore, the area is thirty square centimeters.",
+    "video_script_ar": "الراوي: لنحسب مساحة مثلث قاعدته عشرة سنتيمترات وارتفاعه ستة سنتيمترات. القانون القياسي لمساحة المثلث هو نصف القاعدة ضرب الارتفاع، أو (القاعدة ضرب الارتفاع) مقسوماً على اثنين. نعوض عن القاعدة بعشرة وعن الارتفاع بستة. عشرة ضرب ستة يعطي ستين سنتيمترًا مربعًا في البسط. قسمة الستين على اثنين يعطي ثلاثين. إذن، المساحة هي ثلاثون سنتيمترًا مربعًا.",
+    "storyboard_en": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "Display formula: Area = (base × height) / 2.",
+        "math_direction": "Highlight base and height variables."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "Substitute values: (10 × 6) / 2.",
+        "math_direction": "Show 10 and 6 replacing base and height."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "Show multiplication result: 60 / 2.",
+        "math_direction": "Highlight numerator 60."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "Show final result: 30 cm² and box it.",
+        "math_direction": "Box '30 cm²'."
+      }
+    ],
+    "storyboard_ar": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "عرض القانون: المساحة = (القاعدة × الارتفاع) ÷ 2.",
+        "math_direction": "تحديد متغيرات القاعدة والارتفاع."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "تعويض القيم: (10 × 6) ÷ 2.",
+        "math_direction": "إظهار تعويض 10 و6 مكان القاعدة والارتفاع."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "إظهار نتيجة الضرب: 60 ÷ 2.",
+        "math_direction": "تحديد البسط 60."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "إظهار النتيجة النهائية: 30 سم² ووضعها في إطار.",
+        "math_direction": "إطار حول '30 سم²'."
+      }
+    ],
+    "printable_solution_en": "Printable Solution Summary:\nFormula: Area = (base × height) / 2\n1. Given: base = 10, height = 6\n2. Substitute: (10 × 6) / 2 = 60 / 2\n3. Calculate: 30\nAnswer: 30 cm²",
+    "printable_solution_ar": "ملخص الحل للطباعة:\nالقانون: المساحة = (القاعدة × الارتفاع) ÷ 2\n1. المعطى: القاعدة = 10، الارتفاع = 6\n2. التعويض: (10 × 6) ÷ 2 = 60 ÷ 2\n3. الحساب: 30\nالإجابة: 30 سم²",
+    "common_mistake_en": "Common Mistake: Multiplying base and height (10 × 6 = 60) and forgetting to divide by 2, leading to 60 cm².",
+    "common_mistake_ar": "خطأ شائع: ضرب القاعدة في الارتفاع (10 × 6 = 60) ونسيان القسمة على 2، مما يؤدي إلى 60 سم².",
+    "status": "awaiting_approval",
+    "approval_note": "Professor Munzer must review and approve before student publication"
+  },
+  {
+    "model_id": "grade-9-certificate-model-1",
+    "question_id": "model-grade9-4",
+    "skill": "Proportionality",
+    "written_explanation_en": "Step 1: Understand the proportional relationship: 4 notebooks cost $12.\nStep 2: Find the unit rate (cost per 1 notebook): $12 / 4 = $3 per notebook.\nStep 3: Calculate the cost for 7 notebooks by multiplying the unit rate by 7: 7 × $3 = $21.\nStep 4: Conclude that 7 notebooks cost $21.",
+    "written_explanation_ar": "الخطوة 1: فهم العلاقة التناسبية: 4 دفاتر تكلف 12 دولارًا.\nالخطوة 2: إيجاد معدل الوحدة (تكلفة الدفتر الواحد): 12 ÷ 4 = 3 دولارات لكل دفتر.\nالخطوة 3: حساب تكلفة 7 دفاتر بضرب معدل الوحدة في 7: 7 × 3 = 21 دولارًا.\nالخطوة 4: الاستنتاج أن 7 دفاتر تكلف 21 دولارًا.",
+    "video_script_en": "Narrator: Let's solve a proportion problem. If four notebooks cost twelve dollars, how much do seven notebooks cost? First, we find the unit rate by dividing the total cost by the number of notebooks: twelve divided by four equals three dollars per notebook. Next, we multiply the unit rate of three dollars by the desired quantity of seven notebooks. Seven times three is twenty-one. Therefore, seven notebooks cost twenty-one dollars.",
+    "video_script_ar": "الراوي: لنحل مسألة تناسب. إذا كان ثمن 4 دفاتر 12 دولارًا، فما ثمن 7 دفاتر؟ أولاً، نجد معدل الوحدة بقسمة التكلفة الكلية على عدد الدفاتر: 12 تقسيم 4 يساوي 3 دولارات للدفتر الواحد. بعد ذلك، نضرب معدل الوحدة وهو 3 دولارات في الكمية المطلوبة وهي 7 دفاتر. 7 ضرب 3 يساوي 21. إذن، ثمن 7 دفاتر هو 21 دولارًا.",
+    "storyboard_en": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "Display given data: 4 notebooks = $12.",
+        "math_direction": "Highlight 4 and 12."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "Show unit rate calculation: $12 / 4 = $3.",
+        "math_direction": "Draw division arrow for unit price."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "Show scaling up: 7 × $3 = $21.",
+        "math_direction": "Highlight multiplication by 7."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "Box final answer: $21.",
+        "math_direction": "Box '$21'."
+      }
+    ],
+    "storyboard_ar": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "عرض المعطيات: 4 دفاتر = 12 دولارًا.",
+        "math_direction": "تحديد 4 و12."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "إظهار حساب معدل الوحدة: 12 ÷ 4 = 3 دولارات.",
+        "math_direction": "رسم سهم القسمة لسعر الوحدة."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "إظهار التكبير: 7 × 3 = 21 دولارًا.",
+        "math_direction": "تحديد الضرب في 7."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "إطار حول الإجابة النهائية: 21 دولارًا.",
+        "math_direction": "إطار حول '$21'."
+      }
+    ],
+    "printable_solution_en": "Printable Solution Summary:\n1. Cost of 4 notebooks = $12\n2. Unit cost = 12 / 4 = $3\n3. Cost of 7 notebooks = 7 × $3 = $21\nAnswer: $21",
+    "printable_solution_ar": "ملخص الحل للطباعة:\n1. تكلفة 4 دفاتر = 12 دولارًا\n2. تكلفة الوحدة = 12 ÷ 4 = 3 دولارات\n3. تكلفة 7 دفاتر = 7 × 3 = 21 دولارًا\nالإجابة: $21",
+    "common_mistake_en": "Common Mistake: Using incorrect proportions or adding costs instead of multiplying by the unit rate.",
+    "common_mistake_ar": "خطأ شائع: استخدام تناسبات خاطئة أو جمع التكاليف بدلاً من الضرب في معدل الوحدة.",
+    "status": "awaiting_approval",
+    "approval_note": "Professor Munzer must review and approve before student publication"
+  },
+  {
+    "model_id": "grade-9-certificate-model-1",
+    "question_id": "model-grade9-5",
+    "skill": "Statistics",
+    "written_explanation_en": "Step 1: Recall the formula for the arithmetic mean (average): sum of all values divided by the number of values.\nStep 2: Identify the dataset: 4, 6, 8, and 10 (4 values in total).\nStep 3: Find the sum of the numbers: 4 + 6 + 8 + 10 = 28.\nStep 4: Divide the sum by the count of numbers: 28 / 4 = 7.\nStep 5: Conclude that the mean is 7.",
+    "written_explanation_ar": "الخطوة 1: استذكار قانون المتوسط الحسابي: مجموع القيم مقسوماً على عددها.\nالخطوة 2: تحديد البيانات: 4 و6 و8 و10 (4 قيم إجمالاً).\nالخطوة 3: إيجاد مجموع الأعداد: 4 + 6 + 8 + 10 = 28.\nالخطوة 4: قسمة المجموع على عدد الأعداد: 28 ÷ 4 = 7.\nالخطوة 5: الاستنتاج أن المتوسط هو 7.",
+    "video_script_en": "Narrator: Let's find the arithmetic mean of four, six, eight, and ten. To find the mean, we add all the numbers together and divide by how many numbers there are. First, let's sum them up: four plus six is ten, plus eight is eighteen, plus ten is twenty-eight. There are four numbers in our set. We divide twenty-eight by four. Twenty-eight divided by four is seven. Therefore, the mean is seven.",
+    "video_script_ar": "الراوي: لنوجد المتوسط الحسابي للأعداد 4 و6 و8 و10. لإيجاد المتوسط، نجمع كل الأعداد معاً ونقسمها على عددها. أولاً، نجمعها: 4 زائد 6 يساوي 10، زائد 8 يساوي 18، زائد 10 يساوي 28. هناك 4 أعداد في مجموعتنا. نقسم 28 على 4. 28 تقسيم 4 يساوي 7. إذن، المتوسط هو 7.",
+    "storyboard_en": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "Display numbers: 4, 6, 8, 10.",
+        "math_direction": "List numbers on screen."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "Show sum: 4 + 6 + 8 + 10 = 28.",
+        "math_direction": "Highlight addition of numerator terms."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "Show division by count: 28 / 4.",
+        "math_direction": "Show division by 4."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "Box final answer: 7.",
+        "math_direction": "Box '7'."
+      }
+    ],
+    "storyboard_ar": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "عرض الأعداد: 4، 6، 8، 10.",
+        "math_direction": "كتابة الأعداد على الشاشة."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "إظهار المجموع: 4 + 6 + 8 + 10 = 28.",
+        "math_direction": "تحديد جمع حدود البسط."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "إظهار القسمة على العدد الكلي: 28 ÷ 4.",
+        "math_direction": "إظهار القسمة على 4."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "إطار حول الإجابة النهائية: 7.",
+        "math_direction": "إطار حول '7'."
+      }
+    ],
+    "printable_solution_en": "Printable Solution Summary:\nDataset: 4, 6, 8, 10 (Count = 4)\n1. Sum = 4 + 6 + 8 + 10 = 28\n2. Mean = 28 / 4 = 7\nAnswer: 7",
+    "printable_solution_ar": "ملخص الحل للطباعة:\nمجموعة البيانات: 4، 6، 8، 10 (العدد = 4)\n1. المجموع = 4 + 6 + 8 + 10 = 28\n2. المتوسط = 28 ÷ 4 = 7\nالإجابة: 7",
+    "common_mistake_en": "Common Mistake: Dividing the sum by 3 instead of 4, or incorrectly adding the numbers.",
+    "common_mistake_ar": "خطأ شائع: القسمة على 3 بدلاً من 4، أو جمع الأعداد بشكل خاطئ.",
+    "status": "awaiting_approval",
+    "approval_note": "Professor Munzer must review and approve before student publication"
+  },
+  {
+    "model_id": "grade-9-certificate-model-1",
+    "question_id": "model-grade9-6",
+    "skill": "Probability",
+    "written_explanation_en": "Step 1: Identify the sample space of a fair die: {1, 2, 3, 4, 5, 6}, which has 6 possible outcomes.\nStep 2: Identify the favorable outcomes (even numbers): {2, 4, 6}.\nStep 3: Count the number of favorable outcomes: 3.\nStep 4: Use the probability formula: P(even) = (Number of favorable outcomes) / (Total possible outcomes) = 3 / 6.\nStep 5: Simplify the fraction: 3 / 6 = 1 / 2.",
+    "written_explanation_ar": "الخطوة 1: تحديد فضاء العينة لحجر نرد عادل: {1, 2, 3, 4, 5, 6}، ويحتوي على 6 نواتج ممكنة.\nالخطوة 2: تحديد النواتج الملائمة (الأعداد الزوجية): {2, 4, 6}.\nالخطوة 3: عد النواتج الملائمة: 3.\nالخطوة 4: استخدام قانون الاحتمال: P(زوجي) = (عدد النواتج الملائمة) ÷ (إجمالي النواتج الممكنة) = 3 / 6.\nالخطوة 5: تبسيط الكسر: 3 / 6 = 1 / 2.",
+    "video_script_en": "Narrator: Let's calculate the probability of rolling an even number on a fair die. A standard die has six faces numbered one through six, so our total possible outcomes equal six. The even numbers on the die are two, four, and six. That gives us three favorable outcomes. Probability is the number of favorable outcomes divided by the total outcomes: three over six. Simplifying three-sixths by dividing numerator and denominator by three gives one-half. The correct option is one-half.",
+    "video_script_ar": "الراوي: لنحسب احتمال ظهور عدد زوجي عند رمي حجر نرد عادل. حجر النرد القياسي له ستة أوجه مرقمة من واحد إلى ستة، لذا إجمالي النواتج الممكنة هو ستة. الأعداد الزوجية على حجر النرد هي 2 و4 و6. هذا يعطينا ثلاثة نواتج ملائمة. الاحتمال هو عدد النواتج الملائمة مقسوماً على إجمالي النواتج: ثلاثة على ستة. تبسيط ثلاثة أرباع أو ثلاثة أداة (3/6) بقسمة البسط والمقام على 3 يعطي نصفاً (1/2). الخيار الصحيح هو 1/2.",
+    "storyboard_en": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "Display sample space: {1, 2, 3, 4, 5, 6} (Total = 6).",
+        "math_direction": "Highlight total outcomes."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "Highlight even outcomes: {2, 4, 6} (Favorable = 3).",
+        "math_direction": "Circle 2, 4, 6."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "Show probability ratio: 3 / 6.",
+        "math_direction": "Show fraction 3/6."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "Show simplified fraction: 1 / 2 and box it.",
+        "math_direction": "Box '1/2'."
+      }
+    ],
+    "storyboard_ar": [
+      {
+        "scene": 1,
+        "duration": "15s",
+        "description": "عرض فضاء العينة: {1, 2, 3, 4, 5, 6} (المجموع = 6).",
+        "math_direction": "تحديد إجمالي النواتج."
+      },
+      {
+        "scene": 2,
+        "duration": "20s",
+        "description": "تحديد النواتج الزوجية: {2, 4, 6} (الملائمة = 3).",
+        "math_direction": "وضع دائرة حول 2، 4، 6."
+      },
+      {
+        "scene": 3,
+        "duration": "20s",
+        "description": "إظهار نسبة الاحتمال: 3 / 6.",
+        "math_direction": "إظهار الكسر 3/6."
+      },
+      {
+        "scene": 4,
+        "duration": "15s",
+        "description": "إظهار الكسر المبسط: 1 / 2 وإحاطته بإطار.",
+        "math_direction": "إطار حول '1/2'."
+      }
+    ],
+    "printable_solution_en": "Printable Solution Summary:\nSample space = {1, 2, 3, 4, 5, 6} (Total = 6)\n1. Even outcomes = {2, 4, 6} (Favorable = 3)\n2. Probability = 3 / 6 = 1 / 2\nAnswer: 1 / 2",
+    "printable_solution_ar": "ملخص الحل للطباعة:\nفضاء العينة = {1, 2, 3, 4, 5, 6} (المجموع = 6)\n1. النواتج الزوجية = {2, 4, 6} (الملائمة = 3)\n2. الاحتمال = 3 ÷ 6 = 1 ÷ 2\nالإجابة: 1 / 2",
+    "common_mistake_en": "Common Mistake: Counting odd numbers instead of even numbers, or failing to simplify 3/6 to 1/2.",
+    "common_mistake_ar": "خطأ شائع: عد الأعداد الفردية بدلاً من الزوجية، أو عدم تبسيط الكسر 3/6 إلى 1/2.",
+    "status": "awaiting_approval",
+    "approval_note": "Professor Munzer must review and approve before student publication"
+  }
+]

@@ -1,0 +1,15 @@
+node_modules
+.next
+.netlify
+data/store.json
+data/heygen-jobs.json
+data/studio-events.json
+data/auth.json
+data/math-queries.json
+data/live-sessions.json
+data/whatsapp-outbox.json
+data/uploads
+public/uploads
+.env
+.env.local
+*.tsbuildinfo

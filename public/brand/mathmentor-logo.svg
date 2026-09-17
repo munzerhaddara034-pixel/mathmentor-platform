@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="MathMentor">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0B1F3A"/>
+      <stop offset="100%" stop-color="#123A66"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <rect x="56" y="56" width="400" height="400" rx="72" fill="none" stroke="#D4A017" stroke-width="10" opacity="0.9"/>
+  <!-- stylized M -->
+  <path d="M120 360 V160 L256 300 L392 160 V360" fill="none" stroke="#F5F7FA" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- math curve accent -->
+  <path d="M110 390 C180 300, 240 420, 310 340 S420 280, 430 300" fill="none" stroke="#D4A017" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="310" cy="340" r="12" fill="#D4A017"/>
+</svg>
