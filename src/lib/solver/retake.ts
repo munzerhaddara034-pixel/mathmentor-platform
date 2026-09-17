@@ -10,9 +10,14 @@ export const RETAKE_AR =
 export function looksLikeMath(text: string) {
   const n = text.replace(/[−–—]/g, "-").trim();
   if (n.length < 2) return false;
-  return /[0-9=x∫√∞π\\^_{}()+\-*/]|معادل|نهاي|اشتق|جذر|مثلث|sin|cos|tan|ln|log|e\^|dx|حد|حلّ|أوجد|find|solve|derive|limit|integral|complex|quad|system|triangle|hypoten|percent|z\s*=|f\s*\(|f'/i.test(
-    n,
-  );
+  if (
+    /[0-9=∫√∞π\\^_{}+\-*/]|معادل|نهاي|اشتق|جذر|مثلث|\bsin\b|\bcos\b|\btan\b|\bln\b|\blog\b|e\^|\bdx\b|حلّ|أوجد|\bfind\b|\bsolve\b|\bderive\b|\bderivative\b|\blimit\b|\bintegral\b|\bcomplex\b|\bquad|\bsystem\b|\btriangle\b|\bhypoten|\bpercent|\bz\s*=|f\s*\(|f'/i.test(
+      n,
+    )
+  ) {
+    return true;
+  }
+  return /(^|[^a-zA-Z])x([^a-zA-Z]|$)/.test(n);
 }
 
 export function isGarbledPrompt(text: string) {
