@@ -50,6 +50,13 @@ function fmt(n: number) {
   return String(rounded);
 }
 
+function polyLatex(a: number, b: number, c: number) {
+  const term2 = a === 1 ? "x^{2}" : a === -1 ? "-x^{2}" : `${fmt(a)}x^{2}`;
+  const term1 = b === 0 ? "" : b === 1 ? "+x" : b === -1 ? "-x" : `${b > 0 ? "+" : ""}${fmt(b)}x`;
+  const term0 = c === 0 ? "" : `${c > 0 ? "+" : ""}${fmt(c)}`;
+  return `${term2}${term1}${term0}=0`;
+}
+
 function parseSignedTerms(poly: string) {
   const cleaned = poly.replace(/\s+/g, "").replace(/^\+/, "");
   const parts = cleaned.split(/(?=[+-])/).filter(Boolean);
@@ -148,7 +155,7 @@ function quadraticSolution(a: number, b: number, c: number, language: LessonLang
       title: "Write the canonical form",
       titleFr: "Forme canonique",
       titleAr: "الشكل العام",
-      latex: `${fmt(a)}x^{2}${b >= 0 ? "+" : ""}${fmt(b)}x${c >= 0 ? "+" : ""}${fmt(c)}=0`,
+      latex: polyLatex(a, b, c),
       explanationEn: "A Lebanese Brevet / Terminale quadratic is written ax^2+bx+c=0 with a ≠ 0 before any formula.",
       explanationFr: "On écrit ax^2+bx+c=0 avec a ≠ 0 avant toute formule, comme sur une copie Brevet / Terminale.",
       explanationAr: "نكتب المعادلة من الدرجة الثانية بالشكل العام قبل أي قانون.",
@@ -237,8 +244,8 @@ function quadraticSolution(a: number, b: number, c: number, language: LessonLang
   };
 
   return assembleSolution({
-    question: `${fmt(a)}x^2 ${b >= 0 ? "+" : ""}${fmt(b)}x ${c >= 0 ? "+" : ""}${fmt(c)} = 0`,
-    summary: `Quadratic equation over \\mathbb{R}. Discriminant \\Delta=${fmt(d)}.`,
+    question: polyLatex(a, b, c).replace(/\{|\}/g, ""),
+    summary: `Quadratic equation over the real numbers. Discriminant Δ=${fmt(d)}.`,
     finalAnswer,
     finalAnswerLatex: rootsLatex,
     steps,

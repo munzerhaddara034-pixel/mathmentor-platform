@@ -92,7 +92,7 @@ export function LiveBookingBoard({
           <h2>Open slots</h2>
           {slots.length === 0 ? <p className="muted">No open slots.</p> : null}
           <ul className="slot-list">
-            {slots.map((slot) => (
+            {slots.slice(0, staff ? 40 : 12).map((slot) => (
               <li key={slot.id}>
                 <div>
                   <strong>{formatWhen(slot.startsAt)}</strong>
