@@ -8,7 +8,11 @@ export const runtime = "nodejs";
 export async function GET() {
   const guard = await apiSession();
   if (guard.error) return guard.error;
-  await ensureUpcomingLiveAlerts();
+  try {
+    await ensureUpcomingLiveAlerts();
+  } catch {
+    /* live reminder scan must not hide the inbox */
+  }
   const notifications = await listNotifications(guard.live.user.id);
   return NextResponse.json({
     notifications: notifications.slice(0, 30),
