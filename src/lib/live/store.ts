@@ -1,6 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { platformDataDir } from "@/lib/dataDir";
+import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import { createMeetingLink } from "./meeting";
 import { addYmd, formatInTimeZone, wallTimeToUtc } from "./timezone";
@@ -13,8 +11,7 @@ import {
   type TeacherAvailability,
 } from "./types";
 
-const dataDir = platformDataDir();
-const storePath = path.join(dataDir, "live-sessions.json");
+const STORE_FILE = "live-sessions.json";
 
 export function generateSlotsFromAvailability(availability: TeacherAvailability, existing: LiveSlot[] = []): LiveSlot[] {
   const tz = availability.timezone || "Asia/Beirut";
@@ -74,38 +71,38 @@ function normalizeAvailability(value: Partial<TeacherAvailability> | undefined):
 }
 
 async function readLiveStore(): Promise<LiveStoreData> {
-  await mkdir(dataDir, { recursive: true });
+  const availability = DEFAULT_AVAILABILITY;
+  const initial: LiveStoreData = {
+    slots: generateSlotsFromAvailability(availability),
+    bookings: [],
+    availability,
+  };
   try {
-    const raw = await readFile(storePath, "utf8");
-    const parsed = JSON.parse(raw) as Partial<LiveStoreData>;
+    const parsed = await readJsonFile<Partial<LiveStoreData>>(STORE_FILE, initial);
     const bookings = Array.isArray(parsed.bookings) ? parsed.bookings : [];
-    const availability = normalizeAvailability(parsed.availability);
+    const nextAvailability = normalizeAvailability(parsed.availability);
     let slots = Array.isArray(parsed.slots) ? parsed.slots : [];
     if (!slots.length || !parsed.availability) {
-      const generated = generateSlotsFromAvailability(availability, slots.filter((slot) => bookings.some((b) => b.slotId === slot.id && b.status !== "cancelled")));
+      const generated = generateSlotsFromAvailability(
+        nextAvailability,
+        slots.filter((slot) => bookings.some((b) => b.slotId === slot.id && b.status !== "cancelled")),
+      );
       const bookedIds = new Set(bookings.filter((item) => item.status !== "cancelled").map((item) => item.slotId));
       const keep = slots.filter((slot) => bookedIds.has(slot.id));
       slots = [...keep, ...generated];
-      const next = { slots, bookings, availability };
-      await writeFile(storePath, JSON.stringify(next, null, 2), "utf8");
+      const next = { slots, bookings, availability: nextAvailability };
+      await writeJsonFile(STORE_FILE, next);
       return next;
     }
-    return { slots, bookings, availability };
+    return { slots, bookings, availability: nextAvailability };
   } catch {
-    const availability = DEFAULT_AVAILABILITY;
-    const initial: LiveStoreData = {
-      slots: generateSlotsFromAvailability(availability),
-      bookings: [],
-      availability,
-    };
-    await writeFile(storePath, JSON.stringify(initial, null, 2), "utf8");
+    await writeJsonFile(STORE_FILE, initial);
     return initial;
   }
 }
 
 async function writeLiveStore(store: LiveStoreData) {
-  await mkdir(dataDir, { recursive: true });
-  await writeFile(storePath, JSON.stringify(store, null, 2), "utf8");
+  await writeJsonFile(STORE_FILE, store);
 }
 
 export async function getAvailability() {

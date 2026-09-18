@@ -7,7 +7,7 @@ import { userHasAiAccess, userHasLiveAccess, userHasSubscription } from "./store
 export async function requireAuth(nextPath: string) {
   const live = await getLiveSession();
   if (!live.ok) {
-    redirect(loginUrl(nextPath, live.reason === "replaced" ? "replaced" : undefined));
+    redirect(loginUrl(nextPath, live.reason === "replaced" || live.reason === "expired" ? live.reason : undefined));
   }
   if (!live.ok) throw new Error("unreachable");
   return live;

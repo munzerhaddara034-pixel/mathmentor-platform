@@ -15,6 +15,7 @@ function LoginForm() {
   const [busy, setBusy] = useState(false);
 
   const replaced = reason === "replaced";
+  const expired = reason === "expired";
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -61,6 +62,13 @@ function LoginForm() {
           <p>This account signed in on another device of the same type (phone or computer). That session was closed.</p>
           <p dir="rtl" lang="ar">
             تم تسجيل الدخول لهذا الحساب من جهاز آخر من النوع نفسه (هاتف أو حاسوب). أُغلقت الجلسة السابقة.
+          </p>
+        </div>
+      ) : expired ? (
+        <div className="studio-teacher-error" role="alert">
+          <p>Your session ended. Please sign in again.</p>
+          <p dir="rtl" lang="ar">
+            انتهت الجلسة. يرجى تسجيل الدخول مجدداً.
           </p>
         </div>
       ) : null}

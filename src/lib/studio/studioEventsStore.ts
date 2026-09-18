@@ -1,10 +1,7 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { platformDataDir } from "../dataDir";
+import { readJsonFile, writeJsonFile } from "../dataDir";
 import { canvasActionSchema, type CanvasAction } from "./timeline";
 
-const dataDir = platformDataDir();
-const eventsPath = path.join(dataDir, "studio-events.json");
+const EVENTS_FILE = "studio-events.json";
 
 type StudioEventsStore = {
   lessons: Record<string, { events: CanvasAction[]; updatedAt: string }>;
@@ -15,21 +12,12 @@ function emptyStore(): StudioEventsStore {
 }
 
 async function readStore(): Promise<StudioEventsStore> {
-  await mkdir(dataDir, { recursive: true });
-  try {
-    const raw = await readFile(eventsPath, "utf8");
-    const parsed = JSON.parse(raw) as Partial<StudioEventsStore>;
-    return { lessons: parsed.lessons && typeof parsed.lessons === "object" ? parsed.lessons : {} };
-  } catch {
-    const initial = emptyStore();
-    await writeFile(eventsPath, JSON.stringify(initial, null, 2), "utf8");
-    return initial;
-  }
+  const parsed = await readJsonFile<Partial<StudioEventsStore>>(EVENTS_FILE, emptyStore());
+  return { lessons: parsed.lessons && typeof parsed.lessons === "object" ? parsed.lessons : {} };
 }
 
 async function writeStore(store: StudioEventsStore) {
-  await mkdir(dataDir, { recursive: true });
-  await writeFile(eventsPath, JSON.stringify(store, null, 2), "utf8");
+  await writeJsonFile(EVENTS_FILE, store);
 }
 
 export async function getStudioEvents(lessonId: string): Promise<CanvasAction[] | undefined> {
