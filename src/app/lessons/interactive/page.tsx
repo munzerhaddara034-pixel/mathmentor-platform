@@ -39,7 +39,6 @@ export default async function InteractiveLessonDemoPage({
           limits with <code>y=0</code>, derivative, table of variations, timed graph of C_f, boxed exercise{" "}
           <code>f(x)=−1/2</code> (IVT after continuity + monotonicity), common pitfalls. English default, live French
           toggle. Editor: <Link href="/studio/script">/studio/script</Link>
-          English default, live French toggle. Editor: <Link href="/studio/script">/studio/script</Link>
           {" · "}
           <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>
           {" · "}
