@@ -11,4 +11,6 @@ export type {
   AuditStatus,
   StudentRating,
   SolverGiven,
+  ExamTip,
+  StudyKind,
 } from "./types";

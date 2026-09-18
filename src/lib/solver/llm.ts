@@ -1,13 +1,16 @@
 import { z } from "zod";
+import { SOLVER_SYSTEM_PROMPT } from "@/lib/pedagogy/lebanese";
 import { assembleSolution, type GraphSpec } from "./assemble";
 import { demoSolve, type SolveRequest } from "./demoSolver";
 import { retakeSolution } from "./retake";
-import type { MathSolution, SolverStep } from "./types";
+import type { MathSolution, SolverStep, StudyKind } from "./types";
 
 const geminiStepSchema = z.object({
   title: z.string(),
   titleFr: z.string().optional(),
   titleAr: z.string().optional(),
+  examVerbEn: z.string().optional(),
+  examVerbFr: z.string().optional(),
   latex: z.string(),
   theoremEn: z.string().optional(),
   theoremFr: z.string().optional(),
@@ -15,6 +18,7 @@ const geminiStepSchema = z.object({
   explanationEn: z.string(),
   explanationFr: z.string(),
   explanationAr: z.string().optional(),
+  boxed: z.boolean().optional(),
 });
 
 const geminiJsonSchema = z.object({
@@ -22,6 +26,24 @@ const geminiJsonSchema = z.object({
   retakeMessageEn: z.string().optional(),
   retakeMessageAr: z.string().optional(),
   summary: z.string().optional(),
+  examTip: z
+    .object({
+      en: z.string(),
+      fr: z.string().optional(),
+      ar: z.string().optional(),
+    })
+    .optional(),
+  studyKind: z
+    .enum(["real_function", "geometry", "complex", "probability", "algebra", "limits", "general"])
+    .optional(),
+  asymptotes: z
+    .array(
+      z.object({
+        kind: z.enum(["vertical", "horizontal", "oblique"]),
+        equation: z.string(),
+      }),
+    )
+    .optional(),
   finalAnswer: z.string().optional(),
   finalAnswerLatex: z.string().optional(),
   topic: z.string().optional(),
@@ -67,48 +89,7 @@ export function hasGeminiKey() {
   return geminiApiKey().length > 0;
 }
 
-const SYSTEM = `You are Prof. Munzer Haddara (الأستاذ منذر حداره), expert mathematics teacher for the Lebanese Curriculum: Brevet (Grade 9), Terminale LS/GS/SE/LH, IB, and SAT.
-
-Never use the name Al-Tarah or الطارة. The academy is MathMentor · أكاديمية منذر حداره.
-
-Return ONE JSON object only:
-{
-  "needsRetake": boolean,
-  "retakeMessageEn": string,
-  "retakeMessageAr": string,
-  "summary": string,
-  "given": { "latex": string, "aimEn": string, "aimFr": string, "aimAr": string },
-  "finalAnswer": string,
-  "finalAnswerLatex": string,
-  "topic": string,
-  "topicTag": "quadratic" | "limits" | "exponential" | "systems" | "geometry" | "linear" | "complex" | "integrals" | "percentages" | "general",
-  "track": "brevet" | "ls" | "se" | "gs" | "lh" | "sat",
-  "steps": [
-    {
-      "title": string,
-      "titleAr": string,
-      "latex": string,
-      "theoremEn": string,
-      "theoremAr": string,
-      "explanationEn": string,
-      "explanationFr": string,
-      "explanationAr": string
-    }
-  ],
-  "graph": { "fn": "JS expression in x", "domain": [number, number], "highlights": { "roots": [[x,y]], "extrema": [[x,y]], "asymptotes": [{"y": number}] } },
-  "trap": { "wrong": string, "wrongFr": string, "correction": string, "correctionFr": string, "latex": string }
-}
-
-Hard rules (Lebanese exam accuracy):
-1. ALL mathematics MUST be pure LaTeX (never Unicode mini-math). Use f'(x), \\int, \\lim, \\ln, e^{x}, z=a+ib, \\mathbb{R}.
-2. Always three pedagogical sections:
-   a) Given & Aim (المعطيات والمطلوب) in "given"
-   b) Step-by-step: every step names the theorem/reason (theoremEn / theoremAr) then the algebra
-   c) Final Answer Box: finalAnswerLatex is the boxed line
-3. HALLUCINATION GUARD: if the uploaded image is blurry, cropped, or incomplete, set needsRetake=true, fill retakeMessageEn AND retakeMessageAr, and DO NOT invent a problem or a number. Ask the student to rephotograph.
-4. At least 3 graded steps when needsRetake is false. EN+FR+AR of equal quality.
-5. graph.fn is a JavaScript expression in x.
-6. Instructor voice: calm official-exam barème.`;
+const SYSTEM = SOLVER_SYSTEM_PROMPT;
 
 function geminiModels() {
   const pinned = process.env.GEMINI_MODEL?.trim();
@@ -138,14 +119,17 @@ function solutionFromLlm(
   const steps: SolverStep[] = (parsed.steps ?? []).map((step) => ({
     title: step.title,
     titleFr: step.titleFr,
-    titleAr: step.titleAr,
-    latex: step.latex,
+      titleAr: step.titleAr,
+      examVerbEn: step.examVerbEn,
+      examVerbFr: step.examVerbFr,
+      latex: step.latex,
     theoremEn: step.theoremEn,
     theoremFr: step.theoremFr,
     theoremAr: step.theoremAr,
     explanationEn: step.explanationEn,
     explanationFr: step.explanationFr,
-    explanationAr: step.explanationAr,
+      explanationAr: step.explanationAr,
+      boxed: step.boxed,
   }));
 
   const graph: GraphSpec | undefined = parsed.graph
@@ -172,6 +156,11 @@ function solutionFromLlm(
     source,
     recognizedFromImage: request.imageBase64 ? request.imageName : undefined,
     given: parsed.given,
+    examTip: parsed.examTip
+      ? { en: parsed.examTip.en, fr: parsed.examTip.fr || parsed.examTip.en, ar: parsed.examTip.ar }
+      : undefined,
+    studyKind: parsed.studyKind as StudyKind | undefined,
+    asymptotes: parsed.asymptotes,
   });
 }
 

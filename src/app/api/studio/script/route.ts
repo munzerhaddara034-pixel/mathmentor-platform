@@ -3,7 +3,7 @@ import { z } from "zod";
 import { generateLessonScript } from "@/lib/studio/scriptGenerator";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
-import { certificateTrackSchema, countExampleSteps, hasGradedExample, hasRenderGraph, hasStepByStep, lessonLanguageSchema } from "@/lib/studio/timeline";
+import { certificateTrackSchema, lessonLanguageSchema, auditPedagogy } from "@/lib/studio/timeline";
 
 export const runtime = "nodejs";
 
@@ -43,16 +43,9 @@ export async function POST(request: Request) {
       grade: parsed.data.grade,
     });
 
-    const phases = result.timeline.segments.map((segment) => segment.phase);
     return NextResponse.json({
       ...result,
-      pedagogy: {
-        phases,
-        hasRenderGraph: hasRenderGraph(result.timeline),
-        hasStepByStepEquations: hasStepByStep(result.timeline),
-        gradedSteps: countExampleSteps(result.timeline),
-        gradedExampleReady: hasGradedExample(result.timeline),
-      },
+      pedagogy: auditPedagogy(result.timeline),
     });
   } catch (error) {
     return NextResponse.json(

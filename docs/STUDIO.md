@@ -53,7 +53,7 @@ Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 - Touch targets are at least 44px; KaTeX on the board scrolls horizontally on small screens.
 - The lesson stage stays `dir="ltr"` so graphs and KaTeX are not mirrored. Site chrome (nav) can remain Arabic RTL.
 - Canvas pan / zoom / hover does **not** pause video audio or playback (a quiz checkpoint is the only auto-pause).
-- **Chapters** sit under the video (`leb-term-func-01`: intro, limits, derivative, quiz, graph, example, mistake). Tap a chapter to seek video + canvas together.
+- **Chapters** sit under the video (`leb-term-func-01`: Key Idea, Domain D_f, Limits, Derivative, Variation table, quiz, graph, boxed exercise, pitfalls). Tap a chapter to seek video + canvas together.
 - **Fullscreen** buttons open the board or the video. On phones: video top, canvas bottom, 44px controls, one-tap swap.
 - **PWA**: `manifest.webmanifest` + `sw.js` so students can **Add to Home Screen**. Name: MathMentor · أكاديمية منذر حداره. Icons from `/brand/`.
 
@@ -61,10 +61,12 @@ Full payload, env vars, and webhook notes: [HEYGEN.md](./HEYGEN.md).
 
 The video element is the clock whenever the playhead is inside the clip (`video.currentTime`, with `seeked` / `play` / `pause` / `ratechange` plus **animation-frame** polling). `timeupdate` is ignored while that RAF clock is active so the canvas does not double-tick. Seeking **recomputes** the board from an empty state (`canvasStateAt`) so going backward or forward is idempotent. After a short placeholder clip ends, a RAF lesson clock continues so a 6-minute script can outlive an 8-second demo file — the clip may loop visually, but it no longer overwrites the canvas. Pan/zoom never pauses audio.
 
-1. **Fade-in** KaTeX when `currentTime` reaches `show_equation` / `fade_equation`.
-2. **Plots immediately** on `render_graph` (Function Plot SVG; Desmos if `NEXT_PUBLIC_DESMOS_API_KEY` is set).
-3. Highlights **roots, extrema, asymptotes** from the event payload.
-4. **`quiz_mcq`** auto-pauses the video, shows an MCQ overlay, and resumes only after a correct check **or** after **Show solution** (which unlocks **Continue**). Wrong answers stay retryable.
+1. **Fade-in** KaTeX when `currentTime` reaches `show_equation` / `fade_equation` / `renderMath` / `exam_tip`.
+2. **Plots immediately** on `render_graph` / `plotFunction` (Function Plot SVG; Desmos if `NEXT_PUBLIC_DESMOS_API_KEY` is set).
+3. Highlights **roots, extrema, asymptotes** from the event payload. Asymptote equations are written `x=a`, `y=b`, or `y=ax+b`.
+4. **`variationTable`** draws the tableau de variation (arrows, limits, images).
+5. **`boxAnswer`** is a prominent Boxed Final Answer (one per sub-question, aligned to the barème).
+6. **`quiz_mcq`** auto-pauses the video, shows an MCQ overlay, and resumes only after a correct check **or** after **Show solution** (which unlocks **Continue**). Wrong answers stay retryable.
 
 Flat event fields are lifted into `payload` (backward compatible with `{ at, type, payload }`). Absolute-time events may live on `timeline.events`:
 
@@ -83,7 +85,7 @@ Flat event fields are lifted into `payload` (backward compatible with `{ at, typ
 }
 ```
 
-`leb-term-func-01` / `/lessons/interactive` is a **full Terminale LS/GS/SE study** of `f(x)=(x-1)e^x` (~6 min): domain, limits rewritten as a quotient, product-rule algebra, in-video MCQ at **2:18** (`f'(x)=x e^x`), table of variation, timed graph (root / min / asymptote around 2:30), official exercise `f(x)=m` and `f(x)=−1/2` with four graded steps, then the exam trap `(−∞)×0` and `f'=e^x`. EN and FR are written as parallel papers, not a calque. Wheel or pinch to zoom — playback continues. Short demo clips loop after they hand the clock to RAF.
+`leb-term-func-01` / `/lessons/interactive` is a **full Terminale LS/GS/SE study** of `f(x)=(x-1)e^x` (~6 min) in the official order: Key Idea, D_f, limits rewritten as a quotient with **y=0**, product-rule algebra, table of variations, in-video MCQ (`f'(x)=x e^x`), timed graph (root / min / asymptote), official exercise `f(x)=m` and `f(x)=−1/2` with **IVT only after continuity and monotonicity** and boxed answers, then common pitfalls `(−∞)×0` and `f'=e^x`. EN and FR are written as parallel papers, not a calque. Pedagogy contract: [PEDAGOGY.md](./PEDAGOGY.md).
 
 ## Seeded lesson
 
@@ -103,7 +105,7 @@ A `quiz_mcq` event pauses playback when `currentTime` reaches `at`. Skipping pas
 
 The player accepts **both**:
 
-1. Scene documents (`lessonId`, `defaultLanguage`, `title.en/fr`, `scenes[].audio.en/fr`, `canvas.type` = `renderMath` | `plotFunction`)
+1. Scene documents (`lessonId`, `defaultLanguage`, `title.en/fr`, `scenes[].audio.en/fr`, `canvas.type` = `renderMath` | `plotFunction` | `variationTable` | `boxAnswer` | `examTip`)
 2. The previous `LessonTimeline` (`segments`, `narration.en` + optional `fr` / `ar`)
 
 Step payloads may use:
@@ -120,14 +122,16 @@ Step payloads may use:
 
 ## Pedagogical contract (script generator)
 
-`POST /api/studio/script` always returns four phases:
+`POST /api/studio/script` always returns four phases that **contain** the official sequence. Details: [PEDAGOGY.md](./PEDAGOGY.md).
 
-1. **introduction** (~50s) — certificate scope + domain with justification
-2. **rule_graph** (~100s) — proof sketch + mandatory `render_graph` (avatar paused)
-3. **real_example** (~160s) — official exercise with **≥3** `show_step` lines (`step_en` / `step_fr` / `math_latex`)
-4. **common_mistake** (~40s) — wrong reasoning named, then the correction
+1. **introduction** (~55s) — Key Idea / Exam Tip **first** (`exam_tip`), then domain D_f with justification (`renderMath`)
+2. **rule_graph** (~120s) — limits + asymptote equations, `variationTable`, then `plotFunction` / `render_graph` (avatar paused)
+3. **real_example** (~160s) — official exercise with **≥3** graded lines; each sub-question ends with `boxAnswer`. IVT only after continuity + monotonicity.
+4. **common_mistake** (~45s) — Common pitfalls that lose barème marks, then the correction
 
-Template mode includes French on every narration at the same rigor. OpenAI is used only when `OPENAI_API_KEY` or `LLM_API_KEY` is set.
+The JSON `pedagogy` audit reports `hasExamTip`, `hasDomain`, `hasLimitsAsymptotes`, `hasVariationTable`, `hasRenderGraph`, `hasBoxedAnswer`.
+
+Template mode includes French on every narration at the same rigor. OpenAI is used only when `OPENAI_API_KEY` or `LLM_API_KEY` is set. Demo mode without keys still returns the full sequence.
 
 ## Integrations
 

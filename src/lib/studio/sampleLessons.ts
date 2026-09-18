@@ -23,18 +23,32 @@ export const complexNumbersLesson: LessonTimeline = {
       phase: "introduction",
       avatar: { state: "speaking" },
       narration: L(
-        "Complex numbers on the Lebanese Baccalaureate — especially LS and GS — are a plane geometry question: write z=a+bi, i²=−1, then the modulus as a length. Domain is the whole plane. Official papers mark the identification of Re and Im, the modulus formula with the square root, and one product expanded correctly.",
-        "Les nombres complexes au baccalauréat libanais — surtout SV et SG — sont une question de géométrie du plan : écrire z=a+bi, i²=−1, puis le module comme une longueur. L’ensemble est tout le plan. Le barème note l’identification de Re et Im, la formule du module avec la racine, et un produit correctement développé.",
+        "Key Idea / Exam Tip: write z=a+ib first. Complex numbers on the Lebanese Baccalaureate — especially LS and GS — are a plane geometry question: write z=a+bi, i²=−1, then the modulus as a length. Domain is the whole plane. Official papers mark the identification of Re and Im, the modulus formula with the square root, and one product expanded correctly.",
+        "Idée clé : écrire z=a+ib d’abord. Les nombres complexes au baccalauréat libanais — surtout SV et SG — sont une question de géométrie du plan : écrire z=a+bi, i²=−1, puis le module comme une longueur. L’ensemble est tout le plan. Le barème note l’identification de Re et Im, la formule du module avec la racine, et un produit correctement développé.",
       ),
       canvas: {
         actions: [
           {
-            at: 3,
+            at: 1,
+            type: "exam_tip",
+            payload: {
+              latex: "\\text{Key Idea / Exam Tip}",
+              caption: L("Key Idea / Exam Tip", "Idée clé / Conseil d’épreuve"),
+              step_en: "Write z = a + ib first. The modulus is a length. Never claim |z₁+z₂| = |z₁|+|z₂| always.",
+              step_fr: "Écrire z = a + ib d’abord. Le module est une longueur. Ne jamais affirmer |z₁+z₂| = |z₁|+|z₂| toujours.",
+              text: L(
+                "Write z = a + ib first. The modulus is a length. Never claim |z₁+z₂| = |z₁|+|z₂| always.",
+                "Écrire z = a + ib d’abord. Le module est une longueur. Ne jamais affirmer |z₁+z₂| = |z₁|+|z₂| toujours.",
+              ),
+            },
+          },
+          {
+            at: 10,
             type: "show_equation",
             payload: {
               latex: "z=a+bi,\\quad i^{2}=-1",
               math_latex: "z=a+bi,\\quad i^{2}=-1",
-              caption: L("Concept definition", "Définition"),
+              caption: L("Complex form z = a + ib", "Forme algébrique z = a + ib"),
             },
           },
           {
@@ -148,20 +162,20 @@ export const complexNumbersLesson: LessonTimeline = {
               text: L("Step 3 — collect real and imaginary parts.", "Étape 3 — rassembler parties réelle et imaginaire."),
             },
           },
-          {
-            at: 88,
-            type: "show_step",
-            payload: {
-              latex: "|2+i|\\,|3-i|=\\sqrt{5}\\,\\sqrt{10}=\\sqrt{50},\\quad |7+i|=\\sqrt{50}",
-              math_latex: "|2+i|\\,|3-i|=\\sqrt{5}\\,\\sqrt{10}=\\sqrt{50},\\quad |7+i|=\\sqrt{50}",
-              step_en: "Step 4 — modulus check: |z w|=|z||w|. Substitution confirms 7+i.",
-              step_fr: "Étape 4 — contrôle du module : |z w|=|z||w|. La substitution confirme 7+i.",
-              text: L(
-                "Step 4 — modulus check: |z w|=|z||w|. Substitution confirms 7+i.",
-                "Étape 4 — contrôle du module : |z w|=|z||w|. La substitution confirme 7+i.",
-              ),
+            {
+              at: 88,
+              type: "boxAnswer",
+              payload: {
+                latex: "\\boxed{7+i}",
+                math_latex: "\\boxed{7+i}",
+                step_en: "Boxed Final Answer: (2+i)(3−i)=7+i. Modulus check |zw|=|z||w|.",
+                step_fr: "Réponse encadrée : (2+i)(3−i)=7+i. Contrôle |zw|=|z||w|.",
+                text: L(
+                  "Boxed Final Answer: (2+i)(3−i)=7+i. Modulus check |zw|=|z||w|.",
+                  "Réponse encadrée : (2+i)(3−i)=7+i. Contrôle |zw|=|z||w|.",
+                ),
+              },
             },
-          },
         ],
       },
     },

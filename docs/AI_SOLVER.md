@@ -6,11 +6,20 @@ Students submit a math question (text, LaTeX, or image). The engine returns a st
 
 ## Solver response (Lebanese exam accuracy)
 
-Every solution — Gemini, OpenAI, or the demo engine — has three sections:
+Every solution — Gemini, OpenAI, or the demo engine — has three sections **and** follows the official study sequence. Full contract: [PEDAGOGY.md](./PEDAGOGY.md).
 
-1. **Given & Aim** (`given.latex`, `given.aimEn` / `aimAr`) · المعطيات والمطلوب
-2. **Step-by-step** with a named theorem/reason on every line (`theoremEn` / `theoremAr`) and **pure LaTeX** (`f'(x)`, `\int`, `\lim`, `\ln`, `e^{x}`, `z=a+ib`)
+1. **Given & Aim** (`given.latex`, `given.aimEn` / `aimFr` / `aimAr`) · المعطيات والمطلوب
+2. **Step-by-step** with a named theorem/reason on every line (`theoremEn` / `theoremFr` / `theoremAr`) and **pure LaTeX** (`f'(x)`, `\int`, `\lim`, `\ln`, `e^{x}`, `z=a+ib`)
 3. **Final Answer Box** (`finalAnswerLatex`) — framed in the UI
+
+For a real-function study the steps are, in order:
+
+1. Domain of definition **D_f** (before any further study)
+2. Limits at the boundaries with asymptote equations `x=a`, `y=b`, or `y=ax+b`
+3. Derivative, sign, **table of variations** (arrows, limits, images)
+4. Particular points and graph of **C_f**
+
+The avatar script speaks a **Key Idea / Exam Tip** *before* any calculation, then the sequence, then **Common pitfalls** that lose barème marks. Each sub-question is a `boxAnswer` on the canvas.
 
 Hallucination guard: if the photo or text is blurry, cropped, or incomplete, the engine **does not invent**. It returns `needsRetake: true` plus `retakeMessageEn` / `retakeMessageAr` and asks the student to rephotograph. Without Gemini, an image-only request (no typed math) is always a retake; garbled text (`asdf…`) is a retake; typed math is solved and the photo is ignored with a warning.
 
@@ -48,7 +57,8 @@ npm run dev
 2. Open `/math-solver`. Tap **x² − 5x + 6 = 0** (or type a limit / `f(x)=(x-1)e^x` / a 2×2 system / 3-4-5 triangle).
 3. **Solve with Prof. Munzer AI** → `/math-solver/result/[id]`.
    - `source: "demo"` when `GEMINI_API_KEY` and `OPENAI_API_KEY` are empty.
-   - JSON includes `given`, `steps[].theoremEn`, `finalAnswerLatex`, `needsRetake`, `topicTag`.
+   - JSON includes `given`, `examTip`, `steps[].theoremEn`, `finalAnswerLatex`, `needsRetake`, `topicTag`.
+   - Demo `f(x)=(x-1)e^x` is Domain → Limits (`y=0`) → f' / variation table → min (0,−1), with a Key Idea before the algebra.
 4. Rate 👍/👎 on the result page (stored for teacher audit).
 5. **Generate avatar explanation** calls `POST /api/generate-avatar-video` and stores a demo HeyGen job. Poll `GET /api/heygen/status?jobId=…` ([HEYGEN.md](./HEYGEN.md)). A WhatsApp (or outbox log) notifies the student when the job completes.
 6. Unclear photo with no typed math → retake banner, no invented quadratic.

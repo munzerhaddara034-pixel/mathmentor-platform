@@ -35,8 +35,10 @@ export default async function InteractiveLessonDemoPage({
       <details className="studio-lesson-notes">
         <summary>Prof. Munzer Haddara / الأستاذ منذر حداره · lesson notes</summary>
         <p className="muted">
-          Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — domain, justified limits,
-          product rule, table of variation, timed graph, in-video MCQ at 2:18, exercise <code>f(x)=−1/2</code>, exam trap.
+          Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — Key Idea, domain D_f,
+          limits with <code>y=0</code>, derivative, table of variations, timed graph of C_f, boxed exercise{" "}
+          <code>f(x)=−1/2</code> (IVT after continuity + monotonicity), common pitfalls. English default, live French
+          toggle. Editor: <Link href="/studio/script">/studio/script</Link>
           English default, live French toggle. Editor: <Link href="/studio/script">/studio/script</Link>
           {" · "}
           <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>
