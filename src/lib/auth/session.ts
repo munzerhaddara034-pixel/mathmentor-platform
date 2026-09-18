@@ -1,10 +1,12 @@
 import { classifyDevice, type DeviceFingerprint } from "./device";
+import { notifyStaffDeviceLogin } from "./deviceNotify";
 import { cookies, headers } from "next/headers";
 import { SESSION_COOKIE } from "./paths";
 import {
   createExclusiveSession,
   deleteSessionByToken,
   findSessionByToken,
+  findUserById,
   type PublicUser,
 } from "./store";
 import { newSessionToken } from "./passwords";
@@ -67,6 +69,14 @@ export async function startExclusiveSession(userId: string, userAgent?: string, 
   const token = newSessionToken();
   const created = await createExclusiveSession(userId, token, userAgent, fingerprint);
   await writeSessionCookie(token);
+  const user = await findUserById(userId);
+  if (user) {
+    try {
+      await notifyStaffDeviceLogin(user, created.session);
+    } catch {
+      /* login must succeed even if the inbox write fails */
+    }
+  }
   return {
     token,
     ...created,

@@ -11,15 +11,21 @@ Sign in as `student@mathmentor.local` / `demo-student` unless noted.
 ## 1) Anti-account sharing
 
 - Fingerprint hash: `userAgent + screen + timezone + localStorage mm_device_id`.
-- Concurrent sessions: **1 mobile + 1 desktop** per account. A second login of the *same class* invalidates the previous device of that class (`/login?reason=replaced`).
-- One phone **and** one computer may stay signed in together.
+- **Students:** concurrent sessions **1 mobile + 1 desktop** per account. A second login of the *same class* invalidates the previous device of that class (`/login?reason=replaced`). One phone **and** one computer may stay signed in together.
+- **Teacher / admin** (`teacher`, `admin`, including `teacher@mathmentor.local`): **not kicked**. Other devices stay signed in. Each staff login writes an in-app alert «جهاز جديد نشط / New active device» with the User-Agent device name (e.g. Windows Chrome, iPhone Safari) and Asia/Beirut time. See the header bell and `/dashboard` → **أجهزتي النشطة / Active devices**.
 
-**How to test the kick**
+**How to test the student kick**
 
-1. Sign in on Chrome (desktop). Open `/lessons/interactive`.
+1. Sign in on Chrome (desktop) as `student@mathmentor.local`. Open `/lessons/interactive`.
 2. In DevTools → Application → Local Storage set `mm_qa_device_class` to `desktop` (already desktop) **or** open a second desktop browser profile and sign in with the same account. The first session is closed on the next navigation.
 3. To keep both classes: in one browser set `mm_qa_device_class` = `mobile`, in the other leave it unset (desktop). Both sessions stay.
 4. Watermark on video players, `/lessons/interactive`, `/math-solver/result/…`, and `/lessons/interactive-explanation`: drifting `[Name] - [Phone] - [DD/MM/YYYY]` (Asia/Beirut date). Sara Nassar · 76111111.
+
+**How to test the teacher exemption**
+
+1. Sign in as `teacher@mathmentor.local` / `demo-teacher` on a desktop.
+2. Sign in again from a second desktop profile (do not set `mm_qa_device_class`). The first session stays valid.
+3. Open `/dashboard`: the new device is listed and the bell shows «جهاز جديد نشط / New active device» with the device name.
 
 ## 2) Lebanese official exam simulation
 
@@ -49,7 +55,8 @@ Gemini is used for grading only when `GEMINI_API_KEY` is set; otherwise the dete
 Header **bell** (unread badge + dropdown). Store: `notifications.json`.
 
 Student seeds: video ready, live in 15 minutes, new official papers.  
-Teacher seeds: live booked, exam submitted, AI solution issue (👎 on a solver result).
+Teacher seeds: live booked, exam submitted, AI solution issue (👎 on a solver result).  
+Teacher device logins also push «جهاز جديد نشط / New active device» (not seeded; created on each staff sign-in).
 
 Live 15-minute in-app reminders also run when the bell fetches `/api/notifications` (bookings 10–20 minutes out).
 
@@ -77,4 +84,4 @@ Staff: `teacher@mathmentor.local` / `demo-teacher`.
 | `/profile` | Badges + streak |
 | `/wallet` | Balances, devices, ledger, top-up modal |
 | `/admin/exams` | Teacher submissions |
-| `/dashboard` | Promo codes **and** live-hour top-up codes |
+| `/dashboard` | Promo codes, live-hour top-ups, **active teacher devices** and device-login alerts |

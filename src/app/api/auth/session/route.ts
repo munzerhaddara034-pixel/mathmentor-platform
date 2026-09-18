@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getLiveSession } from "@/lib/auth/session";
+import { isSessionSharingExempt, isStaffRole } from "@/lib/auth/paths";
 import { listUserSessions, userAccess } from "@/lib/auth/store";
-import { isStaffRole } from "@/lib/auth/paths";
 
 export const runtime = "nodejs";
 
@@ -44,6 +44,7 @@ export async function GET() {
     liveCredits: access.liveCredits,
     aiExpiresAt: live.user.aiExpiresAt,
     canTeach: isStaffRole(live.user.role),
+    sharingExempt: isSessionSharingExempt(live.user),
     sessionId: live.sessionId,
     devices: devices.map((device) => ({
       ...device,

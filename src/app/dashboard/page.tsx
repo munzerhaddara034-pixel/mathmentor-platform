@@ -3,7 +3,19 @@
 import { defaultSettings } from "@/lib/settings";
 import type { ScratchCard } from "@/lib/types";
 import type { TopUpCode } from "@/lib/billing/store";
+import type { AppNotification } from "@/lib/notifications/store";
 import { useEffect, useState } from "react";
+
+type DeviceRow = {
+  id: string;
+  deviceClass: string;
+  createdAt: string;
+  createdAtBeirut?: string;
+  deviceName?: string;
+  deviceNameAr?: string;
+  fingerprintHash?: string;
+  current: boolean;
+};
 
 type Dashboard = {
   subscribers: number;
@@ -13,6 +25,8 @@ type Dashboard = {
   cardsLeft: number;
   financials: { estimatedUsd: number; currency: string };
   attempts: { studentName: string; score: number; lessonId: string }[];
+  devices?: DeviceRow[];
+  deviceAlerts?: AppNotification[];
 };
 
 export default function DashboardPage() {
@@ -29,9 +43,11 @@ export default function DashboardPage() {
   const [topupPrefix, setTopupPrefix] = useState("MUNZER-HRS");
 
   const load = () => {
-    void fetch("/api/dashboard")
-      .then((response) => response.json())
-      .then(setData);
+    void fetch("/api/dashboard", { credentials: "same-origin" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: Dashboard | null) => {
+        if (payload) setData(payload);
+      });
     void fetch("/api/cards")
       .then((response) => response.json())
       .then((payload: { cards?: ScratchCard[] }) => setCards(payload.cards ?? []));
@@ -56,10 +72,14 @@ export default function DashboardPage() {
   };
 
   if (!data) return <main className="shell">جارٍ تحميل الإحصائيات…</main>;
+  const devices = data.devices ?? [];
+  const deviceAlerts = data.deviceAlerts ?? [];
+
   return (
     <main className="shell" dir="rtl">
       <p className="eyebrow">لوحة تحكم الأستاذ</p>
       <h1>إحصائيات · أكواد التفعيل · الحماية</h1>
+      <p className="muted">حساب الأستاذ والإدارة لا يُطرد عند الدخول من جهاز آخر — يصلك تنبيه باسم الجهاز بدل ذلك.</p>
       <div className="row" style={{ marginTop: 8 }}>
         <a className="btn dark" href="/studio/script">مولّد سكربت الدرس</a>
         <a className="btn" href="/lessons/interactive">السبورة الذكية</a>
@@ -68,7 +88,43 @@ export default function DashboardPage() {
         <a className="btn" href="/exams">المحاكاة</a>
         <a className="btn" href="/math-solver">الحلّال</a>
       </div>
-      <div className="grid three">
+      <div className="grid two" style={{ marginTop: 20 }}>
+        <section className="card device-card">
+          <h2>أجهزتي النشطة / Active devices</h2>
+          <p className="muted">جلسات هذا الحساب تبقى مفتوحة معاً (حاسوب + هاتف وأكثر). الطلاب ما زالوا محدودين بجهاز من كل نوع.</p>
+          {devices.length === 0 ? <p className="muted">لا توجد جلسات مخزّنة بعد.</p> : null}
+          <ul className="device-list">
+            {devices.map((device) => (
+              <li key={device.id} className={device.current ? "current" : undefined}>
+                <strong>{device.deviceNameAr || device.deviceName || device.deviceClass}</strong>
+                <span>{device.deviceName || device.deviceClass}</span>
+                <span className="muted">
+                  {device.createdAtBeirut || device.createdAt.slice(0, 16).replace("T", " ")} · Asia/Beirut
+                  {device.current ? " · هذا الجهاز / this device" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="card device-card">
+          <h2>تنبيهات الأجهزة / Device alerts</h2>
+          {deviceAlerts.length === 0 ? (
+            <p className="muted">بعد كل دخول يظهر هنا اسم الجهاز (مثل Windows Chrome أو iPhone Safari).</p>
+          ) : null}
+          <ul className="device-list">
+            {deviceAlerts.map((alert) => (
+              <li key={alert.id} className={alert.read ? undefined : "unread"}>
+                <strong>
+                  {alert.titleAr} / {alert.title}
+                </strong>
+                <span>{alert.bodyAr}</span>
+                <span className="muted">{alert.body}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+      <div className="grid three" style={{ marginTop: 20 }}>
         <article className="card">
           <h3>المشتركون / المفعّلون</h3>
           <p style={{ fontSize: 36 }}>{data.subscribers}</p>

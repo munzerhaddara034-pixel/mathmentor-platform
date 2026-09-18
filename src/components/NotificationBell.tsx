@@ -60,18 +60,31 @@ export function NotificationBell() {
       {open ? (
         <div className="notif-dropdown">
           <header>
-            <strong>Alerts</strong>
+            <strong>التنبيهات / Alerts</strong>
             <button type="button" className="ghost" onClick={() => void readAll()}>
-              Mark all read
+              تعليم الكل مقروء
             </button>
           </header>
-          {items.length === 0 ? <p className="muted">No notifications yet.</p> : null}
+          {items.length === 0 ? <p className="muted">لا تنبيهات بعد. / No notifications yet.</p> : null}
           <ul>
             {items.slice(0, 8).map((item) => (
               <li key={item.id}>
                 <button type="button" className={item.read ? "read" : "unread"} onClick={() => void openItem(item)}>
-                  <strong>{item.title}</strong>
-                  <span>{item.body}</span>
+                  <strong>
+                    {item.titleAr} / {item.title}
+                  </strong>
+                  <span>{item.bodyAr}</span>
+                  <span className="muted">
+                    {item.body}
+                    {item.createdAt
+                      ? ` · ${new Intl.DateTimeFormat("en-GB", {
+                          timeZone: "Asia/Beirut",
+                          dateStyle: "short",
+                          timeStyle: "short",
+                          hourCycle: "h23",
+                        }).format(new Date(item.createdAt))}`
+                      : ""}
+                  </span>
                 </button>
               </li>
             ))}

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { findUserByEmail, asPublicUser, userAccess } from "@/lib/auth/store";
 import { verifyPassword } from "@/lib/auth/passwords";
 import { startExclusiveSession } from "@/lib/auth/session";
-import { deviceClassLabel, type DeviceFingerprint } from "@/lib/auth/device";
-import { isStaffRole } from "@/lib/auth/paths";
+import { deviceClassLabel, deviceDisplayName, type DeviceFingerprint } from "@/lib/auth/device";
+import { isSessionSharingExempt, isStaffRole } from "@/lib/auth/paths";
 
 export const runtime = "nodejs";
 
@@ -59,19 +59,27 @@ export async function POST(request: Request) {
   ) {
     redirectTo = `/redeem?need=ai&next=${encodeURIComponent(requested)}`;
   }
+  const described = deviceDisplayName(started.session.userAgent, started.deviceClass);
   const label = deviceClassLabel(started.deviceClass);
-  const notice = started.replaced
-    ? `This sign-in closed the previous ${label.en} session. One mobile and one desktop session may stay active.`
-    : "Signed in. This account allows 1 mobile and 1 desktop session at a time.";
-  const noticeAr = started.replaced
-    ? `أغلق هذا الدخول جلسة ${label.ar} السابقة. يُسمح بجلسة هاتف واحدة وجلسة حاسوب واحدة معاً.`
-    : "تم الدخول. يُسمح بجلسة هاتف واحدة وجلسة حاسوب واحدة في الوقت نفسه.";
+  const staffLogin = started.sharingExempt || isSessionSharingExempt(user);
+  const notice = staffLogin
+    ? `Signed in on ${described.nameWithClass}. Teacher/admin accounts stay signed in on other devices; a notification named this device.`
+    : started.replaced
+      ? `This sign-in closed the previous ${label.en} session. One mobile and one desktop session may stay active.`
+      : "Signed in. This account allows 1 mobile and 1 desktop session at a time.";
+  const noticeAr = staffLogin
+    ? `تم الدخول من ${described.nameWithClassAr}. حسابات الأستاذ والإدارة تبقى مفتوحة على الأجهزة الأخرى؛ أُرسل تنبيه باسم هذا الجهاز.`
+    : started.replaced
+      ? `أغلق هذا الدخول جلسة ${label.ar} السابقة. يُسمح بجلسة هاتف واحدة وجلسة حاسوب واحدة معاً.`
+      : "تم الدخول. يُسمح بجلسة هاتف واحدة وجلسة حاسوب واحدة في الوقت نفسه.";
   return NextResponse.json({
     ok: true,
     user: publicUser,
     redirectTo,
     deviceClass: started.deviceClass,
+    deviceName: described.nameWithClass,
     replaced: started.replaced,
+    sharingExempt: staffLogin,
     notice,
     noticeAr,
   });

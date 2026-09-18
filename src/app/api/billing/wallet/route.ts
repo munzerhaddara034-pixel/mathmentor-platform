@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
-import { isStaffRole } from "@/lib/auth/paths";
+import { isSessionSharingExempt, isStaffRole } from "@/lib/auth/paths";
 import { listUserSessions, userAccess } from "@/lib/auth/store";
 import { listLedger, walletSnapshot } from "@/lib/billing/store";
 
@@ -21,6 +21,7 @@ export async function GET() {
     liveAccess: access.liveAccess,
     liveCredits: access.liveCredits,
     devices: devices.map((device) => ({ ...device, current: device.id === guard.live.sessionId })),
+    sharingExempt: isSessionSharingExempt(guard.live.user),
     ledger: await listLedger(guard.live.user.id),
   });
 }

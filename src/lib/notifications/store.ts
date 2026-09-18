@@ -11,7 +11,8 @@ export type NotificationKind =
   | "exam_uploaded"
   | "live_booked"
   | "exam_submitted"
-  | "solver_issue";
+  | "solver_issue"
+  | "device_login";
 
 export type AppNotification = {
   id: string;
