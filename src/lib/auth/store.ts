@@ -3,9 +3,9 @@ import path from "node:path";
 import { createId } from "../ids";
 import { platformDataDir } from "../dataDir";
 import { DEMO_ACCOUNTS } from "./demoAccounts";
-import { classifyDevice, fingerprintHash, type DeviceClass, type DeviceFingerprint } from "./device";
+import { classifyDevice, deviceDisplayName, fingerprintHash, formatDeviceTimestamp, type DeviceClass, type DeviceFingerprint } from "./device";
 import { hashPassword, hashToken } from "./passwords";
-import type { AuthRole } from "./paths";
+import { isSessionSharingExempt, type AuthRole } from "./paths";
 import {
   accessFromSubscription,
   liveCreditsForPlan,
@@ -296,7 +296,37 @@ export type SessionCreateResult = {
   session: AuthSession;
   replaced: boolean;
   replacedClass: DeviceClass | null;
+  sharingExempt: boolean;
 };
+
+export type PublicSession = {
+  id: string;
+  deviceClass: DeviceClass;
+  createdAt: string;
+  createdAtBeirut: string;
+  userAgent: string;
+  timezone: string;
+  fingerprintHash: string;
+  deviceId: string;
+  deviceName: string;
+  deviceNameAr: string;
+};
+
+function toPublicSession(session: AuthSession): PublicSession {
+  const described = deviceDisplayName(session.userAgent, session.deviceClass);
+  return {
+    id: session.id,
+    deviceClass: classifyDevice(session.userAgent, session.deviceClass),
+    createdAt: session.createdAt,
+    createdAtBeirut: formatDeviceTimestamp(session.createdAt),
+    userAgent: session.userAgent ?? "",
+    timezone: session.timezone ?? "",
+    fingerprintHash: session.fingerprintHash ?? "",
+    deviceId: session.deviceId ?? "",
+    deviceName: described.nameWithClass,
+    deviceNameAr: described.nameWithClassAr,
+  };
+}
 
 export async function createExclusiveSession(
   userId: string,
@@ -305,29 +335,46 @@ export async function createExclusiveSession(
   fingerprint?: DeviceFingerprint,
 ): Promise<SessionCreateResult> {
   const store = await readAuthStore();
-  const deviceClass = classifyDevice(fingerprint?.userAgent || userAgent, fingerprint?.deviceClass);
-  const previousSameClass = store.sessions.filter(
-    (session) =>
-      session.userId === userId &&
-      classifyDevice(session.userAgent, session.deviceClass) === deviceClass,
-  );
-  store.sessions = store.sessions.filter(
-    (session) =>
-      session.userId !== userId || classifyDevice(session.userAgent, session.deviceClass) !== deviceClass,
-  );
+  const user = store.users.find((item) => item.id === userId);
+  const sharingExempt = isSessionSharingExempt(user);
+  const ua = fingerprint?.userAgent || userAgent;
+  const deviceClass = classifyDevice(ua, fingerprint?.deviceClass);
+  const incomingHash = fingerprintHash({
+    userAgent: ua,
+    screen: fingerprint?.screen,
+    timezone: fingerprint?.timezone,
+    deviceId: fingerprint?.deviceId,
+  });
+  const incomingDeviceId = fingerprint?.deviceId?.trim() || "";
+
+  let previousSameClass: AuthSession[] = [];
+  if (!sharingExempt) {
+    previousSameClass = store.sessions.filter(
+      (session) =>
+        session.userId === userId &&
+        classifyDevice(session.userAgent, session.deviceClass) === deviceClass,
+    );
+    store.sessions = store.sessions.filter(
+      (session) =>
+        session.userId !== userId || classifyDevice(session.userAgent, session.deviceClass) !== deviceClass,
+    );
+  } else {
+    store.sessions = store.sessions.filter((session) => {
+      if (session.userId !== userId) return true;
+      if (incomingDeviceId && session.deviceId && session.deviceId === incomingDeviceId) return false;
+      if (!incomingDeviceId && session.fingerprintHash === incomingHash) return false;
+      return true;
+    });
+  }
+
   const session: AuthSession = {
     id: createId("sess"),
     userId,
     tokenHash: hashToken(token),
     createdAt: new Date().toISOString(),
-    userAgent: fingerprint?.userAgent || userAgent,
+    userAgent: ua,
     deviceClass,
-    fingerprintHash: fingerprintHash({
-      userAgent: fingerprint?.userAgent || userAgent,
-      screen: fingerprint?.screen,
-      timezone: fingerprint?.timezone,
-      deviceId: fingerprint?.deviceId,
-    }),
+    fingerprintHash: incomingHash,
     timezone: fingerprint?.timezone,
     screen: fingerprint?.screen,
     deviceId: fingerprint?.deviceId,
@@ -336,8 +383,9 @@ export async function createExclusiveSession(
   await writeAuthStore(store);
   return {
     session,
-    replaced: previousSameClass.length > 0,
-    replacedClass: previousSameClass.length ? deviceClass : null,
+    replaced: sharingExempt ? false : previousSameClass.length > 0,
+    replacedClass: sharingExempt || !previousSameClass.length ? null : deviceClass,
+    sharingExempt,
   };
 }
 
@@ -345,14 +393,8 @@ export async function listUserSessions(userId: string) {
   const store = await readAuthStore();
   return store.sessions
     .filter((session) => session.userId === userId)
-    .map((session) => ({
-      id: session.id,
-      deviceClass: classifyDevice(session.userAgent, session.deviceClass),
-      createdAt: session.createdAt,
-      userAgent: session.userAgent ?? "",
-      timezone: session.timezone ?? "",
-      fingerprintHash: session.fingerprintHash ?? "",
-    }));
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(toPublicSession);
 }
 
 export async function findSessionByToken(token: string) {

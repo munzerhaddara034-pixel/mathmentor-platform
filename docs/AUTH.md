@@ -19,9 +19,13 @@ Unauthenticated visitors to private routes are redirected to `/login` (middlewar
 
 Private pages send `X-Robots-Tag: noindex, nofollow, noarchive` and `<meta name="robots" content="noindex, nofollow" />`.
 
-## Device sessions (1 mobile + 1 desktop)
+## Device sessions (students vs teacher)
 
-Each login issues a new opaque cookie (`mm_session`) and records a device fingerprint (`userAgent + screen + timezone + localStorage deviceId`). The account may keep **one mobile and one desktop** session. A second login of the *same class* deletes the previous session of that class. The old cookie is then treated as logged out and sent to `/login?reason=replaced` (English + Arabic).
+Each login issues a new opaque cookie (`mm_session`) and records a device fingerprint (`userAgent + screen + timezone + localStorage deviceId`). Device names shown in the UI are derived from the User-Agent (e.g. `Windows Chrome`, `iPhone Safari`, `Android Chrome`) plus a Desktop/Mobile label. Timestamps use **Asia/Beirut**.
+
+**Students / parents:** the account may keep **one mobile and one desktop** session. A second login of the *same class* deletes the previous session of that class. The old cookie is then treated as logged out and sent to `/login?reason=replaced` (English + Arabic). One phone **and** one computer may stay signed in together.
+
+**Teacher / admin** (role `teacher` or `admin`, including `teacher@mathmentor.local`): prior sessions are **not** invalidated when signing in from another device. The professor can stay logged in on two or more desktops. Instead, every successful staff login creates an in-app notification «جهاز جديد نشط / New active device» naming that device. Alerts appear in the header bell and on `/dashboard` together with an **أجهزتي النشطة / Active devices** card. Re-login from the *same* browser only replaces that browser’s own ghost session.
 
 The cookie is `Secure` only on HTTPS (or `AUTH_COOKIE_SECURE=1`). `npm start` on `http://localhost` still stores the session.
 

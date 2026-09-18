@@ -41,4 +41,4 @@ Interactive lessons and studio routes are **private**. See [docs/AUTH.md](./docs
 | `teacher@mathmentor.local` | `demo-teacher` | Studio + lessons |
 | `admin@mathmentor.local` | `demo-admin` | Studio + lessons |
 
-Promo card for local unlock: `MUNZER-GOLD-9A` (AI), `MUNZER-LIVE-4C` (live), `MUNZER-BOTH-1X` (bundle), live-hour top-up `MUNZER-HRS-2H` on `/redeem` (must be signed in). A second login of the **same device class** (phone or computer) kicks the previous session of that class; one mobile + one desktop may stay signed in.
+Promo card for local unlock: `MUNZER-GOLD-9A` (AI), `MUNZER-LIVE-4C` (live), `MUNZER-BOTH-1X` (bundle), live-hour top-up `MUNZER-HRS-2H` on `/redeem` (must be signed in). **Students:** a second login of the same device class (phone or computer) kicks the previous session of that class; one mobile + one desktop may stay signed in. **Teacher/admin** accounts are not kicked — they get a device-name notification instead (`/dashboard` + header bell).

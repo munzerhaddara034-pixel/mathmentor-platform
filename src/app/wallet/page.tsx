@@ -13,7 +13,16 @@ type WalletPayload = {
   aiExpiresAt: string | null;
   liveCredits: number;
   ledger: LedgerEntry[];
-  devices?: { id: string; deviceClass: string; createdAt: string; current: boolean }[];
+  devices?: {
+    id: string;
+    deviceClass: string;
+    createdAt: string;
+    createdAtBeirut?: string;
+    deviceName?: string;
+    deviceNameAr?: string;
+    current: boolean;
+  }[];
+  sharingExempt?: boolean;
 };
 
 export default function WalletPage() {
@@ -78,11 +87,21 @@ export default function WalletPage() {
         </article>
       </div>
       <section className="card" style={{ marginTop: 20 }}>
-        <h2>Active devices (1 mobile + 1 desktop)</h2>
+        <h2>
+          {data.sharingExempt
+            ? "أجهزتي النشطة / Active devices"
+            : "Active devices (1 mobile + 1 desktop)"}
+        </h2>
+        {data.sharingExempt ? (
+          <p className="muted">حساب الأستاذ يبقى مسجّلاً على أكثر من جهاز؛ الطلاب محدودون بجهاز من كل نوع.</p>
+        ) : null}
         {(data.devices ?? []).length === 0 ? <p className="muted">No stored sessions.</p> : null}
         {(data.devices ?? []).map((device) => (
           <p key={device.id}>
-            {device.deviceClass} · {device.createdAt.slice(0, 16).replace("T", " ")}
+            {device.deviceNameAr || device.deviceName || device.deviceClass}
+            {device.deviceName ? ` · ${device.deviceName}` : ` · ${device.deviceClass}`}
+            {" · "}
+            {device.createdAtBeirut || device.createdAt.slice(0, 16).replace("T", " ")}
             {device.current ? " · this device" : ""}
           </p>
         ))}
