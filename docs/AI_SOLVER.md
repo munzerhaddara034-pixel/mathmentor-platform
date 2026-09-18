@@ -10,7 +10,7 @@ Every solution — Gemini, OpenAI, or the demo engine — has three sections **a
 
 1. **Given & Aim** (`given.latex`, `given.aimEn` / `aimFr` / `aimAr`) · المعطيات والمطلوب
 2. **Step-by-step** with a named theorem/reason on every line (`theoremEn` / `theoremFr` / `theoremAr`) and **pure LaTeX** (`f'(x)`, `\int`, `\lim`, `\ln`, `e^{x}`, `z=a+ib`)
-3. **Final Answer Box** (`finalAnswerLatex`) — framed in the UI
+3. **Final Answer Box** (`finalAnswerLatex`) — framed in the UI. Student math is passed through the Lebanese / Word Insert Equation cleaner (`\frac{a}{b}`, `x^{n}`, `\sqrt`, `\lim\limits`, `\int\limits`) so slash fractions, visible carets, and the letters `sqrt` never reach the canvas. Contract: [MATH_FORMATTING.md](./MATH_FORMATTING.md).
 
 For a real-function study the steps are, in order:
 
@@ -43,6 +43,7 @@ Hallucination guard: if the photo or text is blurry, cropped, or incomplete, the
 | `PATCH /api/admin/queries` | `{ id, auditStatus, auditNote }` |
 | `POST /api/jobs/whatsapp-reminders` | 30-min live reminders + catch-up video notices |
 | `/admin/video-generator` | existing HeyGen teacher tool |
+| `/studio/voice-solver` | Teacher **Voice-to-Math** recorder (staff). See [VOICE_MATH.md](./VOICE_MATH.md) |
 
 Private pages keep `noindex`, single-session cookies, and identity watermarks from [AUTH.md](./AUTH.md).
 

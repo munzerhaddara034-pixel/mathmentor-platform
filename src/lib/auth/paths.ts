@@ -58,10 +58,13 @@ const PRIVATE_PREFIXES = [
   "/exams",
   "/wallet",
   "/profile",
+  "/teacher",
 ];
 
 const STAFF_PREFIXES = [
   "/studio/script",
+  "/studio/voice-solver",
+  "/teacher",
   "/admin",
   "/professor",
   "/dashboard",

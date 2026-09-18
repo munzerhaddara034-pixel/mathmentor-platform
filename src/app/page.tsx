@@ -27,6 +27,9 @@ export default function HomePage() {
           <Link href="/live" className="ghost-btn">
             حصة مباشرة
           </Link>
+          <Link href="/studio/voice-solver" className="ghost-btn">
+            شرح صوتي
+          </Link>
           <Link href="/studio/script" className="ghost-btn">
             مولّد السكربت
           </Link>

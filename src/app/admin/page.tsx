@@ -12,6 +12,8 @@ export default function AdminPage() {
         AI query logs, live session manager, teacher audit, WhatsApp outbox, and student analytics. Video generator remains at{" "}
         <Link href="/admin/video-generator">/admin/video-generator</Link>
         {" · "}
+        <Link href="/studio/voice-solver">voice-to-math</Link>
+        {" · "}
         <Link href="/admin/exams">exam simulations</Link>
         {" · "}
         <Link href="/dashboard">promo + live-hour codes</Link>

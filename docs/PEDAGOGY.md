@@ -77,17 +77,33 @@ Plus `examTip` (spoken first in the avatar script) and `trap` (common pitfalls).
 
 Without `GEMINI_API_KEY` / `OPENAI_API_KEY`, the deterministic demo solver still emits this structure (try `f(x)=(x-1)e^x`).
 
+## Equation formatting (Word Insert Equation)
+
+Student-facing math — Voice-to-Math canvas, solver sheet, quizzes, formula drawer — must match the official booklet:
+
+| Forbidden in the student UI | Required LaTeX |
+| --- | --- |
+| Slash fractions `1/x`, `(x+1)/(x-1)` | `\frac{a}{b}` |
+| A visible caret `x^2` | `x^{2}` (true superscript) |
+| The letters `sqrt` | `\sqrt{...}` |
+| Limits beside the operator | `\lim\limits_{x \to a}` (under the symbol) |
+| Integral bounds inline | `\int\limits_{a}^{b}` (above and below) |
+
+Shared cleaning layer: `src/lib/math/lebaneseEquationFormat.ts` (`spokenMathToLebaneseLatex` after Whisper, `formatLebaneseEquation` in KaTeX / MathTex / `assembleSolution` / canvas `latexOf`). Graph `fn` strings stay JavaScript and are never rewritten as `\frac`. Full contract: [MATH_FORMATTING.md](./MATH_FORMATTING.md).
+
 ## Where it is enforced
 
 | Surface | File |
 | --- | --- |
 | Shared rules + LLM prompts | `src/lib/pedagogy/lebanese.ts` |
+| Equation formatting (no slash / caret / `sqrt`) | `src/lib/math/lebaneseEquationFormat.ts` |
 | Timeline repair (injects missing tip / D_f / limits / table / box / graph) | `src/lib/studio/pedagogy.ts` |
 | AI solver system prompt + JSON schema | `src/lib/solver/llm.ts` |
+| Voice-to-Math (Whisper → LaTeX → canvas) | `src/lib/voiceMath/`, `/studio/voice-solver`, [VOICE_MATH.md](./VOICE_MATH.md) |
 | Demo stubs | `src/lib/solver/demoSolver.ts`, `src/lib/solver/assemble.ts` |
 | Video script generator | `src/lib/studio/scriptGenerator.ts` |
 | Seed lesson | `src/lib/studio/seedLesson.ts` (`leb-term-func-01`) |
 | Interactive player | `/lessons/interactive`, `MathCanvas` |
 | Script API audit | `POST /api/studio/script` → `pedagogy` object |
 
-See also [AI_SOLVER.md](./AI_SOLVER.md) and [STUDIO.md](./STUDIO.md).
+See also [MATH_FORMATTING.md](./MATH_FORMATTING.md), [AI_SOLVER.md](./AI_SOLVER.md), and [STUDIO.md](./STUDIO.md).

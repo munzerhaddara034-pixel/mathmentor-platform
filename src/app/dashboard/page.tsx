@@ -80,7 +80,25 @@ export default function DashboardPage() {
       <p className="eyebrow">لوحة تحكم الأستاذ</p>
       <h1>إحصائيات · أكواد التفعيل · الحماية</h1>
       <p className="muted">حساب الأستاذ والإدارة لا يُطرد عند الدخول من جهاز آخر — يصلك تنبيه باسم الجهاز بدل ذلك.</p>
+      <section className="card voice-dash-cta">
+        <p className="eyebrow">الموظف الذكي للشرح الصوتي</p>
+        <h2>تسجيل الشرح الصوتي / Record explanation</h2>
+        <p className="muted">
+          سجّل شرحاً بالعربية أو الإنكليزية. يحوّله Whisper ثم LaTeX وفق المنهج اللبناني على السبورة، ثم يمكن توليد فيديو
+          بصوت الأستاذ.
+        </p>
+        <a className="voice-mic" href="/studio/voice-solver">
+          <span className="voice-mic-icon" aria-hidden>
+            ●
+          </span>
+          <span>
+            تسجيل الشرح الصوتي
+            <small>Voice-to-Math studio</small>
+          </span>
+        </a>
+      </section>
       <div className="row" style={{ marginTop: 8 }}>
+        <a className="btn dark" href="/studio/voice-solver">الموظف الصوتي</a>
         <a className="btn dark" href="/studio/script">مولّد سكربت الدرس</a>
         <a className="btn" href="/lessons/interactive">السبورة الذكية</a>
         <a className="btn" href="/admin">سجلات الذكاء والحصص</a>

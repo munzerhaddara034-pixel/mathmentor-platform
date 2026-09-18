@@ -2,6 +2,7 @@
 
 import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
 import { Katex } from "@/components/studio/Katex";
+import { MixedMathText } from "@/components/studio/MixedMathText";
 import type { MathQueryRecord, StudentRating } from "@/lib/solver/types";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -58,7 +59,7 @@ export function SolverResultView({
     <div className="solver-result">
       <div className="card">
         <p className="eyebrow">{query.source === "demo" ? "Demo solver" : query.source}</p>
-        <h2>{query.question}</h2>
+        <MixedMathText as="h2" text={query.question} />
         {query.imageUrl ? <img className="question-image" src={query.imageUrl} alt="" /> : null}
 
         {query.needsRetake ? (

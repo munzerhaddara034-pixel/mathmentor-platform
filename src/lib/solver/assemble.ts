@@ -11,6 +11,7 @@ import {
   sequenceLine,
   sequenceLineFr,
 } from "@/lib/pedagogy/lebanese";
+import { formatLebaneseEquation, formatLatexFields } from "@/lib/math/lebaneseEquationFormat";
 import type {
   AsymptoteSpec,
   AvatarScript,
@@ -107,8 +108,11 @@ function stepSeconds(count: number) {
 export function assembleSolution(input: AssembleInput): MathSolution {
   const language: LessonLanguage = input.language === "fr" ? "fr" : input.language === "ar" ? "ar" : "en";
   const track: CertificateTrack = input.track ?? "ls";
-  const steps = withTheorems(input.steps.length ? input.steps : fallbackSteps(input.question, input.finalAnswerLatex));
+  const steps = withTheorems(input.steps.length ? input.steps : fallbackSteps(input.question, input.finalAnswerLatex)).map(
+    (step) => ({ ...step, latex: formatLebaneseEquation(step.latex) }),
+  );
   const trap = input.trap ?? defaultTrap(input.finalAnswerLatex);
+  if (trap.latex) trap.latex = formatLebaneseEquation(trap.latex);
   const graph = input.graph ?? { fn: "x*x - 5*x + 6", domain: [-1, 6] as [number, number], highlights: { roots: [[2, 0], [3, 0]] } };
   const examTip: ExamTip = {
     en: input.examTip?.en || defaultExamTipFor(input.topic).en,
@@ -117,6 +121,10 @@ export function assembleSolution(input: AssembleInput): MathSolution {
   };
   const studyKind = input.studyKind || studyKindFrom(input.topic, input.topicTag);
   const asymptotes = input.asymptotes ?? asymptotesFromGraph(graph);
+  const finalAnswerLatex = formatLebaneseEquation(input.finalAnswerLatex || input.finalAnswer || "");
+  const given = input.given
+    ? { ...input.given, latex: formatLebaneseEquation(input.given.latex) }
+    : undefined;
 
   const introDur = 32;
   const ruleDur = 72;
@@ -126,27 +134,29 @@ export function assembleSolution(input: AssembleInput): MathSolution {
   const durationSec = introDur + ruleDur + exampleDur + trapDur;
 
   const avatarScript = buildAvatarScript(input.question, steps, input.finalAnswer, trap, examTip, language);
-  const timeline = ensurePedagogy(
-    buildTimeline({
-      question: input.question,
-      summary: input.summary,
-      finalAnswer: input.finalAnswer,
-      finalAnswerLatex: input.finalAnswerLatex,
-      steps,
-      graph,
-      trap,
-      examTip,
-      studyKind,
-      asymptotes,
-      topic: input.topic,
-      track,
-      language,
-      introDur,
-      ruleDur,
-      exampleDur,
-      trapDur,
-      durationSec,
-    }),
+  const timeline = formatLatexFields(
+    ensurePedagogy(
+      buildTimeline({
+        question: input.question,
+        summary: input.summary,
+        finalAnswer: input.finalAnswer,
+        finalAnswerLatex,
+        steps,
+        graph,
+        trap,
+        examTip,
+        studyKind,
+        asymptotes,
+        topic: input.topic,
+        track,
+        language,
+        introDur,
+        ruleDur,
+        exampleDur,
+        trapDur,
+        durationSec,
+      }),
+    ),
   );
 
   const events: CanvasTimelineJson["events"] = [];
@@ -176,15 +186,15 @@ export function assembleSolution(input: AssembleInput): MathSolution {
     }
   }
 
-  return {
+  return formatLatexFields({
     summary: input.summary,
     finalAnswer: input.finalAnswer,
-    finalAnswerLatex: input.finalAnswerLatex,
+    finalAnswerLatex,
     examTip,
     studyKind,
     asymptotes,
-    given: input.given ?? {
-      latex: input.finalAnswerLatex || input.question.slice(0, 120),
+    given: given ?? {
+      latex: formatLebaneseEquation(finalAnswerLatex || input.question.slice(0, 120)),
       aimEn: input.summary,
       aimFr: input.summary,
       aimAr: `المطلوب: ${input.finalAnswer}`,
@@ -207,7 +217,7 @@ export function assembleSolution(input: AssembleInput): MathSolution {
     needsRetake: Boolean(input.needsRetake),
     retakeMessageEn: input.retakeMessageEn,
     retakeMessageAr: input.retakeMessageAr,
-  };
+  });
 }
 
 function fallbackSteps(question: string, latex: string): SolverStep[] {

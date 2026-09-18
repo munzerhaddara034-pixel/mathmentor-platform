@@ -1,6 +1,7 @@
 "use client";
 
 import { MathTex } from "@/components/MathTex";
+import { MixedMathText } from "@/components/studio/MixedMathText";
 import type { QuizQuestion } from "@/lib/types";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -91,7 +92,9 @@ export default function QuizPage() {
       </label>
       {question ? (
         <article className="card" style={{ marginTop: 16 }}>
-          <p>{question.prompt}</p>
+          <p>
+            <MixedMathText text={question.prompt} />
+          </p>
           <MathTex tex={question.latex} />
           <div className="grid two">
             {question.options.map((option, index) => (
@@ -102,7 +105,7 @@ export default function QuizPage() {
                 onClick={() => setPicked(index)}
                 disabled={revealed}
               >
-                {option}
+                <MixedMathText text={option} />
               </button>
             ))}
           </div>
@@ -110,7 +113,9 @@ export default function QuizPage() {
             <div className="paper" style={{ marginTop: 16 }}>
               {picked === question.correctIndex ? "صحيح." : "الإجابة الصحيحة بالخطوات:"}
               {question.steps.map((step) => (
-                <p key={step}>{step}</p>
+                <p key={step}>
+                  <MixedMathText text={step} />
+                </p>
               ))}
             </div>
           ) : (

@@ -4,18 +4,7 @@ import { useEffect, useId, useState } from "react";
 import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import type { QuizMcq } from "@/lib/studio/quiz";
-import { Katex } from "./Katex";
-
-function maybeKatex(text: string) {
-  const trimmed = text.trim();
-  if (trimmed.startsWith("$") && trimmed.endsWith("$") && trimmed.length > 2) {
-    return <Katex tex={trimmed.slice(1, -1)} />;
-  }
-  if (/[\\^_{}]/.test(trimmed) && /\\[a-zA-Z]+|{/.test(trimmed)) {
-    return <Katex tex={trimmed} />;
-  }
-  return text;
-}
+import { MixedMathText } from "./MixedMathText";
 
 export function QuizOverlay({
   quiz,
@@ -57,7 +46,9 @@ export function QuizOverlay({
     <div className="studio-quiz-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
       <div className="studio-quiz-card">
         <p className="eyebrow">{pickText(STUDIO_UI.quizEyebrow, language)}</p>
-        <h2 id={titleId}>{maybeKatex(pickText(quiz.question, language))}</h2>
+        <h2 id={titleId}>
+          <MixedMathText text={pickText(quiz.question, language)} />
+        </h2>
         <p className="muted studio-quiz-rule">{pickText(STUDIO_UI.quizRule, language)}</p>
         <div className="studio-quiz-choices" role="radiogroup">
           {quiz.choices.map((choice) => {
@@ -78,7 +69,9 @@ export function QuizOverlay({
                 disabled={canContinue}
               >
                 <span className="studio-quiz-letter">{choice.id.toUpperCase()}</span>
-                <span>{maybeKatex(pickText(choice.text, language))}</span>
+                <span>
+                  <MixedMathText text={pickText(choice.text, language)} />
+                </span>
               </button>
             );
           })}
@@ -90,7 +83,9 @@ export function QuizOverlay({
         {revealed && quiz.explanation ? (
           <div className="studio-quiz-solution">
             <p className="eyebrow">{pickText(STUDIO_UI.quizSolution, language)}</p>
-            <p>{maybeKatex(pickText(quiz.explanation, language))}</p>
+            <p>
+              <MixedMathText text={pickText(quiz.explanation, language)} />
+            </p>
           </div>
         ) : null}
         <div className="studio-quiz-actions">

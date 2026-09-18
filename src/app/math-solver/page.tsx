@@ -21,6 +21,8 @@ export default function MathSolverPage() {
         After solving, open the split player or generate a talking-avatar clip.{" "}
         <Link href="/lessons/interactive">Classroom board</Link>
         {" · "}
+        <Link href="/studio/voice-solver">Voice-to-Math (teachers)</Link>
+        {" · "}
         <Link href="/live">Book a live hour</Link>
       </p>
     </main>

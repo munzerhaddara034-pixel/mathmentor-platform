@@ -68,10 +68,12 @@ export function AvatarPlayer({
   onDurationRef.current = onDuration;
   clockMasterRef.current = clockMaster;
 
-  const emitTime = (video: HTMLVideoElement, source: VideoClockSource) => {
+  const audioIsClock = Boolean(clockMaster && audioUrl && !videoUrl);
+
+  const emitTime = (media: HTMLMediaElement, source: VideoClockSource) => {
     if (!clockMasterRef.current) return;
     if (seekingRef.current && source !== "seeked") return;
-    onTimeRef.current?.(video.currentTime, source);
+    onTimeRef.current?.(media.currentTime, source);
   };
 
   useEffect(() => {
@@ -182,12 +184,86 @@ export function AvatarPlayer({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !audioUrl) return;
+    const emitEnded = () => onEndedRef.current?.();
+    const emitError = () => onErrorRef.current?.();
+    const emitMeta = () => {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) onDurationRef.current?.(audio.duration);
+    };
+    const onSeeking = () => {
+      seekingRef.current = true;
+    };
+    const onSeeked = () => {
+      seekingRef.current = false;
+      if (audioIsClock) emitTime(audio, "seeked");
+    };
+    audio.addEventListener("ended", emitEnded);
+    audio.addEventListener("error", emitError);
+    audio.addEventListener("loadedmetadata", emitMeta);
+    audio.addEventListener("seeking", onSeeking);
+    audio.addEventListener("seeked", onSeeked);
+    if (Number.isFinite(audio.duration) && audio.duration > 0) emitMeta();
+    return () => {
+      audio.removeEventListener("ended", emitEnded);
+      audio.removeEventListener("error", emitError);
+      audio.removeEventListener("loadedmetadata", emitMeta);
+      audio.removeEventListener("seeking", onSeeking);
+      audio.removeEventListener("seeked", onSeeked);
+    };
+  }, [audioUrl, audioIsClock]);
+
+  useEffect(() => {
+    if (!audioIsClock) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+    let frame = 0;
+    const loop = () => {
+      if (!audio.paused) emitTime(audio, "raf");
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, [audioIsClock, audioUrl]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !audioUrl) return;
+    audio.playbackRate = playbackRate;
+    if (playing) {
+      const pastEnd =
+        audio.ended ||
+        (Number.isFinite(audio.duration) && audio.duration > 0 && audio.currentTime >= audio.duration - 0.05);
+      if (!audioIsClock && pastEnd) audio.currentTime = 0;
+      if (audio.paused) void audio.play().catch(() => undefined);
+    } else if (!audio.paused) {
+      audio.pause();
+    }
+  }, [playing, playbackRate, audioUrl, audioIsClock]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !audioUrl || !audioIsClock) return;
+    if (seekEpoch <= 0) return;
+    const duration = Number.isFinite(audio.duration) ? audio.duration : Number.NaN;
+    if (Number.isFinite(duration) && seekTo >= duration - 0.02) {
+      seekingRef.current = false;
+      return;
+    }
+    if (Math.abs(audio.currentTime - seekTo) <= 0.08) {
+      seekingRef.current = false;
+      onTimeRef.current?.(audio.currentTime, "seeked");
+      return;
+    }
+    seekingRef.current = true;
+    audio.currentTime = seekTo;
+  }, [audioIsClock, seekEpoch, seekTo, audioUrl]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !audioUrl || audioIsClock) return;
+    if (Number.isFinite(audio.duration) && audio.duration > 0 && currentTime >= audio.duration - 0.02) return;
     const drift = Math.abs(audio.currentTime - currentTime);
     if (drift > 0.35) audio.currentTime = currentTime;
-    audio.playbackRate = playbackRate;
-    if (playing && audio.paused) void audio.play().catch(() => undefined);
-    if (!playing && !audio.paused) audio.pause();
-  }, [audioUrl, currentTime, playing, playbackRate]);
+  }, [audioIsClock, currentTime, audioUrl]);
 
   const status = frozen
     ? pickText(STUDIO_UI.boardFreeze, language)
@@ -226,11 +302,19 @@ export function AvatarPlayer({
       </div>
       {audioUrl ? <audio ref={audioRef} src={audioUrl} preload="auto" /> : null}
       <p className="muted studio-demo-hint">
-        {videoUrl
-          ? isLocalDemo
-            ? pickText(STUDIO_UI.demoVideoHint, language)
-            : pickText(STUDIO_UI.videoHint, language)
-          : pickText(STUDIO_UI.demoHint, language)}
+        {audioIsClock
+          ? pickText(
+              {
+                en: "Teacher voice is the clock: the math canvas follows the recording timestamps.",
+                fr: "La voix du professeur est l’horloge : le tableau suit l’enregistrement.",
+              },
+              language,
+            )
+          : videoUrl
+            ? isLocalDemo
+              ? pickText(STUDIO_UI.demoVideoHint, language)
+              : pickText(STUDIO_UI.videoHint, language)
+            : pickText(STUDIO_UI.demoHint, language)}
       </p>
     </section>
   );
