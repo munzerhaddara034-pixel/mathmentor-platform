@@ -9,6 +9,7 @@ data/math-queries.json
 data/voice-math.json
 data/voice-audio-*.json
 data/live-sessions.json
+data/livekit-rooms.json
 data/whatsapp-outbox.json
 data/notifications.json
 data/gamification.json

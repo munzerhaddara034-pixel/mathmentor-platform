@@ -97,8 +97,22 @@ export default function DashboardPage() {
           </span>
         </a>
       </section>
+      <section className="card voice-dash-cta">
+        <p className="eyebrow">الحصة المباشرة / Live classroom</p>
+        <h2>انضم للحصة · LiveKit + السبورة</h2>
+        <p className="muted">
+          صف مباشر مع الأستاذ منذر حداره: سبورة KaTeX وفق المنهج اللبناني، شبكة فيديو، دردشة، ورفع اليد. الطلاب يحتاجون حجزاً أو الصف التجريبي.
+        </p>
+        <a className="btn dark" href="/live">
+          الحجوزات / Bookings
+        </a>{" "}
+        <a className="btn" href="/live/classroom/demo">
+          انضم للحصة التجريبية
+        </a>
+      </section>
       <div className="row" style={{ marginTop: 8 }}>
         <a className="btn dark" href="/studio/voice-solver">الموظف الصوتي</a>
+        <a className="btn dark" href="/live/classroom/demo">الصف المباشر</a>
         <a className="btn dark" href="/studio/script">مولّد سكربت الدرس</a>
         <a className="btn" href="/lessons/interactive">السبورة الذكية</a>
         <a className="btn" href="/admin">سجلات الذكاء والحصص</a>

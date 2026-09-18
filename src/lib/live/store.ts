@@ -1,5 +1,7 @@
 import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
+import { classroomPath } from "@/lib/livekit/rooms";
+import { livekitEnv } from "@/lib/livekit/config";
 import { createMeetingLink } from "./meeting";
 import { addYmd, formatInTimeZone, wallTimeToUtc } from "./timezone";
 import {
@@ -189,12 +191,16 @@ export async function bookSlot(input: {
   }
 
   const bookingId = createId("live");
-  const meeting = await createMeetingLink({
-    id: bookingId,
-    topic: `MathMentor live · ${input.studentName} · Prof. Munzer Haddara`,
-    startsAt: slot.startsAt,
-    durationMinutes: slot.durationMinutes,
-  });
+  const classroomUrl = classroomPath(bookingId);
+  const livekitReady = livekitEnv().configured;
+  const meeting = livekitReady
+    ? { url: classroomUrl, provider: "livekit" as const, stub: false }
+    : await createMeetingLink({
+        id: bookingId,
+        topic: `MathMentor live · ${input.studentName} · Prof. Munzer Haddara`,
+        startsAt: slot.startsAt,
+        durationMinutes: slot.durationMinutes,
+      });
 
   const booking: LiveBooking = {
     id: bookingId,
@@ -208,6 +214,8 @@ export async function bookSlot(input: {
     status: "confirmed",
     meetingLink: meeting.url,
     meetingProvider: meeting.provider,
+    classroomUrl,
+    classroomRoomId: bookingId,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -222,6 +230,7 @@ export async function patchBooking(
     status?: BookingStatus;
     meetingLink?: string;
     meetingProvider?: string;
+    classroomUrl?: string;
     teacherNote?: string;
     reminderSentAt?: string;
   },

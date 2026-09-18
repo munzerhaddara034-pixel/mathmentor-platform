@@ -53,9 +53,9 @@ export async function POST(request: Request) {
     kind: "live_booked",
     title: "Live session confirmed",
     titleAr: "تم تأكيد الحصة المباشرة",
-    body: result.booking.meetingLink || "See /live for the join link.",
-    bodyAr: "راجع صفحة المباشر لرابط الدخول.",
-    href: "/live",
+    body: result.booking.classroomUrl || result.booking.meetingLink || "See /live for the join link.",
+    bodyAr: "اضغط انضم للحصة من صفحة المباشر.",
+    href: result.booking.classroomUrl || "/live",
     relatedId: `stu-${result.booking.id}`,
   });
 
@@ -63,7 +63,8 @@ export async function POST(request: Request) {
     ok: true,
     booking: result.booking,
     meetingLink: result.booking.meetingLink,
-    message: "Booked. 1 live credit used. Meeting link is in your calendar.",
-    messageAr: "تم الحجز. خُصم رصيد حصة واحدة. رابط اللقاء في رزنامتك.",
+    classroomUrl: result.booking.classroomUrl,
+    message: "Booked. 1 live credit used. Join the classroom from your calendar.",
+    messageAr: "تم الحجز. خُصم رصيد حصة واحدة. انضم للحصة من رزنامتك.",
   });
 }

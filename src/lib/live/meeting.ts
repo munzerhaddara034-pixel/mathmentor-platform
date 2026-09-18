@@ -1,6 +1,6 @@
 import { createId } from "@/lib/ids";
 
-export type MeetingProvider = "zoom" | "meet-stub" | "meet-template";
+export type MeetingProvider = "zoom" | "meet-stub" | "meet-template" | "livekit";
 
 export type MeetingLink = {
   url: string;

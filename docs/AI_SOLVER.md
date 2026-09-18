@@ -37,7 +37,9 @@ Hallucination guard: if the photo or text is blurry, cropped, or incomplete, the
 | `POST /api/generate-avatar-video` | `{ queryId }` or `{ script, timelineJson }` → HeyGen `v2/video/generate` |
 | `POST /api/generate-explanation` | alias of generate-avatar-video |
 | `/live` | login + **LIVE_TIER** or **BOTH**; students see slots only if `liveCredits > 0` |
-| `GET/POST /api/live/slots`, `POST /api/live/book` | book decrements 1 credit, confirms, writes a meeting link |
+| `/live/classroom/[roomId]` | LiveKit classroom (whiteboard + video). Demo shell without keys. [LIVEKIT.md](./LIVEKIT.md) |
+| `POST /api/livekit/token` | session JWT for LiveKit; teacher vs student grants |
+| `GET/POST /api/live/slots`, `POST /api/live/book` | book decrements 1 credit, confirms, writes a classroom URL |
 | `GET/PUT /api/live/availability` | teacher weekly hours (e.g. Mon/Wed 16:00–19:00 `Asia/Beirut`) |
 | `/admin` · `/admin/audit` | staff: query log, ratings, verify / needs-fix, stats, WhatsApp outbox |
 | `PATCH /api/admin/queries` | `{ id, auditStatus, auditNote }` |
@@ -72,8 +74,9 @@ Student: `/live` lists only future open slots when `liveCredits > 0`. Booking:
 
 1. Decrements 1 credit
 2. Creates a confirmed session
-3. Issues a meeting URL
-   - **Google Meet stub** `https://meet.google.com/xxx-xxxx-xxx` if no keys
+3. Issues a classroom URL `/live/classroom/{bookingId}` (**انضم للحصة**)
+   - **LiveKit Cloud** when `LIVEKIT_*` keys are set ([LIVEKIT.md](./LIVEKIT.md))
+   - **Google Meet stub** `https://meet.google.com/xxx-xxxx-xxx` if no LiveKit/Zoom keys (classroom URL still present)
    - **Zoom stub** `https://zoom.us/j/…` if `ZOOM_ACCOUNT_ID` is set without OAuth
    - **Real Zoom** `POST /users/me/meetings` when `ZOOM_ACCOUNT_ID` + `ZOOM_CLIENT_ID` + `ZOOM_CLIENT_SECRET` are present
    - **Meet template** `GOOGLE_MEET_LINK_TEMPLATE` with `{id}` / `{code}`

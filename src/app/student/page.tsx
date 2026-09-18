@@ -97,6 +97,9 @@ export default function StudentPage() {
             <Link className="btn" href="/live">
               Book Prof. Munzer
             </Link>
+            <Link className="btn dark" href="/live/classroom/demo">
+              انضم للحصة
+            </Link>
             <Link className="btn" href="/subscribe">
               Subscription
             </Link>

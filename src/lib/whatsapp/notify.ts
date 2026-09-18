@@ -33,9 +33,9 @@ export async function notifyLiveReminder(booking: LiveBooking) {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const link = booking.meetingLink || "(link pending)";
-  const body = `Reminder: live 1-on-1 with Prof. Munzer Haddara in ~30 minutes (${when} Asia/Beirut).\nJoin: ${link}`;
-  const bodyAr = `تذكير: حصة مباشرة مع الأستاذ منذر حداره بعد نحو 30 دقيقة (${when} بتوقيت بيروت).\nالرابط: ${link}`;
+  const link = booking.classroomUrl || booking.meetingLink || "(link pending)";
+  const body = `Reminder: live 1-on-1 with Prof. Munzer Haddara in ~30 minutes (${when} Asia/Beirut).\nانضم للحصة: ${link}`;
+  const bodyAr = `تذكير: حصة مباشرة مع الأستاذ منذر حداره بعد نحو 30 دقيقة (${when} بتوقيت بيروت).\nانضم للحصة: ${link}`;
 
   const student = await sendWhatsApp({
     to: booking.studentPhone,
