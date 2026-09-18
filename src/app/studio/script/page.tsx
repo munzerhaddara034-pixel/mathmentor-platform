@@ -34,7 +34,13 @@ export default function StudioScriptPage() {
   const [jsonText, setJsonText] = useState(SEEDED_JSON);
   const [pedagogy, setPedagogy] = useState<{
     phases: string[];
+    sequence?: string[];
+    hasExamTip?: boolean;
+    hasDomain?: boolean;
+    hasLimitsAsymptotes?: boolean;
+    hasVariationTable?: boolean;
     hasRenderGraph: boolean;
+    hasBoxedAnswer?: boolean;
     hasStepByStepEquations: boolean;
     gradedSteps?: number;
     gradedExampleReady?: boolean;
@@ -66,7 +72,13 @@ export default function StudioScriptPage() {
         error?: string;
         pedagogy?: {
           phases: string[];
+          sequence?: string[];
+          hasExamTip?: boolean;
+          hasDomain?: boolean;
+          hasLimitsAsymptotes?: boolean;
+          hasVariationTable?: boolean;
           hasRenderGraph: boolean;
+          hasBoxedAnswer?: boolean;
           hasStepByStepEquations: boolean;
           gradedSteps?: number;
           gradedExampleReady?: boolean;
@@ -101,9 +113,9 @@ export default function StudioScriptPage() {
       <p className="eyebrow">Studio · AI video script</p>
       <h1>Lesson script editor</h1>
       <p className="muted">
-        Default sample: <code>leb-term-func-01</code> — full Terminale study of <code>f(x)=(x-1)e^x</code> (domain,
-        justified limits, product rule, table of variation, timed graph, official exercise, exam trap). EN default + FR
-        of equal quality. Then send the JSON to{" "}
+        Default sample: <code>leb-term-func-01</code> — official sequence Intro → Domain D_f → Limits/Asymptotes →
+        Derivative/Variation → Points/Graph → boxed exercise → Common pitfalls. Model <code>f(x)=(x-1)e^x</code>. EN
+        default + FR of equal quality. Then send the JSON to{" "}
         <Link href="/admin/video-generator">/admin/video-generator</Link>. Instructor: Prof. Munzer Haddara / الأستاذ
         منذر حداره.
       </p>
@@ -140,7 +152,7 @@ export default function StudioScriptPage() {
         </div>
         <div className="row">
           <button className="btn dark" type="button" disabled={busy} onClick={() => void generate()}>
-            {busy ? "Generating…" : "Generate four-phase script"}
+            {busy ? "Generating…" : "Generate official-sequence script"}
           </button>
           <button
             className="btn"
@@ -162,15 +174,17 @@ export default function StudioScriptPage() {
         </div>
         {source ? (
           <p className="muted" style={{ marginTop: 12 }}>
-            Source: {source === "openai" ? "OpenAI" : source === "seed" ? "seeded leb-term-func-01 (full exam study)" : "EN+FR template (no LLM key)"}
+            Source: {source === "openai" ? "OpenAI" : source === "seed" ? "seeded leb-term-func-01 (D_f → limits → variation → graph)" : "EN+FR template (no LLM key)"}
           </p>
         ) : null}
         {warning ? <p className="muted">{warning}</p> : null}
         {error ? <p className="error">{error}</p> : null}
         {pedagogy ? (
-          <p className={pedagogy.hasRenderGraph && pedagogy.gradedExampleReady !== false ? "success" : "error"}>
-            phases: {pedagogy.phases.join(" → ")} · Render Graph: {pedagogy.hasRenderGraph ? "yes" : "no"} · Graded
-            steps: {pedagogy.gradedSteps ?? (pedagogy.hasStepByStepEquations ? "yes" : "no")}
+          <p className={pedagogy.hasRenderGraph && pedagogy.gradedExampleReady !== false && pedagogy.hasExamTip !== false ? "success" : "error"}>
+            sequence: {(pedagogy.sequence ?? pedagogy.phases).join(" → ")} · Exam tip: {pedagogy.hasExamTip ? "yes" : "no"} ·
+            D_f: {pedagogy.hasDomain ? "yes" : "no"} · Limits: {pedagogy.hasLimitsAsymptotes ? "yes" : "no"} · Variation:{" "}
+            {pedagogy.hasVariationTable ? "yes" : "no"} · Graph: {pedagogy.hasRenderGraph ? "yes" : "no"} · Boxed:{" "}
+            {pedagogy.hasBoxedAnswer ? "yes" : "no"} · Graded steps: {pedagogy.gradedSteps ?? (pedagogy.hasStepByStepEquations ? "yes" : "no")}
             {pedagogy.gradedExampleReady === false ? " (need ≥3)" : ""}
           </p>
         ) : null}

@@ -125,9 +125,9 @@ export const STUDIO_UI = {
   teacherSaved: { en: "Saved to sessionStorage and /api/studio/events.", fr: "Enregistré dans sessionStorage et /api/studio/events." },
 
   phases: {
-    introduction: { en: "1. Exam framing & domain", fr: "1. Cadre d’épreuve" },
-    rule_graph: { en: "2. Limits, derivative, graph", fr: "2. Limites, dérivée, graphe" },
-    real_example: { en: "3. Official exercise", fr: "3. Exercice d’épreuve" },
-    common_mistake: { en: "4. Official-exam trap", fr: "4. Piège d’épreuve" },
+    introduction: { en: "1. Key Idea & domain D_f", fr: "1. Idée clé et ensemble D_f" },
+    rule_graph: { en: "2. Limits, variation, graph", fr: "2. Limites, variation, graphe" },
+    real_example: { en: "3. Boxed official exercise", fr: "3. Exercice encadré" },
+    common_mistake: { en: "4. Common pitfalls (barème)", fr: "4. Pièges fréquents (barème)" },
   },
 } as const;

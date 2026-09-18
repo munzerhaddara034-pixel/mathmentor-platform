@@ -37,8 +37,20 @@ export function MathCanvas({ state, language, currentTime, watermarkName, waterm
       <h2>{pickText(STUDIO_UI.canvasSub, language)}</h2>
       <div ref={boardRef} className="studio-board">
         <IdentityWatermark name={watermarkName ?? "طالب المنصة"} phone={watermarkPhone ?? "76532421"} variant="light" />
-        {state.equations.length === 0 && !state.graph && state.steps.length === 0 ? (
+        {state.equations.length === 0 && !state.graph && state.steps.length === 0 && state.examTips.length === 0 ? (
           <p className="muted">{pickText(STUDIO_UI.waiting, language)}</p>
+        ) : null}
+
+        {state.examTips.length ? (
+          <aside className="studio-exam-tip" aria-label={pickText({ en: "Key Idea / Exam Tip", fr: "Idée clé / Conseil d’épreuve" }, language)}>
+            <p className="eyebrow">{pickText({ en: "Key Idea / Exam Tip", fr: "Idée clé / Conseil d’épreuve" }, language)}</p>
+            {state.examTips.map((tip, index) => (
+              <div key={`tip-${tip.appearedAt}-${index}`}>
+                {tip.text ? <p>{pickText(tip.text, language)}</p> : null}
+                {tip.latex ? <Katex tex={tip.latex} display /> : null}
+              </div>
+            ))}
+          </aside>
         ) : null}
 
         {state.equations.map((equation) => (
@@ -74,7 +86,7 @@ export function MathCanvas({ state, language, currentTime, watermarkName, waterm
             {state.steps.map((step, index) => (
               <li
                 key={`st-${step.appearedAt}-${step.index}`}
-                className={`${index === state.steps.length - 1 ? "current" : ""} studio-eq-fade`}
+                className={`${index === state.steps.length - 1 ? "current" : ""} studio-eq-fade${step.boxed || step.kind === "boxed" ? " studio-step-boxed" : ""}${step.kind === "variation" ? " studio-step-variation" : ""}`}
               >
                 <span className="studio-step-index">{step.index}</span>
                 <div>
@@ -84,6 +96,31 @@ export function MathCanvas({ state, language, currentTime, watermarkName, waterm
               </li>
             ))}
           </ol>
+        ) : null}
+
+        {state.variationTables.length ? (
+          <section className="studio-variation" aria-label={pickText({ en: "Table of variations", fr: "Tableau de variation" }, language)}>
+            <p className="eyebrow">{pickText({ en: "Table of variations", fr: "Tableau de variation" }, language)}</p>
+            {state.variationTables.map((table, index) => (
+              <div key={`var-${table.appearedAt}-${index}`}>
+                {table.text ? <p>{pickText(table.text, language)}</p> : null}
+                {table.latex ? <Katex tex={table.latex} display /> : null}
+              </div>
+            ))}
+          </section>
+        ) : null}
+
+        {state.boxedAnswers.length ? (
+          <section className="studio-boxed-answer" aria-label={pickText({ en: "Boxed Final Answer", fr: "Réponse encadrée" }, language)}>
+            <p className="eyebrow">{pickText({ en: "Boxed Final Answer · barème", fr: "Réponse encadrée · barème" }, language)}</p>
+            {state.boxedAnswers.map((box, index) => (
+              <article key={`box-${box.appearedAt}-${index}`}>
+                {box.marks ? <p className="muted">{box.marks}</p> : null}
+                {box.text ? <p>{pickText(box.text, language)}</p> : null}
+                {box.latex ? <Katex tex={box.latex} display /> : null}
+              </article>
+            ))}
+          </section>
         ) : null}
       </div>
     </section>

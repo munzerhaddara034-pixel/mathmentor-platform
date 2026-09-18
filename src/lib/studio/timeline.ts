@@ -38,6 +38,10 @@ export const CANVAS_ACTION_TYPES = [
   "quiz_mcq",
   "renderMath",
   "plotFunction",
+  "variationTable",
+  "boxAnswer",
+  "exam_tip",
+  "examTip",
 ] as const;
 
 export const canvasActionTypeSchema = z.enum(CANVAS_ACTION_TYPES);
@@ -87,6 +91,11 @@ function liftTimelineEvent(value: unknown) {
     "answer",
     "explanation",
     "prompt",
+    "boxed",
+    "marks",
+    "table",
+    "examVerbEn",
+    "examVerbFr",
   ]) {
     if (rec[key] !== undefined && payload[key] === undefined) payload[key] = rec[key];
   }
@@ -177,6 +186,9 @@ export type StepPayload = {
   latex?: string;
   text?: Bilingual;
   index?: number;
+  boxed?: boolean;
+  kind?: "step" | "variation" | "boxed" | "exam_tip";
+  marks?: string;
 };
 
 export type GraphPoint = {
@@ -207,7 +219,17 @@ export type HighlightPayload = {
 
 export type DerivedCanvasState = {
   equations: Array<{ latex: string; caption?: Bilingual; appearedAt: number; fade: boolean }>;
-  steps: Array<{ latex?: string; text?: Bilingual; index: number; appearedAt: number }>;
+  steps: Array<{
+    latex?: string;
+    text?: Bilingual;
+    index: number;
+    appearedAt: number;
+    boxed?: boolean;
+    kind?: StepPayload["kind"];
+  }>;
+  examTips: Array<{ latex: string; text?: Bilingual; appearedAt: number }>;
+  variationTables: Array<{ latex: string; text?: Bilingual; appearedAt: number }>;
+  boxedAnswers: Array<{ latex: string; text?: Bilingual; appearedAt: number; marks?: string }>;
   graph: GraphPayload | null;
   highlights: HighlightPayload[];
   graphStartedAt: number | null;
@@ -357,6 +379,9 @@ export function emptyCanvasState(): DerivedCanvasState {
   return {
     equations: [],
     steps: [],
+    examTips: [],
+    variationTables: [],
+    boxedAnswers: [],
     graph: null,
     highlights: [],
     graphStartedAt: null,
@@ -364,9 +389,10 @@ export function emptyCanvasState(): DerivedCanvasState {
   };
 }
 
-function normalizedActionType(type: CanvasActionType): CanvasActionType {
+export function normalizedActionType(type: CanvasActionType): CanvasActionType {
   if (type === "renderMath") return "show_equation";
   if (type === "plotFunction") return "render_graph";
+  if (type === "examTip") return "exam_tip";
   return type;
 }
 
@@ -407,10 +433,60 @@ function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: numbe
   if (type === "clear") {
     state.equations = [];
     state.steps = [];
+    state.examTips = [];
+    state.variationTables = [];
+    state.boxedAnswers = [];
     state.graph = null;
     state.highlights = [];
     state.graphStartedAt = null;
     return 0;
+  }
+
+  if (type === "exam_tip") {
+    const latex = latexOf(payload);
+    const text = stepTextOf(payload) ?? coerceBilingual(payload.caption);
+    state.examTips.push({ latex, text, appearedAt: abs });
+    if (latex) {
+      state.equations.push({
+        latex,
+        caption: coerceBilingual(payload.caption) ?? { en: "Key Idea / Exam Tip", fr: "Idée clé / Conseil d’épreuve" },
+        appearedAt: abs,
+        fade: true,
+      });
+    }
+    return stepIndex;
+  }
+
+  if (type === "variationTable") {
+    const latex = latexOf(payload);
+    const text = stepTextOf(payload);
+    state.variationTables.push({ latex, text, appearedAt: abs });
+    const next = stepIndex + 1;
+    state.steps.push({
+      latex: latex || undefined,
+      text,
+      index: typeof payload.index === "number" ? payload.index : next,
+      appearedAt: abs,
+      kind: "variation",
+    });
+    return next;
+  }
+
+  if (type === "boxAnswer") {
+    const latex = latexOf(payload);
+    const text = stepTextOf(payload);
+    const marks = typeof payload.marks === "string" ? payload.marks : undefined;
+    state.boxedAnswers.push({ latex, text, appearedAt: abs, marks });
+    const next = stepIndex + 1;
+    state.steps.push({
+      latex: latex || undefined,
+      text,
+      index: typeof payload.index === "number" ? payload.index : next,
+      appearedAt: abs,
+      boxed: true,
+      kind: "boxed",
+    });
+    return next;
   }
 
   if (type === "show_equation" || type === "fade_equation") {
@@ -430,12 +506,26 @@ function applyAction(state: DerivedCanvasState, action: CanvasAction, abs: numbe
 
   if (type === "show_step") {
     const next = stepIndex + 1;
+    const boxed = payload.boxed === true;
+    const kind: StepPayload["kind"] = boxed ? "boxed" : "step";
+    const latex = latexOf(payload) || undefined;
+    const text = stepTextOf(payload);
     state.steps.push({
-      latex: latexOf(payload) || undefined,
-      text: stepTextOf(payload),
+      latex,
+      text,
       index: typeof payload.index === "number" ? payload.index : next,
       appearedAt: abs,
+      boxed,
+      kind,
     });
+    if (boxed && latex) {
+      state.boxedAnswers.push({
+        latex,
+        text,
+        appearedAt: abs,
+        marks: typeof payload.marks === "string" ? payload.marks : undefined,
+      });
+    }
     return next;
   }
 
@@ -542,7 +632,10 @@ export function hasRenderGraph(timeline: LessonTimeline) {
 export function countExampleSteps(timeline: LessonTimeline) {
   const example = timeline.segments.find((segment) => segment.phase === "real_example");
   if (!example) return 0;
-  return example.canvas.actions.filter((action) => normalizedActionType(action.type) === "show_step").length;
+  return example.canvas.actions.filter((action) => {
+    const type = normalizedActionType(action.type);
+    return type === "show_step" || type === "boxAnswer" || type === "variationTable";
+  }).length;
 }
 
 export function hasStepByStep(timeline: LessonTimeline) {
@@ -555,4 +648,100 @@ export function hasGradedExample(timeline: LessonTimeline, minSteps = 3) {
 
 export function phaseOf(timeline: LessonTimeline, phase: LessonPhase) {
   return timeline.segments.find((segment) => segment.phase === phase);
+}
+
+function allActions(timeline: LessonTimeline): CanvasAction[] {
+  const actions: CanvasAction[] = [];
+  for (const segment of timeline.segments) actions.push(...segment.canvas.actions);
+  if (timeline.events) actions.push(...timeline.events);
+  return actions;
+}
+
+function actionBlob(action: CanvasAction): string {
+  const payload = (action.payload ?? {}) as Record<string, unknown>;
+  return [
+    action.type,
+    action.latex,
+    payload.latex,
+    payload.math_latex,
+    payload.step_en,
+    payload.step_fr,
+    payload.caption,
+  ]
+    .map((value) => (value == null ? "" : typeof value === "string" ? value : JSON.stringify(value)))
+    .join(" ")
+    .toLowerCase();
+}
+
+export function hasExamTip(timeline: LessonTimeline) {
+  return allActions(timeline).some((action) => {
+    const type = normalizedActionType(action.type);
+    if (type === "exam_tip") return true;
+    return /exam tip|key idea|idée clé|conseil d’épreuve|conseil d'épreuve/.test(actionBlob(action));
+  });
+}
+
+export function hasDomainStatement(timeline: LessonTimeline) {
+  return allActions(timeline).some((action) => /d_f|ensemble de d[eé]finition|domain/.test(actionBlob(action)));
+}
+
+export function hasLimitsAsymptotes(timeline: LessonTimeline) {
+  return allActions(timeline).some((action) =>
+    /\\lim|asymptote|y\s*=\s*0|x\s*=\s*|y\s*=\s*a/.test(actionBlob(action)),
+  );
+}
+
+export function hasVariationTable(timeline: LessonTimeline) {
+  return allActions(timeline).some((action) => {
+    const type = normalizedActionType(action.type);
+    if (type === "variationTable") return true;
+    return /tableau de variation|table of variation|begin\{array\}/.test(actionBlob(action));
+  });
+}
+
+export function hasBoxedAnswer(timeline: LessonTimeline) {
+  return allActions(timeline).some((action) => {
+    const type = normalizedActionType(action.type);
+    if (type === "boxAnswer") return true;
+    const payload = (action.payload ?? {}) as Record<string, unknown>;
+    return payload.boxed === true || /\\boxed|box the|encadr/.test(actionBlob(action));
+  });
+}
+
+export type PedagogyAudit = {
+  phases: LessonPhase[];
+  sequence: string[];
+  hasExamTip: boolean;
+  hasDomain: boolean;
+  hasLimitsAsymptotes: boolean;
+  hasVariationTable: boolean;
+  hasRenderGraph: boolean;
+  hasBoxedAnswer: boolean;
+  hasStepByStepEquations: boolean;
+  gradedSteps: number;
+  gradedExampleReady: boolean;
+};
+
+export function auditPedagogy(timeline: LessonTimeline): PedagogyAudit {
+  return {
+    phases: timeline.segments.map((segment) => segment.phase),
+    sequence: [
+      "Key Idea / Exam Tip",
+      "Domain D_f",
+      "Limits & asymptotes",
+      "Derivative / variation",
+      "Points & graph",
+      "Boxed exercise",
+      "Common pitfalls",
+    ],
+    hasExamTip: hasExamTip(timeline),
+    hasDomain: hasDomainStatement(timeline),
+    hasLimitsAsymptotes: hasLimitsAsymptotes(timeline),
+    hasVariationTable: hasVariationTable(timeline),
+    hasRenderGraph: hasRenderGraph(timeline),
+    hasBoxedAnswer: hasBoxedAnswer(timeline),
+    hasStepByStepEquations: hasStepByStep(timeline),
+    gradedSteps: countExampleSteps(timeline),
+    gradedExampleReady: hasGradedExample(timeline),
+  };
 }

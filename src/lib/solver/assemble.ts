@@ -3,7 +3,24 @@ import { L } from "@/lib/studio/i18n";
 import { ensurePedagogy } from "@/lib/studio/pedagogy";
 import { DEMO_AVATAR_VIDEO, DEMO_POSTER } from "@/lib/studio/heygenClient";
 import type { CertificateTrack, LessonLanguage, LessonTimeline } from "@/lib/studio/timeline";
-import type { AvatarScript, CanvasTimelineJson, MathSolution, SolverSource, SolverStep } from "./types";
+import {
+  DEFAULT_VARIATION_TABLE,
+  INSTRUCTOR_AR,
+  INSTRUCTOR_EN,
+  defaultExamTipFor,
+  sequenceLine,
+  sequenceLineFr,
+} from "@/lib/pedagogy/lebanese";
+import type {
+  AsymptoteSpec,
+  AvatarScript,
+  CanvasTimelineJson,
+  ExamTip,
+  MathSolution,
+  SolverSource,
+  SolverStep,
+  StudyKind,
+} from "./types";
 
 export type GraphSpec = {
   fn: string;
@@ -40,6 +57,9 @@ export type AssembleInput = {
   recognizedFromImage?: string;
   given?: import("./types").SolverGiven;
   topicTag?: string;
+  examTip?: ExamTip;
+  studyKind?: StudyKind;
+  asymptotes?: AsymptoteSpec[];
   needsRetake?: boolean;
   retakeMessageEn?: string;
   retakeMessageAr?: string;
@@ -57,6 +77,17 @@ function topicTagFrom(topic: string) {
   if (/integral|تكامل/.test(t)) return "integrals";
   if (/percent|نسبة/.test(t)) return "percentages";
   if (/unclear/.test(t)) return "unclear";
+  return "general";
+}
+
+function studyKindFrom(topic: string, tag?: string): StudyKind {
+  const t = `${topic} ${tag ?? ""}`.toLowerCase();
+  if (/exp|function|étude|derive|variation/.test(t)) return "real_function";
+  if (/geom|triangle|vector|فيثاغ/.test(t)) return "geometry";
+  if (/complex|مركب/.test(t)) return "complex";
+  if (/probab|احتمال/.test(t)) return "probability";
+  if (/limit|نهاي/.test(t)) return "limits";
+  if (/quad|linear|system|algebra/.test(t)) return "algebra";
   return "general";
 }
 
@@ -79,15 +110,22 @@ export function assembleSolution(input: AssembleInput): MathSolution {
   const steps = withTheorems(input.steps.length ? input.steps : fallbackSteps(input.question, input.finalAnswerLatex));
   const trap = input.trap ?? defaultTrap(input.finalAnswerLatex);
   const graph = input.graph ?? { fn: "x*x - 5*x + 6", domain: [-1, 6] as [number, number], highlights: { roots: [[2, 0], [3, 0]] } };
+  const examTip: ExamTip = {
+    en: input.examTip?.en || defaultExamTipFor(input.topic).en,
+    fr: input.examTip?.fr || defaultExamTipFor(input.topic).fr,
+    ar: input.examTip?.ar || defaultExamTipFor(input.topic).ar,
+  };
+  const studyKind = input.studyKind || studyKindFrom(input.topic, input.topicTag);
+  const asymptotes = input.asymptotes ?? asymptotesFromGraph(graph);
 
-  const introDur = 22;
-  const ruleDur = 48;
+  const introDur = 32;
+  const ruleDur = 72;
   const perStep = stepSeconds(steps.length);
   const exampleDur = Math.max(50, Math.round(perStep * Math.max(3, steps.length) + 8));
-  const trapDur = 24;
+  const trapDur = 28;
   const durationSec = introDur + ruleDur + exampleDur + trapDur;
 
-  const avatarScript = buildAvatarScript(input.question, steps, input.finalAnswer, trap, language);
+  const avatarScript = buildAvatarScript(input.question, steps, input.finalAnswer, trap, examTip, language);
   const timeline = ensurePedagogy(
     buildTimeline({
       question: input.question,
@@ -97,6 +135,9 @@ export function assembleSolution(input: AssembleInput): MathSolution {
       steps,
       graph,
       trap,
+      examTip,
+      studyKind,
+      asymptotes,
       topic: input.topic,
       track,
       language,
@@ -139,6 +180,9 @@ export function assembleSolution(input: AssembleInput): MathSolution {
     summary: input.summary,
     finalAnswer: input.finalAnswer,
     finalAnswerLatex: input.finalAnswerLatex,
+    examTip,
+    studyKind,
+    asymptotes,
     given: input.given ?? {
       latex: input.finalAnswerLatex || input.question.slice(0, 120),
       aimEn: input.summary,
@@ -204,10 +248,20 @@ function defaultTrap(latex: string): TrapSpec {
   return {
     wrong: "Jumping to the boxed number without writing the hypothesis of the rule.",
     wrongFr: "Sauter au nombre encadré sans écrire l’hypothèse de la règle.",
-    correction: "Write given → rule → algebra → check. That is the MathMentor / Prof. Munzer Haddara barème.",
-    correctionFr: "Données → règle → algèbre → vérification. C’est le barème de MathMentor / Prof. Munzer Haddara.",
+    correction: "Write given → D_f → rule → algebra → boxed check. That is the MathMentor / Prof. Munzer Haddara barème.",
+    correctionFr: "Données → D_f → règle → algèbre → cadre. C’est le barème de MathMentor / Prof. Munzer Haddara.",
     latex: latex || "\\text{hypothesis first}",
   };
+}
+
+function asymptotesFromGraph(graph: GraphSpec): AsymptoteSpec[] {
+  const rows = graph.highlights?.asymptotes ?? [];
+  const out: AsymptoteSpec[] = [];
+  for (const row of rows) {
+    if (typeof row.x === "number") out.push({ kind: "vertical", equation: `x=${row.x}` });
+    if (typeof row.y === "number") out.push({ kind: "horizontal", equation: `y=${row.y}` });
+  }
+  return out;
 }
 
 function buildAvatarScript(
@@ -215,30 +269,42 @@ function buildAvatarScript(
   steps: SolverStep[],
   finalAnswer: string,
   trap: TrapSpec,
+  examTip: ExamTip,
   language: LessonLanguage,
 ): AvatarScript {
   const en = [
-    `I am Prof. Munzer Haddara. Let us solve this together, line by line, as on a Lebanese official paper.`,
+    `I am ${INSTRUCTOR_EN}. Let us solve this together, line by line, as on a Lebanese official paper.`,
+    `Key Idea / Exam Tip — how we think about the question, before any calculation: ${examTip.en}`,
+    `The official sequence is ${sequenceLine()}.`,
     `The question: ${question}.`,
-    ...steps.map((step, index) => `Step ${index + 1}. ${step.explanationEn}`),
-    `The final answer is ${finalAnswer}.`,
-    `A common exam trap: ${trap.wrong} ${trap.correction}`,
+    ...steps.map((step, index) => {
+      const verb = step.examVerbEn ? `${step.examVerbEn}. ` : "";
+      return `Step ${index + 1}. ${verb}${step.explanationEn}`;
+    }),
+    `Boxed Final Answer: ${finalAnswer}.`,
+    `Common pitfalls that lose barème marks: ${trap.wrong} Correction: ${trap.correction}`,
   ].join(" ");
 
   const fr = [
-    `Je suis le professeur Munzer Haddara. Nous résolvons ensemble, ligne par ligne, comme sur une copie officielle libanaise.`,
+    `Je suis ${INSTRUCTOR_EN}. Nous résolvons ensemble, ligne par ligne, comme sur une copie officielle libanaise.`,
+    `Idée clé / Conseil d’épreuve — comment on pense la question, avant tout calcul : ${examTip.fr}`,
+    `La suite officielle est ${sequenceLineFr()}.`,
     `L’énoncé : ${question}.`,
-    ...steps.map((step, index) => `Étape ${index + 1}. ${step.explanationFr}`),
-    `La réponse finale est ${finalAnswer}.`,
-    `Piège d’épreuve : ${trap.wrongFr} ${trap.correctionFr}`,
+    ...steps.map((step, index) => {
+      const verb = step.examVerbFr ? `${step.examVerbFr}. ` : "";
+      return `Étape ${index + 1}. ${verb}${step.explanationFr}`;
+    }),
+    `Réponse finale encadrée : ${finalAnswer}.`,
+    `Pièges fréquents (barème) : ${trap.wrongFr} Correction : ${trap.correctionFr}`,
   ].join(" ");
 
   const ar = [
-    `أنا الأستاذ منذر حداره. نحلّ المسألة سطراً بسطر كما في ورقة رسمية لبنانية.`,
+    `أنا ${INSTRUCTOR_AR}. نحلّ المسألة سطراً بسطر كما في ورقة رسمية لبنانية.`,
+    `الفكرة الأساسية قبل أي حساب: ${examTip.ar || examTip.en}`,
     `السؤال: ${question}.`,
     ...steps.map((step, index) => `الخطوة ${index + 1}. ${step.explanationAr || step.explanationEn}`),
-    `الجواب النهائي: ${finalAnswer}.`,
-    `خطأ شائع في الامتحان: لا تقفز إلى الناتج قبل كتابة القانون والتحقق.`,
+    `الجواب النهائي في إطار: ${finalAnswer}.`,
+    `أخطاء شائعة تخسر علامات الباريم: لا تقفز إلى الناتج قبل مجموعة التعريف والقانون والتحقق.`,
   ].join(" ");
 
   void language;
@@ -253,6 +319,9 @@ function buildTimeline(input: {
   steps: SolverStep[];
   graph: GraphSpec;
   trap: TrapSpec;
+  examTip: ExamTip;
+  studyKind: StudyKind;
+  asymptotes: AsymptoteSpec[];
   topic: string;
   track: CertificateTrack;
   language: LessonLanguage;
@@ -268,33 +337,42 @@ function buildTimeline(input: {
   const ruleEnd = introEnd + input.ruleDur;
   const exampleEnd = ruleEnd + input.exampleDur;
   const trapEnd = exampleEnd + input.trapDur;
+  const asymptoteLatex =
+    input.asymptotes.map((item) => item.equation).join(",\\ ") || "y=b\\text{ or }x=a\\text{ or }y=ax+b";
 
-  const exampleActions = input.steps.map((step, index) => ({
-    at: 4 + index * perStep,
-    type: "show_step" as const,
-    latex: step.latex,
-    payload: {
+  const exampleActions = input.steps.map((step, index) => {
+    const last = index === input.steps.length - 1 || step.boxed;
+    return {
+      at: 4 + index * perStep,
+      type: last ? ("boxAnswer" as const) : ("show_step" as const),
       latex: step.latex,
-      math_latex: step.latex,
-      step_en: step.explanationEn,
-      step_fr: step.explanationFr,
-      text: L(step.explanationEn, step.explanationFr, step.explanationAr),
-      index: index + 1,
-    },
-  }));
+      payload: {
+        latex: last ? `\\boxed{${step.latex}}` : step.latex,
+        math_latex: last ? `\\boxed{${step.latex}}` : step.latex,
+        step_en: `${step.examVerbEn ? `${step.examVerbEn} — ` : ""}${step.explanationEn}`,
+        step_fr: `${step.examVerbFr ? `${step.examVerbFr} — ` : ""}${step.explanationFr}`,
+        text: L(step.explanationEn, step.explanationFr, step.explanationAr),
+        index: index + 1,
+        boxed: last,
+        marks: last ? "barème" : undefined,
+      },
+    };
+  });
 
   while (exampleActions.length < 3) {
     exampleActions.push({
       at: 4 + exampleActions.length * perStep,
-      type: "show_step",
+      type: "boxAnswer",
       latex: input.finalAnswerLatex,
       payload: {
-        latex: input.finalAnswerLatex,
-        math_latex: input.finalAnswerLatex,
+        latex: `\\boxed{${input.finalAnswerLatex}}`,
+        math_latex: `\\boxed{${input.finalAnswerLatex}}`,
         step_en: "Box the final answer after the algebra is written.",
         step_fr: "Encadrer la réponse après l’algèbre écrite.",
         text: L("Box the final answer after the algebra is written.", "Encadrer la réponse après l’algèbre écrite."),
         index: exampleActions.length + 1,
+        boxed: true,
+        marks: "barème",
       },
     });
   }
@@ -302,14 +380,14 @@ function buildTimeline(input: {
   return {
     id: createId("solve"),
     title: L(
-      `${input.topic} — Prof. Munzer Haddara`,
-      `${input.topic} — Prof. Munzer Haddara`,
-      `${input.topic} — الأستاذ منذر حداره`,
+      `${input.topic} — ${INSTRUCTOR_EN}`,
+      `${input.topic} — ${INSTRUCTOR_EN}`,
+      `${input.topic} — ${INSTRUCTOR_AR}`,
     ),
     language: input.language === "fr" ? "fr" : "en",
     defaultLanguage: input.language === "fr" ? "fr" : "en",
     durationSec: trapEnd,
-    instructor: "Prof. Munzer Haddara",
+    instructor: INSTRUCTOR_EN,
     track: input.track,
     topic: input.topic,
     media: {
@@ -318,10 +396,13 @@ function buildTimeline(input: {
       studentEnabled: true,
     },
     chapters: [
-      { id: "intro", at: 0, label: L("Question", "Énoncé", "السؤال") },
-      { id: "rule", at: introEnd, label: L("Rule + graph", "Règle + graphe", "القانون والرسم") },
-      { id: "steps", at: ruleEnd, label: L("Worked steps", "Étapes", "الخطوات") },
-      { id: "trap", at: exampleEnd, label: L("Exam trap", "Piège", "خطأ شائع") },
+      { id: "intro", at: 0, label: L("Key Idea / Exam Tip", "Idée clé / Conseil d’épreuve", "الفكرة الأساسية") },
+      { id: "domain", at: Math.round(introEnd * 0.45), label: L("Domain D_f", "Ensemble D_f", "مجموعة التعريف") },
+      { id: "limits", at: introEnd, label: L("Limits & asymptotes", "Limites et asymptotes", "النهايات والمقاربات") },
+      { id: "variation", at: introEnd + Math.round(input.ruleDur * 0.4), label: L("Derivative / variation", "Dérivée / variation", "المشتق والتغيرات") },
+      { id: "graph", at: introEnd + Math.round(input.ruleDur * 0.7), label: L("Points & graph", "Points et graphe", "النقاط والرسم") },
+      { id: "steps", at: ruleEnd, label: L("Boxed exercise", "Exercice encadré", "التمرين المؤطّر") },
+      { id: "trap", at: exampleEnd, label: L("Common pitfalls", "Pièges fréquents", "أخطاء شائعة") },
     ],
     segments: [
       {
@@ -329,26 +410,47 @@ function buildTimeline(input: {
         start: 0,
         end: introEnd,
         phase: "introduction",
-        label: L("1. Read the question", "1. Lire l’énoncé", "١. قراءة السؤال"),
+        label: L("1. Key Idea & domain", "1. Idée clé et ensemble de définition", "١. الفكرة ومجموعة التعريف"),
         avatar: { state: "speaking" },
         narration: L(
-          `I am Prof. Munzer Haddara. We work this as a Lebanese Brevet / Terminale paper: copy the given, name the certificate skill, then start the algebra. Question: ${input.question}. ${input.summary}`,
-          `Je suis le professeur Munzer Haddara. On traite cela comme une copie Brevet / Terminale : recopier les données, nommer la compétence, puis l’algèbre. Énoncé : ${input.question}. ${input.summary}`,
-          `أنا الأستاذ منذر حداره. نتعامل مع المسألة كورقة رسمية: نكتب المعطيات ثم القانون ثم الحساب. السؤال: ${input.question}.`,
+          `I am ${INSTRUCTOR_EN}. ${input.examTip.en} Question: ${input.question}. Official sequence: ${sequenceLine()}. ${input.summary}`,
+          `Je suis ${INSTRUCTOR_EN}. ${input.examTip.fr} Énoncé : ${input.question}. Suite officielle : ${sequenceLineFr()}. ${input.summary}`,
+          `أنا ${INSTRUCTOR_AR}. ${input.examTip.ar || input.examTip.en} السؤال: ${input.question}.`,
         ),
         canvas: {
           actions: [
             {
-              at: 2,
-              type: "fade_equation",
+              at: 1,
+              type: "exam_tip",
+              latex: "\\text{Key Idea / Exam Tip}",
+              payload: {
+                latex: "\\text{Key Idea / Exam Tip}",
+                caption: L("Key Idea / Exam Tip", "Idée clé / Conseil d’épreuve"),
+                step_en: input.examTip.en,
+                step_fr: input.examTip.fr,
+                text: L(input.examTip.en, input.examTip.fr, input.examTip.ar),
+              },
+            },
+            {
+              at: 10,
+              type: "renderMath",
               latex: input.question.slice(0, 120),
               payload: { latex: input.question.slice(0, 120), caption: L("Given", "Donnée", "المعطى") },
             },
             {
-              at: 10,
-              type: "show_equation",
-              latex: input.summary,
-              payload: { latex: input.summary, caption: L("Plan", "Plan", "الخطة") },
+              at: 18,
+              type: "show_step",
+              latex: "D_f\\text{ first}",
+              payload: {
+                latex: "D_f\\text{ first}",
+                math_latex: "D_f\\text{ first}",
+                step_en: "Write the domain of definition D_f before any limit or derivative.",
+                step_fr: "Écrire l’ensemble de définition D_f avant toute limite ou dérivée.",
+                text: L(
+                  "Write the domain of definition D_f before any limit or derivative.",
+                  "Écrire l’ensemble de définition D_f avant toute limite ou dérivée.",
+                ),
+              },
             },
           ],
         },
@@ -358,23 +460,47 @@ function buildTimeline(input: {
         start: introEnd,
         end: ruleEnd,
         phase: "rule_graph",
-        label: L("2. Rule and graph", "2. Règle et graphe", "٢. القانون والرسم"),
+        label: L("2. Limits, variation, graph", "2. Limites, variation, graphe", "٢. النهايات والتغيرات والرسم"),
         avatar: { state: "paused" },
         narration: L(
-          `Look at the board. We name the rule with its hypothesis, then we plot the model so the roots, extrema, or asymptotes are visible — never a slogan without a graph when the function is on the paper.`,
-          `Regardez le tableau. On nomme la règle avec son hypothèse, puis on trace le modèle pour voir racines, extrema ou asymptotes — jamais un slogan sans graphe si la fonction est dans l’énoncé.`,
+          `Look at the board. Limits at the boundaries, then asymptote equations ${asymptoteLatex}, then the derivative and the table of variations, then C_f. Study kind: ${input.studyKind}.`,
+          `Regardez le tableau. Limites aux bornes, puis équations d’asymptotes ${asymptoteLatex}, puis la dérivée et le tableau de variation, puis C_f. Type d’étude : ${input.studyKind}.`,
         ),
         canvas: {
           actions: [
             {
               at: 3,
-              type: "show_equation",
-              latex: input.steps[0]?.latex || input.finalAnswerLatex,
-              payload: { caption: L("Named rule", "Règle nommée") },
+              type: "show_step",
+              latex: `\\text{asymptotes: }${asymptoteLatex}`,
+              payload: {
+                latex: `\\text{asymptotes: }${asymptoteLatex}`,
+                math_latex: `\\text{asymptotes: }${asymptoteLatex}`,
+                step_en: "Limits at the boundaries. Write x=a, y=b, or y=ax+b. Never leave (−∞)×0.",
+                step_fr: "Limites aux bornes. Écrire x=a, y=b ou y=ax+b. Ne jamais laisser (−∞)×0.",
+                text: L(
+                  "Limits at the boundaries. Write x=a, y=b, or y=ax+b. Never leave (−∞)×0.",
+                  "Limites aux bornes. Écrire x=a, y=b ou y=ax+b. Ne jamais laisser (−∞)×0.",
+                ),
+              },
             },
             {
-              at: 14,
-              type: "render_graph",
+              at: 16,
+              type: "variationTable",
+              latex: input.steps.find((step) => /array|f'\s*\(/.test(step.latex))?.latex || DEFAULT_VARIATION_TABLE,
+              payload: {
+                latex: input.steps.find((step) => /array|f'\s*\(/.test(step.latex))?.latex || DEFAULT_VARIATION_TABLE,
+                math_latex: input.steps.find((step) => /array|f'\s*\(/.test(step.latex))?.latex || DEFAULT_VARIATION_TABLE,
+                step_en: "Derivative, sign chart, table of variations (arrows, limits, images).",
+                step_fr: "Dérivée, signe, tableau de variation (flèches, limites, images).",
+                text: L(
+                  "Derivative, sign chart, table of variations (arrows, limits, images).",
+                  "Dérivée, signe, tableau de variation (flèches, limites, images).",
+                ),
+              },
+            },
+            {
+              at: 28,
+              type: "plotFunction",
               latex: input.finalAnswerLatex,
               expression: input.graph.fn,
               domain,
@@ -387,7 +513,7 @@ function buildTimeline(input: {
                 xDomain: domain,
                 yDomain: input.graph.yDomain,
                 highlights: input.graph.highlights,
-                title: L("Model graph", "Graphe modèle"),
+                title: L("Particular points & C_f", "Points particuliers et C_f"),
               },
             },
           ],
@@ -401,8 +527,8 @@ function buildTimeline(input: {
         label: L("3. Graded solution", "3. Solution notée", "٣. الحل المفصّل"),
         avatar: { state: "speaking" },
         narration: L(
-          `Now the graded lines. Each step is substitution or algebra. The boxed answer is ${input.finalAnswer}.`,
-          `Les lignes notées. Chaque étape est une substitution ou de l’algèbre. La réponse encadrée est ${input.finalAnswer}.`,
+          `Now the graded lines. Each sub-question ends in a Boxed Final Answer. The boxed answer is ${input.finalAnswer}.`,
+          `Les lignes notées. Chaque sous-question se termine par une réponse encadrée. La réponse encadrée est ${input.finalAnswer}.`,
         ),
         canvas: { actions: exampleActions },
       },
@@ -411,11 +537,11 @@ function buildTimeline(input: {
         start: exampleEnd,
         end: trapEnd,
         phase: "common_mistake",
-        label: L("4. Official-exam trap", "4. Piège d’épreuve", "٤. خطأ الامتحان"),
+        label: L("4. Common pitfalls", "4. Pièges fréquents", "٤. أخطاء شائعة"),
         avatar: { state: "speaking" },
         narration: L(
-          `Exam trap: ${input.trap.wrong} Correction: ${input.trap.correction}`,
-          `Piège : ${input.trap.wrongFr} Correction : ${input.trap.correctionFr}`,
+          `Common pitfalls that lose barème marks: ${input.trap.wrong} Correction: ${input.trap.correction}`,
+          `Pièges fréquents (barème) : ${input.trap.wrongFr} Correction : ${input.trap.correctionFr}`,
         ),
         canvas: {
           actions: [

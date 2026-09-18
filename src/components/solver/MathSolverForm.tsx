@@ -140,9 +140,10 @@ export function MathSolverForm() {
       />
       {preview ? <img className="question-image" src={preview} alt="Uploaded problem" /> : null}
       <p className="muted">
-        Without <code>GEMINI_API_KEY</code> the demo solver covers Brevet/Terminale patterns (quadratics, limits,
-        <code> (x-1)e^x </code>, systems, Pythagoras) when the given is readable. Unclear or incomplete photos return{" "}
-        <code>needsRetake</code> — the engine will not invent a problem.
+        Without <code>GEMINI_API_KEY</code> the demo solver still follows the official sequence (domain, limits with{" "}
+        <code>y=b</code>/<code>x=a</code>, variation table, boxed answers) on Brevet/Terminale patterns: quadratics,
+        limits, <code>(x-1)e^x</code>, systems, Pythagoras. Unclear photos return <code>needsRetake</code> — the engine
+        will not invent a problem.
       </p>
       {error ? (
         <div className="studio-teacher-error" role="alert">

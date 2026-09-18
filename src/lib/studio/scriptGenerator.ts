@@ -3,6 +3,7 @@ import { L } from "./i18n";
 import { ensurePedagogy } from "./pedagogy";
 import { complexNumbersLesson } from "./sampleLessons";
 import { officialExamFourPhaseLesson } from "./seedLesson";
+import { INSTRUCTOR_EN, SCRIPT_SYSTEM_PROMPT } from "@/lib/pedagogy/lebanese";
 import {
   certificateTrackSchema,
   lessonTimelineSchema,
@@ -67,7 +68,7 @@ function cloneTimeline(base: LessonTimeline, request: ScriptRequest): LessonTime
     track: coerceTrack(String(request.track)),
     grade,
     language: request.language === "fr" ? "fr" : "en",
-    instructor: base.instructor ?? "Prof. Munzer Haddara",
+    instructor: base.instructor ?? INSTRUCTOR_EN,
     title: L(
       `${request.topic} — ${scope.en}${grade ? ` · ${grade}` : ""}`,
       `${request.topic} — ${scope.fr}${grade ? ` · ${grade}` : ""}`,
@@ -86,7 +87,7 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
     grade,
     language: request.language === "fr" ? "fr" : "en",
     durationSec: 350,
-    instructor: "Prof. Munzer Haddara",
+    instructor: INSTRUCTOR_EN,
     title: L(
       `${request.topic} — ${scope.en} official pattern`,
       `${request.topic} — modèle d’épreuve ${scope.fr}`,
@@ -102,13 +103,27 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
         label: L("1. Exam framing & domain", "1. Cadre d’épreuve et ensemble de définition"),
         avatar: { state: "speaking" },
         narration: L(
-          `${request.topic} on the ${scope.en} paper is a complete quadratic study, not a slogan. Domain first: a polynomial is defined on R. We will need the discriminant, the axis of symmetry, the table of variation, and a sketch. Model: f(x)=x²−4x+3. Grade: ${grade || "Terminale / Brevet as listed"}.`,
-          `${request.topic} dans l’épreuve ${scope.fr} est une étude complète de trinôme, pas un slogan. D’abord D_f = R. Il faudra le discriminant, l’axe de symétrie, le tableau de variation et une allure. Modèle : f(x)=x²−4x+3. Classe : ${grade || "Terminale / Brevet selon l’énoncé"}.`,
+          `Key Idea / Exam Tip: a quadratic study is D_f first, then Δ, then the table of variations, then C_f. ${request.topic} on the ${scope.en} paper is a complete quadratic study, not a slogan. Domain first: a polynomial is defined on R. We will need the discriminant, the axis of symmetry, the table of variation, and a sketch. Model: f(x)=x²−4x+3. Grade: ${grade || "Terminale / Brevet as listed"}.`,
+          `Idée clé : étude de trinôme = D_f d’abord, puis Δ, puis le tableau, puis C_f. ${request.topic} dans l’épreuve ${scope.fr} est une étude complète de trinôme, pas un slogan. D’abord D_f = R. Il faudra le discriminant, l’axe de symétrie, le tableau de variation et une allure. Modèle : f(x)=x²−4x+3. Classe : ${grade || "Terminale / Brevet selon l’énoncé"}.`,
         ),
         canvas: {
           actions: [
             {
-              at: 3,
+              at: 1,
+              type: "exam_tip",
+              payload: {
+                latex: "\\text{Key Idea / Exam Tip}",
+                caption: L("Key Idea / Exam Tip", "Idée clé / Conseil d’épreuve"),
+                step_en: "How we think: D_f first, then Δ and roots, then the axis, the table of variations, then C_f. Never start with x=−b/2a.",
+                step_fr: "Comment on pense : D_f d’abord, puis Δ et racines, puis l’axe, le tableau de variation, puis C_f. Ne jamais commencer par x=−b/2a.",
+                text: L(
+                  "How we think: D_f first, then Δ and roots, then the axis, the table of variations, then C_f. Never start with x=−b/2a.",
+                  "Comment on pense : D_f d’abord, puis Δ et racines, puis l’axe, le tableau de variation, puis C_f. Ne jamais commencer par x=−b/2a.",
+                ),
+              },
+            },
+            {
+              at: 8,
               type: "fade_equation",
               latex: "f(x)=x^{2}-4x+3=(x-1)(x-3)",
               payload: { caption: L("Given on the paper", "Donnée de l’énoncé") },
@@ -154,6 +169,20 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
                 text: L(
                   "Proof sketch: compute Δ, then the quadratic formula. Factor as (x−1)(x−3).",
                   "Esquisse : calculer Δ, puis la formule. On factorise (x−1)(x−3).",
+                ),
+              },
+            },
+            {
+              at: 40,
+              type: "variationTable",
+              payload: {
+                latex: "\\begin{array}{c|ccc} x & -\\infty & 2 & +\\infty \\\\ \\hline f'(x) & - & 0 & + \\\\ \\hline f & +\\infty\\searrow & -1 & \\nearrow +\\infty \\end{array}",
+                math_latex: "\\begin{array}{c|ccc} x & -\\infty & 2 & +\\infty \\\\ \\hline f'(x) & - & 0 & + \\\\ \\hline f & +\\infty\\searrow & -1 & \\nearrow +\\infty \\end{array}",
+                step_en: "Table of variations: arrows, vertex (2,−1), limits at ±∞.",
+                step_fr: "Tableau de variation : flèches, sommet (2,−1), limites en ±∞.",
+                text: L(
+                  "Table of variations: arrows, vertex (2,−1), limits at ±∞.",
+                  "Tableau de variation : flèches, sommet (2,−1), limites en ±∞.",
                 ),
               },
             },
@@ -253,16 +282,17 @@ function quadraticLesson(request: ScriptRequest): LessonTimeline {
             },
             {
               at: 120,
-              type: "show_step",
+              type: "boxAnswer",
               payload: {
-                latex: "S=[1,3]",
-                math_latex: "S=[1,3]",
-                step_en: "Step 4 — box S=[1,3]. Closed because ≤ includes the roots.",
-                step_fr: "Étape 4 — encadrer S=[1,3]. Fermé car ≤ inclut les racines.",
+                latex: "\\boxed{S=[1,3]}",
+                math_latex: "\\boxed{S=[1,3]}",
+                step_en: "Step 4 — Boxed Final Answer S=[1,3]. Closed because ≤ includes the roots. Barème: inequality.",
+                step_fr: "Étape 4 — Réponse encadrée S=[1,3]. Fermé car ≤ inclut les racines. Barème : inéquation.",
                 text: L(
-                  "Step 4 — box S=[1,3]. Closed because ≤ includes the roots.",
-                  "Étape 4 — encadrer S=[1,3]. Fermé car ≤ inclut les racines.",
+                  "Step 4 — Boxed Final Answer S=[1,3]. Closed because ≤ includes the roots. Barème: inequality.",
+                  "Étape 4 — Réponse encadrée S=[1,3]. Fermé car ≤ inclut les racines. Barème : inéquation.",
                 ),
+                marks: "inequality",
               },
             },
           ],
@@ -320,7 +350,7 @@ function genericLesson(request: ScriptRequest): LessonTimeline {
     grade,
     language: request.language === "fr" ? "fr" : "en",
     durationSec: 350,
-    instructor: "Prof. Munzer Haddara",
+    instructor: INSTRUCTOR_EN,
     title: L(`${topic} — ${scope.en} official pattern`, `${topic} — modèle d’épreuve ${scope.fr}`, `${topic} — ${scope.ar}`),
     media: { poster: "/teachers/munzer.jpg" },
     segments: [
@@ -540,57 +570,7 @@ export function buildTemplateScript(request: ScriptRequest): LessonTimeline {
   return genericLesson(request);
 }
 
-const SYSTEM_PROMPT = `You are Professor Munzer Haddara's lesson-script writer for MathMentor, a Lebanese Secondary & Brevet mathematics platform (English section / Terminale LS, GS, SE).
-
-Return ONE JSON object only, matching this schema:
-{
-  "id": string,
-  "title": { "en": string, "fr": string },
-  "language": "en" | "fr",
-  "instructor": "Prof. Munzer Haddara",
-  "defaultLanguage": "en",
-  "durationSec": number,
-  "track": string,
-  "grade": string,
-  "topic": string,
-  "segments": [
-    {
-      "id": string,
-      "start": number,
-      "end": number,
-      "phase": "introduction" | "rule_graph" | "real_example" | "common_mistake",
-      "narration": { "en": string, "fr": string },
-      "avatar": { "state": "speaking" | "paused" },
-      "canvas": {
-        "actions": [
-          {
-            "at": number,
-            "type": "show_equation" | "fade_equation" | "render_graph" | "highlight_point" | "show_step" | "clear",
-            "payload": {
-              "latex": string,
-              "math_latex": string,
-              "step_en": string,
-              "step_fr": string,
-              "fn": string,
-              "expression": string,
-              "domain": [number, number]
-            }
-          }
-        ]
-      }
-    }
-  ]
-}
-
-Hard rules:
-1. ALWAYS include exactly these four phases in order. Durations about 50s, 100s, 160s, 40s (total ~350s). instructor is always "Prof. Munzer Haddara".
-2. introduction: Lebanese certificate scope (Brevet / LS / GS / SE / LH) + domain with justification (not a slogan). Canvas: fade_equation / show_equation.
-3. rule_graph: a proof sketch of the rule (named hypotheses, algebra lines). MUST include type "render_graph" (fn is a JS expression in x). avatar.state = "paused". Highlight roots, extrema, asymptotes when they exist.
-4. real_example: one full official-exam exercise. MUST include at least THREE show_step actions with math_latex, step_en, AND step_fr of equal quality (not machine-gibberish). Include substitution or factoring and a boxed conclusion.
-5. common_mistake: name the WRONG reasoning, then the correction. ~40s.
-6. "at" is seconds from the start of THAT segment.
-7. Every narration, title, caption, and step MUST have English AND French (Lebanese English-section with a French toggle). French must read like a French-section paper (ensemble de définition, tableau de variation, barème), not a literal calque.
-8. Default language is English. Ready to charge: a paying student should be able to copy the board into an official booklet.`;
+const SYSTEM_PROMPT = SCRIPT_SYSTEM_PROMPT;
 
 async function generateWithOpenAI(request: ScriptRequest): Promise<LessonTimeline> {
   const key = openaiKey();

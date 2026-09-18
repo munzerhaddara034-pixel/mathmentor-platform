@@ -12,4 +12,5 @@ export { generateLessonScript, buildTemplateScript } from "./scriptGenerator";
 export { exponentialFunctionsLesson, complexNumbersLesson, getSampleLesson } from "./sampleLessons";
 export { officialExamSceneDocument, officialExamFourPhaseLesson } from "./seedLesson";
 export { ensurePedagogy } from "./pedagogy";
+export { auditPedagogy } from "./timeline";
 export { hasDesmosKey, desmosScriptSrc } from "./desmos";

@@ -6,6 +6,8 @@ export type SolverStep = {
   title: string;
   titleFr?: string;
   titleAr?: string;
+  examVerbEn?: string;
+  examVerbFr?: string;
   latex: string;
   theoremEn?: string;
   theoremFr?: string;
@@ -13,6 +15,7 @@ export type SolverStep = {
   explanationEn: string;
   explanationFr: string;
   explanationAr?: string;
+  boxed?: boolean;
 };
 
 export type SolverGiven = {
@@ -20,6 +23,26 @@ export type SolverGiven = {
   aimEn: string;
   aimFr?: string;
   aimAr: string;
+};
+
+export type ExamTip = {
+  en: string;
+  fr: string;
+  ar?: string;
+};
+
+export type StudyKind =
+  | "real_function"
+  | "geometry"
+  | "complex"
+  | "probability"
+  | "algebra"
+  | "limits"
+  | "general";
+
+export type AsymptoteSpec = {
+  kind: "vertical" | "horizontal" | "oblique";
+  equation: string;
 };
 
 export type AuditStatus = "pending" | "verified" | "needs_fix";
@@ -54,6 +77,9 @@ export type MathSolution = {
   summary: string;
   finalAnswer: string;
   finalAnswerLatex: string;
+  examTip: ExamTip;
+  studyKind: StudyKind;
+  asymptotes?: AsymptoteSpec[];
   given: SolverGiven;
   steps: SolverStep[];
   avatarScript: AvatarScript;
@@ -87,6 +113,9 @@ export type MathQueryRecord = {
   topic?: string;
   topicTag?: string;
   summary: string;
+  examTip?: ExamTip;
+  studyKind?: StudyKind;
+  asymptotes?: AsymptoteSpec[];
   given?: SolverGiven;
   finalAnswer: string;
   finalAnswerLatex: string;

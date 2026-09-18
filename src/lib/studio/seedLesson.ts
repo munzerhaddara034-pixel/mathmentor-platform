@@ -2,6 +2,7 @@ import { timelineFromScenes, type StudioSceneDocument } from "./scenes";
 import { L, type Bilingual } from "./i18n";
 import type { CanvasAction, LessonTimeline } from "./timeline";
 import { DEMO_AVATAR_VIDEO, DEMO_POSTER } from "./heygenClient";
+import { DEFAULT_EXAM_TIP, DEFAULT_VARIATION_TABLE, INSTRUCTOR_EN } from "@/lib/pedagogy/lebanese";
 
 function cap(en: string, fr: string): Bilingual {
   return L(en, fr);
@@ -30,6 +31,53 @@ function step(at: number, latex: string, en: string, fr: string): CanvasAction {
   };
 }
 
+function examTip(at: number, en: string, fr: string): CanvasAction {
+  return {
+    at,
+    type: "exam_tip",
+    payload: {
+      latex: "\\text{Key Idea / Exam Tip}",
+      math_latex: "\\text{Key Idea / Exam Tip}",
+      caption: cap("Key Idea / Exam Tip", "Idée clé / Conseil d’épreuve"),
+      step_en: en,
+      step_fr: fr,
+      text: cap(en, fr),
+    },
+  };
+}
+
+function variation(at: number, latex: string, en: string, fr: string): CanvasAction {
+  return {
+    at,
+    type: "variationTable",
+    payload: {
+      latex,
+      math_latex: latex,
+      step_en: en,
+      step_fr: fr,
+      text: cap(en, fr),
+    },
+  };
+}
+
+function boxed(at: number, latex: string, en: string, fr: string, marks?: string): CanvasAction {
+  return {
+    at,
+    type: "boxAnswer",
+    payload: {
+      latex: `\\boxed{${latex}}`,
+      math_latex: `\\boxed{${latex}}`,
+      step_en: en,
+      step_fr: fr,
+      text: cap(en, fr),
+      boxed: true,
+      marks,
+    },
+  };
+}
+
+const VARIATION_TABLE = DEFAULT_VARIATION_TABLE;
+
 /** Compact scene document for the JSON editor; audio is full exam language, not slogans. */
 export const officialExamSceneDocument: StudioSceneDocument = {
   lessonId: "leb-term-func-01",
@@ -38,7 +86,7 @@ export const officialExamSceneDocument: StudioSceneDocument = {
     en: "Exponential Functions — Official Exam Pattern f(x)=(x−1)e^x",
     fr: "Fonctions exponentielles — modèle d’épreuve f(x)=(x−1)e^x",
   },
-  instructor: "Prof. Munzer Haddara",
+  instructor: INSTRUCTOR_EN,
   topic: "Exponential Functions",
   grade: "Terminale LS / GS / SE",
   track: "ls",
@@ -46,8 +94,16 @@ export const officialExamSceneDocument: StudioSceneDocument = {
     {
       sceneId: 1,
       audio: {
-        en: "Terminale LS, GS and SE papers treat the product of a linear factor and an exponential as a full study: domain, both limits, derivative, table of variation, sketch. Let f(x)=(x−1)e^x. A polynomial and e^x are defined on all of R, so the domain is R. Do not invent a restriction that is not in the text.",
-        fr: "Les épreuves de Terminale SV, SG et SES traitent le produit d’un facteur affine et d’une exponentielle comme une étude complète : ensemble de définition, les deux limites, dérivée, tableau de variation, allure. Soit f(x)=(x−1)e^x. Un polynôme et e^x sont définis sur R, donc D_f = R. On n’ajoute aucune restriction absente de l’énoncé.",
+        en: DEFAULT_EXAM_TIP.en,
+        fr: DEFAULT_EXAM_TIP.fr,
+      },
+      canvas: { type: "examTip", latex: "\\text{Key Idea / Exam Tip}" },
+    },
+    {
+      sceneId: 2,
+      audio: {
+        en: "Show that D_f = R. A polynomial and e^x are defined on all of R, so the product is defined on R. Write the domain before any limit or derivative. Do not invent a restriction that is not in the text.",
+        fr: "Montrer que D_f = R. Un polynôme et e^x sont définis sur R, donc le produit l’est sur R. Écrire l’ensemble de définition avant toute limite ou dérivée. On n’ajoute aucune restriction absente de l’énoncé.",
       },
       canvas: {
         type: "renderMath",
@@ -55,22 +111,30 @@ export const officialExamSceneDocument: StudioSceneDocument = {
       },
     },
     {
-      sceneId: 2,
+      sceneId: 3,
       audio: {
-        en: "The limit at minus infinity is an indeterminate form of type (−∞)×0. Set t=−x, so as x goes to minus infinity, t goes to plus infinity. Then f(−t)=−(t+1)e^{−t}=−(t+1)/e^t. Growth comparison: any polynomial over e^t tends to 0. Hence the limit is 0 and y=0 is a horizontal asymptote at minus infinity.",
-        fr: "La limite en −∞ est une forme indéterminée du type (−∞)×0. On pose t=−x : lorsque x tend vers −∞, t tend vers +∞. Alors f(−t)=−(t+1)e^{−t}=−(t+1)/e^t. Croissance comparée : tout polynôme sur e^t tend vers 0. Donc la limite vaut 0 et y=0 est asymptote horizontale en −∞.",
+        en: "Calculate the limits at the boundaries. The limit at minus infinity is an indeterminate form of type (−∞)×0. Set t=−x. Then f(−t)=−(t+1)/e^t → 0 by growth comparison. Deduce the horizontal asymptote y=0. At plus infinity both factors tend to plus infinity.",
+        fr: "Calculer les limites aux bornes. En −∞ la forme est (−∞)×0. On pose t=−x. Alors f(−t)=−(t+1)/e^t → 0 par croissance comparée. En déduire l’asymptote horizontale y=0. En +∞ les deux facteurs tendent vers +∞.",
       },
       canvas: {
         type: "renderMath",
         latex:
-          "\\lim_{x\\to-\\infty}f(x)=0\\quad(y=0\\text{ asymptote}),\\quad \\lim_{x\\to+\\infty}f(x)=+\\infty",
+          "\\lim_{x\\to-\\infty}f(x)=0\\quad(y=0),\\quad \\lim_{x\\to+\\infty}f(x)=+\\infty",
       },
     },
     {
-      sceneId: 3,
+      sceneId: 4,
       audio: {
-        en: "Product rule: u=x−1, u'=1, v=e^x, v'=e^x. Then f'=u'v+uv'=e^x+(x−1)e^x. Factor e^x: f'(x)=x e^x. e^x is never zero, so the only critical point is x=0, and f(0)=−1. Look at the board: root at (1,0), global minimum at (0,−1), asymptote y=0.",
-        fr: "Règle du produit : u=x−1, u'=1, v=e^x, v'=e^x. Alors f'=u'v+uv'=e^x+(x−1)e^x. On factorise e^x : f'(x)=x e^x. e^x ne s’annule jamais, donc le seul point critique est x=0, et f(0)=−1. Regardez le tableau : racine en (1,0), minimum global en (0,−1), asymptote y=0.",
+        en: "Calculate f'(x) with the product rule: u=x−1, v=e^x gives f'(x)=x e^x. The sign of f' is the sign of x. Table of variations: arrows, limits, and images. Global minimum f(0)=−1.",
+        fr: "Calculer f'(x) par le produit : u=x−1, v=e^x donne f'(x)=x e^x. Le signe de f' est celui de x. Tableau de variation : flèches, limites et images. Minimum global f(0)=−1.",
+      },
+      canvas: { type: "variationTable", latex: VARIATION_TABLE },
+    },
+    {
+      sceneId: 5,
+      audio: {
+        en: "Particular points: intercept (1,0), global minimum (0,−1), horizontal asymptote y=0. Sketch C_f accurately on the canvas.",
+        fr: "Points particuliers : intercept (1,0), minimum global (0,−1), asymptote horizontale y=0. Tracer C_f avec précision.",
       },
       canvas: {
         type: "plotFunction",
@@ -79,21 +143,21 @@ export const officialExamSceneDocument: StudioSceneDocument = {
       },
     },
     {
-      sceneId: 4,
+      sceneId: 6,
       audio: {
-        en: "Official exercise: how many real solutions has f(x)=−1/2? The range of f is [−1,+∞). Since −1/2 lies strictly between −1 and 0, the table of variation gives exactly two roots: one in (−∞,0) and one in (0,1), because f(1)=0.",
-        fr: "Exercice type : combien de solutions réelles pour f(x)=−1/2 ? L’image de f est [−1,+∞). Comme −1/2 est strictement entre −1 et 0, le tableau de variation donne exactement deux racines : une dans (−∞,0) et une dans (0,1), car f(1)=0.",
+        en: "Deduce the number of real solutions of f(x)=−1/2. f is continuous on R. Strictly decreasing on (−∞,0], strictly increasing on [0,+∞). Intermediate Value Theorem plus monotonicity: two roots. Boxed answer: x1 in (−∞,0), x2 in (0,1).",
+        fr: "En déduire le nombre de solutions de f(x)=−1/2. f est continue sur R, strictement monotone sur chaque morceau. Théorème des valeurs intermédiaires plus monotonie : deux racines. Réponse encadrée : x1 dans (−∞,0), x2 dans (0,1).",
       },
       canvas: {
-        type: "renderMath",
-        latex: "f(x)=-\\tfrac12\\quad\\text{has two real roots}",
+        type: "boxAnswer",
+        latex: "f(x)=-\\tfrac12\\Rightarrow x_1\\in(-\\infty,0),\\ x_2\\in(0,1)",
       },
     },
     {
-      sceneId: 5,
+      sceneId: 7,
       audio: {
-        en: "Exam trap: writing (−∞)×0=0, or writing f'(x)=e^x as if the linear factor were constant. Both score zero. Rewrite the limit as a quotient, and expand u'v+uv' before you box the minimum.",
-        fr: "Piège d’épreuve : écrire (−∞)×0=0, ou écrire f'(x)=e^x comme si le facteur affine était constant. Les deux sont notés zéro. On réécrit la limite en quotient, et on développe u'v+uv' avant d’encadrer le minimum.",
+        en: "Common pitfalls that lose barème marks: writing (−∞)×0=0, writing f'(x)=e^x, or applying the Intermediate Value Theorem without continuity and monotonicity.",
+        fr: "Pièges fréquents (barème) : écrire (−∞)×0=0, écrire f'(x)=e^x, ou appliquer le théorème des valeurs intermédiaires sans continuité ni monotonie.",
       },
       canvas: {
         type: "renderMath",
@@ -105,44 +169,43 @@ export const officialExamSceneDocument: StudioSceneDocument = {
 
 export const officialExamSceneTimeline = timelineFromScenes(officialExamSceneDocument);
 
-const VARIATION_TABLE =
-  "\\begin{array}{c|ccc} x & -\\infty & 0 & +\\infty \\\\ f'(x) & - & 0 & + \\\\ f & 0 & -1 & +\\infty \\end{array}";
-
 /** Full Terminale English-section study used by `/lessons/interactive`. */
 export const officialExamFourPhaseLesson: LessonTimeline = {
   id: "leb-term-func-01",
   topic: "Exponential Functions",
   track: "ls",
   grade: "Terminale LS / GS / SE",
-  instructor: "Prof. Munzer Haddara",
+  instructor: INSTRUCTOR_EN,
   defaultLanguage: "en",
   title: L(
     "Exponential Functions — Official Exam Pattern f(x)=(x−1)e^x",
     "Fonctions exponentielles — modèle d’épreuve f(x)=(x−1)e^x",
   ),
   language: "en",
-  durationSec: 360,
+  durationSec: 380,
   media: { poster: DEMO_POSTER, videoUrl: DEMO_AVATAR_VIDEO },
   chapters: [
-    { id: "intro", at: 0, label: L("Intro", "Intro") },
-    { id: "limits", at: 50, label: L("Limits", "Limites") },
-    { id: "derivative", at: 112, label: L("Derivative", "Dérivée") },
-    { id: "quiz", at: 138, label: L("Quiz", "Quiz") },
-    { id: "graph", at: 150, label: L("Graph", "Graphe") },
-    { id: "example", at: 160, label: L("Example", "Exercice") },
-    { id: "mistake", at: 320, label: L("Mistake", "Piège") },
+    { id: "intro", at: 0, label: L("Key Idea / Exam Tip", "Idée clé / Conseil d’épreuve") },
+    { id: "domain", at: 18, label: L("Domain D_f", "Ensemble D_f") },
+    { id: "limits", at: 55, label: L("Limits & asymptotes", "Limites et asymptotes") },
+    { id: "derivative", at: 100, label: L("Derivative", "Dérivée") },
+    { id: "variation", at: 118, label: L("Variation table", "Tableau de variation") },
+    { id: "quiz", at: 145, label: L("Quiz", "Quiz") },
+    { id: "graph", at: 158, label: L("Points & graph", "Points et graphe") },
+    { id: "example", at: 175, label: L("Boxed exercise", "Exercice encadré") },
+    { id: "mistake", at: 335, label: L("Common pitfalls", "Pièges fréquents") },
   ],
   scenes: officialExamSceneDocument.scenes,
   events: [
     {
-      at: 145,
+      at: 152,
       type: "fade_equation",
       latex: "f(x)=(x-1)e^{x}",
       payload: { caption: cap("On the board", "Au tableau") },
     },
     {
-      at: 150,
-      type: "render_graph",
+      at: 158,
+      type: "plotFunction",
       latex: "f(x)=(x-1)e^{x}",
       expression: "(x-1)*exp(x)",
       domain: [-3, 2],
@@ -156,11 +219,11 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
         fn: "(x-1)*exp(x)",
         xDomain: [-3, 2],
         yDomain: [-4, 8],
-        title: cap("y = (x−1)e^x", "y = (x−1)e^x"),
+        title: cap("C_f : y = (x−1)e^x", "C_f : y = (x−1)e^x"),
       },
     },
     {
-      at: 138,
+      at: 145,
       type: "quiz_mcq",
       payload: {
         id: "leb-term-func-01-derivative",
@@ -182,7 +245,7 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
       },
     },
     {
-      at: 155,
+      at: 165,
       type: "highlight_point",
       payload: {
         kind: "extrema",
@@ -196,42 +259,44 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
     {
       id: "intro",
       start: 0,
-      end: 50,
+      end: 55,
       phase: "introduction",
-      label: L("1. Exam framing & domain", "1. Cadre d’épreuve et ensemble de définition"),
+      label: L("1. Key Idea & domain D_f", "1. Idée clé et ensemble D_f"),
       avatar: { state: "speaking" },
       narration: L(
-        "This is a Lebanese Terminale pattern — Life Sciences, General Sciences, and Sociology-Economics. Official papers ask for a complete study of a product of a linear factor and an exponential: domain, both limits with justification, the derivative, the table of variation, and a sketch. Let f be defined by f(x)=(x−1)e^x. A polynomial and the exponential function are defined on all real numbers, so the domain is R. Never invent a restriction that is not written in the text.",
-        "C’est un modèle d’épreuve libanaise de Terminale — Sciences de la Vie, Sciences Générales et SES. Les sujets officiels demandent l’étude complète d’un produit d’un facteur affine et d’une exponentielle : ensemble de définition, les deux limites justifiées, la dérivée, le tableau de variation et une allure. Soit f définie par f(x)=(x−1)e^x. Un polynôme et la fonction exponentielle sont définis sur R, donc D_f = R. On n’ajoute aucune restriction absente de l’énoncé.",
+        `${DEFAULT_EXAM_TIP.en} This is a Lebanese Terminale pattern — Life Sciences, General Sciences, and Sociology-Economics. Let f(x)=(x−1)e^x. Show that D_f = R: a polynomial and the exponential are defined on all real numbers. Never invent a restriction. Domain comes before any limit or derivative.`,
+        `${DEFAULT_EXAM_TIP.fr} C’est un modèle d’épreuve libanaise de Terminale — SV, SG et SES. Soit f(x)=(x−1)e^x. Montrer que D_f = R : un polynôme et l’exponentielle sont définis sur R. On n’ajoute aucune restriction. L’ensemble de définition précède toute limite ou dérivée.`,
       ),
       canvas: {
         actions: [
-          fadeEq(2, "f(x)=(x-1)e^{x}", "Given function", "Fonction donnée"),
+          examTip(1, DEFAULT_EXAM_TIP.en, DEFAULT_EXAM_TIP.fr),
+          fadeEq(12, "f(x)=(x-1)e^{x}", "Given function", "Fonction donnée"),
           step(
-            12,
+            20,
             "D_f=\\mathbb{R}",
-            "Polynomials and e^x are defined on R, so the product is defined on R.",
-            "Les polynômes et e^x sont définis sur R, donc le produit l’est aussi.",
+            "Show that D_f = R: polynomials and e^x are defined on R, so the product is defined on R.",
+            "Montrer que D_f = R : les polynômes et e^x sont définis sur R, donc le produit l’est aussi.",
           ),
-          step(
-            28,
-            "\\text{LS / GS / SE: study }+\\text{ sketch }+\\text{ equation }f(x)=m",
-            "What the paper actually marks: domain, limits, f', table, graph, then an equation in m.",
-            "Ce que le barème note : D_f, limites, f', tableau, graphe, puis une équation en m.",
+          boxed(
+            40,
+            "D_f=\\mathbb{R}",
+            "Boxed Final Answer (domain sub-question): D_f = R.",
+            "Réponse encadrée (ensemble de définition) : D_f = R.",
+            "domain",
           ),
         ],
       },
     },
     {
       id: "rule-graph",
-      start: 50,
-      end: 160,
+      start: 55,
+      end: 175,
       phase: "rule_graph",
-      label: L("2. Limits, derivative, graph", "2. Limites, dérivée, graphe"),
+      label: L("2. Limits, variation, graph", "2. Limites, variation, graphe"),
       avatar: { state: "paused" },
       narration: L(
-        "Look at the board. The limit at minus infinity is indeterminate of type (−∞)×0. Set t=−x. Then f(−t)=−(t+1)/e^t, which tends to 0 by growth comparison. At plus infinity both factors tend to plus infinity, so f tends to plus infinity. Product rule: u=x−1, v=e^x gives f'(x)=x e^x. The sign of f' is the sign of x. Table of variation: f decreases from 0 to −1 on (−∞,0], then increases to plus infinity. Horizontal asymptote y=0, root (1,0), global minimum (0,−1).",
-        "Regardez le tableau. La limite en −∞ est indéterminée du type (−∞)×0. On pose t=−x. Alors f(−t)=−(t+1)/e^t, qui tend vers 0 par croissance comparée. En +∞ les deux facteurs tendent vers +∞, donc f tend vers +∞. Règle du produit : u=x−1, v=e^x donne f'(x)=x e^x. Le signe de f' est celui de x. Tableau de variation : f décroît de 0 à −1 sur (−∞,0], puis croît vers +∞. Asymptote y=0, racine (1,0), minimum global (0,−1).",
+        "Look at the board. Calculate the limits at the boundaries. At minus infinity the form is (−∞)×0: set t=−x, rewrite as −(t+1)/e^t, growth comparison gives 0. Deduce the horizontal asymptote y=0 — write the equation, not only the word. At plus infinity f tends to plus infinity. Product rule: u=x−1, v=e^x gives f'(x)=x e^x. Table of variations with arrows, limits, and images. Particular points: (1,0), (0,−1). Sketch C_f.",
+        "Regardez le tableau. Calculer les limites aux bornes. En −∞ la forme est (−∞)×0 : t=−x, −(t+1)/e^t → 0. En déduire y=0. En +∞, f → +∞. Règle du produit : f'(x)=x e^x. Tableau de variation avec flèches, limites et images. Points : (1,0), (0,−1). Tracer C_f.",
       ),
       canvas: {
         actions: [
@@ -242,44 +307,45 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
             "Ne pas conclure trop tôt",
           ),
           step(
-            14,
+            12,
             "t=-x:\\quad f(-t)=-\\dfrac{t+1}{e^{t}}\\xrightarrow[t\\to+\\infty]{}0",
-            "Rewrite as a quotient. Growth comparison: t^n / e^t → 0 for every n.",
-            "On réécrit en quotient. Croissance comparée : t^n / e^t → 0 pour tout n.",
+            "Calculate: rewrite as a quotient. Growth comparison: t^n / e^t → 0 for every n.",
+            "Calculer : réécrire en quotient. Croissance comparée : t^n / e^t → 0 pour tout n.",
           ),
-          step(
+          boxed(
             32,
-            "\\lim_{x\\to-\\infty}f(x)=0,\\quad y=0\\text{ horizontal asymptote}",
-            "Hence y=0 is a horizontal asymptote as x → −∞.",
-            "Donc y=0 est asymptote horizontale lorsque x → −∞.",
+            "\\lim_{x\\to-\\infty}f(x)=0,\\ y=0",
+            "Boxed: horizontal asymptote y=0 as x → −∞. Write the equation y=0, not only “asymptote”.",
+            "Encadré : asymptote horizontale y=0 lorsque x → −∞. Écrire l’équation y=0.",
+            "limits",
           ),
           step(
             48,
             "\\lim_{x\\to+\\infty}f(x)=+\\infty",
-            "As x → +∞, x−1 → +∞ and e^x → +∞, so the product → +∞.",
-            "Lorsque x → +∞, x−1 → +∞ et e^x → +∞, donc le produit → +∞.",
+            "Calculate: as x → +∞, x−1 → +∞ and e^x → +∞, so the product → +∞. No horizontal asymptote at +∞.",
+            "Calculer : lorsque x → +∞ le produit → +∞. Pas d’asymptote horizontale en +∞.",
           ),
           step(
             62,
             "u=x-1,\\; u'=1,\\; v=e^{x},\\; v'=e^{x}",
-            "Proof sketch of the derivative: name u and v before differentiating.",
-            "Esquisse de preuve de la dérivée : on nomme u et v avant de dériver.",
+            "Calculate f': name u and v before differentiating (product rule).",
+            "Calculer f' : nommer u et v avant de dériver (règle du produit).",
           ),
           step(
             78,
             "f'=u'v+uv'=e^{x}+(x-1)e^{x}=e^{x}\\bigl(1+x-1\\bigr)=xe^{x}",
             "Every algebra step: expand, factor e^x, simplify the bracket to x.",
-            "Chaque étape : on développe, on factorise e^x, le crochet se réduit à x.",
+            "Chaque étape : développer, factoriser e^x, le crochet se réduit à x.",
           ),
-          step(
-            92,
+          variation(
+            96,
             VARIATION_TABLE,
-            "f' has the sign of x. f decreases on (−∞,0] and increases on [0,+∞). Global min f(0)=−1. Root: (x−1)e^x=0 ⇒ x=1.",
-            "f' a le signe de x. f décroît sur (−∞,0] et croît sur [0,+∞). Min global f(0)=−1. Racine : (x−1)e^x=0 ⇒ x=1.",
+            "Table of variations: f' has the sign of x. Arrows, limits, and images. Global min f(0)=−1. Root: (x−1)e^x=0 ⇒ x=1.",
+            "Tableau de variation : f' a le signe de x. Flèches, limites et images. Min global f(0)=−1. Racine x=1.",
           ),
           {
-            at: 100,
-            type: "render_graph",
+            at: 112,
+            type: "plotFunction",
             latex: "f(x)=(x-1)e^{x}",
             expression: "(x-1)*exp(x)",
             domain: [-3, 2],
@@ -294,7 +360,7 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
               expression: "(x-1)*exp(x)",
               xDomain: [-3, 2],
               yDomain: [-4, 8],
-              title: cap("y = (x−1)e^x", "y = (x−1)e^x"),
+              title: cap("C_f : y = (x−1)e^x", "C_f : y = (x−1)e^x"),
             },
           },
         ],
@@ -302,14 +368,14 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
     },
     {
       id: "real-example",
-      start: 160,
-      end: 320,
+      start: 175,
+      end: 335,
       phase: "real_example",
-      label: L("3. Official exercise", "3. Exercice d’épreuve"),
+      label: L("3. Official exercise (boxed)", "3. Exercice d’épreuve (encadré)"),
       avatar: { state: "speaking" },
       narration: L(
-        "Exam-style exercise. After the study of f, determine the number of real solutions of f(x)=m, then solve f(x)=−1/2. From the table, the range is [−1,+∞). If m is less than −1 there is no solution. If m equals −1 there is exactly one solution, x=0. If m is greater than or equal to 0 there is exactly one solution, on [1,+∞). If m is strictly between −1 and 0 there are two solutions. For m=−1/2, factor nothing extra: read the table, compare with f(1)=0, and conclude one root in (−∞,0) and one in (0,1).",
-        "Exercice type d’épreuve. Après l’étude de f, déterminer le nombre de solutions réelles de f(x)=m, puis traiter f(x)=−1/2. D’après le tableau, l’image est [−1,+∞). Si m<−1, aucune solution. Si m=−1, une seule solution x=0. Si m≥0, une seule solution, dans [1,+∞). Si −1<m<0, deux solutions. Pour m=−1/2, on ne factorise rien de plus : on lit le tableau, on compare à f(1)=0, et on conclut une racine dans (−∞,0) et une dans (0,1).",
+        "Exam-style exercise. After the study of f, determine the number of real solutions of f(x)=m, then solve f(x)=−1/2. f is continuous on R. Strictly decreasing on (−∞,0], strictly increasing on [0,+∞). Intermediate Value Theorem / Théorème des valeurs intermédiaires applies only after continuity and monotonicity. For m=−1/2 ∈ (−1,0) deduce exactly two roots. Box each sub-question.",
+        "Exercice type. Après l’étude, le nombre de solutions de f(x)=m, puis f(x)=−1/2. f est continue sur R, strictement monotone sur chaque morceau. Le théorème des valeurs intermédiaires n’est licite qu’après continuité et monotonie. Pour m=−1/2 ∈ (−1,0), deux racines. Encadrer chaque sous-question.",
       ),
       canvas: {
         actions: [
@@ -317,56 +383,65 @@ export const officialExamFourPhaseLesson: LessonTimeline = {
           fadeEq(4, "\\text{Solve }f(x)=m\\text{ and }f(x)=-\\tfrac12", "Official wording", "Énoncé type"),
           step(
             16,
+            "f\\text{ continuous on }\\mathbb{R}",
+            "Show that f is continuous on R (product of continuous functions) before any Intermediate Value Theorem.",
+            "Montrer que f est continue sur R (produit de fonctions continues) avant tout théorème des valeurs intermédiaires.",
+          ),
+          step(
+            40,
             "f\\bigl((−\\infty,0]\\bigr)=[-1,0),\\quad f\\bigl([0,+\\infty)\\bigr)=[-1,+\\infty)",
-            "Step 1 — read the range from the table of variation. Global minimum −1; limit 0 at −∞; +∞ at +∞.",
-            "Étape 1 — lire l’image sur le tableau de variation. Minimum global −1 ; limite 0 en −∞ ; +∞ en +∞.",
+            "Deduce the range from the table: strictly monotone on each piece, so the image of each interval is an interval.",
+            "En déduire l’image sur le tableau : monotonie stricte sur chaque morceau, donc l’image de chaque intervalle est un intervalle.",
+          ),
+          boxed(
+            72,
+            "m<-1:\\emptyset,\\ m=-1:\\{0\\},\\ m\\ge 0:\\text{one root},\\ -1<m<0:\\text{two roots}",
+            "Boxed Final Answer (number of solutions): read from the table, not guessed. Barème: discussion in m.",
+            "Réponse encadrée (nombre de solutions) : lue sur le tableau. Barème : discussion en m.",
+            "discussion in m",
           ),
           step(
-            48,
-            "m<-1:\\;\\emptyset,\\quad m=-1:\\;\\{0\\},\\quad m\\ge 0:\\;\\text{one root},\\quad -1<m<0:\\;\\text{two roots}",
-            "Step 2 — number of solutions by cases. This is the sentence the marker wants, copied from the table, not guessed.",
-            "Étape 2 — nombre de solutions par cas. C’est la phrase du barème, lue sur le tableau, non devinée.",
+            100,
+            "f(0)=-1,\\quad f(1)=0,\\quad -1<-\\tfrac12<0",
+            "Calculate: f(0)=−1 and f(1)=0 pin −1/2 between the minimum and the root. Continuity + monotonicity ⇒ unique root on each piece.",
+            "Calculer : f(0)=−1 et f(1)=0 encadrent −1/2. Continuité + monotonie ⇒ une racine unique sur chaque morceau.",
           ),
-          step(
-            88,
-            "f(0)=-1,\\quad f(1)=(1-1)e^{1}=0,\\quad -1<-\\tfrac12<0",
-            "Step 3 — substitution. f(0)=−1 and f(1)=0 pin −1/2 between the minimum and the root.",
-            "Étape 3 — substitution. f(0)=−1 et f(1)=0 encadrent −1/2 entre le minimum et la racine.",
-          ),
-          step(
-            118,
-            "f(x)=-\\tfrac12\\;\\Rightarrow\\; x_1\\in(-\\infty,0),\\; x_2\\in(0,1)",
-            "Step 4 — conclusion. Exactly two real solutions: one negative, one in (0,1). Do not claim a closed form unless the paper asks to solve numerically.",
-            "Étape 4 — conclusion. Exactement deux solutions réelles : une négative, une dans (0,1). On n’invente pas de forme fermée si l’énoncé ne demande pas de résolution numérique.",
+          boxed(
+            132,
+            "x_1\\in(-\\infty,0),\\ x_2\\in(0,1)",
+            "Boxed Final Answer: f(x)=−1/2 has exactly two real solutions (IVT + strict monotonicity). No closed form unless the paper asks to solve numerically.",
+            "Réponse encadrée : f(x)=−1/2 a exactement deux solutions réelles (TVI + monotonie stricte).",
+            "f(x)=-1/2",
           ),
         ],
       },
     },
     {
       id: "common-mistake",
-      start: 320,
-      end: 360,
+      start: 335,
+      end: 380,
       phase: "common_mistake",
-      label: L("4. Official-exam trap", "4. Piège d’épreuve"),
+      label: L("4. Common pitfalls (barème)", "4. Pièges fréquents (barème)"),
       avatar: { state: "speaking" },
       narration: L(
-        "Two traps that lose the question. First: writing (−∞)×0=0, or writing −∞, without rewriting as −(t+1)/e^t. That is not a proof. Second: treating (x−1) as a constant and writing f'(x)=e^x. Then the critical point disappears and students mark the minimum on the asymptote. Correct derivative: f'(x)=x e^x. Correct minimum: (0,−1), which is not on y=0.",
-        "Deux pièges qui font perdre la question. Premier : écrire (−∞)×0=0, ou écrire −∞, sans passer par −(t+1)/e^t. Ce n’est pas une preuve. Second : traiter (x−1) comme une constante et écrire f'(x)=e^x. Le point critique disparaît et on place le minimum sur l’asymptote. Dérivée correcte : f'(x)=x e^x. Minimum correct : (0,−1), qui n’est pas sur y=0.",
+        "Common pitfalls that lose barème marks. First: writing (−∞)×0=0 without rewriting as −(t+1)/e^t. Second: treating (x−1) as a constant and writing f'(x)=e^x. Third: applying the Intermediate Value Theorem without continuity and monotonicity. Correct: f'(x)=x e^x, min (0,−1), asymptote y=0.",
+        "Pièges fréquents (barème). Premier : écrire (−∞)×0=0 sans −(t+1)/e^t. Second : f'(x)=e^x. Troisième : TVI sans continuité ni monotonie. Correct : f'(x)=x e^x, min (0,−1), y=0.",
       ),
       canvas: {
         actions: [
-          fadeEq(2, "(-\\infty)\\times 0\\;\\text{ is not a value}", "Wrong reasoning", "Raisonnement faux"),
+          fadeEq(2, "(-\\infty)\\times 0\\;\\text{ is not a value}", "Wrong shortcut", "Raccourci faux"),
           step(
             10,
             "f'(x)\\neq e^{x}",
-            "Wrong: skip the product rule. Correct: f'(x)=x e^x, min at (0,−1), not on the asymptote y=0.",
-            "Faux : sauter la règle du produit. Correct : f'(x)=x e^x, min en (0,−1), pas sur l’asymptote y=0.",
+            "Wrong: skip the product rule, or apply IVT without hypotheses. Correct: f'(x)=x e^x, min at (0,−1), not on y=0.",
+            "Faux : sauter le produit, ou TVI sans hypothèses. Correct : f'(x)=x e^x, min en (0,−1).",
           ),
-          step(
-            24,
-            "f'(x)=xe^{x},\\quad \\min(0,-1),\\quad y=0\\text{ at }-\\infty\\text{ only}",
-            "Box the three facts the paper marks: derivative, minimum, asymptote. They are three different objects.",
-            "On encadre les trois faits notés : dérivée, minimum, asymptote. Ce sont trois objets distincts.",
+          boxed(
+            28,
+            "f'(x)=xe^{x},\\ \\min(0,-1),\\ y=0",
+            "Box the three facts the paper marks: derivative, minimum, asymptote equation y=0. They are three different objects.",
+            "Encadrer les trois faits notés : dérivée, minimum, équation d’asymptote y=0.",
+            "trap correction",
           ),
         ],
       },

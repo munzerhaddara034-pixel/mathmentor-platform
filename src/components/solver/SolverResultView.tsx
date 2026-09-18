@@ -71,6 +71,17 @@ export function SolverResultView({
           </div>
         ) : null}
 
+        <section className="exam-tip-box">
+          <p className="eyebrow">Key Idea / Exam Tip · الفكرة الأساسية (before any calculation)</p>
+          <p>{query.examTip?.en || query.summary}</p>
+          {query.examTip?.fr ? <p className="muted">{query.examTip.fr}</p> : null}
+          {query.examTip?.ar ? (
+            <p dir="rtl" lang="ar">
+              {query.examTip.ar}
+            </p>
+          ) : null}
+        </section>
+
         <section className="given-box">
           <p className="eyebrow">a) Given &amp; Aim · المعطيات والمطلوب</p>
           {given ? <Katex tex={given.latex} display /> : <p>{query.question}</p>}
@@ -87,15 +98,18 @@ export function SolverResultView({
             {query.steps.map((step, index) => (
               <li key={`${step.title}-${index}`}>
                 <strong>
-                  {index + 1}. {arabic ? step.titleAr || step.title : step.title}
+                  {index + 1}. {step.examVerbEn ? `${step.examVerbEn} / ${step.examVerbFr || ""} — ` : ""}
+                  {arabic ? step.titleAr || step.title : step.title}
                 </strong>
                 <p className="theorem">
                   {step.theoremEn || step.title}
+                  {step.theoremFr ? ` · ${step.theoremFr}` : ""}
                   {step.theoremAr ? ` · ${step.theoremAr}` : ""}
                 </p>
                 <Katex tex={step.latex} display />
                 <p>{arabic ? step.explanationAr || step.explanationEn : step.explanationEn}</p>
                 {!arabic && step.explanationFr ? <p className="muted">{step.explanationFr}</p> : null}
+                {step.boxed ? <p className="solver-boxed-flag">Boxed Final Answer · إجابة مؤطّرة</p> : null}
                 {!arabic && step.explanationAr ? (
                   <p className="muted" dir="rtl" lang="ar">
                     {step.explanationAr}
