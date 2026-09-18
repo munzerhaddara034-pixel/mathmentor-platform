@@ -17,13 +17,13 @@ Cold start / missing blob seeds the demo accounts (same table as below). Set `NE
 
 **Do not store sessions in `/tmp`.** `/tmp/mathmentor-data` is per-instance and ephemeral. That was the production bug: login wrote `auth.json` on instance A; the next navigation hit instance B with an empty file; `findSessionByToken` missed; the UI treated it as `/login?reason=replaced`.
 
-Binary uploads (solver images under `public/uploads`) stay on the local disk / `/tmp` and are not Blobs-backed.
+Binary uploads (solver images under `public/uploads`) stay on the local disk / `/tmp` and are not Blobs-backed. Voice-to-Math job JSON and recorded audio (`voice-math.json`, `voice-audio-*.json`) use the same Blobs/filesystem JSON helpers.
 
 ## What is protected
 
 Unauthenticated visitors to private routes are redirected to `/login` (middleware + server layouts + client fallback).
 
-| Role | Lessons + solver (`/lessons/*`, `/math-solver`, `/studio/player`…) | Live booking (`/live`) | Staff (`/studio/script`, `/admin`, `/professor`…) |
+| Role | Lessons + solver (`/lessons/*`, `/math-solver`, `/studio/player`…) | Live booking (`/live`) | Staff (`/studio/script`, `/studio/voice-solver`, `/admin`, `/professor`…) |
 | --- | --- | --- | --- |
 | Student / parent with **AI_TIER** or **BOTH** | yes | BOTH only | no |
 | Student with **LIVE_TIER** only | no → `/redeem?need=ai` | yes | no |

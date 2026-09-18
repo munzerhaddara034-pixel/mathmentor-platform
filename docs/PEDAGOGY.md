@@ -84,6 +84,7 @@ Without `GEMINI_API_KEY` / `OPENAI_API_KEY`, the deterministic demo solver still
 | Shared rules + LLM prompts | `src/lib/pedagogy/lebanese.ts` |
 | Timeline repair (injects missing tip / D_f / limits / table / box / graph) | `src/lib/studio/pedagogy.ts` |
 | AI solver system prompt + JSON schema | `src/lib/solver/llm.ts` |
+| Voice-to-Math (Whisper → LaTeX → canvas) | `src/lib/voiceMath/`, `/studio/voice-solver`, [VOICE_MATH.md](./VOICE_MATH.md) |
 | Demo stubs | `src/lib/solver/demoSolver.ts`, `src/lib/solver/assemble.ts` |
 | Video script generator | `src/lib/studio/scriptGenerator.ts` |
 | Seed lesson | `src/lib/studio/seedLesson.ts` (`leb-term-func-01`) |

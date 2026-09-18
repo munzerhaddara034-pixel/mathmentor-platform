@@ -6,6 +6,8 @@ data/heygen-jobs.json
 data/studio-events.json
 data/auth.json
 data/math-queries.json
+data/voice-math.json
+data/voice-audio-*.json
 data/live-sessions.json
 data/whatsapp-outbox.json
 data/notifications.json

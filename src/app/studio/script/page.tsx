@@ -168,6 +168,9 @@ export default function StudioScriptPage() {
           <Link className="btn" href="/lessons/interactive">
             Open player demo
           </Link>
+          <Link className="btn" href="/studio/voice-solver">
+            Voice-to-Math
+          </Link>
           <Link className="btn" href="/admin/video-generator">
             Generate HeyGen video
           </Link>

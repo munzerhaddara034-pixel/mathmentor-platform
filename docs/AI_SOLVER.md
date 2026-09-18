@@ -43,6 +43,7 @@ Hallucination guard: if the photo or text is blurry, cropped, or incomplete, the
 | `PATCH /api/admin/queries` | `{ id, auditStatus, auditNote }` |
 | `POST /api/jobs/whatsapp-reminders` | 30-min live reminders + catch-up video notices |
 | `/admin/video-generator` | existing HeyGen teacher tool |
+| `/studio/voice-solver` | Teacher **Voice-to-Math** recorder (staff). See [VOICE_MATH.md](./VOICE_MATH.md) |
 
 Private pages keep `noindex`, single-session cookies, and identity watermarks from [AUTH.md](./AUTH.md).
 

@@ -73,7 +73,7 @@ export function InteractiveLessonPlayer({
   const [currentTime, setCurrentTime] = useState(0);
   const [seekEpoch, setSeekEpoch] = useState(0);
   const [videoFailed, setVideoFailed] = useState(false);
-  const [videoClock, setVideoClock] = useState(Boolean(initialTimeline.media?.videoUrl));
+  const [videoClock, setVideoClock] = useState(Boolean(initialTimeline.media?.videoUrl || initialTimeline.media?.audioUrl));
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [boardFocus, setBoardFocus] = useState(false);
   const [teacherMode, setTeacherMode] = useState(Boolean(teacherModeProp && canTeach));
@@ -84,14 +84,16 @@ export function InteractiveLessonPlayer({
   const spokenKey = useRef<string | null>(null);
   const seekingRef = useRef(false);
   const timeRef = useRef(0);
-  const videoClockRef = useRef(Boolean(initialTimeline.media?.videoUrl));
+  const videoClockRef = useRef(Boolean(initialTimeline.media?.videoUrl || initialTimeline.media?.audioUrl));
   const canvasHostRef = useRef<HTMLDivElement>(null);
   const videoHostRef = useRef<HTMLDivElement>(null);
   const [fullscreenTarget, setFullscreenTarget] = useState<"board" | "video" | null>(null);
   timeRef.current = currentTime;
 
   const videoUrl = videoFailed ? undefined : timeline.media?.videoUrl;
-  const clockMaster = Boolean(videoUrl) && videoClock;
+  const audioUrl = timeline.media?.audioUrl;
+  const hasMediaClock = Boolean(videoUrl || audioUrl);
+  const clockMaster = hasMediaClock && videoClock;
   const clockMasterRef = useRef(clockMaster);
   clockMasterRef.current = clockMaster;
   videoClockRef.current = videoClock;
@@ -111,10 +113,10 @@ export function InteractiveLessonPlayer({
   useEffect(() => {
     setTimeline(initialTimeline);
     setVideoFailed(false);
-    setVideoClock(Boolean(initialTimeline.media?.videoUrl));
+    setVideoClock(Boolean(initialTimeline.media?.videoUrl || initialTimeline.media?.audioUrl));
     setVideoDuration(null);
     setResolvedQuizzes([]);
-  }, [initialTimeline.id, initialTimeline.media?.videoUrl]);
+  }, [initialTimeline.id, initialTimeline.media?.videoUrl, initialTimeline.media?.audioUrl]);
 
   useEffect(() => {
     if (teacherModeProp && (canTeach || staffUnlock)) setTeacherMode(true);
@@ -214,7 +216,7 @@ export function InteractiveLessonPlayer({
 
   const speakSegment = useCallback(
     (id: string | undefined, language: LessonLocale, text: string) => {
-      if (!("speechSynthesis" in window) || !id || videoUrl) return;
+      if (!("speechSynthesis" in window) || !id || videoUrl || audioUrl) return;
       const key = `${id}:${language}`;
       if (spokenKey.current === key) return;
       spokenKey.current = key;
@@ -226,11 +228,11 @@ export function InteractiveLessonPlayer({
       if (voice) utterance.voice = voice;
       window.speechSynthesis.speak(utterance);
     },
-    [speed, videoUrl],
+    [speed, videoUrl, audioUrl],
   );
 
   useEffect(() => {
-    if (videoUrl) return;
+    if (videoUrl || audioUrl) return;
     if (!playing || !segment) {
       if (!playing && "speechSynthesis" in window) window.speechSynthesis.cancel();
       if (!playing) spokenKey.current = null;
@@ -238,7 +240,7 @@ export function InteractiveLessonPlayer({
     }
     if (frozen) return;
     speakSegment(segment.id, uiLanguage, pickText(segment.narration, uiLanguage));
-  }, [frozen, playing, segment, speakSegment, uiLanguage, videoUrl]);
+  }, [frozen, playing, segment, speakSegment, uiLanguage, videoUrl, audioUrl]);
 
   useEffect(() => {
     return () => {
@@ -260,7 +262,7 @@ export function InteractiveLessonPlayer({
         if ("speechSynthesis" in window) window.speechSynthesis.cancel();
         setSeekEpoch((value) => value + 1);
         seekingRef.current = true;
-        if (videoUrl) {
+        if (videoUrl || audioUrl) {
           const drive =
             videoDuration != null && Number.isFinite(videoDuration) && videoDuration > 0
               ? next < videoDuration - 0.04
@@ -271,7 +273,7 @@ export function InteractiveLessonPlayer({
         }
       }
     },
-    [resolvedQuizzes, timeline, videoDuration, videoUrl],
+    [resolvedQuizzes, timeline, videoDuration, videoUrl, audioUrl],
   );
 
   useEffect(() => {
@@ -447,15 +449,17 @@ export function InteractiveLessonPlayer({
             onEnded={onVideoEnded}
             onError={() => {
               setVideoFailed(true);
-              videoClockRef.current = false;
-              clockMasterRef.current = false;
-              setVideoClock(false);
+              if (!audioUrl) {
+                videoClockRef.current = false;
+                clockMasterRef.current = false;
+                setVideoClock(false);
+              }
             }}
             onDuration={(duration) => {
               setVideoDuration(duration);
               const drive = timeRef.current < duration - 0.04;
               videoClockRef.current = drive;
-              clockMasterRef.current = Boolean(videoUrl) && drive;
+              clockMasterRef.current = Boolean(videoUrl || audioUrl) && drive;
               setVideoClock(drive);
             }}
           />
