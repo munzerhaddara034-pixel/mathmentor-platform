@@ -30,6 +30,8 @@ export type LatexStep = {
 
 export type VoiceTranscript = {
   text: string;
+  /** Official LaTeX after the formatting cleaning layer (spoken → Word-equation). */
+  formattedLatex?: string;
   language?: string;
   durationSec?: number;
   segments: WhisperSegment[];

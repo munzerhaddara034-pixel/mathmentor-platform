@@ -1,6 +1,7 @@
 import { INSTRUCTOR_AR, INSTRUCTOR_EN } from "@/lib/pedagogy/lebanese";
 import { demoSolve } from "@/lib/solver/demoSolver";
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
+import { formatLebaneseEquation, spokenMathToLebaneseLatex } from "@/lib/math/lebaneseEquationFormat";
 import { extractLatexHints, spokenMathToPlain } from "./phrases";
 import type { LatexStep, VoiceTranscript } from "./types";
 
@@ -12,6 +13,8 @@ export const DEMO_DICTATION_EN =
 
 export const DEMO_DICTATION_EXP_AR =
   "ادرس الدالة إف إكس تساوي إكس ناقص واحد في إي أس إكس. مجموعة التعريف كل الأعداد الحقيقية. نهاية عند الناقص إنفينيتي صفر. ديريفاتيف إكس إي أس إكس.";
+
+export const DEMO_DICTATION_FRAC_AR = "واحد على إكس. إكس سكوير. جذر إكس.";
 
 export type DemoDictation = {
   id: string;
@@ -47,6 +50,14 @@ export const DEMO_DICTATIONS: DemoDictation[] = [
     language: "ar",
     track: "ls",
   },
+  {
+    id: "frac-ar",
+    labelAr: "واحد على إكس · إكس سكوير",
+    labelEn: "1/x and x squared (Arabic)",
+    transcript: DEMO_DICTATION_FRAC_AR,
+    language: "ar",
+    track: "ls",
+  },
 ];
 
 export function defaultDemoDictation(language: LessonLanguage = "ar"): DemoDictation {
@@ -64,6 +75,7 @@ export function demoTranscriptFromStub(opts?: {
   const stub = opts?.transcript?.trim() || defaultDemoDictation(language).transcript;
   return {
     text: stub,
+    formattedLatex: spokenMathToLebaneseLatex(stub),
     language,
     durationSec: opts?.durationSec ?? 48,
     segments: equalSegments(stub, opts?.durationSec ?? 48),
@@ -89,10 +101,10 @@ export function equalSegments(text: string, durationSec: number): Array<{ start:
 export function questionFromTranscript(transcript: string) {
   const plain = spokenMathToPlain(transcript);
   const compact = plain.replace(/\s+/g, "");
-  if (/x\^2/.test(plain) && /(5|five|خمسة)/i.test(plain) && /(6|six|ستة)/i.test(plain)) {
+  if (/x\^\{?2\}/.test(plain) && /(5|five|خمسة)/i.test(plain) && /(6|six|ستة)/i.test(plain)) {
     return "Solve x^2 - 5x + 6 = 0";
   }
-  if (/x\^2\s*(minus|-)\s*5\s*x\s*(plus|\+)\s*6|x\^2-5x\+6/i.test(compact)) {
+  if (/x\^\{?2\}\s*(minus|-)\s*5\s*x\s*(plus|\+)\s*6|x\^\{?2\}-5x\+6/i.test(compact)) {
     return "Solve x^2 - 5x + 6 = 0";
   }
   if (/\(x-1\)e\^x|x-1.*e\^x|\(x\s*-?\s*1\).*e\^x/i.test(compact) || (/e\^x/.test(plain) && /x\s*minus\s*1|x-1/.test(plain))) {
@@ -100,6 +112,9 @@ export function questionFromTranscript(transcript: string) {
   }
   if (/lim.*\+?inf/i.test(plain) && /3x\^2/i.test(plain)) {
     return "Compute lim x->inf (3x^2 + 1)/(x^2 - 2)";
+  }
+  if (/(\\frac\{1\}\{x\}|1\s*\/\s*x)/.test(plain) && /x\^\{?2\}/.test(plain)) {
+    return "Write \\frac{1}{x}, x^{2}, and \\sqrt{x}.";
   }
   if (/f\(x\)|Study the function|x\^2/i.test(plain)) {
     return plain.slice(0, 280) || "Solve x^2 - 5x + 6 = 0";
@@ -115,7 +130,7 @@ export function demoParseTranscript(transcript: string, language: LessonLanguage
     title: step.title,
     titleFr: step.titleFr,
     titleAr: step.titleAr,
-    latex: step.latex || hints[index]?.latex || "",
+    latex: formatLebaneseEquation(step.latex || hints[index]?.latex || ""),
     examVerbEn: step.examVerbEn,
     examVerbFr: step.examVerbFr,
     theoremEn: step.theoremEn,
@@ -126,16 +141,19 @@ export function demoParseTranscript(transcript: string, language: LessonLanguage
     explanationAr: step.explanationAr,
     boxed: step.boxed,
   }));
-  if (!latexSteps.some((step) => /x\^\{2\}|x\^2/.test(step.latex)) && hints.length) {
-    latexSteps.unshift({
-      title: "Spoken math → LaTeX",
-      titleFr: "Oral → LaTeX",
-      titleAr: "من الكلام إلى لاتخ",
-      latex: hints.map((hint) => hint.latex).join("\\quad "),
-      explanationEn: `Heard: ${hints.map((hint) => `${hint.spoken} → $${hint.latex}$`).join("; ")}.`,
-      explanationFr: `Entendu : ${hints.map((hint) => `${hint.spoken} → $${hint.latex}$`).join("; ")}.`,
-      explanationAr: `سُمع: ${hints.map((hint) => `${hint.spoken} ← ${hint.latex}`).join("؛ ")}.`,
-    });
+  if (hints.length) {
+    const spokenLatex = formatLebaneseEquation(hints.map((hint) => hint.latex).join("\\quad "));
+    if (latexSteps[0]?.latex !== spokenLatex) {
+      latexSteps.unshift({
+        title: "Spoken math → LaTeX",
+        titleFr: "Oral → LaTeX",
+        titleAr: "من الكلام إلى لاتخ",
+        latex: spokenLatex,
+        explanationEn: `Heard: ${hints.map((hint) => `${hint.spoken} → $${hint.latex}$`).join("; ")}.`,
+        explanationFr: `Entendu : ${hints.map((hint) => `${hint.spoken} → $${hint.latex}$`).join("; ")}.`,
+        explanationAr: `سُمع: ${hints.map((hint) => `${hint.spoken} ← ${hint.latex}`).join("؛ ")}.`,
+      });
+    }
   }
   solution.warning =
     solution.warning ||

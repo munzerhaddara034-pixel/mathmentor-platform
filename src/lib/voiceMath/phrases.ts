@@ -1,11 +1,13 @@
 /**
- * Spoken Arabic / English math → standard LaTeX.
+ * Spoken Arabic / English math → official Lebanese / Word Insert Equation LaTeX.
  * Used by the demo parser and as a hint for the LLM step.
- *
- * Examples from the product brief:
- *   «إكس مربع» → $x^2$
- *   «نهاية عند الزائد إنفينيتي» → $\lim_{x \to +\infty}$
- *   «ديريفاتيف» → $f'(x)$
+ * The Voice-to-Math cleaning layer (`src/lib/math/lebaneseEquationFormat.ts`) is the
+ * source of truth before the live canvas:
+ *   «إكس سكوير» → x^{2} (renders as a superscript, never a visible caret)
+ *   «واحد على إكس» → \frac{1}{x} (never 1/x)
+ *   «جذر إكس» → \sqrt{x} (never the letters sqrt)
+ *   «نهاية عند الزائد إنفينيتي» → \lim\limits_{x \to +\infty}
+ *   «ديريفاتيف» → f'(x)
  */
 
 export type SpokenLatexHint = {
@@ -15,16 +17,18 @@ export type SpokenLatexHint = {
 };
 
 export const SPOKEN_LATEX_HINTS: SpokenLatexHint[] = [
-  { pattern: /اكس\s*مربع|إكس\s*مربع|اكس\s*تربيع|إكس\s*تربيع|x\s*squared|x\s*square/gi, latex: "x^{2}", spoken: "إكس مربع" },
+  { pattern: /اكس\s*مربع|إكس\s*مربع|اكس\s*تربيع|إكس\s*تربيع|إكس\s*سكوير|اكس\s*سكوير|x\s*squared|x\s*square/gi, latex: "x^{2}", spoken: "إكس سكوير" },
+  { pattern: /واحد\s+على\s+(?:إكس|اكس|x)|one\s+over\s+x/gi, latex: "\\frac{1}{x}", spoken: "واحد على إكس" },
+  { pattern: /جذر\s*(?:تربيعي\s*(?:ل|لـ)?)?\s*(?:إكس|اكس|x)|square\s*root\s*(?:of\s*)?x/gi, latex: "\\sqrt{x}", spoken: "جذر إكس" },
   { pattern: /اكس\s*مكعب|إكس\s*مكعب|x\s*cubed/gi, latex: "x^{3}", spoken: "إكس مكعب" },
   {
     pattern: /نهاية\s*عند\s*(?:ال)?زائد\s*(?:انفينيتي|إنفينيتي|ما لا نهاية)|limit\s*(?:as\s*x\s*(?:goes|tends)\s*to\s*)?(?:plus\s*)?infinity/gi,
-    latex: "\\lim_{x \\to +\\infty}",
+    latex: "\\lim\\limits_{x \\to +\\infty}",
     spoken: "نهاية عند الزائد إنفينيتي",
   },
   {
     pattern: /نهاية\s*عند\s*(?:ال)?ناقص\s*(?:انفينيتي|إنفينيتي|ما لا نهاية)|limit\s*(?:as\s*x\s*(?:goes|tends)\s*to\s*)?minus\s*infinity/gi,
-    latex: "\\lim_{x \\to -\\infty}",
+    latex: "\\lim\\limits_{x \\to -\\infty}",
     spoken: "نهاية عند الناقص إنفينيتي",
   },
   { pattern: /ديريفاتيف|المشتق(?:ة)?|derivative/gi, latex: "f'(x)", spoken: "ديريفاتيف" },
@@ -37,9 +41,11 @@ export const SPOKEN_LATEX_HINTS: SpokenLatexHint[] = [
 ];
 
 const REPLACEMENTS: Array<[RegExp, string]> = [
-  [/إكس مربع|اكس مربع|إكس تربيع|اكس تربيع/gi, "x^2"],
-  [/إكس مكعب|اكس مكعب/gi, "x^3"],
-  [/واي مربع|واي تربيع/gi, "y^2"],
+  [/إكس مربع|اكس مربع|إكس تربيع|اكس تربيع|إكس سكوير|اكس سكوير/gi, "x^{2}"],
+  [/واحد على إكس|واحد على اكس/gi, "1/x"],
+  [/جذر إكس|جذر اكس/gi, "sqrt(x)"],
+  [/إكس مكعب|اكس مكعب/gi, "x^{3}"],
+  [/واي مربع|واي تربيع/gi, "y^{2}"],
   [/إف إكس|اف إكس|إف اكس|اف اكس/gi, "f(x)"],
   [/جي إكس|جي اكس/gi, "g(x)"],
   [/إي أس إكس|اي اس اكس|e to the x/gi, "e^x"],
@@ -64,8 +70,9 @@ const REPLACEMENTS: Array<[RegExp, string]> = [
   [/احسب|أحسب/gi, "Calculate"],
   [/بيّن أن|بين أن/gi, "Show that"],
   [/استنتج/gi, "Deduce"],
-  [/x squared/gi, "x^2"],
-  [/x cubed/gi, "x^3"],
+  [/x squared/gi, "x^{2}"],
+  [/x cubed/gi, "x^{3}"],
+  [/one over x|1 over x/gi, "1/x"],
   [/f of x/gi, "f(x)"],
   [/f prime(?: of x)?/gi, "f'(x)"],
   [/limit as x (?:goes|tends) to plus infinity/gi, "lim x->+inf"],

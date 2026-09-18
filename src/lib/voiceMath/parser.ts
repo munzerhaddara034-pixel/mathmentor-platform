@@ -4,6 +4,7 @@ import { assembleSolution } from "@/lib/solver/assemble";
 import { geminiApiKey, openaiSolverKey } from "@/lib/solver/llm";
 import type { MathSolution, SolverStep, StudyKind } from "@/lib/solver/types";
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
+import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import { demoParseTranscript } from "./demo";
 import { extractLatexHints, spokenMathToPlain } from "./phrases";
 import type { LatexStep, VoiceParseSource } from "./types";
@@ -96,11 +97,12 @@ const SPEECH_PROMPT = `${OFFICIAL_METHODOLOGY_PROMPT}
 You are converting a TEACHER'S SPOKEN MATH DICTATION (Arabic Lebanese dialect mixed with English/French exam verbs) into a full official Lebanese solution.
 
 Convert spoken phrases to pure LaTeX. Canonical examples:
-- «إكس مربع» / "x squared" → $x^2$  (write as x^{2} in JSON latex fields)
-- «نهاية عند الزائد إنفينيتي» / "limit as x goes to plus infinity" → $\\lim_{x \\to +\\infty}$
+- «إكس مربع» / «إكس سكوير» / "x squared" → $x^{2}$
+- «واحد على إكس» / "one over x" → $\\frac{1}{x}$ (NEVER 1/x)
+- «نهاية عند الزائد إنفينيتي» / "limit as x goes to plus infinity" → $\\lim\\limits_{x \\to +\\infty}$
 - «ديريفاتيف» / "derivative" / «إف فتحة» → $f'(x)$
-- مجموعة التعريف → D_f
-Never write Unicode mini-math.
+- «جذر إكس» / "sqrt x" → $\\sqrt{x}$ (NEVER the letters sqrt)
+Never write Unicode mini-math. Never slash fractions. Never a visible caret. Limits under the operator; integral bounds above/below.
 
 Return ONE JSON object:
 {
@@ -162,7 +164,7 @@ function toLatexSteps(parsed: z.infer<typeof parseJsonSchema>): LatexStep[] {
     title: step.title,
     titleFr: step.titleFr,
     titleAr: step.titleAr,
-    latex: step.latex,
+    latex: formatLebaneseEquation(step.latex),
     examVerbEn: step.examVerbEn,
     examVerbFr: step.examVerbFr,
     theoremEn: step.theoremEn,
@@ -230,18 +232,21 @@ function solutionFromParsed(
   });
   return {
     question,
-    latexDraft: parsed.latexDraft || parsed.given?.latex || latexSteps[0]?.latex || "",
+    latexDraft: formatLebaneseEquation(parsed.latexDraft || parsed.given?.latex || latexSteps[0]?.latex || ""),
     latexSteps: latexSteps.length ? latexSteps : solution.steps,
     solution,
   };
 }
 
-async function parseWithGemini(transcript: string, language: LessonLanguage, track: CertificateTrack) {
+async function parseWithGemini(transcript: string, language: LessonLanguage, track: CertificateTrack, formattedTranscript?: string) {
   const key = geminiApiKey();
   if (!key) throw new Error("GEMINI_API_KEY is not set.");
   const hints = extractLatexHints(transcript);
   const userText = [
     `Spoken transcript:\n${transcript}`,
+    formattedTranscript && formattedTranscript !== transcript
+      ? `Formatting cleaning layer (Lebanese / Word Insert Equation):\n${formattedTranscript}`
+      : "",
     `Normalized draft: ${spokenMathToPlain(transcript)}`,
     hints.length ? `Detected spoken→LaTeX: ${hints.map((h) => `${h.spoken} → ${h.latex}`).join("; ")}` : "",
     `Language preference: ${language}`,
@@ -279,10 +284,14 @@ async function parseWithGemini(transcript: string, language: LessonLanguage, tra
   throw new Error(lastError);
 }
 
-async function parseWithOpenAI(transcript: string, language: LessonLanguage, track: CertificateTrack) {
+async function parseWithOpenAI(transcript: string, language: LessonLanguage, track: CertificateTrack, formattedTranscript?: string) {
   const key = openaiSolverKey();
   if (!key) throw new Error("OPENAI_API_KEY is not set.");
   const model = process.env.OPENAI_VOICE_MODEL?.trim() || process.env.OPENAI_MODEL?.trim() || "gpt-4o";
+  const layer =
+    formattedTranscript && formattedTranscript !== transcript
+      ? `\nFormatting cleaning layer (Lebanese / Word Insert Equation):\n${formattedTranscript}`
+      : "";
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -295,7 +304,10 @@ async function parseWithOpenAI(transcript: string, language: LessonLanguage, tra
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SPEECH_PROMPT },
-        { role: "user", content: `Transcript:\n${transcript}\nNormalized: ${spokenMathToPlain(transcript)}\nLanguage: ${language}\nTrack: ${track}` },
+        {
+          role: "user",
+          content: `Transcript:\n${transcript}${layer}\nNormalized: ${spokenMathToPlain(transcript)}\nLanguage: ${language}\nTrack: ${track}`,
+        },
       ],
     }),
   });
@@ -309,6 +321,7 @@ async function parseWithOpenAI(transcript: string, language: LessonLanguage, tra
 
 export async function parseSpeechToMath(input: {
   transcript: string;
+  formattedTranscript?: string;
   language?: LessonLanguage;
   track?: CertificateTrack;
 }): Promise<{
@@ -321,17 +334,18 @@ export async function parseSpeechToMath(input: {
 }> {
   const language: LessonLanguage = input.language === "fr" ? "fr" : input.language === "en" ? "en" : "ar";
   const track: CertificateTrack = input.track ?? "ls";
+  const formatted = input.formattedTranscript || formatLebaneseEquation(input.transcript);
 
   if (geminiApiKey()) {
     try {
-      const parsed = await parseWithGemini(input.transcript, language, track);
+      const parsed = await parseWithGemini(input.transcript, language, track, formatted);
       return { ...parsed, parseSource: "gemini" };
     } catch (error) {
       if (!openaiSolverKey()) {
         const demo = demoParseTranscript(input.transcript, language, track);
         return {
           question: demo.question,
-          latexDraft: demo.hints.map((h) => h.latex).join(" \\quad ") || demo.solution.given.latex,
+          latexDraft: formatLebaneseEquation(demo.hints.map((h) => h.latex).join(" \\quad ") || demo.solution.given.latex),
           latexSteps: demo.latexSteps,
           solution: demo.solution,
           parseSource: "demo",
@@ -343,13 +357,13 @@ export async function parseSpeechToMath(input: {
 
   if (openaiSolverKey()) {
     try {
-      const parsed = await parseWithOpenAI(input.transcript, language, track);
+      const parsed = await parseWithOpenAI(input.transcript, language, track, formatted);
       return { ...parsed, parseSource: "openai" };
     } catch (error) {
       const demo = demoParseTranscript(input.transcript, language, track);
       return {
         question: demo.question,
-        latexDraft: demo.hints.map((h) => h.latex).join(" \\quad ") || demo.solution.given.latex,
+        latexDraft: formatLebaneseEquation(demo.hints.map((h) => h.latex).join(" \\quad ") || demo.solution.given.latex),
         latexSteps: demo.latexSteps,
         solution: demo.solution,
         parseSource: "demo",
@@ -361,7 +375,7 @@ export async function parseSpeechToMath(input: {
   const demo = demoParseTranscript(input.transcript, language, track);
   return {
     question: demo.question,
-    latexDraft: demo.hints.map((h) => h.latex).join(" \\quad ") || demo.solution.given.latex,
+    latexDraft: formatLebaneseEquation(demo.hints.map((h) => h.latex).join(" \\quad ") || demo.solution.given.latex),
     latexSteps: demo.latexSteps,
     solution: demo.solution,
     parseSource: "demo",

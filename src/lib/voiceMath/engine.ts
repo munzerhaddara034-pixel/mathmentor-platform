@@ -6,6 +6,7 @@ import { parseSpeechToMath } from "./parser";
 import { attachTeacherAudio, syncTimelineToAudio } from "./sync";
 import { getVoiceJob, saveVoiceAudio, saveVoiceJob } from "./store";
 import { transcribeAudioOrDemo } from "./whisper";
+import { formatLatexFields, spokenMathToLebaneseLatex } from "@/lib/math/lebaneseEquationFormat";
 import type { StoredAudio, VoiceMathJob, VoiceMathResult } from "./types";
 
 export type VoiceEngineInput = {
@@ -29,31 +30,39 @@ export async function runVoiceMath(input: VoiceEngineInput): Promise<VoiceMathRe
     durationSec: input.durationSec,
     demo: input.demo,
   });
+  // Formatting cleaning layer — spoken Arabic/English → Word Insert Equation LaTeX
+  // BEFORE the solver and Live Canvas render. Demo transcripts take the same path.
+  const formattedLatex = spokenMathToLebaneseLatex(transcript.text);
+  transcript.formattedLatex = formattedLatex;
   const parsed = await parseSpeechToMath({
     transcript: transcript.text,
+    formattedTranscript: formattedLatex,
     language: input.language ?? (transcript.language === "fr" ? "fr" : transcript.language === "en" ? "en" : "ar"),
     track: input.track,
   });
   const durationSec = input.durationSec || transcript.durationSec || parsed.solution.timeline.durationSec;
-  const synced = syncTimelineToAudio(parsed.solution.timeline, {
+  const synced = syncTimelineToAudio(formatLatexFields(parsed.solution.timeline), {
     durationSec,
     segments: transcript.segments,
   });
+  const latexSteps = formatLatexFields(parsed.latexSteps);
+  const canvasTimeline = formatLatexFields(synced.canvasTimeline);
+  const timeline = formatLatexFields(synced.timeline);
   const warning = [transcript.warning, parsed.warning, parsed.solution.warning].filter(Boolean).join(" ");
   return {
     transcript,
     question: parsed.question,
-    latexDraft: parsed.latexDraft,
-    latexSteps: parsed.latexSteps,
-    canvasTimeline: synced.canvasTimeline,
+    latexDraft: spokenMathToLebaneseLatex(parsed.latexDraft),
+    latexSteps,
+    canvasTimeline,
     avatarScript: parsed.solution.avatarScript,
-    timeline: synced.timeline,
-    solution: {
+    timeline,
+    solution: formatLatexFields({
       ...parsed.solution,
-      canvasTimeline: synced.canvasTimeline,
-      timeline: synced.timeline,
+      canvasTimeline,
+      timeline,
       warning: warning || parsed.solution.warning,
-    },
+    }),
     parseSource: parsed.parseSource,
     warning: warning || undefined,
   };

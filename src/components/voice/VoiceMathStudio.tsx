@@ -15,7 +15,7 @@ type SolvePayload = {
   ok?: boolean;
   id?: string;
   job?: VoiceMathJob;
-  transcript?: { text: string; source?: string; warning?: string };
+  transcript?: { text: string; formattedLatex?: string; source?: string; warning?: string };
   latexSteps?: LatexStep[];
   timeline?: LessonTimeline;
   warning?: string;
@@ -211,6 +211,22 @@ export function VoiceMathStudio({
           <p className="paper" dir="auto">
             {job.transcript.text}
           </p>
+          {job.transcript.formattedLatex ? (
+            <div className="voice-cleaned-latex" style={{ marginTop: 12 }}>
+              <p className="eyebrow">Formatting cleaning layer · Word Insert Equation</p>
+              <p className="paper" dir="ltr">
+                {job.transcript.formattedLatex}
+              </p>
+              {/[\u0600-\u06FF]/.test(job.transcript.formattedLatex) ? null : (
+                <Katex tex={job.transcript.formattedLatex} display />
+              )}
+            </div>
+          ) : null}
+          {job.latexDraft ? (
+            <p style={{ marginTop: 12 }}>
+              <Katex tex={job.latexDraft} display />
+            </p>
+          ) : null}
           <div className="voice-latex-steps">
             {job.latexSteps.map((step, index) => (
               <article key={`${step.title}-${index}`} className={step.boxed ? "studio-step-boxed" : undefined}>

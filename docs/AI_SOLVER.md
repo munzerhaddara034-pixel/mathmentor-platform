@@ -10,7 +10,7 @@ Every solution — Gemini, OpenAI, or the demo engine — has three sections **a
 
 1. **Given & Aim** (`given.latex`, `given.aimEn` / `aimFr` / `aimAr`) · المعطيات والمطلوب
 2. **Step-by-step** with a named theorem/reason on every line (`theoremEn` / `theoremFr` / `theoremAr`) and **pure LaTeX** (`f'(x)`, `\int`, `\lim`, `\ln`, `e^{x}`, `z=a+ib`)
-3. **Final Answer Box** (`finalAnswerLatex`) — framed in the UI
+3. **Final Answer Box** (`finalAnswerLatex`) — framed in the UI. Student math is passed through the Lebanese / Word Insert Equation cleaner (`\frac{a}{b}`, `x^{n}`, `\sqrt`, `\lim\limits`, `\int\limits`) so slash fractions, visible carets, and the letters `sqrt` never reach the canvas.
 
 For a real-function study the steps are, in order:
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 
 declare global {
   interface Window {
@@ -9,9 +10,10 @@ declare global {
 }
 
 export function MathTex({ tex, inline }: { tex?: string; inline?: boolean }) {
+  const cleaned = tex ? formatLebaneseEquation(tex) : tex;
   useEffect(() => {
     void window.MathJax?.typesetPromise?.();
-  }, [tex]);
-  if (!tex) return null;
-  return inline ? <span>{`\\(${tex}\\)`}</span> : <div className="math-block">{`\\[${tex}\\]`}</div>;
+  }, [cleaned]);
+  if (!cleaned) return null;
+  return inline ? <span>{`\\(${cleaned}\\)`}</span> : <div className="math-block">{`\\[${cleaned}\\]`}</div>;
 }

@@ -1,4 +1,11 @@
-export { DEMO_DICTATIONS, DEMO_DICTATION_AR, DEMO_DICTATION_EN, defaultDemoDictation } from "./demo";
+export {
+  DEMO_DICTATIONS,
+  DEMO_DICTATION_AR,
+  DEMO_DICTATION_EN,
+  DEMO_DICTATION_EXP_AR,
+  DEMO_DICTATION_FRAC_AR,
+  defaultDemoDictation,
+} from "./demo";
 export { spokenMathToPlain, extractLatexHints } from "./phrases";
 export { transcribeAudioOrDemo, hasWhisperKey } from "./whisper";
 export { parseSpeechToMath } from "./parser";

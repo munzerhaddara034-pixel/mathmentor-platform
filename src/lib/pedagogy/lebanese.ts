@@ -202,7 +202,13 @@ Then the official sequence.
 Each sub-question ends with a Boxed Final Answer aligned to the official mark distribution.
 End with Common Pitfalls that lose barème marks.
 
-ALL mathematics MUST be pure LaTeX (never Unicode mini-math). Use f'(x), \\int, \\lim, \\ln, e^{x}, z=a+ib, \\mathbb{R}, D_f.`;
+ALL mathematics MUST be pure LaTeX (never Unicode mini-math). Use f'(x), \\int, \\lim, \\ln, e^{x}, z=a+ib, \\mathbb{R}, D_f.
+
+Equation formatting (Lebanese official booklet / Word Insert Equation):
+- NEVER slash fractions (1/x, (x+1)/(x-1)). Always \\frac{a}{b}.
+- NEVER a visible caret. Write x^{2} so it renders as a superscript, never x^2 as plain text.
+- NEVER the letters sqrt. Always \\sqrt{...}.
+- Limits under the symbol: \\lim\\limits_{x \\to a}. Integral bounds above and below: \\int\\limits_{a}^{b}.`;
 
 export const SOLVER_SYSTEM_PROMPT = `${OFFICIAL_METHODOLOGY_PROMPT}
 

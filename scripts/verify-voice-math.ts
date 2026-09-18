@@ -2,9 +2,16 @@
  * Demo speech→LaTeX + pedagogy checks (no Next server).
  * Run: npx tsx scripts/verify-voice-math.ts
  */
-import { DEMO_DICTATION_AR, DEMO_DICTATION_EN, demoParseTranscript, questionFromTranscript } from "../src/lib/voiceMath/demo";
+import {
+  DEMO_DICTATION_AR,
+  DEMO_DICTATION_EN,
+  DEMO_DICTATION_FRAC_AR,
+  demoParseTranscript,
+  questionFromTranscript,
+} from "../src/lib/voiceMath/demo";
 import { extractLatexHints, spokenMathToPlain } from "../src/lib/voiceMath/phrases";
 import { syncTimelineToAudio } from "../src/lib/voiceMath/sync";
+import { spokenMathToLebaneseLatex, hasForbiddenEquationForm } from "../src/lib/math/lebaneseEquationFormat";
 import { FORBIDDEN_NAME_AR, FORBIDDEN_NAME_EN, INSTRUCTOR_AR, INSTRUCTOR_EN } from "../src/lib/pedagogy/lebanese";
 import { hasExamTip, hasVariationTable, hasBoxedAnswer } from "../src/lib/studio/timeline";
 
@@ -14,7 +21,7 @@ function assert(condition: unknown, message: string): asserts condition {
 
 function main() {
   const plainAr = spokenMathToPlain(DEMO_DICTATION_AR);
-  assert(/x\^2/.test(plainAr), "Arabic dictation should map إكس مربع → x^2");
+  assert(/x\^\{2\}/.test(plainAr), "Arabic dictation should map إكس مربع → x^{2}");
   assert(/f'\(x\)|f\(x\)/.test(plainAr), "Arabic dictation should map ديريفاتيف / إف إكس");
   assert(/lim x->\+inf/.test(plainAr), "Arabic dictation should map نهاية عند الزائد إنفينيتي");
 
@@ -34,6 +41,18 @@ function main() {
 
   assert(questionFromTranscript(DEMO_DICTATION_AR).includes("x^2 - 5x + 6"), "quadratic question from Arabic stub");
   assert(questionFromTranscript(DEMO_DICTATION_EN).includes("x^2 - 5x + 6"), "quadratic question from English stub");
+
+  const cleanedFrac = spokenMathToLebaneseLatex(DEMO_DICTATION_FRAC_AR);
+  assert(cleanedFrac.includes("\\frac{1}{x}"), "cleaning layer: واحد على إكس → frac");
+  assert(cleanedFrac.includes("x^{2}"), "cleaning layer: إكس سكوير → x^{2}");
+  assert(cleanedFrac.includes("\\sqrt{x}"), "cleaning layer: جذر إكس → sqrt");
+  assert(!hasForbiddenEquationForm(cleanedFrac), "cleaned frac dictation has no slash/caret/sqrt");
+
+  const fracHints = extractLatexHints(DEMO_DICTATION_FRAC_AR);
+  assert(
+    fracHints.some((item) => item.latex === "\\frac{1}{x}"),
+    "frac hint",
+  );
 
   const parsed = demoParseTranscript(DEMO_DICTATION_AR, "ar", "brevet");
   assert(parsed.latexSteps.length >= 3, "Lebanese demo solver should return ≥3 steps");

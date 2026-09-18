@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import { coerceBilingual, type Bilingual, type LessonLanguage, type LessonLocale } from "./i18n";
 import { isSceneDocument, timelineFromScenes } from "./scenes";
 
@@ -397,9 +398,13 @@ export function normalizedActionType(type: CanvasActionType): CanvasActionType {
 }
 
 function latexOf(payload: Record<string, unknown>) {
-  if (typeof payload.latex === "string" && payload.latex) return payload.latex;
-  if (typeof payload.math_latex === "string" && payload.math_latex) return payload.math_latex;
-  return "";
+  const raw =
+    typeof payload.latex === "string" && payload.latex
+      ? payload.latex
+      : typeof payload.math_latex === "string" && payload.math_latex
+        ? payload.math_latex
+        : "";
+  return raw ? formatLebaneseEquation(raw) : "";
 }
 
 function stepTextOf(payload: Record<string, unknown>) {
