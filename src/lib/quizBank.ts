@@ -1,4 +1,5 @@
 import { academyLessons } from "./academyLessons";
+import { formatLebaneseEquation, formatMathIslands } from "./math/lebaneseEquationFormat";
 import type { Difficulty, QuizQuestion } from "./types";
 
 function q(
@@ -12,7 +13,17 @@ function q(
   latex?: string,
   kind: QuizQuestion["kind"] = "mcq",
 ): QuizQuestion {
-  return { id: `${lessonId}-q${n}`, lessonId, difficulty, kind, prompt, options, correctIndex, steps, latex };
+  return {
+    id: `${lessonId}-q${n}`,
+    lessonId,
+    difficulty,
+    kind,
+    prompt: formatMathIslands(prompt),
+    options: options.map(formatMathIslands),
+    correctIndex,
+    steps: steps.map(formatMathIslands),
+    latex: latex ? formatLebaneseEquation(latex) : latex,
+  };
 }
 
 const extra: QuizQuestion[] = [

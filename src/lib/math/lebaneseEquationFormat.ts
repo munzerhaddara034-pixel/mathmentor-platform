@@ -208,6 +208,31 @@ export function hasForbiddenEquationForm(tex: string) {
   return false;
 }
 
+const MATH_ISLAND_RE = /(\$\$[\s\S]+?\$\$|\$[^$\n]+\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\))/g;
+
+/**
+ * Clean `$...$` / `\[...\]` islands inside question-bank prose.
+ * Leaves bilingual separators (`Show that / Montrer que`) untouched.
+ */
+export function formatMathIslands(input: string) {
+  if (!input) return input;
+  return input.replace(MATH_ISLAND_RE, (chunk) => {
+    if (chunk.startsWith("$$") && chunk.endsWith("$$") && chunk.length > 4) {
+      return `$$${formatLebaneseEquation(chunk.slice(2, -2).trim())}$$`;
+    }
+    if (chunk.startsWith("\\[") && chunk.endsWith("\\]") && chunk.length > 4) {
+      return `\\[${formatLebaneseEquation(chunk.slice(2, -2).trim())}\\]`;
+    }
+    if (chunk.startsWith("\\(") && chunk.endsWith("\\)") && chunk.length > 4) {
+      return `\\(${formatLebaneseEquation(chunk.slice(2, -2).trim())}\\)`;
+    }
+    if (chunk.startsWith("$") && chunk.endsWith("$") && chunk.length > 2) {
+      return `$${formatLebaneseEquation(chunk.slice(1, -1).trim())}$`;
+    }
+    return chunk;
+  });
+}
+
 export function formatLatexFields<T>(value: T): T {
   return walkLatexFields(value) as T;
 }

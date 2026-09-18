@@ -7,7 +7,7 @@ Instructor: **Prof. Munzer Haddara / الأستاذ منذر حداره**. Never
 Teachers record an Arabic or English math explanation. The pipeline:
 
 1. **Speech-to-text** — OpenAI Whisper (`whisper-1`) when `OPENAI_API_KEY` is set.
-2. **Formatting cleaning layer** — `src/lib/math/lebaneseEquationFormat.ts` converts spoken math to Lebanese / Word *Insert Equation* LaTeX **before** the Live Canvas. Same pass runs on KaTeX / solver / quiz output.
+2. **Formatting cleaning layer** — `src/lib/math/lebaneseEquationFormat.ts` converts spoken math to Lebanese / Word *Insert Equation* LaTeX **before** the Live Canvas. Same pass runs on KaTeX / solver / quiz output. Contract: [MATH_FORMATTING.md](./MATH_FORMATTING.md).
 3. **Speech-to-LaTeX** — Gemini 1.5 Pro (`GEMINI_API_KEY`) preferred, else GPT-4o, else the local phrase map + Lebanese demo solver.
 4. **Live Math Canvas** — KaTeX steps in the official sequence from [`src/lib/pedagogy/lebanese.ts`](../src/lib/pedagogy/lebanese.ts): Key Idea → Domain \(D_f\) → Limits/Asymptotes → Derivative/Variation table → Points/Graph → Boxed answers → Common pitfalls.
 5. **Generate video with teacher voice** — attaches the recording as `timeline.media.audioUrl` (canvas follows the audio clock). If `HEYGEN_API_KEY` is set, also queues the existing HeyGen avatar generator with the avatar script; the recording remains available as narration when a custom HeyGen voice is configured.

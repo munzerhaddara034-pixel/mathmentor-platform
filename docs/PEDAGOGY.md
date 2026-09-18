@@ -89,7 +89,7 @@ Student-facing math — Voice-to-Math canvas, solver sheet, quizzes, formula dra
 | Limits beside the operator | `\lim\limits_{x \to a}` (under the symbol) |
 | Integral bounds inline | `\int\limits_{a}^{b}` (above and below) |
 
-Shared cleaning layer: `src/lib/math/lebaneseEquationFormat.ts` (`spokenMathToLebaneseLatex` after Whisper, `formatLebaneseEquation` in KaTeX / MathTex / `assembleSolution` / canvas `latexOf`). Graph `fn` strings stay JavaScript and are never rewritten as `\frac`.
+Shared cleaning layer: `src/lib/math/lebaneseEquationFormat.ts` (`spokenMathToLebaneseLatex` after Whisper, `formatLebaneseEquation` in KaTeX / MathTex / `assembleSolution` / canvas `latexOf`). Graph `fn` strings stay JavaScript and are never rewritten as `\frac`. Full contract: [MATH_FORMATTING.md](./MATH_FORMATTING.md).
 
 ## Where it is enforced
 
@@ -106,4 +106,4 @@ Shared cleaning layer: `src/lib/math/lebaneseEquationFormat.ts` (`spokenMathToLe
 | Interactive player | `/lessons/interactive`, `MathCanvas` |
 | Script API audit | `POST /api/studio/script` → `pedagogy` object |
 
-See also [AI_SOLVER.md](./AI_SOLVER.md) and [STUDIO.md](./STUDIO.md).
+See also [MATH_FORMATTING.md](./MATH_FORMATTING.md), [AI_SOLVER.md](./AI_SOLVER.md), and [STUDIO.md](./STUDIO.md).

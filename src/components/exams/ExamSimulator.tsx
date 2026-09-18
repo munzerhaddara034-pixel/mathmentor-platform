@@ -2,6 +2,7 @@
 
 import { FormulaDrawer } from "@/components/exams/FormulaDrawer";
 import { Katex } from "@/components/studio/Katex";
+import { MixedMathText } from "@/components/studio/MixedMathText";
 import { PageWatermark } from "@/components/studio/IdentityWatermark";
 import type { GradeResult, OfficialPaper } from "@/lib/exams/types";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -130,20 +131,24 @@ export function ExamSimulator({
                 Question {question.number}
                 {question.title ? ` — ${question.title}` : ""}
               </h4>
-              {question.prompt ? <p>{question.prompt}</p> : null}
+              {question.prompt ? (
+                <p>
+                  <MixedMathText text={question.prompt} />
+                </p>
+              ) : null}
               {question.promptAr ? (
                 <p className="muted" dir="rtl">
-                  {question.promptAr}
+                  <MixedMathText text={question.promptAr} />
                 </p>
               ) : null}
               {question.subs.map((sub) => (
                 <div key={sub.id} className="exam-sub">
                   <p>
-                    <strong>{sub.label}.</strong> {sub.prompt}{" "}
+                    <strong>{sub.label}.</strong> <MixedMathText text={sub.prompt} />{" "}
                     <span className="badge">{sub.marks} pts</span>
                   </p>
                   <p className="muted" dir="rtl">
-                    {sub.promptAr}
+                    <MixedMathText text={sub.promptAr} />
                   </p>
                   {sub.latex ? <Katex tex={sub.latex} display /> : null}
                   <textarea
