@@ -2,9 +2,9 @@
 
 Instructor: **Prof. Munzer Haddara** / **الأستاذ منذر حداره**. Branding: **MathMentor · أكاديمية منذر حداره**. Never Al-Tarah / الطارة.
 
-File stores use `/tmp/mathmentor-data` on Netlify/Lambda (`NETLIFY` or `AWS_LAMBDA_FUNCTION_NAME`), otherwise the project `data/` folder. Same pattern as `auth.json` and live sessions.
+JSON stores (`auth.json`, notifications, exam attempts, …) use **Netlify Blobs** (`mathmentor-data`) on Netlify/Lambda and the project `data/` folder for local `next dev`. See [AUTH.md](./AUTH.md). Binary uploads may still use `/tmp` on Lambda.
 
-No extra env vars are required. Demo accounts stay in [AUTH.md](./AUTH.md) (not on `/login`).
+No extra env vars are required (`@netlify/blobs` is zero-config on Netlify). Demo accounts stay in [AUTH.md](./AUTH.md) (not on `/login`).
 
 Sign in as `student@mathmentor.local` / `demo-student` unless noted.
 

@@ -18,7 +18,8 @@ export function AuthClientGuard({ mode = "lesson" }: { mode?: "auth" | "lesson" 
         if (cancelled) return;
         const next = `${window.location.pathname}${window.location.search}`;
         if (!payload.ok) {
-          const reason = payload.reason === "replaced" ? "replaced" : undefined;
+          const reason =
+            payload.reason === "replaced" || payload.reason === "expired" ? payload.reason : undefined;
           const url = reason
             ? `/login?reason=${reason}&next=${encodeURIComponent(next)}`
             : `/login?next=${encodeURIComponent(next)}`;

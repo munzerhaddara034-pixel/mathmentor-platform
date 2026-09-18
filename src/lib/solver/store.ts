@@ -1,30 +1,18 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { platformDataDir } from "@/lib/dataDir";
+import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import type { MathQueryRecord, VideoJobStatus } from "./types";
 
-const dataDir = platformDataDir();
-const storePath = path.join(dataDir, "math-queries.json");
+const STORE_FILE = "math-queries.json";
 
 type QueryStore = { queries: MathQueryRecord[] };
 
 async function readQueryStore(): Promise<QueryStore> {
-  await mkdir(dataDir, { recursive: true });
-  try {
-    const raw = await readFile(storePath, "utf8");
-    const parsed = JSON.parse(raw) as Partial<QueryStore>;
-    return { queries: Array.isArray(parsed.queries) ? parsed.queries : [] };
-  } catch {
-    const initial: QueryStore = { queries: [] };
-    await writeFile(storePath, JSON.stringify(initial, null, 2), "utf8");
-    return initial;
-  }
+  const parsed = await readJsonFile<Partial<QueryStore>>(STORE_FILE, { queries: [] });
+  return { queries: Array.isArray(parsed.queries) ? parsed.queries : [] };
 }
 
 async function writeQueryStore(store: QueryStore) {
-  await mkdir(dataDir, { recursive: true });
-  await writeFile(storePath, JSON.stringify(store, null, 2), "utf8");
+  await writeJsonFile(STORE_FILE, store);
 }
 
 export async function saveMathQuery(record: Omit<MathQueryRecord, "id" | "createdAt" | "updatedAt"> & { id?: string }) {

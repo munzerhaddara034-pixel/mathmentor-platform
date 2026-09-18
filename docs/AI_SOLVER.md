@@ -148,9 +148,10 @@ Extra QA logins: `ai@mathmentor.local` / `demo-ai`, `live@mathmentor.local` / `d
 - **Students** — plan, tier, live credits
 - **WhatsApp** — outbox (logged or sent)
 
-File stores (gitignored, same pattern as `data/auth.json`):
+JSON stores (gitignored locally; **Netlify Blobs** `mathmentor-data` in production — see [AUTH.md](./AUTH.md)):
 
-- `data/math-queries.json`
-- `data/live-sessions.json`
-- `data/heygen-jobs.json`
-- `data/whatsapp-outbox.json`
+- `auth.json`
+- `math-queries.json`
+- `live-sessions.json`
+- `heygen-jobs.json`
+- `whatsapp-outbox.json`

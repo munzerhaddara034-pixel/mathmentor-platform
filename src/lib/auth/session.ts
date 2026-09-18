@@ -7,8 +7,10 @@ import {
   deleteSessionByToken,
   findSessionByToken,
   findUserById,
+  wasTokenReplaced,
   type PublicUser,
 } from "./store";
+import { liveSessionFailureReason, type LiveSessionFailureReason } from "./sessionReason";
 import { newSessionToken } from "./passwords";
 
 const MAX_AGE = 60 * 60 * 24 * 30;
@@ -28,7 +30,7 @@ async function sessionCookieSecure() {
 
 export type LiveSession =
   | { ok: true; user: PublicUser; sessionId: string }
-  | { ok: false; reason: "unauthenticated" | "replaced" };
+  | { ok: false; reason: LiveSessionFailureReason };
 
 export async function readSessionCookie() {
   const jar = await cookies();
@@ -61,8 +63,13 @@ export async function getLiveSession(): Promise<LiveSession> {
   const token = await readSessionCookie();
   if (!token) return { ok: false, reason: "unauthenticated" };
   const found = await findSessionByToken(token);
-  if (!found) return { ok: false, reason: "replaced" };
-  return { ok: true, user: found.publicUser, sessionId: found.session.id };
+  if (found) return { ok: true, user: found.publicUser, sessionId: found.session.id };
+  const reason = liveSessionFailureReason({
+    hasCookie: true,
+    sessionFound: false,
+    tokenWasReplaced: await wasTokenReplaced(token),
+  });
+  return { ok: false, reason: reason ?? "expired" };
 }
 
 export async function startExclusiveSession(userId: string, userAgent?: string, fingerprint?: DeviceFingerprint) {

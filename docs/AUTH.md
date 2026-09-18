@@ -2,7 +2,22 @@
 
 Prof. Munzer Haddara / الأستاذ منذر حداره.
 
-This build uses a **file-store session** (`data/auth.json`) — the same style as promo cards and HeyGen jobs. There is still no external IdP.
+This build uses a **JSON session store** (`auth.json`) — the same adapter as promo cards, HeyGen jobs, live bookings, and notifications. There is still no external IdP.
+
+## Persistence (Netlify Blobs vs local)
+
+`readJsonFile` / `writeJsonFile` in `src/lib/dataDir.ts` pick a backend:
+
+| Runtime | Where `auth.json` (and other JSON stores) live |
+| --- | --- |
+| **Netlify production** / `netlify dev` / Lambda (`NETLIFY`, `AWS_LAMBDA_FUNCTION_NAME`, …) | **Netlify Blobs**, site-scoped store `mathmentor-data`, key = filename (`auth.json`, `store.json`, …). Strong consistency so a login on one function instance is visible on the next request. |
+| Local `next dev` / `next start` | Gitignored `data/` folder on disk. |
+
+Cold start / missing blob seeds the demo accounts (same table as below). Set `NETLIFY_BLOBS_DISABLED=1` only to force the filesystem fallback.
+
+**Do not store sessions in `/tmp`.** `/tmp/mathmentor-data` is per-instance and ephemeral. That was the production bug: login wrote `auth.json` on instance A; the next navigation hit instance B with an empty file; `findSessionByToken` missed; the UI treated it as `/login?reason=replaced`.
+
+Binary uploads (solver images under `public/uploads`) stay on the local disk / `/tmp` and are not Blobs-backed.
 
 ## What is protected
 
@@ -23,19 +38,27 @@ Private pages send `X-Robots-Tag: noindex, nofollow, noarchive` and `<meta name=
 
 Each login issues a new opaque cookie (`mm_session`) and records a device fingerprint (`userAgent + screen + timezone + localStorage deviceId`). Device names shown in the UI are derived from the User-Agent (e.g. `Windows Chrome`, `iPhone Safari`, `Android Chrome`) plus a Desktop/Mobile label. Timestamps use **Asia/Beirut**.
 
-**Students / parents:** the account may keep **one mobile and one desktop** session. A second login of the *same class* deletes the previous session of that class. The old cookie is then treated as logged out and sent to `/login?reason=replaced` (English + Arabic). One phone **and** one computer may stay signed in together.
+**Students / parents:** the account may keep **one mobile and one desktop** session. A second login of the *same class* deletes the previous session of that class **and records that token hash in `revokedTokens`**. The old cookie is then sent to `/login?reason=replaced` (English + Arabic). One phone **and** one computer may stay signed in together.
 
 **Teacher / admin** (role `teacher` or `admin`, including `teacher@mathmentor.local`): prior sessions are **not** invalidated when signing in from another device. The professor can stay logged in on two or more desktops. Instead, every successful staff login creates an in-app notification «جهاز جديد نشط / New active device» naming that device. Alerts appear in the header bell and on `/dashboard` together with an **أجهزتي النشطة / Active devices** card. Re-login from the *same* browser only replaces that browser’s own ghost session.
 
-The cookie is `Secure` only on HTTPS (or `AUTH_COOKIE_SECURE=1`). `npm start` on `http://localhost` still stores the session.
+`getLiveSession` reasons:
 
-On Netlify/Lambda, JSON stores live under `/tmp/mathmentor-data`.
+| Cookie | Live session row | `revokedTokens` hit | `reason` | Login copy |
+| --- | --- | --- | --- | --- |
+| missing | — | — | `unauthenticated` | none (plain sign-in) |
+| present | missing | **yes** (student same-class kick) | `replaced` | “signed in on another device” |
+| present | missing | **no** (empty store, TTL, logout leftover) | `expired` | “session ended, sign in again” — **not** “another device” |
+
+`replaced` is reserved for an explicit kick. A missing blob or a new function instance must never show the “another device” message.
+
+The cookie is `Secure` only on HTTPS (or `AUTH_COOKIE_SECURE=1`). `npm start` on `http://localhost` still stores the session.
 
 ## Demo accounts (local / Netlify)
 
 The login screen is **logo + title + email/password + Sign in** only. Demo credentials live in this file, not on `/login`.
 
-Seeded on first boot of `data/auth.json`:
+Seeded on first boot of `auth.json` (Blobs or `data/`):
 
 | Email | Password | Notes |
 | --- | --- | --- |
@@ -55,7 +78,27 @@ Unlock while signed in on `/redeem` or `/activate`:
 
 AI solver, live booking, WhatsApp, teacher audit: [AI_SOLVER.md](./AI_SOLVER.md) · [LIVE_WHATSAPP.md](./LIVE_WHATSAPP.md).
 
-On Netlify the JSON file store is ephemeral per instance (`/tmp/mathmentor-data`); demo users are re-seeded if the file is missing.
+## How to verify
+
+**Adapter + kick markers (no browser)**
+
+```bash
+npx tsx scripts/verify-auth-persistence.ts
+```
+
+This checks: shared-backend `auth.json` survives a simulated second instance; cookie + missing row without `revokedTokens` is `expired` not `replaced`; student same-class login records a real replacement; teacher second desktop is not kicked.
+
+**Local app**
+
+1. `npm run dev`. Sign in as `teacher@mathmentor.local` / `demo-teacher`.
+2. Open `/dashboard`, then `/lessons/interactive`, then `/studio/script`. You must **not** land on `/login?reason=replaced`.
+3. Student kick: sign in as `student@mathmentor.local` on two desktop profiles. The first session should redirect to `/login?reason=replaced` on the next navigation.
+
+**Netlify production**
+
+1. Deploy this branch. In the Netlify UI, Blobs → store `mathmentor-data` should gain key `auth.json` after the first login.
+2. Sign in as Prof. Munzer Haddara (`teacher@mathmentor.local`). Click dashboard, lessons, and studio. Function logs may show different instance IDs; the session cookie must still work (no `reason=replaced`).
+3. Repeat the student same-class kick from two browsers. That path still sets `replaced` because the kicked token hash is stored in `revokedTokens` on the shared blob.
 
 ## Watermark
 

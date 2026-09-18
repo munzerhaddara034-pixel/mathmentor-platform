@@ -1,6 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { platformDataDir } from "../dataDir";
+import { readJsonFile, writeJsonFile } from "../dataDir";
 import { createId } from "../ids";
 import { getSampleLesson } from "./sampleLessons";
 import { officialExamFourPhaseLesson } from "./seedLesson";
@@ -12,8 +10,7 @@ import {
   type HeyGenLanguage,
 } from "./heygen";
 
-const dataDir = platformDataDir();
-const jobsPath = path.join(dataDir, "heygen-jobs.json");
+const JOBS_FILE = "heygen-jobs.json";
 
 export const HEYGEN_JOB_STATUSES = ["queued", "processing", "completed", "failed"] as const;
 export type HeyGenJobStatus = (typeof HEYGEN_JOB_STATUSES)[number];
@@ -62,24 +59,15 @@ function emptyStore(): HeyGenJobStore {
 }
 
 async function readJobStore(): Promise<HeyGenJobStore> {
-  await mkdir(dataDir, { recursive: true });
-  try {
-    const raw = await readFile(jobsPath, "utf8");
-    const parsed = JSON.parse(raw) as Partial<HeyGenJobStore>;
-    return {
-      jobs: Array.isArray(parsed.jobs) ? parsed.jobs : [],
-      lessons: parsed.lessons && typeof parsed.lessons === "object" ? parsed.lessons : {},
-    };
-  } catch {
-    const initial = emptyStore();
-    await writeFile(jobsPath, JSON.stringify(initial, null, 2), "utf8");
-    return initial;
-  }
+  const parsed = await readJsonFile<Partial<HeyGenJobStore>>(JOBS_FILE, emptyStore());
+  return {
+    jobs: Array.isArray(parsed.jobs) ? parsed.jobs : [],
+    lessons: parsed.lessons && typeof parsed.lessons === "object" ? parsed.lessons : {},
+  };
 }
 
 async function writeJobStore(store: HeyGenJobStore): Promise<HeyGenJobStore> {
-  await mkdir(dataDir, { recursive: true });
-  await writeFile(jobsPath, JSON.stringify(store, null, 2), "utf8");
+  await writeJsonFile(JOBS_FILE, store);
   return store;
 }
 
