@@ -30,6 +30,17 @@ export async function POST(request: Request) {
 
   const roomName = sanitizeRoomName(body.room || body.roomName || body.sessionId || "");
   const staff = isStaffRole(user.role);
+  if (body.isTeacher === true && !staff) {
+    return NextResponse.json(
+      {
+        ok: false,
+        demo: !livekitEnv().configured,
+        error: "Teacher tokens require a teacher or admin account.",
+        errorAr: "رمز الأستاذ يتطلب حساب أستاذ أو إدارة.",
+      },
+      { status: 403 },
+    );
+  }
   const wantTeacher = staff && body.isTeacher !== false;
 
   const access = await assertClassroomAccess(user, roomName, wantTeacher);
