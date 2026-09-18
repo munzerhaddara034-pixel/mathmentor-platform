@@ -282,13 +282,15 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
     onToggleCamera: () => setCameraOff((value) => !value),
   };
 
-  const demoRoster: RosterEntry[] = useMemo(
-    () => [
-      { identity: "teacher-host", name: INSTRUCTOR_EN, isLocal: staff },
+  const demoRoster: RosterEntry[] = useMemo(() => {
+    if (staff) {
+      return [{ identity: user.id, name: user.name, isLocal: true }];
+    }
+    return [
+      { identity: "teacher-host", name: INSTRUCTOR_EN },
       { identity: user.id, name: user.name, isLocal: true },
-    ],
-    [staff, user.id, user.name],
-  );
+    ];
+  }, [staff, user.id, user.name]);
 
   if (loading) {
     return (

@@ -29,5 +29,12 @@ export function Katex({
     }
   }, [tex, display]);
 
-  return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <span
+      dir="ltr"
+      className={className}
+      style={{ unicodeBidi: "isolate" }}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }

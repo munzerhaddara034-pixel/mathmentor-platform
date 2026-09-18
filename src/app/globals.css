@@ -1199,6 +1199,8 @@ a.voice-mic { text-decoration: none; }
 .modal-card { max-width: 420px; width: 100%; }
 
 .live-classroom-page { max-width: 1280px; margin: 0 auto; padding: 16px 16px 48px; }
+.live-eq-list, .live-eq-preview, .live-eq-composer input { direction: ltr; text-align: left; unicode-bidi: isolate; }
+.btn:disabled, .live-swatch:disabled { opacity: 0.45; cursor: not-allowed; }
 .live-classroom-banner {
   display: flex;
   justify-content: space-between;
