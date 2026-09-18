@@ -239,13 +239,17 @@ export function AdminConsole({ initialTab = "overview" }: { initialTab?: Tab }) 
                     <td>{booking.studentPhone}</td>
                     <td>{booking.status}</td>
                     <td>
-                      {booking.meetingLink ? (
-                        <a href={booking.meetingLink} target="_blank" rel="noreferrer">
-                          open
-                        </a>
-                      ) : (
-                        "—"
-                      )}
+                      <a href={booking.classroomUrl || `/live/classroom/${encodeURIComponent(booking.id)}`}>
+                        انضم للحصة
+                      </a>
+                      {booking.meetingProvider && booking.meetingProvider !== "livekit" && booking.meetingLink ? (
+                        <>
+                          {" · "}
+                          <a href={booking.meetingLink} target="_blank" rel="noreferrer">
+                            {booking.meetingProvider}
+                          </a>
+                        </>
+                      ) : null}
                     </td>
                     <td>
                       <button className="btn" type="button" onClick={() => void patchBooking(booking.id, "confirmed")}>

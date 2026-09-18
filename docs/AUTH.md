@@ -76,7 +76,7 @@ Unlock while signed in on `/redeem` or `/activate`:
 - **`MUNZER-LIVE-4C`** — live 1-on-1 (+4 credits)
 - **`MUNZER-BOTH-1X`** — bundle (+8 credits)
 
-AI solver, live booking, WhatsApp, teacher audit: [AI_SOLVER.md](./AI_SOLVER.md) · [LIVE_WHATSAPP.md](./LIVE_WHATSAPP.md).
+AI solver, live booking, WhatsApp, teacher audit: [AI_SOLVER.md](./AI_SOLVER.md) · [LIVE_WHATSAPP.md](./LIVE_WHATSAPP.md) · LiveKit classroom: [LIVEKIT.md](./LIVEKIT.md).
 
 ## How to verify
 

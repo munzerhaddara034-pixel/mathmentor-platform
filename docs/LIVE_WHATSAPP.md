@@ -6,7 +6,7 @@ See the full write-up in [AI_SOLVER.md](./AI_SOLVER.md). Instructor: **Prof. Mun
 
 - Teacher hours: staff `/live` or Admin → Live. Default Mon/Wed **16:00–19:00 Asia/Beirut**.
 - Students with `LIVE_TIER` / `BOTH` see open slots only if `liveCredits > 0`.
-- Book → −1 credit, confirmed session, meeting URL (Meet stub, Zoom stub if `ZOOM_ACCOUNT_ID`, real Zoom OAuth when `ZOOM_CLIENT_ID` + `ZOOM_CLIENT_SECRET` are set).
+- Book → −1 credit, confirmed session, classroom URL `/live/classroom/{bookingId}` (**انضم للحصة**). Meet/Zoom stubs remain as fallback when LiveKit Cloud keys are unset. Full LiveKit setup: [LIVEKIT.md](./LIVEKIT.md).
 - Calendars: student `/live` and admin live table.
 
 ## WhatsApp

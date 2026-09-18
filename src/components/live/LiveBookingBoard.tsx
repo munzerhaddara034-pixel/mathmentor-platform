@@ -26,6 +26,10 @@ function formatWhen(iso: string) {
   });
 }
 
+function classroomHref(booking: LiveBooking) {
+  return booking.classroomUrl || `/live/classroom/${encodeURIComponent(booking.id)}`;
+}
+
 export function LiveBookingBoard({
   staff = false,
 }: {
@@ -90,13 +94,14 @@ export function LiveBookingBoard({
       message?: string;
       messageAr?: string;
       meetingLink?: string;
+      classroomUrl?: string;
     };
     if (!response.ok) {
       setError(`${payload.error ?? "Could not book."} ${payload.errorAr ?? ""}`);
       return;
     }
     setMessage(
-      `${payload.message ?? "Booked."} ${payload.messageAr ?? ""}${payload.meetingLink ? ` · ${payload.meetingLink}` : ""}`,
+      `${payload.message ?? "Booked."} ${payload.messageAr ?? ""}${payload.classroomUrl ? ` · ${payload.classroomUrl}` : payload.meetingLink ? ` · ${payload.meetingLink}` : ""}`,
     );
     load();
   };
@@ -153,6 +158,8 @@ export function LiveBookingBoard({
     <div className="live-board">
       <p className="muted">
         Live credits: {credits}. Weekly hours: {weekLabel}. Each booking uses one credit with Prof. Munzer Haddara.
+        {" · "}
+        <a href="/live/classroom/demo">انضم للحصة التجريبية / Open demo classroom</a>
       </p>
       {error ? <p className="error">{error}</p> : null}
       {message ? <p className="success">{message}</p> : null}
@@ -231,19 +238,23 @@ export function LiveBookingBoard({
                   <strong>{formatWhen(booking.startsAt)}</strong>
                   <p className="muted">
                     {booking.status} · {booking.studentName}
-                    {booking.meetingLink ? (
+                    {booking.meetingProvider && booking.meetingProvider !== "livekit" && booking.meetingLink ? (
                       <>
                         {" · "}
                         <a href={booking.meetingLink} target="_blank" rel="noreferrer">
-                          join
+                          {booking.meetingProvider}
                         </a>
                       </>
                     ) : null}
                   </p>
                 </div>
-                <span className={`badge ${booking.status === "confirmed" ? "approved" : booking.status === "cancelled" ? "rejected" : "pending"}`}>
-                  {booking.status}
-                </span>
+                {booking.status !== "cancelled" ? (
+                  <a className="btn dark" href={classroomHref(booking)}>
+                    انضم للحصة
+                  </a>
+                ) : (
+                  <span className="badge rejected">{booking.status}</span>
+                )}
               </li>
             ))}
           </ul>

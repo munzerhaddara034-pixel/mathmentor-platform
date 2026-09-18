@@ -36,6 +36,8 @@ export type LiveBooking = {
   status: BookingStatus;
   meetingLink?: string;
   meetingProvider?: string;
+  classroomUrl?: string;
+  classroomRoomId?: string;
   teacherNote?: string;
   reminderSentAt?: string;
   createdAt: string;

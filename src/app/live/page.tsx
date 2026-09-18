@@ -17,6 +17,10 @@ export default async function LivePage() {
         <Link href="/math-solver">/math-solver</Link>; live hours are for the problems that still need a human board.
       </p>
       <LiveBookingBoard staff={Boolean(staff)} />
+      <p className="muted" style={{ marginTop: 16 }}>
+        الصف يستخدم LiveKit Cloud: السبورة الرياضية + الفيديو. بدون مفاتيح LiveKit تبقى الواجهة تعمل في وضع تجريبي.{" "}
+        <a href="/live/classroom/demo">انضم للحصة التجريبية</a>
+      </p>
     </main>
   );
 }

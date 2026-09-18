@@ -16,9 +16,9 @@ export async function ensureUpcomingLiveAlerts() {
       kind: "live_upcoming",
       title: "Live session in about 15 minutes",
       titleAr: "حصة مباشرة بعد نحو 15 دقيقة",
-      body: `Prof. Munzer Haddara · ${when} Asia/Beirut. Join from /live.`,
+      body: `Prof. Munzer Haddara · ${when} Asia/Beirut. انضم للحصة from the classroom.`,
       bodyAr: `الأستاذ منذر حداره · ${when} بتوقيت بيروت.`,
-      href: "/live",
+      href: booking.classroomUrl || `/live/classroom/${encodeURIComponent(booking.id)}`,
       relatedId: `upcoming-${booking.id}`,
     });
   }
