@@ -253,9 +253,7 @@ export function LiveBookingBoard({
                     انضم للحصة
                   </a>
                 ) : (
-                  <span className={`badge ${booking.status === "confirmed" ? "approved" : booking.status === "cancelled" ? "rejected" : "pending"}`}>
-                    {booking.status}
-                  </span>
+                  <span className="badge rejected">{booking.status}</span>
                 )}
               </li>
             ))}

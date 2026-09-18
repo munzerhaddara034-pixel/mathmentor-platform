@@ -17,7 +17,7 @@ async function applyLivekitPermission(room: string, identity: string, canPublish
       canPublish,
       canSubscribe: true,
       canPublishData: true,
-      canUpdateOwnMetadata: true,
+      canUpdateMetadata: true,
     },
   });
   return { applied: true as const };
