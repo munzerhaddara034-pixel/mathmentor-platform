@@ -1,5 +1,6 @@
 import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
 import { PageWatermark } from "@/components/studio/IdentityWatermark";
+import { MixedMathText } from "@/components/studio/MixedMathText";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
 import { getVoiceJob } from "@/lib/voiceMath";
@@ -51,7 +52,7 @@ export default async function VoiceSolverStudentPage({
     <main className="shell studio-shell relative-watermark">
       <PageWatermark name={viewer.name} phone={viewer.phone} />
       <p className="eyebrow">Voice explanation · {INSTRUCTOR_LINE}</p>
-      <h1>{job.question}</h1>
+      <MixedMathText as="h1" text={job.question} />
       <p className="muted">
         Canvas follows the teacher recording when audio is attached. {job.finalAnswer}
         {staff ? (

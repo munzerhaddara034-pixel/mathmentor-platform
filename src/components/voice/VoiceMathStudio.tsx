@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MathCanvas } from "@/components/studio/MathCanvas";
 import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
 import { Katex } from "@/components/studio/Katex";
+import { MixedMathText } from "@/components/studio/MixedMathText";
 import { VoiceRecorder, type RecordedClip } from "./VoiceRecorder";
 import { DEMO_DICTATIONS } from "@/lib/voiceMath/demo";
 import { canvasStateAt, type CertificateTrack, type LessonTimeline } from "@/lib/studio/timeline";
@@ -202,7 +203,7 @@ export function VoiceMathStudio({
       {job ? (
         <section className="card" style={{ marginTop: 20 }}>
           <p className="eyebrow">Speech → LaTeX · Lebanese official sequence</p>
-          <h2>{job.question}</h2>
+          <MixedMathText as="h2" text={job.question} />
           <p className="muted">
             source {job.transcript.source} → {job.parseSource}
             {job.hasAudio ? " · audio stored" : " · demo / typed"}
