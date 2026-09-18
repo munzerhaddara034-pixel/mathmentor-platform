@@ -271,6 +271,8 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
           <h2>{pickText(STUDIO_UI.teacherTitle, language)}</h2>
           <p className="muted">
             {eventCount} {pickText(STUDIO_UI.teacherEvents, language)} · {timeline.id}
+            {" · "}
+            <a href="/studio/voice-solver">تسجيل الشرح الصوتي / Voice-to-Math</a>
           </p>
         </div>
         <div className="studio-teacher-head-actions">

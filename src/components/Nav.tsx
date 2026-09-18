@@ -23,6 +23,7 @@ export async function Nav() {
         {staff ? (
           <>
             <Link href="/studio/script">السكربت</Link>
+            <Link href="/studio/voice-solver">الصوت</Link>
             <Link href="/admin/video-generator">الفيديو</Link>
           </>
         ) : null}

@@ -15,7 +15,8 @@ Open:
 
 | Route | What it is |
 | --- | --- |
-| http://127.0.0.1:3001/studio/script | Script editor (seeded `leb-term-func-01` JSON) |
+| http://localhost:3000/studio/script | Script editor (seeded `leb-term-func-01` JSON) |
+| http://localhost:3000/studio/voice-solver | Voice-to-Math teacher studio ([VOICE_MATH.md](./VOICE_MATH.md)) |
 | http://localhost:3000/admin/video-generator | Teacher HeyGen generator (script, notes, math, voice, speed) |
 | http://localhost:3000/math-solver | AI solver (text / LaTeX / photo) |
 | http://localhost:3000/lessons/interactive-explanation | Split explanation player |

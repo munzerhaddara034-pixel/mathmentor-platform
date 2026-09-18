@@ -49,6 +49,8 @@ export default async function InteractiveLessonDemoPage({
             <>
               {" · "}
               <Link href="/lessons/interactive?teacher=1">teacher timeline</Link>
+              {" · "}
+              <Link href="/studio/voice-solver">تسجيل الشرح الصوتي</Link>
             </>
           ) : null}
           {timeline.media?.videoUrl ? " · canvas follows video.currentTime" : ""}

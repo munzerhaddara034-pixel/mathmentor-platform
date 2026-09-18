@@ -157,7 +157,8 @@ export default function AdminVideoGeneratorPage() {
         Write the lesson in{" "}
         <Link href="/studio/script">/studio/script</Link>, generate a talking-avatar video here, wait for webhook or
         status polling, then open the sync player. Seeded lesson: <code>leb-term-func-01</code> (full Terminale study).
-        Instructor: Prof. Munzer Haddara / الأستاذ منذر حداره.
+        Instructor: Prof. Munzer Haddara / الأستاذ منذر حداره. Teacher voice dictation:{" "}
+        <Link href="/studio/voice-solver">/studio/voice-solver</Link>.
       </p>
 
       <TeacherQualityChecklist />
