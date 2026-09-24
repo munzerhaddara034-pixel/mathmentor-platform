@@ -17,6 +17,7 @@
     "video:lessons": "npm run video:continuity && npm run video:derivatives && npm run video:brevet-geometry"
   },
   "dependencies": {
+    "@octokit/rest": "^20.0.0",
     "next": "^15.5.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
