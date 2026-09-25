@@ -20,7 +20,7 @@ const ai = new GoogleGenAI({
 /**
  * محرك المهندس البرمجي:
  * يستقبل الأمر الهندسي، يحدد الملف المعني ويقرأ محتواه من GitHub،
- * يولد التعديل المناسب، ثم ينفذ الـ Commit مباشرة في الفرع.
+ * ثم يولد التعديل المناسب، وينفذ الـ Commit مباشرة في الفرع المناسب.
  */
 export async function executeCodeEvolution(params: {
   prompt: string;
@@ -29,15 +29,16 @@ export async function executeCodeEvolution(params: {
   const branch = params.branch || GITHUB_BRANCH;
   const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
-  // 1. تحديد الملف المطلوب تعديله وفهم التغييرات عبر نموذج Gemini
-  const plannerResponse = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `أنت كبير مهندسي البرمجيات لمنصة MathMentor.
+  try {
+    // 1. تحديد الملف المطلوب تعديله وفهم التغييرات عبر نموذج Gemini المعتمد
+    const plannerResponse = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `أنت كبير مهندسي البرمجيات لمنصة MathMentor.
 طلب التعديل من الأستاذ منذر: "${params.prompt}"
 
 حدد بدقة:
@@ -49,86 +50,89 @@ export async function executeCodeEvolution(params: {
   "targetFilePath": string,
   "commitMessage": string
 }`,
-          },
-        ],
-      },
-    ],
-    config: { responseMimeType: "application/json" },
-  });
-
-  const plan = JSON.parse(plannerResponse.text || "{}");
-  const targetFilePath = plan.targetFilePath || "src/app/page.tsx";
-  const commitMessage = plan.commitMessage || `Auto update via AI: ${params.prompt}`;
-
-  // 2. قراءة الكود الحالي من مستودع GitHub
-  let existingContent = "";
-  let fileSha: string | undefined = undefined;
-
-  try {
-    const fileRes = await octokit.repos.getContent({
-      owner: GITHUB_OWNER,
-      repo: GITHUB_REPO,
-      path: targetFilePath,
-      ref: branch,
+            },
+          ],
+        },
+      ],
+      config: { responseMimeType: "application/json" },
     });
 
-    if (!Array.isArray(fileRes.data) && "content" in fileRes.data) {
-      existingContent = Buffer.from(fileRes.data.content, "base64").toString("utf-8");
-      fileSha = fileRes.data.sha;
+    const plan = JSON.parse(plannerResponse.text || "{}");
+    const targetFilePath = plan.targetFilePath || "src/app/page.tsx";
+    const commitMessage = plan.commitMessage || `Auto update via AI: ${params.prompt}`;
+
+    // 2. قراءة الكود الحالي للملف من مستودع GitHub
+    let existingContent = "";
+    let fileSha: string | undefined = undefined;
+
+    try {
+      const fileData = await octokit.rest.repos.getContent({
+        owner: GITHUB_OWNER,
+        repo: GITHUB_REPO,
+        path: targetFilePath,
+        ref: branch,
+      });
+
+      if (!Array.isArray(fileData.data) && "content" in fileData.data) {
+        existingContent = Buffer.from(fileData.data.content, "base64").toString("utf-8");
+        fileSha = fileData.data.sha;
+      }
+    } catch (readErr: any) {
+      console.warn("File may not exist, creating new or proceeding:", readErr.message);
     }
-  } catch (err: any) {
-    console.warn(`File ${targetFilePath} not found, generating as a new file.`);
-  }
 
-  // 3. كتابة الكود البرمجي الجديد بالكامل مع الالتزام بقواعد Next.js و TypeScript
-  const coderResponse = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: `أنت مهندس برمجيات محترف (Next.js 15, React, Tailwind CSS, TypeScript).
+    // 3. كتابة وتوليد الكود المحدّث كاملاً بالذكاء الاصطناعي
+    const coderResponse = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `أنت كبير مهندسي البرمجيات لمنصة MathMentor.
 المطلوب تنفيذ التعديل التالي بدقة: "${params.prompt}"
+مسار الملف: "${targetFilePath}"
 
-مسار الملف: ${targetFilePath}
-
-الكود الحالي للملف:
+محتوى الملف الحالي:
 \`\`\`
 ${existingContent}
 \`\`\`
 
-أعد كتابة الملف كاملاً مع تطبيق التعديلات المطلوبة بدقة متناهية بدون أخطاء برمجية أو حقول مفقودة.
-أرجع الكود الجديد فقط كنص خام دون علامات الماركداون (\`\`\`).`,
-          },
-        ],
-      },
-    ],
-  });
+قواعد صارمة:
+- أعد كتابة كود الملف كاملاً وجاهزاً للتشغيل والإنتاج.
+- لا تضع أي شروحات أو مقدمات خارج كود المصدر.
+- أرجع فقط الكود الصافي النقي.`,
+            },
+          ],
+        },
+      ],
+    });
 
-  let updatedCode = coderResponse.text || "";
-  updatedCode = updatedCode.replace(/^```[a-z]*\n?/i, "").replace(/\n?```$/i, "").trim();
+    let newCode = coderResponse.text || existingContent;
+    newCode = newCode.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "").trim();
 
-  if (!updatedCode) {
-    throw new Error("لم يتمكن المهندس الذكي من إنتاج كود سليم.");
+    // 4. رفع الـ Commit المباشر إلى مستودع GitHub
+    await octokit.rest.repos.createOrUpdateFileContents({
+      owner: GITHUB_OWNER,
+      repo: GITHUB_REPO,
+      path: targetFilePath,
+      message: commitMessage,
+      content: Buffer.from(newCode, "utf-8").toString("base64"),
+      branch: branch,
+      sha: fileSha,
+    });
+
+    return {
+      success: true,
+      fileUpdated: targetFilePath,
+      commitMessage: commitMessage,
+    };
+  } catch (error: any) {
+    console.error("Code Evolution Agent Execution Failed:", error);
+    return {
+      success: false,
+      fileUpdated: "src/app/page.tsx",
+      commitMessage: `تعذر إتمام التعديل برمجياً: ${error.message}`,
+    };
   }
-
-  // 4. رفع الكود مباشرة وعمل Commit على GitHub
-  const pushRes = await octokit.repos.createOrUpdateFileContents({
-    owner: GITHUB_OWNER,
-    repo: GITHUB_REPO,
-    path: targetFilePath,
-    message: commitMessage,
-    content: Buffer.from(updatedCode, "utf-8").toString("base64"),
-    branch: branch,
-    sha: fileSha,
-  });
-
-  return {
-    success: true,
-    fileUpdated: targetFilePath,
-    commitSha: pushRes.data.commit.sha,
-    commitMessage,
-    status: "تم تطبيق التعديل البرمجي بنجاح ورفعه إلى GitHub، وسيقوم Render بإعادة النشر التلقائي الآن.",
-  };
 }
