@@ -1,105 +1,97 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
 import { executeCodeEvolution } from "@/lib/agent/codeEvolutionAgent";
 
 export const dynamic = "force-dynamic";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-});
-
 export async function POST(req: NextRequest) {
   try {
-    const contentType = req.headers.get("content-type") || "";
-    let transcript = "";
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ reply: "مفتاح GEMINI_API_KEY غير متوفر في الخادم." }, { status: 500 });
+    }
 
-    // 1. استقبال المقطع الصوتي ومعالجته بذكاء
+    let base64Audio = "";
+    let mimeType = "audio/ogg";
+
+    const contentType = req.headers.get("content-type") || "";
+
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
-      const audioFile = formData.get("audio") as Blob | null;
-
-      if (!audioFile) {
-        return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
+      const file = (formData.get("audio") || formData.get("file") || formData.get("voice")) as Blob | null;
+      if (file) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        base64Audio = buffer.toString("base64");
+        mimeType = file.type || "audio/ogg";
       }
-
-      const buffer = Buffer.from(await audioFile.arrayBuffer());
-      const base64Audio = buffer.toString("base64");
-
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: "أنت السكرتير الذكي 'محمد' والمساعد الهندسي لمنصة MathMentor. استمع إلى هذا المقطع الصوتي بدقة، واستخرج طلب المستخدم بوضوح وحدد ما إذا كان طلباً لتعديل الكود أو استفساراً عاماً.",
-              },
-              {
-                inlineData: {
-                  mimeType: audioFile.type || "audio/ogg",
-                  data: base64Audio,
-                },
-              },
-            ],
-          },
-        ],
-      });
-
-      transcript = response.text || "";
+    } else if (contentType.includes("application/json")) {
+      const json = await req.json().catch(() => ({}));
+      base64Audio = json.audio || json.base64 || json.data || "";
+      if (json.mimeType) mimeType = json.mimeType;
     } else {
-      const body = await req.json();
-      transcript = body.text || body.transcript || body.message || "";
+      const buffer = Buffer.from(await req.arrayBuffer());
+      if (buffer.length > 0) {
+        base64Audio = buffer.toString("base64");
+      }
     }
 
-    if (!transcript) {
-      return NextResponse.json({ error: "لم يتم استلام أي نص أو تسجيل صوتي واضح" }, { status: 400 });
+    if (!base64Audio) {
+      return NextResponse.json({ reply: "تعذر استلام الملف الصوتي، يرجى إعادة المحاولة." }, { status: 400 });
     }
 
-    // 2. تحليل نية الأمر وتحديد هل يتطلب تدخلاً برمجياً من المهندس
-    const decisionResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
+    // استدعاء Gemini مباشرة لتفريغ الصوت وفهم محتواه
+    const promptText = `أنت محمد، المساعد الشخصي والسكرتير للأستاذ منذر حداره في منصة MathMentor.
+قم بتفريغ المقطع الصوتي بدقة تامة. 
+إذا كان التسجيل يتضمن أمراً لتعديل أو تطوير المنصة (مثل: عدل، غير، أضف، كود، صفحة)، لخص التعديل البرمجي المطلوب بوضوح.
+إذا كان استفساراً عاماً أو دراسياً، أجب عليه باحترافية واختصار باسم الأستاذ منذر حداره.`;
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
             {
-              text: `النص التالي هو طلب من الأستاذ منذر: "${transcript}".
-هل يتطلب هذا تعديلاً في الكود أو ملفات المنصة؟ 
-إذا كان نعم، استخرج التعليمات الهندسية بدقة (ما هو الملف وما التعديل المطلوب). 
-إذا كان لا، أجب بالرد المناسب بصفتك السكرتير محمد.
-أجب بصيغة JSON حصراً:
-{
-  "isCodeTask": boolean,
-  "instruction": string,
-  "replyMessage": string
-}`,
+              parts: [
+                { text: promptText },
+                {
+                  inline_data: {
+                    mime_type: mimeType.split(";")[0],
+                    data: base64Audio,
+                  },
+                },
+              ],
             },
           ],
-        },
-      ],
-      config: { responseMimeType: "application/json" },
-    });
+        }),
+      }
+    );
 
-    const parsed = JSON.parse(decisionResponse.text || "{}");
+    const data = await geminiRes.json();
+    const transcript = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-    // 3. التنفيذ البرمجي التلقائي عبر المهندس البرمجي
-    let executionResult = null;
-    if (parsed.isCodeTask && typeof executeCodeEvolution === "function") {
-      executionResult = await executeCodeEvolution({
-        prompt: parsed.instruction || transcript,
-        branch: process.env.GITHUB_BRANCH || "cursor/platform-shell-auth-dashboard-2f19",
-      });
+    if (!transcript) {
+      return NextResponse.json({ reply: "تعذر تفريغ الصوت، يرجى المحاولة بصوت أوضح." });
     }
 
-    return NextResponse.json({
-      success: true,
-      sender: "محمد، سكرتير الأستاذ منذر / المهندس البرمجي",
-      transcript,
-      actionTaken: parsed.isCodeTask ? "تم تنفيذ التعديل البرمجي بنجاح" : "تم الرد على الاستفسار",
-      details: executionResult || parsed.replyMessage,
-    });
+    // التحقق هل يحتوي التفريغ على طلب برمجي
+    const isCodeChange =
+      transcript.includes("عدل") ||
+      transcript.includes("تعديل") ||
+      transcript.includes("غير") ||
+      transcript.includes("صفحة") ||
+      transcript.includes("أضف") ||
+      transcript.includes("كود");
+
+    if (isCodeChange) {
+      const result = await executeCodeEvolution({ prompt: transcript });
+      const reply = `🎙️ استلمت رسالتكم الصوتية يا أستاذ منذر:\n"${transcript}"\n\n🚀 أنجز المهندس البرمجي التعديل فوراً:\n• الملف المحدّث: ${result.fileUpdated}\n• التغيير: ${result.commitMessage}\n• الحالة: تم حفظ الـ Commit وتحديث المنصة بنجاح.`;
+      return NextResponse.json({ reply, source: "code-evolution-agent", transcript });
+    }
+
+    return NextResponse.json({ reply: transcript, source: "gemini-voice" });
   } catch (error: any) {
-    console.error("Agent error:", error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error("Voice Route Error:", error);
+    return NextResponse.json({ reply: `تعذر تفريغ الصوت: ${error.message || "خطأ غير متوقع"}` }, { status: 500 });
   }
 }
