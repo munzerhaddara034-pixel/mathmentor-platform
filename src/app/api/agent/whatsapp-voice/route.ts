@@ -1,68 +1,105 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateCodeChange, executeAndDeployCode, CodeEvolutionPlan } from "@/lib/agent/codeEvolutionAgent";
+import { GoogleGenAI } from "@google/genai";
+import { executeCodeEvolution } from "@/lib/agent/codeEvolutionAgent";
 
-// ذاكرة مؤقتة لآخر خطة تعديل تنتظر الاعتماد
-let pendingPlan: CodeEvolutionPlan | null = null;
+export const dynamic = "force-dynamic";
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY || "",
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const messageText = body.text || body.transcript || body.message || "";
+    const contentType = req.headers.get("content-type") || "";
+    let transcript = "";
 
-    if (!messageText) {
-      return NextResponse.json({ reply: "لم أتمكن من استلام الأمر بشكل واضح." }, { status: 400 });
-    }
+    // 1. استقبال المقطع الصوتي ومعالجته بذكاء
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      const audioFile = formData.get("audio") as Blob | null;
 
-    const command = messageText.trim();
-
-    // 1. حالة اعتماد ونشر التعديل البرمجي
-    if (/^(اعتمد|موافق|انشر|نفذ|approve)$/i.test(command)) {
-      if (!pendingPlan) {
-        return NextResponse.json({ reply: "لا يوجد أي تعديل برمجي معلّق بانتظار الاعتماد حالياً." });
+      if (!audioFile) {
+        return NextResponse.json({ error: "No audio file provided" }, { status: 400 });
       }
 
-      const result = await executeAndDeployCode(pendingPlan);
-      const executed = pendingPlan;
-      pendingPlan = null; // تفريغ الخطة بعد التنفيذ
+      const buffer = Buffer.from(await audioFile.arrayBuffer());
+      const base64Audio = buffer.toString("base64");
 
-      if (result.ok) {
-        return NextResponse.json({
-          reply: `🚀 تم اعتماد التعديل ورفعه بنجاح إلى GitHub!\n` +
-                 `📁 الملف: ${executed.targetFilePath}\n` +
-                 `🔗 الرابط: ${result.commitUrl || "تم التحديث بنجاح"}`
-        });
-      } else {
-        return NextResponse.json({
-          reply: `⚠️ حدث خطأ أثناء النشر إلى GitHub: ${result.error}`
-        });
-      }
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [
+          {
+            role: "user",
+            parts: [
+              {
+                text: "أنت السكرتير الذكي 'محمد' والمساعد الهندسي لمنصة MathMentor. استمع إلى هذا المقطع الصوتي بدقة، واستخرج طلب المستخدم بوضوح وحدد ما إذا كان طلباً لتعديل الكود أو استفساراً عاماً.",
+              },
+              {
+                inlineData: {
+                  mimeType: audioFile.type || "audio/ogg",
+                  data: base64Audio,
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      transcript = response.text || "";
+    } else {
+      const body = await req.json();
+      transcript = body.text || body.transcript || body.message || "";
     }
 
-    // 2. حالة طلب تطوير أو تعديل برمجي
-    if (/طور|عدل|برمج|غير في الصفحة|code|develop|edit/i.test(command)) {
-      // افتراضياً نعدل الصفحة الرئيسية أو يمكن تحديد ملف آخر
-      const targetFile = "src/app/page.tsx";
-      
-      const plan = await generateCodeChange(command, targetFile);
-      pendingPlan = plan; // حفظ الخطة بانتظار موافقتك
+    if (!transcript) {
+      return NextResponse.json({ error: "لم يتم استلام أي نص أو تسجيل صوتي واضح" }, { status: 400 });
+    }
 
-      return NextResponse.json({
-        reply: `🛠️ تم إعداد التعديل البرمجي بنجاح:\n\n` +
-               `📝 الشرح: ${plan.explanation}\n` +
-               `📁 الملف المستهدف: ${plan.targetFilePath}\n\n` +
-               `هل أعتمد النشر إلى GitHub لتحديث المنصة؟ أرسل كلمة (اعتمد) للتنفيذ فوراً.`
+    // 2. تحليل نية الأمر وتحديد هل يتطلب تدخلاً برمجياً من المهندس
+    const decisionResponse = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `النص التالي هو طلب من الأستاذ منذر: "${transcript}".
+هل يتطلب هذا تعديلاً في الكود أو ملفات المنصة؟ 
+إذا كان نعم، استخرج التعليمات الهندسية بدقة (ما هو الملف وما التعديل المطلوب). 
+إذا كان لا، أجب بالرد المناسب بصفتك السكرتير محمد.
+أجب بصيغة JSON حصراً:
+{
+  "isCodeTask": boolean,
+  "instruction": string,
+  "replyMessage": string
+}`,
+            },
+          ],
+        },
+      ],
+      config: { responseMimeType: "application/json" },
+    });
+
+    const parsed = JSON.parse(decisionResponse.text || "{}");
+
+    // 3. التنفيذ البرمجي التلقائي عبر المهندس البرمجي
+    let executionResult = null;
+    if (parsed.isCodeTask && typeof executeCodeEvolution === "function") {
+      executionResult = await executeCodeEvolution({
+        prompt: parsed.instruction || transcript,
+        branch: process.env.GITHUB_BRANCH || "cursor/platform-shell-auth-dashboard-2f19",
       });
     }
 
-    // 3. باقي المهام العامة للسكرتير التنفيذي
     return NextResponse.json({
-      reply: `مرحباً بك. تم استلام رسالتك: "${command}". كيف تحب أن أساعدك في منصة MathMentor اليوم؟`
+      success: true,
+      sender: "محمد، سكرتير الأستاذ منذر / المهندس البرمجي",
+      transcript,
+      actionTaken: parsed.isCodeTask ? "تم تنفيذ التعديل البرمجي بنجاح" : "تم الرد على الاستفسار",
+      details: executionResult || parsed.replyMessage,
     });
-
-  } catch (error) {
-    return NextResponse.json(
-      { reply: "عذراً، حدث خطأ أثناء معالجة طلبك.", error: String(error) },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error("Agent error:", error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
