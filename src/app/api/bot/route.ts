@@ -1,21 +1,18 @@
 import { NextResponse } from "next/server";
 import { executeCodeEvolution } from "@/lib/agent/codeEvolutionAgent";
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-});
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { message?: string };
-    const message = body.message ?? "";
+    const body = (await request.json().catch(() => ({}))) as Record<string, any>;
+    
+    // استخراج الرسالة سواء أرسلت كمفتاح message أو text أو query
+    const message = body.message || body.text || body.query || "";
 
     if (!message) {
       return NextResponse.json({ reply: "لم يتم استلام أي نص." }, { status: 400 });
     }
 
-    // التحقق هل الرسالة عبارة عن طلب تعديل برمجي أو أمر هندسي
+    // التحقق من الأوامر الهندسية
     const isCodeChange =
       message.includes("عدل") ||
       message.includes("تعديل") ||
@@ -26,35 +23,46 @@ export async function POST(request: Request) {
 
     if (isCodeChange) {
       const result = await executeCodeEvolution({ prompt: message });
-      const reply = `🤝 محمد، سكرتير الأستاذ منذر حداره / MathMentor\n\nأنجز المهندس البرمجي التعديل بنجاح! 🚀\n• الملف المحدّث: ${result.fileUpdated}\n• التغيير: ${result.commitMessage}\n• الحالة: تم إرسال الـ Commit وسيقوم Render بإعادة النشر التلقائي الآن.\n— الأستاذ منذر حداره`;
+      const reply = `🤝 محمد، سكرتير الأستاذ منذر حداره / MathMentor\n\nأنجز المهندس البرمجي التعديل بنجاح! 🚀\n• الملف المحدّث: ${result.fileUpdated}\n• التغيير: ${result.commitMessage}\n• الحالة: تم حفظ الـ Commit وسيقوم Render بإعادة النشر.\n— الأستاذ منذر حداره`;
       return NextResponse.json({ reply, source: "code-evolution-agent" });
     }
 
-    // الرد الذكي المعتاد عبر Gemini في حال كانت محادثة عادية
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
+    // استدعاء Gemini REST API المباشر بدون الاعتماد على أي مكتبة قد تفشل في البناء
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({
+        reply: "🤝 محمد: أهلاً بك! تم استلام رسالتك، ومفتاح الذكاء الاصطناعي قيد التفعيل.",
+        source: "system"
+      });
+    }
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
             {
-              text: `أنت محمد، المساعد الشخصي والسكرتير للأستاذ منذر حداره في منصة MathMentor التعليمية.
-رد باحترافية، وود، واختصار باسم الأستاذ منذر حداره.
-رسالة المستخدم: "${message}"`,
+              parts: [
+                {
+                  text: `أنت محمد، المساعد الشخصي والسكرتير للأستاذ منذر حداره في منصة MathMentor التعليمية. رد باحترافية وود واختصار باسم الأستاذ منذر حداره على رسالة المستخدم: "${message}"`,
+                },
+              ],
             },
           ],
-        },
-      ],
-    });
+        }),
+      }
+    );
 
-    const reply = response.text || "تم استلام رسالتكم بنجاح.";
+    const data = await geminiRes.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "تم استلام رسالتكم بنجاح.";
+
     return NextResponse.json({ reply, source: "gemini" });
   } catch (error: any) {
     console.error("Bot Route Error:", error);
     return NextResponse.json(
-      {
-        reply: `تعذر إكمال المهمة: ${error.message || "حدث خطأ غير متوقع"}`,
-      },
+      { reply: `تعذر إكمال المهمة: ${error.message || "حدث خطأ غير متوقع"}` },
       { status: 500 }
     );
   }
