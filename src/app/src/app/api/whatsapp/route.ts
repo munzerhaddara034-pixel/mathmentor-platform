@@ -7,12 +7,13 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
-  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
-
-  if (mode === 'subscribe' && token === verifyToken) {
-    return new NextResponse(challenge, {
+  // التحقق المباشر من الرمز كقيمة نصية صريحة
+  if (mode === 'subscribe' && token === 'mathmentor_verify_token_2026') {
+    return new NextResponse(challenge || '', {
       status: 200,
-      headers: { 'Content-Type': 'text/plain' },
+      headers: {
+        'Content-Type': 'text/plain',
+      },
     });
   }
 
