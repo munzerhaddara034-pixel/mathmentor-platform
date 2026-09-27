@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 const VERIFY_TOKEN = 'mathmentor_verify_token_2026';
 const PHONE_NUMBER_ID = '133334783194073';
 
-// انسخ الرمز الطويل الظاهر في خانة (رمز الوصول) بصفحة Meta وضعه هنا بين علامتي التنصيص
-const ACCESS_TOKEN = 'الصق_رمز_الوصول_هنا';
+// تأكد أن تضع الرمز المنسوخ من Meta فقط بالإنجليزية والأرقام دون أي مسافات أو أحرف عربية
+const ACCESS_TOKEN = 'ضع_هنا_الرمز_فقط';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -37,22 +37,24 @@ export async function POST(request: NextRequest) {
 
       console.log(`Received: "${incomingText}" from ${fromNumber}`);
 
-      // نص الرد التلقائي
-      const replyMessage = `أهلاً بك في منصة Math Mentor التعليمية! 📐✨\nتم استلام رسالتك: "${incomingText}". كيف يمكننا مساعدتك اليوم؟`;
+      const replyText = `أهلاً بك في منصة Math Mentor! 📐✨\nتم استلام رسالتك: "${incomingText}". كيف يمكننا مساعدتك اليوم؟`;
 
-      await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
+      const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${ACCESS_TOKEN}`,
+          'Authorization': `Bearer ${ACCESS_TOKEN.trim()}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           messaging_product: 'whatsapp',
           to: fromNumber,
           type: 'text',
-          text: { body: replyMessage },
+          text: { body: replyText },
         }),
       });
+
+      const resData = await response.json();
+      console.log('Meta API Response:', resData);
     }
 
     return NextResponse.json({ status: 'success' }, { status: 200 });
