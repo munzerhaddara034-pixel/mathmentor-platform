@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
       const replyText = `أهلاً بك في منصة Math Mentor! 📐✨\nتم استلام رسالتك: "${incomingText}". كيف يمكننا مساعدتك اليوم؟`;
 
-      const response = await fetch(`https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`, {
+     const response = await fetch('https://graph.facebook.com/v21.0/133334783194073/messages', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${ACCESS_TOKEN.trim()}`,
