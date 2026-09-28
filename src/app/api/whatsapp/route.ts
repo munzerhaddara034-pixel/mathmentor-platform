@@ -4,7 +4,7 @@ const VERIFY_TOKEN = 'mathmentor_verify_token_2026';
 const PHONE_NUMBER_ID = '133334783194073';
 
 // تأكد أن تضع الرمز المنسوخ من Meta فقط بالإنجليزية والأرقام دون أي مسافات أو أحرف عربية
-const ACCESS_TOKEN = 'EAAeSF50YIs0BSpRpIkmrxPxuCoLAW4qaMoZAHZBZBfcKgqadvdLXZBV1VIQfI4tLUPqbUbjNpEVqDNRckF9MKrzSTYAq7AQONpe7WxWOOgcwGzsuCh2m9bfcCmepx7bga0NSMywzT4t0oNJIggVW4wwaw6jKyGvL7x3Fhr9ZBzpVN2og5xVC6rhjhbo3JAy2tUo5tPh0kGQfP3ak3JRwBX04EZAPYHmHFZBacZA2mmPPNQ8k799pGPhoXzDowM3EkbjZC3kxlzvcM1tyf44ZBJ7HKl';
+const ACCESS_TOKEN = 'EAAeSF50YIs0BStFj19E0iYufSHahNiZAkaXe26wBH6ScYkNe7A0QxmuvyRYD2U87YmfPUwIwbE1UOW634gpliaJ6H5WVTPDNFDykUXFIvksLJQft18i0AsaJtPYCIeZBYZBM6vH9GV9ekQzI060DMBlx0tPNLl1ZAsrqAuj42zgQFDxuOOtyj6snUkMeM1rnWghnp7WL9F7Dl6Wwn2SBgjXPtWpc2lhnaIbj8fMxacDtwTqyVZCkuLmPCDIQ9VVec3UCpA0qxhYvIkTnZA0MHw';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get('hub.mode');
