@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     id: createId("lib"),
     title,
     kind: ["book", "exam-model", "worksheet", "solution-guide"].includes(kind) ? kind : "book",
-    track: ["grade-7", "grade-8", "grade-9", "grade-11", "grade-12", "sat"].includes(track) ? track : "grade-9",
+    track: ["grade-7", "grade-8", "grade-9", "grade-10", "grade-11", "grade-12", "sat"].includes(track) ? track : "grade-9",
     subject: subject || title,
     language: language === "en" ? "en" : "ar",
     fileName,

@@ -1,6 +1,6 @@
 export type RoleView = "student" | "professor";
 export type Language = "ar" | "en";
-export type GradeTrack = "grade-7" | "grade-8" | "grade-9" | "grade-11" | "grade-12" | "sat";
+export type GradeTrack = "grade-7" | "grade-8" | "grade-9" | "grade-10" | "grade-11" | "grade-12" | "sat";
 export type SourceKind = "book" | "exam-model" | "worksheet" | "solution-guide";
 export type DraftKind = "lesson-video" | "exam-solution-video" | "exam-solution-paper";
 export type ReviewStatus =
@@ -127,6 +127,10 @@ export type ScratchCard = {
   expiresAt?: string;
   batchId?: string;
   note?: string;
+  /** When true, redeem does not consume the card (teacher QA only). */
+  reusable?: boolean;
+  /** Labelled demo — never sell / never give to paying students. */
+  teacherTestingOnly?: boolean;
 };
 
 export type Entitlement = {
@@ -135,6 +139,7 @@ export type Entitlement = {
   phone?: string;
   planId: string;
   unlockedAt: string;
+  userId?: string;
 };
 
 export type QuizAttempt = {
@@ -163,6 +168,8 @@ export type SubscriptionPlan = {
   usdMonthly: number;
   usdTerm: number;
   includes: string;
+  tier?: "AI_TIER" | "LIVE_TIER" | "BOTH";
+  liveCredits?: number;
 };
 
 export type PlatformSettings = {

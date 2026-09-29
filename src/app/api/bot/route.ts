@@ -1,7 +1,36 @@
 import { NextResponse } from "next/server";
 import { executeCodeEvolution } from "@/lib/agent/codeEvolutionAgent";
+import { canRunCodeEvolution, looksLikeCodeChange } from "@/lib/agent/codeEvolutionGate";
 
 export const dynamic = "force-dynamic";
+
+type BotJsonBody = {
+  message?: unknown;
+  text?: unknown;
+  query?: unknown;
+  audio?: unknown;
+  base64?: unknown;
+  voice?: unknown;
+  mimeType?: unknown;
+  audioUrl?: unknown;
+  mediaUrl?: unknown;
+  url?: unknown;
+};
+
+type GeminiResponse = {
+  candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+};
+
+function firstString(...values: unknown[]): string {
+  for (const value of values) {
+    if (typeof value === "string" && value) return value;
+  }
+  return "";
+}
+
+function geminiText(data: GeminiResponse): string {
+  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+}
 
 export async function POST(request: Request) {
   try {
@@ -13,24 +42,26 @@ export async function POST(request: Request) {
     // 1. استخراج البيانات سواء كانت JSON أو FormData
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
-      message = (formData.get("message") || formData.get("text") || "") as string;
-      const audioFile = (formData.get("audio") || formData.get("file") || formData.get("voice")) as Blob | null;
-      if (audioFile) {
+      message = firstString(formData.get("message"), formData.get("text"));
+      const audioFile = formData.get("audio") || formData.get("file") || formData.get("voice");
+      if (audioFile instanceof Blob) {
         const buffer = Buffer.from(await audioFile.arrayBuffer());
         base64Audio = buffer.toString("base64");
         mimeType = audioFile.type || "audio/ogg";
       }
     } else {
-      const body = (await request.json().catch(() => ({}))) as Record<string, any>;
-      message = body.message || body.text || body.query || "";
+      const body = (await request.json().catch(() => ({}))) as BotJsonBody;
+      message = firstString(body.message, body.text, body.query);
 
       // استخراج الصوت إذا وجد بصيغة base64 أو رابط
-      if (body.audio || body.base64 || body.voice) {
-        base64Audio = body.audio || body.base64 || body.voice;
-        if (body.mimeType) mimeType = body.mimeType;
-      } else if (body.audioUrl || body.mediaUrl || body.url) {
+      const inlineAudio = firstString(body.audio, body.base64, body.voice);
+      const mediaUrl = firstString(body.audioUrl, body.mediaUrl, body.url);
+      if (inlineAudio) {
+        base64Audio = inlineAudio;
+        const hinted = firstString(body.mimeType);
+        if (hinted) mimeType = hinted;
+      } else if (mediaUrl) {
         // تنزيل ملف الصوت في حال إرساله كرابط من وسيط واتساب
-        const mediaUrl = body.audioUrl || body.mediaUrl || body.url;
         try {
           const fetchRes = await fetch(mediaUrl);
           const arrayBuffer = await fetchRes.arrayBuffer();
@@ -73,12 +104,12 @@ export async function POST(request: Request) {
                 },
               ],
             }),
-          }
+          },
         );
 
-        const geminiData = await geminiRes.json();
-        message = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-      } catch (err: any) {
+        const geminiData = (await geminiRes.json()) as GeminiResponse;
+        message = geminiText(geminiData);
+      } catch (err) {
         console.error("Gemini Transcription Error:", err);
       }
     }
@@ -87,20 +118,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ reply: "تعذر قراءة الرسالة أو تفريغ المقطع الصوتي، يرجى إعادة المحاولة." }, { status: 400 });
     }
 
-    // 3. التحقق من الأوامر الهندسية والبرمجية
-    const isCodeChange =
-      message.includes("عدل") ||
-      message.includes("تعديل") ||
-      message.includes("غير") ||
-      message.includes("صفحة") ||
-      message.includes("عنوان") ||
-      message.includes("أضف") ||
-      message.includes("كود");
-
-    if (isCodeChange) {
-      const result = await executeCodeEvolution({ prompt: message });
-      const reply = `🤝 أهلاً بك يا أستاذ منذر!\nأنجز المهندس التعديل بنجاح 🚀\n• نص الأمر المستلم: "${message}"\n• الملف المحدّث: ${result.fileUpdated}\n• التغيير: ${result.commitMessage}`;
-      return NextResponse.json({ reply, source: "code-evolution-agent", transcript: message });
+    // 3. التحقق من الأوامر الهندسية والبرمجية (فقط لجلسة الأستاذ أو سر الوكيل — لا لزوار الدردشة)
+    if (looksLikeCodeChange(message, ["عنوان"])) {
+      if (await canRunCodeEvolution(request)) {
+        const result = await executeCodeEvolution({ prompt: message });
+        const reply = `🤝 أهلاً بك يا أستاذ منذر!\nأنجز المهندس التعديل بنجاح 🚀\n• نص الأمر المستلم: "${message}"\n• الملف المحدّث: ${result.fileUpdated}\n• التغيير: ${result.commitMessage}`;
+        return NextResponse.json({ reply, source: "code-evolution-agent", transcript: message });
+      }
+      console.info("bot: code-change wording from an unauthenticated caller — answered as chat, no commit.");
     }
 
     // 4. استجابة الذكاء الاصطناعي العامة في حال لم يكن طلباً برمجياً
@@ -127,17 +152,16 @@ export async function POST(request: Request) {
             },
           ],
         }),
-      }
+      },
     );
 
-    const aiData = await aiRes.json();
-    const finalReply =
-      aiData?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "🤝 أهلاً بك يا أستاذ منذر، استلمت رسالتك وجارٍ متابعتها.";
+    const aiData = (await aiRes.json()) as GeminiResponse;
+    const finalReply = geminiText(aiData) || "🤝 أهلاً بك يا أستاذ منذر، استلمت رسالتك وجارٍ متابعتها.";
 
     return NextResponse.json({ reply: finalReply, source: "gemini" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Bot Route Error:", error);
-    return NextResponse.json({ reply: `خطأ في معالجة الطلب: ${error.message}` }, { status: 500 });
+    const detail = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ reply: `خطأ في معالجة الطلب: ${detail}` }, { status: 500 });
   }
 }

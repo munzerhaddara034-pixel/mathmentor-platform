@@ -1,5 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { readJsonFile, writeJsonFile } from "./dataDir";
 import { lebaneseCatalog } from "./curriculum";
 import { GRADE_12_LS_CH1_ID, grade12LsCh1Draft } from "./grade12LsCh1";
 import { createId } from "./ids";
@@ -21,8 +20,7 @@ import type {
   StudentChatMessage,
 } from "./types";
 
-const dataDir = path.join(process.cwd(), "data");
-const storePath = path.join(dataDir, "store.json");
+const STORE_FILE = "store.json";
 
 function seed(): StoreData {
   const now = new Date().toISOString();
@@ -44,6 +42,10 @@ function seed(): StoreData {
       { code: "MUNZER-GOLD-9A", planId: "all", used: false },
       { code: "MUNZER-G12-7K", planId: "g11-12", used: false },
       { code: "BREVET-29-MX", planId: "g7-9", used: false },
+      { code: "MUNZER-AI-3K", planId: "ai", used: false },
+      { code: "MUNZER-LIVE-4C", planId: "live", used: false },
+      { code: "MUNZER-BOTH-1X", planId: "both", used: false },
+      { code: "MUNZER-DEMO-TEACHER", planId: "ai", used: false, reusable: true, teacherTestingOnly: true, note: "Teacher testing only — reusable demo AI unlock (Prof. Munzer Haddara)" },
     ],
     quizAttempts: [],
     customQuestions: [],
@@ -53,10 +55,9 @@ function seed(): StoreData {
 }
 
 async function ensureStore(): Promise<StoreData> {
-  await mkdir(dataDir, { recursive: true });
+  const initial = withFeaturedLesson(seed());
   try {
-    const raw = await readFile(storePath, "utf8");
-    const parsed = JSON.parse(raw) as StoreData;
+    const parsed = await readJsonFile<StoreData>(STORE_FILE, initial);
     if (!Array.isArray(parsed.library) || !Array.isArray(parsed.drafts)) {
       throw new Error("invalid store");
     }
@@ -79,10 +80,58 @@ async function ensureStore(): Promise<StoreData> {
     parsed.customQuestions ??= [];
     parsed.entitlements ??= [];
     parsed.exams ??= [];
-    return withFeaturedLesson(parsed);
+    const planIds = new Set((parsed.settings.plans ?? []).map((plan) => plan.id));
+    for (const plan of defaultSettings.plans) {
+      if (!planIds.has(plan.id)) parsed.settings.plans.push(plan);
+    }
+    // Keep subscription marketing labels in sync with defaultSettings (ids/prices stay stable).
+    parsed.settings.plans = parsed.settings.plans.map((plan) => {
+      const fresh = defaultSettings.plans.find((item) => item.id === plan.id);
+      if (!fresh) return plan;
+      return {
+        ...plan,
+        name: fresh.name,
+        arabicName: fresh.arabicName,
+        includes: fresh.includes,
+        usdMonthly: fresh.usdMonthly,
+        usdTerm: fresh.usdTerm,
+        tier: fresh.tier,
+        liveCredits: fresh.liveCredits,
+      };
+    });
+    const codes = new Set((parsed.scratchCards ?? []).map((card) => card.code));
+    let cardsChanged = false;
+    for (const card of [
+      { code: "MUNZER-AI-3K", planId: "ai", used: false },
+      { code: "MUNZER-LIVE-4C", planId: "live", used: false },
+      { code: "MUNZER-BOTH-1X", planId: "both", used: false },
+      {
+        code: "MUNZER-DEMO-TEACHER",
+        planId: "ai",
+        used: false,
+        reusable: true,
+        teacherTestingOnly: true,
+        note: "Teacher testing only — reusable demo AI unlock (Prof. Munzer Haddara)",
+      },
+    ]) {
+      if (!codes.has(card.code)) {
+        parsed.scratchCards.push(card);
+        cardsChanged = true;
+      }
+    }
+    const demo = parsed.scratchCards.find((card) => card.code === "MUNZER-DEMO-TEACHER");
+    if (demo && (!demo.reusable || !demo.teacherTestingOnly)) {
+      demo.reusable = true;
+      demo.teacherTestingOnly = true;
+      demo.used = false;
+      demo.note = demo.note || "Teacher testing only — reusable demo AI unlock (Prof. Munzer Haddara)";
+      cardsChanged = true;
+    }
+    const next = withFeaturedLesson(parsed);
+    if (cardsChanged) await writeJsonFile(STORE_FILE, next);
+    return next;
   } catch {
-    const initial = withFeaturedLesson(seed());
-    await writeFile(storePath, JSON.stringify(initial, null, 2), "utf8");
+    await writeJsonFile(STORE_FILE, initial);
     return initial;
   }
 }
@@ -99,8 +148,7 @@ export async function readStore(): Promise<StoreData> {
 }
 
 export async function writeStore(data: StoreData): Promise<StoreData> {
-  await mkdir(dataDir, { recursive: true });
-  await writeFile(storePath, JSON.stringify(data, null, 2), "utf8");
+  await writeJsonFile(STORE_FILE, data);
   return data;
 }
 
@@ -194,23 +242,29 @@ export async function addQuizAttempt(attempt: QuizAttempt) {
   return attempt;
 }
 
-export async function redeemCard(code: string, studentName: string, phone?: string) {
+export async function redeemCard(code: string, studentName: string, phone?: string, userId?: string) {
   const store = await readStore();
   const card = store.scratchCards.find((item) => item.code.toLowerCase() === code.trim().toLowerCase());
   if (!card) return { ok: false as const, error: "رمز غير صحيح" };
-  if (card.used) return { ok: false as const, error: "هذه البطاقة مستخدمة" };
+  if (card.used && !card.reusable) return { ok: false as const, error: "هذه البطاقة مستخدمة" };
   if (card.expiresAt && new Date(card.expiresAt).getTime() < Date.now()) {
     return { ok: false as const, error: "انتهت صلاحية هذا الكود" };
   }
-  card.used = true;
-  card.usedBy = studentName;
-  card.usedPhone = phone;
+  if (!card.reusable) {
+    card.used = true;
+    card.usedBy = studentName;
+    card.usedPhone = phone;
+  } else {
+    card.usedBy = studentName;
+    card.usedPhone = phone;
+  }
   const entitlement: Entitlement = {
     id: createId("ent"),
     studentName,
     phone,
     planId: card.planId,
     unlockedAt: new Date().toISOString(),
+    userId,
   };
   store.entitlements.unshift(entitlement);
   await writeStore(store);

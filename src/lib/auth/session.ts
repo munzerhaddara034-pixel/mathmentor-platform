@@ -1,76 +1,98 @@
-export const SESSION_COOKIE = "mm_session";
-const SESSION_DAYS = 14;
+import { classifyDevice, type DeviceFingerprint } from "./device";
+import { notifyStaffDeviceLogin } from "./deviceNotify";
+import { cookies, headers } from "next/headers";
+import { SESSION_COOKIE } from "./paths";
+import {
+  createExclusiveSession,
+  deleteSessionByToken,
+  findSessionByToken,
+  findUserById,
+  wasTokenReplaced,
+  type PublicUser,
+} from "./store";
+import { liveSessionFailureReason, type LiveSessionFailureReason } from "./sessionReason";
+import { newSessionToken } from "./passwords";
 
-export type CookieSession = {
-  id: string;
-  email: string;
-  name: string;
-  role: "student" | "teacher" | "parent";
-  linkedStudentId?: string | null;
-  track?: string | null;
-  exp: number;
-};
+const MAX_AGE = 60 * 60 * 24 * 30;
 
-const encoder = new TextEncoder();
-const decoder = new TextDecoder();
-
-export function sessionSecret() {
-  return process.env.AUTH_SECRET || process.env.MM_AUTH_SECRET || "mathmentor-dev-secret-change-me";
+/** Secure cookies only on HTTPS so `next start` on localhost still stores the session. */
+async function sessionCookieSecure() {
+  if (process.env.AUTH_COOKIE_SECURE === "0") return false;
+  if (process.env.AUTH_COOKIE_SECURE === "1") return true;
+  const h = await headers();
+  const proto = (h.get("x-forwarded-proto") ?? "").split(",")[0]?.trim().toLowerCase();
+  if (proto === "https") return true;
+  if (proto === "http") return false;
+  const host = (h.get("host") ?? "").split(":")[0];
+  if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") return false;
+  return process.env.NODE_ENV === "production";
 }
 
-function bytesToB64url(bytes: Uint8Array) {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+export type LiveSession =
+  | { ok: true; user: PublicUser; sessionId: string }
+  | { ok: false; reason: LiveSessionFailureReason };
+
+export async function readSessionCookie() {
+  const jar = await cookies();
+  return jar.get(SESSION_COOKIE)?.value ?? null;
 }
 
-function b64urlToBytes(value: string) {
-  const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
-async function hmacKey(secret: string) {
-  return crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [
-    "sign",
-    "verify",
-  ]);
-}
-
-export async function signSession(payload: Omit<CookieSession, "exp">) {
-  const session: CookieSession = {
-    ...payload,
-    exp: Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000,
-  };
-  const body = bytesToB64url(encoder.encode(JSON.stringify(session)));
-  const key = await hmacKey(sessionSecret());
-  const signature = new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(body)));
-  return `${body}.${bytesToB64url(signature)}`;
-}
-
-export async function readSessionFromCookieValue(token: string): Promise<CookieSession | null> {
-  const [body, signature] = token.split(".");
-  if (!body || !signature) return null;
-  const key = await hmacKey(sessionSecret());
-  const ok = await crypto.subtle.verify("HMAC", key, b64urlToBytes(signature), encoder.encode(body));
-  if (!ok) return null;
-  try {
-    const session = JSON.parse(decoder.decode(b64urlToBytes(body))) as CookieSession;
-    if (!session?.id || !session.email || !session.role || session.exp < Date.now()) return null;
-    return session;
-  } catch {
-    return null;
-  }
-}
-
-export function sessionCookieOptions() {
-  return {
+export async function writeSessionCookie(token: string) {
+  const jar = await cookies();
+  jar.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    sameSite: "lax" as const,
-    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     path: "/",
-    maxAge: SESSION_DAYS * 24 * 60 * 60,
+    secure: await sessionCookieSecure(),
+    maxAge: MAX_AGE,
+  });
+}
+
+export async function clearSessionCookie() {
+  const jar = await cookies();
+  jar.set(SESSION_COOKIE, "", {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: await sessionCookieSecure(),
+    maxAge: 0,
+  });
+}
+
+export async function getLiveSession(): Promise<LiveSession> {
+  const token = await readSessionCookie();
+  if (!token) return { ok: false, reason: "unauthenticated" };
+  const found = await findSessionByToken(token);
+  if (found) return { ok: true, user: found.publicUser, sessionId: found.session.id };
+  const reason = liveSessionFailureReason({
+    hasCookie: true,
+    sessionFound: false,
+    tokenWasReplaced: await wasTokenReplaced(token),
+  });
+  return { ok: false, reason: reason ?? "expired" };
+}
+
+export async function startExclusiveSession(userId: string, userAgent?: string, fingerprint?: DeviceFingerprint) {
+  const token = newSessionToken();
+  const created = await createExclusiveSession(userId, token, userAgent, fingerprint);
+  await writeSessionCookie(token);
+  const user = await findUserById(userId);
+  if (user) {
+    try {
+      await notifyStaffDeviceLogin(user, created.session);
+    } catch {
+      /* login must succeed even if the inbox write fails */
+    }
+  }
+  return {
+    token,
+    ...created,
+    deviceClass: created.session.deviceClass ?? classifyDevice(userAgent, fingerprint?.deviceClass),
   };
+}
+
+export async function endCurrentSession() {
+  const token = await readSessionCookie();
+  if (token) await deleteSessionByToken(token);
+  await clearSessionCookie();
 }

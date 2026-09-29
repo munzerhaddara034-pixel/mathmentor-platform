@@ -2,7 +2,20 @@
 
 import { defaultSettings } from "@/lib/settings";
 import type { ScratchCard } from "@/lib/types";
+import type { TopUpCode } from "@/lib/billing/store";
+import type { AppNotification } from "@/lib/notifications/store";
 import { useEffect, useState } from "react";
+
+type DeviceRow = {
+  id: string;
+  deviceClass: string;
+  createdAt: string;
+  createdAtBeirut?: string;
+  deviceName?: string;
+  deviceNameAr?: string;
+  fingerprintHash?: string;
+  current: boolean;
+};
 
 type Dashboard = {
   subscribers: number;
@@ -12,25 +25,35 @@ type Dashboard = {
   cardsLeft: number;
   financials: { estimatedUsd: number; currency: string };
   attempts: { studentName: string; score: number; lessonId: string }[];
+  devices?: DeviceRow[];
+  deviceAlerts?: AppNotification[];
 };
 
 export function TeacherOpsPanel() {
   const [data, setData] = useState<Dashboard | null>(null);
   const [cards, setCards] = useState<ScratchCard[]>([]);
+  const [topups, setTopups] = useState<TopUpCode[]>([]);
   const [planId, setPlanId] = useState("all");
   const [prefix, setPrefix] = useState("MUNZER");
   const [count, setCount] = useState(10);
   const [expiresAt, setExpiresAt] = useState("");
   const [note, setNote] = useState("");
   const [status, setStatus] = useState("");
+  const [liveHours, setLiveHours] = useState(2);
+  const [topupPrefix, setTopupPrefix] = useState("MUNZER-HRS");
 
   const load = () => {
-    void fetch("/api/dashboard")
-      .then((response) => response.json())
-      .then(setData);
+    void fetch("/api/dashboard", { credentials: "same-origin" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: Dashboard | null) => {
+        if (payload) setData(payload);
+      });
     void fetch("/api/cards")
       .then((response) => response.json())
       .then((payload: { cards?: ScratchCard[] }) => setCards(payload.cards ?? []));
+    void fetch("/api/billing/topup")
+      .then((response) => response.json())
+      .then((payload: { codes?: TopUpCode[] }) => setTopups(payload.codes ?? []));
   };
 
   useEffect(() => {
@@ -49,11 +72,91 @@ export function TeacherOpsPanel() {
   };
 
   if (!data) return <main className="shell">جارٍ تحميل الإحصائيات…</main>;
+  const devices = data.devices ?? [];
+  const deviceAlerts = data.deviceAlerts ?? [];
+
   return (
-    <main className="shell">
+    <main className="shell" dir="rtl">
       <p className="eyebrow">لوحة تحكم الأستاذ</p>
       <h1>إحصائيات · أكواد التفعيل · الحماية</h1>
-      <div className="grid three">
+      <p className="muted">حساب الأستاذ والإدارة لا يُطرد عند الدخول من جهاز آخر — يصلك تنبيه باسم الجهاز بدل ذلك.</p>
+      <section className="card voice-dash-cta">
+        <p className="eyebrow">الموظف الذكي للشرح الصوتي</p>
+        <h2>تسجيل الشرح الصوتي / Record explanation</h2>
+        <p className="muted">
+          سجّل شرحاً بالعربية أو الإنكليزية. يحوّله Whisper ثم LaTeX وفق المنهج اللبناني على السبورة، ثم يمكن توليد فيديو
+          بصوت الأستاذ.
+        </p>
+        <a className="voice-mic" href="/studio/voice-solver">
+          <span className="voice-mic-icon" aria-hidden>
+            ●
+          </span>
+          <span>
+            تسجيل الشرح الصوتي
+            <small>Voice-to-Math studio</small>
+          </span>
+        </a>
+      </section>
+      <section className="card voice-dash-cta">
+        <p className="eyebrow">الحصة المباشرة / Live classroom</p>
+        <h2>انضم للحصة · LiveKit + السبورة</h2>
+        <p className="muted">
+          صف مباشر مع الأستاذ منذر حداره: سبورة KaTeX وفق المنهج اللبناني، شبكة فيديو، دردشة، ورفع اليد. الطلاب يحتاجون حجزاً أو الصف التجريبي.
+        </p>
+        <a className="btn dark" href="/live">
+          الحجوزات / Bookings
+        </a>{" "}
+        <a className="btn" href="/live/classroom/demo">
+          انضم للحصة التجريبية
+        </a>
+      </section>
+      <div className="row" style={{ marginTop: 8 }}>
+        <a className="btn dark" href="/studio/voice-solver">الموظف الصوتي</a>
+        <a className="btn dark" href="/live/classroom/demo">الصف المباشر</a>
+        <a className="btn dark" href="/studio/script">مولّد سكربت الدرس</a>
+        <a className="btn" href="/lessons/interactive">السبورة الذكية</a>
+        <a className="btn" href="/admin">سجلات الذكاء والحصص</a>
+        <a className="btn" href="/admin/exams">تصحيح المحاكاة</a>
+        <a className="btn" href="/exams">المحاكاة</a>
+        <a className="btn" href="/math-solver">الحلّال</a>
+      </div>
+      <div className="grid two" style={{ marginTop: 20 }}>
+        <section className="card device-card">
+          <h2>أجهزتي النشطة / Active devices</h2>
+          <p className="muted">جلسات هذا الحساب تبقى مفتوحة معاً (حاسوب + هاتف وأكثر). الطلاب ما زالوا محدودين بجهاز من كل نوع.</p>
+          {devices.length === 0 ? <p className="muted">لا توجد جلسات مخزّنة بعد.</p> : null}
+          <ul className="device-list">
+            {devices.map((device) => (
+              <li key={device.id} className={device.current ? "current" : undefined}>
+                <strong>{device.deviceNameAr || device.deviceName || device.deviceClass}</strong>
+                <span>{device.deviceName || device.deviceClass}</span>
+                <span className="muted">
+                  {device.createdAtBeirut || device.createdAt.slice(0, 16).replace("T", " ")} · Asia/Beirut
+                  {device.current ? " · هذا الجهاز / this device" : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="card device-card">
+          <h2>تنبيهات الأجهزة / Device alerts</h2>
+          {deviceAlerts.length === 0 ? (
+            <p className="muted">بعد كل دخول يظهر هنا اسم الجهاز (مثل Windows Chrome أو iPhone Safari).</p>
+          ) : null}
+          <ul className="device-list">
+            {deviceAlerts.map((alert) => (
+              <li key={alert.id} className={alert.read ? undefined : "unread"}>
+                <strong>
+                  {alert.titleAr} / {alert.title}
+                </strong>
+                <span>{alert.bodyAr}</span>
+                <span className="muted">{alert.body}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+      <div className="grid three" style={{ marginTop: 20 }}>
         <article className="card">
           <h3>المشتركون / المفعّلون</h3>
           <p style={{ fontSize: 36 }}>{data.subscribers}</p>
@@ -104,6 +207,54 @@ export function TeacherOpsPanel() {
           توليد الأكواد
         </button>
         {status ? <p className="success">{status}</p> : null}
+      </section>
+      <section className="card" style={{ marginTop: 20 }}>
+        <h2>أكواد شحن ساعات الحصص المباشرة</h2>
+        <label>
+          عدد الساعات لكل رمز
+          <input type="number" min={1} max={40} value={liveHours} onChange={(event) => setLiveHours(Number(event.target.value))} />
+        </label>
+        <label>
+          بادئة الرمز
+          <input value={topupPrefix} onChange={(event) => setTopupPrefix(event.target.value)} />
+        </label>
+        <button
+          className="btn dark"
+          type="button"
+          onClick={() => {
+            void fetch("/api/billing/topup", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prefix: topupPrefix, liveHours, count: 1, note }),
+            }).then(async (response) => {
+              const payload = (await response.json()) as { created?: TopUpCode[]; error?: string };
+              setStatus(payload.error ?? `شحن: ${payload.created?.map((item) => item.code).join(", ")}`);
+              load();
+            });
+          }}
+        >
+          توليد رمز شحن ساعات
+        </button>
+        <table className="data-table" style={{ marginTop: 12 }}>
+          <thead>
+            <tr>
+              <th>الرمز</th>
+              <th>ساعات</th>
+              <th>الحالة</th>
+              <th>الطالب</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topups.map((code) => (
+              <tr key={code.code}>
+                <td>{code.code}</td>
+                <td>{code.liveHours}</td>
+                <td>{code.used ? "مستخدم" : "متاح"}</td>
+                <td>{code.usedBy ?? "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
       <section className="card" style={{ marginTop: 20, overflowX: "auto" }}>
         <h2>متابعة الأكواد</h2>

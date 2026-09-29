@@ -1,6 +1,6 @@
 {
   "name": "mathmentor-platform",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "engines": {
     "node": ">=22"
@@ -17,15 +17,22 @@
     "video:lessons": "npm run video:continuity && npm run video:derivatives && npm run video:brevet-geometry"
   },
   "dependencies": {
-    "@octokit/rest": "^20.0.0",
-    "@google/genai": "latest",
+    "@google/genai": "^2.24.0",
+    "@livekit/components-react": "^2.9.24",
+    "@livekit/components-styles": "^1.2.0",
+    "@netlify/blobs": "^11.1.0",
+    "@octokit/rest": "^22.0.1",
+    "katex": "^0.16.22",
+    "livekit-client": "^2.22.3",
+    "livekit-server-sdk": "^2.19.0",
     "next": "^15.5.2",
+    "pdf-parse": "^1.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "pdf-parse": "^1.1.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.16.0",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",

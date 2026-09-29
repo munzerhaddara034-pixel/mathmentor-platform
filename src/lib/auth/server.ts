@@ -1,47 +1,58 @@
-import { cookies } from "next/headers";
+/**
+ * Role-dashboard session API (getSession / requireRole …) used by the SQLite dashboard,
+ * /api/me/dashboard, /api/auth/me and the teacher APIs.
+ *
+ * Merge note: there is a single session authority — the exclusive, server-side opaque token
+ * in `./session` (`mm_session` cookie, one phone + one computer per student). This module
+ * adapts that live session to the `SessionUser` shape and enriches it with the SQLite
+ * profile (`./db`: linked student, track, enrollments) when one exists for the same email.
+ */
 import { NextResponse } from "next/server";
-import { findUserById } from "./db";
-import { readSessionFromCookieValue, SESSION_COOKIE, sessionCookieOptions, signSession } from "./session";
+import { findUserByEmail as findProfileByEmail } from "./db";
+import { endCurrentSession, getLiveSession } from "./session";
+import type { PublicUser } from "./store";
 import type { SessionUser, UserRole } from "./types";
 
-export async function getSession(): Promise<SessionUser | null> {
-  const jar = await cookies();
-  const token = jar.get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-  const session = await readSessionFromCookieValue(token);
-  if (!session) return null;
+export function toDashboardRole(role: string): UserRole {
+  if (role === "teacher" || role === "admin") return "teacher";
+  if (role === "parent") return "parent";
+  return "student";
+}
+
+/** SQLite profile lookup that never breaks auth (e.g. read-only serverless FS, Node without node:sqlite). */
+function profileForEmail(email: string): SessionUser | null {
+  try {
+    return findProfileByEmail(email)?.user ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function sessionUserFromLive(user: PublicUser): SessionUser {
+  const profile = profileForEmail(user.email);
   return {
-    id: session.id,
-    email: session.email,
-    name: session.name,
-    role: session.role,
-    linkedStudentId: session.linkedStudentId,
-    track: session.track,
+    id: profile?.id ?? user.id,
+    email: user.email,
+    name: profile?.name ?? user.name,
+    role: toDashboardRole(user.role),
+    linkedStudentId: profile?.linkedStudentId ?? null,
+    track: profile?.track ?? null,
   };
 }
 
-export async function getFreshSession(): Promise<SessionUser | null> {
-  const session = await getSession();
-  if (!session) return null;
-  return findUserById(session.id) ?? session;
+export async function getSession(): Promise<SessionUser | null> {
+  const live = await getLiveSession();
+  if (!live.ok) return null;
+  return sessionUserFromLive(live.user);
 }
 
-export async function setSessionCookie(user: SessionUser) {
-  const token = await signSession({
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    linkedStudentId: user.linkedStudentId,
-    track: user.track,
-  });
-  const jar = await cookies();
-  jar.set(SESSION_COOKIE, token, sessionCookieOptions());
+/** Kept for existing call sites; the live session is already read fresh from the store. */
+export async function getFreshSession(): Promise<SessionUser | null> {
+  return getSession();
 }
 
 export async function clearSessionCookie() {
-  const jar = await cookies();
-  jar.set(SESSION_COOKIE, "", { ...sessionCookieOptions(), maxAge: 0 });
+  await endCurrentSession();
 }
 
 type AuthGate = { ok: true; user: SessionUser } | { ok: false; error: NextResponse };

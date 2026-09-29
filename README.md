@@ -10,7 +10,7 @@ A Lebanese-curriculum (and SAT) math academy: classroom videos, quizzes, a profe
 
 ## المتطلبات / Prerequisites
 
-- **Node.js 22** أو أحدث (المنصة تستخدم SQLite المدمج في Node للجلسات؛ Next.js 15 يحتاج 18.18+)
+- **Node.js 22** أو أحدث (المنصة تستخدم SQLite المدمج في Node (`node:sqlite`) لملفات لوحة التحكم؛ راجع `.nvmrc` / `.node-version`)
 - npm (يأتي مع Node)
 
 تحقق:
@@ -56,10 +56,34 @@ npm start
 
 ## الدخول والحسابات التجريبية / Auth & demo logins
 
-المستخدمون والجلسات مخزّنون في SQLite (`data/auth.db`) مع كعكة جلسة موقّعة — ليسوا داخل `data/store.json`. غيّر `AUTH_SECRET` في الإنتاج.
+جلسة واحدة موحّدة: كعكة `mm_session` تحمل رمزاً معتماً مخزّناً على الخادم (`data/auth.json` محلياً، Netlify Blobs على Netlify) — جلسة هاتف واحدة + جلسة حاسوب واحدة لكل طالب، وحسابات الأستاذ/الإدارة لا تُطرد بل يصل تنبيه باسم الجهاز. ملفات الطلاب للوحة التحكم (الدورات، التقدّم، تذكير الامتحانات، ربط ولي الأمر) في SQLite (`data/auth.db`). الحسابات المنشأة من `/signup` تُسجَّل في الاثنين؛ حسابات SQLite القديمة تُنسخ تلقائياً إلى مخزن الجلسات عند أول دخول. التفاصيل: [docs/AUTH.md](./docs/AUTH.md).
 
 | الدور | البريد | كلمة المرور | بعد الدخول |
 | --- | --- | --- | --- |
+| طالب | `student@mathmentor.lb` | `student123` | [`/dashboard`](http://localhost:3000/dashboard) لوحة الطالب (تقدم، تذكير امتحانات، الدورات) |
+| أستاذ / إدارة | `teacher@mathmentor.lb` | `teacher123` | [`/dashboard`](http://localhost:3000/dashboard) إحصائيات وأكواد التفعيل · [`/professor`](http://localhost:3000/professor) |
+| ولي أمر | `parent@mathmentor.lb` | `parent123` | [`/dashboard`](http://localhost:3000/dashboard) متابعة الطالب المرتبط (سارة) |
+
+Access-tier demo accounts (session store, paywall tiers):
+
+| Account | Password | Access |
+| --- | --- | --- |
+| `student@mathmentor.local` | `demo-student` | AI + Live (4 credits) |
+| `ai@mathmentor.local` | `demo-ai` | Solver + lessons |
+| `live@mathmentor.local` | `demo-live` | Live booking only |
+| `pending@mathmentor.local` | `demo-pending` | Login only → `/redeem` |
+| `parent@mathmentor.local` | `demo-parent` | Lessons + solver |
+| `teacher@mathmentor.local` | `demo-teacher` | Studio + lessons + Agent Hub |
+| `admin@mathmentor.local` | `demo-admin` | Studio + lessons + Agent Hub |
+
+- تسجيل الدخول: [`/login`](http://localhost:3000/login) · حساب جديد (طالب أو ولي أمر فقط؛ حسابات الأستاذ تُنشأ من الإدارة): [`/signup`](http://localhost:3000/signup) · الملف: [`/profile`](http://localhost:3000/profile)
+- Promo cards: `MUNZER-GOLD-9A` (AI), `MUNZER-LIVE-4C` (live), `MUNZER-BOTH-1X` (bundle), live-hour top-up `MUNZER-HRS-2H` on `/redeem` (signed in).
+- الدروس (`/lessons/*`) والسبورة والحلّال خاصة وتتطلب اشتراكاً؛ `/watch/[id]` يبقى عاماً.
+- **الوضع الداكن / الفاتح:** زر «داكن» أو «فاتح» في الشريط العلوي. الاختيار يُحفظ في `localStorage` (`mm-theme`).
+- الواجهة عربية واتجاهها من اليمين لليسار (`dir="rtl"`). مشغّلات الدروس الإنجليزية تبقى `ltr` داخلياً.
+- المساعد العائم في كل الصفحات: **«مساعد الأستاذ منذر»**.
+
+--- | --- | --- | --- |
 | طالب | `student@mathmentor.lb` | `student123` | [`/dashboard`](http://localhost:3000/dashboard) لوحة الطالب (تقدم، تذكير امتحانات، الدورات، ومساعد الأستاذ منذر) |
 | أستاذ / إدارة | `teacher@mathmentor.lb` | `teacher123` | [`/dashboard`](http://localhost:3000/dashboard) إحصائيات وأكواد التفعيل · [`/professor`](http://localhost:3000/professor) |
 | ولي أمر | `parent@mathmentor.lb` | `parent123` | [`/dashboard`](http://localhost:3000/dashboard) متابعة الطالب المرتبط (سارة) |
@@ -79,6 +103,11 @@ npm start
 | --- | --- | --- |
 | `OPENAI_API_KEY` | لا | مفتاح OpenAI لدردشة `/api/bot`. إن غاب، الردود محلية من قاعدة المعارف. |
 | `OPENAI_MODEL` | لا | النموذج (الافتراضي `gpt-4o-mini`) |
+| `GEMINI_API_KEY` | لا | Gemini لـ `/api/bot` والتفريغ الصوتي و`/api/solve-math/gemini` |
+| `WHATSAPP_ACCESS_TOKEN` | لـ `/api/whatsapp` | رمز Meta WhatsApp Cloud API — **لا يوضع في الكود أبداً** |
+| `WHATSAPP_PHONE_NUMBER_ID` | لـ `/api/whatsapp` | معرّف رقم الإرسال من Meta |
+| `WHATSAPP_VERIFY_TOKEN` | لا | قيمة Verify token لويبهوك Meta |
+| `GITHUB_TOKEN` / `GITHUB_BRANCH` | لا | وكيل تطوير الكود (يعمل فقط بجلسة الأستاذ أو `AGENT_WEBHOOK_SECRET`) |
 | `NEXT_PUBLIC_VIDEO_PROVIDER` | لا | `local` (افتراضي) أو `bunny` / `vimeo-ott` / `wistia` |
 | `NEXT_PUBLIC_BUNNY_LIBRARY_ID` | لا | مكتبة Bunny Stream |
 | `NEXT_PUBLIC_VIMEO_OTT_URL` | لا | رابط تضمين Vimeo OTT |
@@ -281,3 +310,33 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 ## الترخيص والاستخدام
 
 مشروع خاص بأكاديمية الأستاذ منذر حدارة. المحتوى الأكاديمي للمنصة وليس نسخاً حرفياً من كتب رسمية.
+
+---
+
+## Agent Hub، الحلّال، الصف المباشر، HeyGen
+
+### صفحات إضافية / More pages
+
+- `/classroom` فيديوهات كل الصفوف (درس كامل: تعريف، قانون، مثالان، خطأ شائع، تدريب، واجب)
+- `/studio/script` مولّد سكربت الفيديو (عيّنة leb-term-func-01، إنجليزي افتراضي + تبديل فرنسي)
+- `/admin/video-generator` مولّد فيديو HeyGen (سكربت، ملاحظات، أمثلة، لغة الصوت، السرعة)
+- `/math-solver` حلّال الذكاء (نص، لاتكس، صورة) ثم شرح تفاعلي
+- `/lessons/interactive-explanation` مشغّل الفيديو والسبورة لزمن حل المسألة
+- `/exams` محاكاة الامتحان الرسمي (Brevet + Terminale)
+- `/wallet` رصيد الذكاء وساعات الحصص المباشرة
+- `/profile` الأوسمة والسلسلة
+- `/live` حجز حصة مباشرة مع الأستاذ منذر حداره
+- `/live/classroom/[roomId]` الصف المباشر (سبورة KaTeX + LiveKit). بدون مفاتيح: وضع تجريبي. التفاصيل: [docs/LIVEKIT.md](docs/LIVEKIT.md)
+- `/admin` سجلات الذكاء وطلبات الحصص المباشرة
+- `/studio/player` المشغّل التفاعلي (عيّنات أو سكربت مولَّد أو `?job=` بعد HeyGen)
+- `/student` دردشة + رفع صورة أو ملف + الدرس التالي
+- `/subscribe` الرسوم وواتساب
+- `/assistant` موظف الذكاء الاصطناعي: نص أو صوت. أوامر: توليد فيديو، إضافة درس، تعيين رقم الهاتف، تعيين السعر، رسالة مدرسة، دعوة طالب
+
+### Interactive studio
+
+See [docs/STUDIO.md](docs/STUDIO.md) for the lesson timeline JSON schema, HeyGen demo mode, and script-generator contract. HeyGen request fields and the teacher workflow are in [docs/HEYGEN.md](docs/HEYGEN.md). AI solver + dual-tier live sessions: [docs/AI_SOLVER.md](docs/AI_SOLVER.md). Anti-sharing, official exam simulator, streaks, notifications, wallet: [docs/RETENTION.md](docs/RETENTION.md).
+
+Copy `.env.example` to `.env.local` only if you add keys. The demo runs with **no** `HEYGEN_API_KEY` and **no** `OPENAI_API_KEY`. Daily path: write script → `/admin/video-generator` → webhook/status → students watch the sync player.
+
+Agent Hub (`/admin/agent-hub`), WhatsApp voice pipeline (`/api/agent/whatsapp-voice`), and approvals: [docs/AGENT_OPS.md](docs/AGENT_OPS.md). Whish: [docs/WHISH.md](docs/WHISH.md). Engineering standards: [docs/ENGINEERING.md](docs/ENGINEERING.md).

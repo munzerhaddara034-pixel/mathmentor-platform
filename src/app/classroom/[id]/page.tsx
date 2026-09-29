@@ -29,6 +29,13 @@ export default function ClassroomLessonPage() {
         setCustom((store.customLessons ?? []) as AcademyLesson[]);
         setProgress(store.progress ?? []);
       });
+    void fetch("/api/auth/session", { credentials: "same-origin" })
+      .then((response) => response.json())
+      .then((payload: { user?: { name?: string; phone?: string } }) => {
+        if (payload.user?.name) setStudentName(payload.user.name);
+        if (payload.user?.phone) setPhone(payload.user.phone);
+      })
+      .catch(() => undefined);
   }, []);
 
   const lesson = useMemo(() => getAcademyLesson(params.id, custom), [params.id, custom]);
@@ -40,7 +47,7 @@ export default function ClassroomLessonPage() {
 
   if (!lesson) {
     return (
-      <main className="shell">
+      <main className="shell mm-mobile-stack">
         <p>Lesson not found.</p>
         <Link href="/classroom">Back to classroom</Link>
       </main>
@@ -49,7 +56,7 @@ export default function ClassroomLessonPage() {
 
   if (!unlocked) {
     return (
-      <main className="shell" dir="rtl">
+      <main className="shell mm-mobile-stack" dir="rtl">
         <h1>الدرس مقفل</h1>
         <p className="muted">يجب اجتياز اختبار الدرس السابق بنسبة {PASS_SCORE}% على الأقل.</p>
         <Link className="btn dark" href="/classroom">
@@ -75,7 +82,7 @@ export default function ClassroomLessonPage() {
   const pageDir = pack ? "ltr" : "rtl";
 
   return (
-    <main className="shell protected-lesson" dir={pageDir} onContextMenu={(event) => event.preventDefault()}>
+    <main className="shell protected-lesson mm-mobile-stack" dir={pageDir} onContextMenu={(event) => event.preventDefault()}>
       <p className="eyebrow">
         {pack ? copy?.trackLabel : lesson.gradeLabel} · {pack ? copy?.title : lesson.arabicTitle}
       </p>
@@ -84,14 +91,9 @@ export default function ClassroomLessonPage() {
       </h1>
       <p className="muted">{lesson.idea}</p>
       <div className="grid two">
-        <label>
-          Name on the video
-          <input value={studentName} onChange={(event) => setStudentName(event.target.value)} />
-        </label>
-        <label>
-          Phone for the watermark
-          <input value={phone} onChange={(event) => setPhone(event.target.value)} />
-        </label>
+        <p>
+          Watermark identity (from profile): <strong>{studentName}</strong> · {phone}
+        </p>
       </div>
       <LessonVideoPlayer
         videoUrl={lesson.videoUrl}

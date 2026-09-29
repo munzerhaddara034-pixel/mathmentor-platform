@@ -1,45 +1,30 @@
 import { readStore } from "@/lib/store";
-import { whatsappLink } from "@/lib/settings";
-import Link from "next/link";
+import { SubscribePlans } from "@/components/billing/SubscribePlans";
+import { whishTransferPhone, whishTransferNameAr } from "@/lib/whish/client";
+
+export const dynamic = "force-dynamic";
 
 export default async function SubscribePage() {
   const store = await readStore();
   const settings = store.settings;
+  const phone = whishTransferPhone();
+  const nameAr = whishTransferNameAr();
+
   return (
-    <main className="shell">
-      <p className="eyebrow">Subscription</p>
-      <h1>رسوم الاشتراك ورقم الهاتف</h1>
-      <p className="muted">
-        Academy phone / WhatsApp: {settings.phone}. The AI employee can change this number by command after you confirm.
+    <main className="shell mm-mobile-stack">
+      <p className="eyebrow">Subscription · Multi-region pricing</p>
+      <h1>رسوم الاشتراك · Whish / Western Union / OMT</h1>
+      <p className="muted" dir="rtl">
+        أسعار حسب المنطقة (لبنان / الخليج / دولي) مرتبطة بالمنهج. التحويل اليدوي عبر Whish إلى{" "}
+        <strong>{phone}</strong> باسم <strong>{nameAr}</strong>، أو Western Union / OMT للمستفيد نفسه. واتساب للدعم فقط
+        وليس للدفع. بعد تأكيد الأستاذ منذر حداره يُفعَّل الاشتراك.
       </p>
-      <div className="grid two">
-        {settings.plans.map((plan) => (
-          <article className="card" key={plan.id}>
-            <span className="badge">{plan.name}</span>
-            <h2>{plan.arabicName}</h2>
-            <p style={{ fontSize: 28, margin: "8px 0" }}>${plan.usdMonthly}<span className="muted"> / month</span></p>
-            <p className="muted">${plan.usdTerm} per term</p>
-            <p>{plan.includes}</p>
-            <a className="btn dark" href={whatsappLink(settings.whatsapp, `Subscribe: ${plan.name}`)}>
-              دفع إلكتروني / واتساب
-            </a>
-            <p className="muted" style={{ marginTop: 8 }}>
-              بطاقة مصرفية: تُربط لاحقاً (Stripe / local gateway). أو اشترِ بطاقة كشط من مكتب معتمد.
-            </p>
-            <Link className="btn" href="/redeem">
-              تفعيل بطاقة كشط
-            </Link>
-          </article>
-        ))}
-      </div>
-      <div className="row" style={{ marginTop: 24 }}>
-        <Link className="btn" href="/classroom">
-          Start a classroom video
-        </Link>
-        <Link className="btn" href="/student">
-          Student chat
-        </Link>
-      </div>
+      <p className="muted">
+        Regional prices (Lebanon / GCC / International) follow the curriculum switcher. Pay by manual transfer via Whish
+        to <strong>{phone}</strong> ({nameAr} / Munzer Ahmad Haddara), or Western Union / OMT to the same beneficiary.
+        Academy WhatsApp ({settings.phone}) is support-only. Redeem cards on /redeem remain optional after confirmation.
+      </p>
+      <SubscribePlans contactPhone={settings.phone} contactNote={settings.contactNote} />
     </main>
   );
 }

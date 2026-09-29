@@ -13,6 +13,27 @@ export interface CodeEvolutionPlan {
   commitMessage: string;
 }
 
+export type CodeEvolutionResult = {
+  success: boolean;
+  fileUpdated: string;
+  commitMessage: string;
+};
+
+type PlannerJson = { targetFilePath?: unknown; commitMessage?: unknown };
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function parsePlan(text: string | undefined): PlannerJson {
+  try {
+    const parsed: unknown = JSON.parse(text || "{}");
+    return parsed && typeof parsed === "object" ? (parsed as PlannerJson) : {};
+  } catch {
+    return {};
+  }
+}
+
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
@@ -21,11 +42,10 @@ const ai = new GoogleGenAI({
  * محرك المهندس البرمجي:
  * يستقبل الأمر الهندسي، يحدد الملف المعني ويقرأ محتواه من GitHub،
  * ثم يولد التعديل المناسب، وينفذ الـ Commit مباشرة في الفرع المناسب.
+ *
+ * Callers must gate this with `canRunCodeEvolution` (see ./codeEvolutionGate).
  */
-export async function executeCodeEvolution(params: {
-  prompt: string;
-  branch?: string;
-}) {
+export async function executeCodeEvolution(params: { prompt: string; branch?: string }): Promise<CodeEvolutionResult> {
   const branch = params.branch || GITHUB_BRANCH;
   const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
@@ -57,9 +77,13 @@ export async function executeCodeEvolution(params: {
       config: { responseMimeType: "application/json" },
     });
 
-    const plan = JSON.parse(plannerResponse.text || "{}");
-    const targetFilePath = plan.targetFilePath || "src/app/page.tsx";
-    const commitMessage = plan.commitMessage || `Auto update via AI: ${params.prompt}`;
+    const plan = parsePlan(plannerResponse.text);
+    const targetFilePath =
+      typeof plan.targetFilePath === "string" && plan.targetFilePath ? plan.targetFilePath : "src/app/page.tsx";
+    const commitMessage =
+      typeof plan.commitMessage === "string" && plan.commitMessage
+        ? plan.commitMessage
+        : `Auto update via AI: ${params.prompt}`;
 
     // 2. قراءة الكود الحالي للملف من مستودع GitHub
     let existingContent = "";
@@ -77,8 +101,8 @@ export async function executeCodeEvolution(params: {
         existingContent = Buffer.from(fileData.data.content, "base64").toString("utf-8");
         fileSha = fileData.data.sha;
       }
-    } catch (readErr: any) {
-      console.warn("File may not exist, creating new or proceeding:", readErr.message);
+    } catch (readErr) {
+      console.warn("File may not exist, creating new or proceeding:", errorMessage(readErr));
     }
 
     // 3. كتابة وتوليد الكود المحدّث كاملاً بالذكاء الاصطناعي
@@ -127,12 +151,12 @@ ${existingContent}
       fileUpdated: targetFilePath,
       commitMessage: commitMessage,
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Code Evolution Agent Execution Failed:", error);
     return {
       success: false,
       fileUpdated: "src/app/page.tsx",
-      commitMessage: `تعذر إتمام التعديل برمجياً: ${error.message}`,
+      commitMessage: `تعذر إتمام التعديل برمجياً: ${errorMessage(error)}`,
     };
   }
 }

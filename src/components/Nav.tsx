@@ -4,14 +4,27 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { roleLabel, type SessionUser } from "@/lib/auth/types";
+import { NotificationBell } from "./NotificationBell";
 import { ThemeToggle } from "./ThemeToggle";
+import { CurriculumSwitcher } from "./curriculum/CurriculumSwitcher";
 
-function linksFor(user: SessionUser | null) {
+type NavLink = { href: string; label: string };
+
+/** Links shared by every signed-in or guest visitor (AI board, solver, live, exam simulator). */
+const LEARNING_LINKS: NavLink[] = [
+  { href: "/lessons", label: "الدروس" },
+  { href: "/lessons/interactive", label: "السبورة" },
+  { href: "/math-solver", label: "الحلّال" },
+  { href: "/live", label: "مباشر" },
+  { href: "/exams", label: "المحاكاة" },
+  { href: "/practice", label: "الاختبارات" },
+];
+
+function linksFor(user: SessionUser | null): NavLink[] {
   if (!user) {
     return [
       { href: "/", label: "الرئيسية" },
-      { href: "/lessons", label: "الدروس" },
-      { href: "/practice", label: "الاختبارات" },
+      ...LEARNING_LINKS,
       { href: "/classroom", label: "الصف" },
       { href: "/subscribe", label: "الاشتراك" },
     ];
@@ -22,24 +35,33 @@ function linksFor(user: SessionUser | null) {
       { href: "/professor", label: "الأستاذ" },
       { href: "/assistant", label: "الموظف" },
       { href: "/bank", label: "بنك الأستاذ" },
-      { href: "/lessons", label: "الدروس" },
-      { href: "/practice", label: "الاختبارات" },
+      { href: "/admin", label: "الإدارة" },
+      { href: "/admin/agent-hub", label: "الوكيل" },
+      { href: "/admin/b2b-manager", label: "الشراكات" },
+      { href: "/admin/exams", label: "تصحيح" },
+      { href: "/studio/script", label: "السكربت" },
+      { href: "/studio/voice-solver", label: "الصوت" },
+      { href: "/admin/video-generator", label: "الفيديو" },
+      ...LEARNING_LINKS,
     ];
   }
   if (user.role === "parent") {
     return [
       { href: "/dashboard", label: "لوحة ولي الأمر" },
-      { href: "/lessons", label: "الدروس" },
-      { href: "/practice", label: "الاختبارات" },
+      ...LEARNING_LINKS,
+      { href: "/wallet", label: "المحفظة" },
       { href: "/profile", label: "ملفي" },
     ];
   }
   return [
     { href: "/dashboard", label: "لوحة الطالب" },
-    { href: "/lessons", label: "الدروس" },
-    { href: "/practice", label: "الاختبارات" },
+    ...LEARNING_LINKS,
     { href: "/classroom", label: "الصف" },
+    { href: "/resources", label: "المرفقات" },
+    { href: "/leaderboard", label: "الصدارة" },
     { href: "/student", label: "دردشة" },
+    { href: "/wallet", label: "المحفظة" },
+    { href: "/redeem", label: "تفعيل" },
     { href: "/profile", label: "ملفي" },
   ];
 }
@@ -68,25 +90,28 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
   }, [pathname]);
 
   const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
     setUser(null);
     setOpen(false);
-    window.location.assign("/");
+    window.location.assign("/login");
   };
 
   return (
     <header className="nav">
-      <Link href="/" className="brand">
-        <span className="mark">∑</span>
-        <span>
-          Math Mentor
-          <div className="muted brand-sub">الأستاذ منذر حدارة</div>
+      <Link href="/" className="brand" dir="ltr">
+        <img className="brand-logo" src="/brand/mathmentor-logo.svg" alt="" width={40} height={40} />
+        <span className="brand-text">
+          MathMentor
+          <span className="brand-kicker" lang="ar" dir="rtl">
+            أكاديمية منذر حداره
+          </span>
         </span>
       </Link>
       <button type="button" className="nav-burger" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
         القائمة
       </button>
       <nav className={`links ${open ? "open" : ""}`}>
+        <CurriculumSwitcher />
         {links.map((link) => (
           <Link
             key={link.href}
@@ -100,6 +125,7 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
         <ThemeToggle />
         {user ? (
           <>
+            <NotificationBell />
             <Link href="/profile" className="nav-user" onClick={() => setOpen(false)}>
               <span className="role-badge">{roleLabel(user.role)}</span>
               <span>{user.name}</span>

@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { academyLessons } from "@/lib/academyLessons";
-import { defaultSettings, whatsappLink } from "@/lib/settings";
+import { defaultSettings } from "@/lib/settings";
 import type { PlatformSettings, ProgressEntry, StoreData, StudentChatMessage } from "@/lib/types";
 
 export default function StudentPage() {
@@ -13,6 +13,9 @@ export default function StudentPage() {
   const [body, setBody] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [xp, setXp] = useState(0);
+  const [badges, setBadges] = useState<string[]>([]);
 
   useEffect(() => {
     void fetch("/api/content")
@@ -24,6 +27,14 @@ export default function StudentPage() {
     void fetch("/api/tutor")
       .then((response) => response.json())
       .then((payload) => setMessages(payload.messages ?? []));
+    void fetch("/api/gamification/me", { credentials: "same-origin" })
+      .then((response) => response.json())
+      .then((payload: { profile?: { streakDays?: number; xp?: number; badges?: string[] } }) => {
+        setStreak(payload.profile?.streakDays ?? 0);
+        setXp(payload.profile?.xp ?? 0);
+        setBadges(payload.profile?.badges ?? []);
+      })
+      .catch(() => undefined);
   }, []);
 
   const done = new Set(progress.map((item) => item.lessonId));
@@ -50,6 +61,26 @@ export default function StudentPage() {
       <p className="muted">
         Completed {progress.length} lessons. Next: {next?.title}. WhatsApp {settings.phone}.
       </p>
+      <div className="card" style={{ marginTop: 12 }}>
+        <h2>
+          🔥 {streak} Days Streak · {xp} XP
+        </h2>
+        <p className="muted">{badges.length ? badges.join(" · ") : "Earn Calculus Master, Probability Pro, Brevet Champ."}</p>
+        <div className="row">
+          <Link className="btn" href="/profile">
+            Profile / badges
+          </Link>
+          <Link className="btn" href="/wallet">
+            Wallet
+          </Link>
+          <Link className="btn" href="/exams">
+            Official exam sim
+          </Link>
+          <Link className="btn" href="/leaderboard">
+            Monthly XP
+          </Link>
+        </div>
+      </div>
       <div className="grid two">
         <article className="card">
           <h2>Keep moving</h2>
@@ -59,6 +90,15 @@ export default function StudentPage() {
           <div className="row">
             <Link className="btn dark" href={`/classroom/${next?.id}`}>
               Continue classroom video
+            </Link>
+            <Link className="btn" href="/math-solver">
+              AI solver
+            </Link>
+            <Link className="btn" href="/live">
+              Book Prof. Munzer
+            </Link>
+            <Link className="btn dark" href="/live/classroom/demo">
+              انضم للحصة
             </Link>
             <Link className="btn" href="/subscribe">
               Subscription
@@ -100,9 +140,9 @@ export default function StudentPage() {
             <h3>{plan.arabicName}</h3>
             <p>${plan.usdMonthly} / month · ${plan.usdTerm} / term</p>
             <p className="muted">{plan.includes}</p>
-            <a className="btn" href={whatsappLink(settings.whatsapp, `I want ${plan.name}`)}>
-              Subscribe on WhatsApp
-            </a>
+            <Link className="btn dark" href="/subscribe">
+              ادفع عبر Whish / Pay with Whish
+            </Link>
           </article>
         ))}
       </div>

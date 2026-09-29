@@ -3,6 +3,7 @@ import { brevetThalesQuestions } from "./brevetGeometryQuestions";
 import { grade12LsContinuityQuestions } from "./grade12LsContinuityQuestions";
 import { grade12LsDerivativesQuestions } from "./grade12LsDerivativesQuestions";
 import { grade12LsLimitsQuestions } from "./grade12LsLimitsQuestions";
+import { formatLebaneseEquation, formatMathIslands } from "./math/lebaneseEquationFormat";
 import { getTopicBank, quizQuestionsForBank } from "./topicBanks";
 import type { Difficulty, QuizQuestion } from "./types";
 
@@ -17,7 +18,17 @@ function q(
   latex?: string,
   kind: QuizQuestion["kind"] = "mcq",
 ): QuizQuestion {
-  return { id: `${lessonId}-q${n}`, lessonId, difficulty, kind, prompt, options, correctIndex, steps, latex };
+  return {
+    id: `${lessonId}-q${n}`,
+    lessonId,
+    difficulty,
+    kind,
+    prompt: formatMathIslands(prompt),
+    options: options.map(formatMathIslands),
+    correctIndex,
+    steps: steps.map(formatMathIslands),
+    latex: latex ? formatLebaneseEquation(latex) : latex,
+  };
 }
 
 const extra: QuizQuestion[] = [

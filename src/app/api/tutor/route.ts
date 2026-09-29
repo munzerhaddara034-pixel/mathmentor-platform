@@ -1,9 +1,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { apiRequireAiAccess } from "@/lib/auth/guards";
 import { createId } from "@/lib/ids";
 import { addStudentChat, readStore } from "@/lib/store";
 import { academyLessons } from "@/lib/academyLessons";
+
+export const runtime = "nodejs";
 
 function tutorAnswer(question: string, fileName?: string) {
   const q = question.toLowerCase();
@@ -18,11 +21,15 @@ function tutorAnswer(question: string, fileName?: string) {
 }
 
 export async function GET() {
+  const guard = await apiRequireAiAccess();
+  if (guard.error) return guard.error;
   const store = await readStore();
   return NextResponse.json({ messages: store.studentChat });
 }
 
 export async function POST(request: Request) {
+  const guard = await apiRequireAiAccess();
+  if (guard.error) return guard.error;
   const form = await request.formData();
   const body = String(form.get("body") ?? "").trim();
   const file = form.get("file");

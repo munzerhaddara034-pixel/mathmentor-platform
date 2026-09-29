@@ -1,30 +1,27 @@
 import { academyLessons } from "@/lib/academyLessons";
-import { badgesFor } from "@/lib/gating";
+import { monthlyLeaderboard, BADGE_META } from "@/lib/gamification/store";
 import { readStore } from "@/lib/store";
+
+export const dynamic = "force-dynamic";
 
 export default async function LeaderboardPage() {
   const store = await readStore();
-  const scores = new Map<string, number>();
-  for (const attempt of store.quizAttempts) {
-    scores.set(attempt.studentName, (scores.get(attempt.studentName) ?? 0) + attempt.points);
-  }
-  const rows = [...scores.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20);
+  const monthly = await monthlyLeaderboard();
   return (
     <main className="shell" dir="rtl">
       <p className="eyebrow">Gamification</p>
-      <h1>لوحة الصدارة والأوسمة</h1>
-      <p className="muted">{store.quizAttempts.length} محاولة اختبار · نقاط من الدرجات.</p>
+      <h1>لوحة الصدارة الشهرية</h1>
+      <p className="muted">XP this month (Asia/Beirut) · lessons, solver, exams. Quiz attempts in store: {store.quizAttempts.length}.</p>
       <div className="grid two">
-        {rows.length === 0 ? <p>لا نتائج بعد. أنه اختبار درس لتظهر هنا.</p> : null}
-        {rows.map(([name, points], index) => (
-          <article className="card" key={name}>
+        {monthly.length === 0 ? <p>لا نتائج بعد. شاهد درساً أو حلّ مسألة.</p> : null}
+        {monthly.map((row, index) => (
+          <article className="card" key={row.userId}>
             <span className="badge">#{index + 1}</span>
-            <h2>{name}</h2>
-            <p>{points} نقطة</p>
+            <h2>{row.name}</h2>
+            <p>{row.xp} XP هذا الشهر</p>
+            <p>🔥 {row.streakDays} أيام</p>
             <p className="muted">
-              {badgesFor(name, store.quizAttempts)
-                .map((badge) => badge.title)
-                .join(" · ") || "ابدأ اختباراً لنيل وسام"}
+              {row.badges.map((id) => BADGE_META[id]?.title).filter(Boolean).join(" · ") || "بدون أوسمة بعد"}
             </p>
           </article>
         ))}

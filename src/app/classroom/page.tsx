@@ -15,11 +15,22 @@ export default function ClassroomIndexPage() {
       .then((store: StoreData) => setProgress(store.progress ?? []));
   }, []);
 
-    return (
-    <main className="shell" dir="ltr">
+  return (
+    <main className="shell mm-mobile-stack" dir="ltr">
       <p className="eyebrow">Classroom studio</p>
       <h1>Every grade. Every chapter. Professor at the board.</h1>
       <p className="muted">Open the lesson, then the quiz. The next chapter unlocks at 70%. Bilingual videos use one EN | FR click for voice and board together.</p>
+      <p className="muted" dir="rtl" lang="ar">
+        افتح الدرس ثم الاختبار. الدرس التالي يُفتح بعد 70%.
+      </p>
+      <div className="row">
+        <Link href="/lessons/interactive" className="btn dark">
+          مشغل الدروس الشارحة والسبورة الذكية
+        </Link>
+        <Link href="/studio/script" className="btn">
+          مولّد السكربت
+        </Link>
+      </div>
       <section className="card" style={{ marginTop: 20 }}>
         <h2>Watch now</h2>
         <p className="muted">Professor Munzer on camera. English default, French toggle on the new explainers.</p>

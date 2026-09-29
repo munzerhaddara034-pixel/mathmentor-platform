@@ -1,4 +1,4 @@
-import type { GradeTrack, LibraryItem } from "./types";
+import type { GradeTrack, LibraryItem } from "../types";
 
 export const lebaneseCatalog: Array<Omit<LibraryItem, "id" | "createdAt" | "extractedText"> & { extractedText: string }> = [
   {
@@ -58,7 +58,8 @@ export const trackLabel: Record<GradeTrack, { ar: string; en: string }> = {
   "grade-7": { ar: "حلقة ثالثة · صف 7", en: "EB7" },
   "grade-8": { ar: "حلقة ثالثة · صف 8", en: "EB8" },
   "grade-9": { ar: "شهادة متوسطة · صف 9", en: "Grade 9 Certificate" },
-  "grade-11": { ar: "سنة أولى ثانوي · صف 11", en: "Secondary Year 1" },
+  "grade-10": { ar: "سنة أولى ثانوي · صف 10", en: "Grade 10 · Secondary Year 1" },
+  "grade-11": { ar: "سنة ثانية ثانوي · صف 11", en: "Grade 11 · Secondary Year 2" },
   "grade-12": { ar: "شهادة ثانوية · صف 12", en: "Grade 12 Certificate" },
   sat: { ar: "رياضيات SAT", en: "SAT Math" },
 };

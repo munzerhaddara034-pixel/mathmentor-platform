@@ -1,6 +1,7 @@
 "use client";
 
 import { MathTex } from "@/components/MathTex";
+import { MixedMathText } from "@/components/studio/MixedMathText";
 import { difficultyLabel } from "@/lib/quizBank";
 import type { QuizQuestion } from "@/lib/types";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -107,15 +108,21 @@ export function QuizEngine({
             <article className="card" key={item.id} style={{ marginTop: 12 }}>
               <span className={`badge ${ok ? "approved" : "rejected"}`}>{ok ? "صح" : "خطأ"}</span>
               <p>
-                {i + 1}. {item.prompt}
+                {i + 1}. <MixedMathText text={item.prompt} />
               </p>
               <MathTex tex={item.latex} />
-              <p className="muted">إجابتك: {picked == null ? "بدون إجابة" : item.options[picked]}</p>
-              <p>الصحيح: {item.options[item.correctIndex]}</p>
+              <p className="muted">
+                إجابتك: {picked == null ? "بدون إجابة" : <MixedMathText text={item.options[picked]} />}
+              </p>
+              <p>
+                الصحيح: <MixedMathText text={item.options[item.correctIndex]} />
+              </p>
               <div className="paper">
                 <strong>خطوات الحل</strong>
                 {item.steps.map((step) => (
-                  <p key={step}>{step}</p>
+                  <p key={step}>
+                    <MixedMathText text={step} />
+                  </p>
                 ))}
               </div>
             </article>
@@ -137,7 +144,9 @@ export function QuizEngine({
         </p>
       </div>
       <article className="card">
-        <p style={{ fontSize: 20 }}>{question.prompt}</p>
+        <p style={{ fontSize: 20 }}>
+          <MixedMathText text={question.prompt} />
+        </p>
         <MathTex tex={question.latex} />
         {question.imageUrl ? <img src={question.imageUrl} alt="" className="question-image" /> : null}
         <div className="option-grid">
@@ -154,7 +163,7 @@ export function QuizEngine({
                 })
               }
             >
-              {option}
+              <MixedMathText text={option} />
             </button>
           ))}
         </div>

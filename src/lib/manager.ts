@@ -63,7 +63,7 @@ Reply YES if your family wants a place this month.
   if (text.includes("video") || text.includes("فيديو") || text.includes("lesson") || text.includes("درس")) {
     return {
       reply:
-        "Classroom videos are already prepared for every chapter in Grades 7, 8, 9, 11, 12 LS, and SAT. Open Classroom Studio, play a lesson, then approve publishing if the writing and voice are correct. I will not show a new lesson to students without that approval.",
+        "Classroom videos are already prepared for every chapter in Grades 7, 8, 9, 10, 11, 12 LS, and SAT. Open Classroom Studio, play a lesson, then approve publishing if the writing and voice are correct. I will not show a new lesson to students without that approval.",
     };
   }
   return {

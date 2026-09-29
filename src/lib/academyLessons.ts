@@ -78,6 +78,11 @@ export const academyLessons: AcademyLesson[] = [
   L("grade-9", "EB9 / Brevet", 7, "Right-triangle trigonometry", "حساب مثلثات القائم", "Sine, cosine, tangent are ratios of sides.", "sin = opp/hyp\ncos = adj/hyp\ntan = opp/adj", "In a 3-4-5 triangle, sin of the angle opposite 3.", "3/5"),
   L("grade-9", "EB9 / Brevet", 8, "Space geometry", "هندسة الفضاء", "We describe cubes, boxes, and planes in space with edges and faces.", "Volume of a box = LWH", "2 × 3 × 4 box.", "V = 24"),
 
+  L("grade-10", "Grade 10 / Secondary 1", 1, "Real numbers and powers", "الأعداد الحقيقية والقوى", "Extend powers and roots on the real line; keep order and signs.", "aⁿ, √a on ℝ⁺", "Simplify (2³)².", "2⁶ = 64"),
+  L("grade-10", "Grade 10 / Secondary 1", 2, "Linear equations and inequalities", "المعادلات والمتراجحات الخطية", "Solve ax+b=c and ax+b≤c; reverse the inequality when multiplying by a negative.", "ax+b ≤ c", "Solve −2x+4 ≤ 10.", "x ≥ −3"),
+  L("grade-10", "Grade 10 / Secondary 1", 3, "Introduction to functions", "مدخل إلى الدوال", "A function assigns one output to each allowed input; read tables and simple graphs.", "x ↦ f(x)", "If f(x)=3x−1, f(2).", "5"),
+  L("grade-10", "Grade 10 / Secondary 1", 4, "Coordinate geometry basics", "أساسيات الهندسة التحليلية", "Plot points; slope is rise over run; equation of a line through two points.", "m=(y₂−y₁)/(x₂−x₁)", "Slope through (0,1) and (2,5).", "m=2"),
+
   L("grade-11", "S1 / Grade 11", 1, "Functions and graphs", "الدوال والرسوم", "A function assigns one output to each allowed input.", "x ↦ f(x)", "If f(x)=2x, f(5).", "10"),
   L("grade-11", "S1 / Grade 11", 2, "Limits at a point", "النهايات عند نقطة", "A limit is the value approached, not always the value attained.", "lim x→a f(x) = L", "lim x→0 (x+1).", "1"),
   L("grade-11", "S1 / Grade 11", 3, "Numerical sequences", "المتتاليات", "A sequence is a list of terms with a rule.", "u(n+1) from u(n)", "Arithmetic: 3, 7, 11.", "common difference 4"),
@@ -109,7 +114,8 @@ export const gradeGroups = [
   { track: "grade-7" as GradeTrack, title: "Grade 7 · EB7" },
   { track: "grade-8" as GradeTrack, title: "Grade 8 · EB8" },
   { track: "grade-9" as GradeTrack, title: "Grade 9 · Brevet" },
-  { track: "grade-11" as GradeTrack, title: "Grade 11 · Secondary 1" },
+  { track: "grade-10" as GradeTrack, title: "Grade 10 · Secondary 1" },
+  { track: "grade-11" as GradeTrack, title: "Grade 11 · Secondary 2" },
   { track: "grade-12" as GradeTrack, title: "Grade 12 · Life Sciences" },
   { track: "sat" as GradeTrack, title: "SAT Math" },
 ];

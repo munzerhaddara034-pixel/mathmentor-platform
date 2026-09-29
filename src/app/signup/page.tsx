@@ -10,6 +10,9 @@ const ROLE_COPY: Record<UserRole, string> = {
   parent: "ولي أمر",
 };
 
+/** Staff accounts are provisioned by the academy; self-signup is student / parent only. */
+const SIGNUP_ROLES = USER_ROLES.filter((item) => item !== "teacher");
+
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,7 +45,7 @@ export default function SignupPage() {
       <section className="card auth-card">
         <p className="eyebrow">Math Mentor</p>
         <h1>حساب جديد</h1>
-        <p className="muted">سجّل كطالب أو ولي أمر أو أستاذ. الحسابات التجريبية موثّقة في README.</p>
+        <p className="muted">سجّل كطالب أو ولي أمر. حسابات الأستاذ تُنشأ من الإدارة. الحسابات التجريبية موثّقة في README.</p>
         <form onSubmit={(event) => void submit(event)} className="auth-form">
           <label>
             الاسم
@@ -66,7 +69,7 @@ export default function SignupPage() {
           <label>
             الدور
             <select value={role} onChange={(event) => setRole(event.target.value as UserRole)}>
-              {USER_ROLES.map((item) => (
+              {SIGNUP_ROLES.map((item) => (
                 <option key={item} value={item}>
                   {ROLE_COPY[item]}
                 </option>

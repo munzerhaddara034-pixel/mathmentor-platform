@@ -1,3 +1,26 @@
+import { academyLessons } from "./academyLessons";
+import { createId } from "./ids";
+import type { AcademyLessonRecord, GradeTrack, OutreachDraft, PlatformSettings } from "./types";
+
+export type CommandResult = {
+  reply: string;
+  outreach?: Omit<OutreachDraft, "id" | "createdAt">;
+  settingsPatch?: Partial<PlatformSettings>;
+  newLesson?: AcademyLessonRecord;
+  generatedLessonId?: string;
+};
+
+function trackFromText(text: string): GradeTrack {
+  if (text.includes("sat")) return "sat";
+  if (text.includes("12")) return "grade-12";
+  if (text.includes("11")) return "grade-11";
+  if (text.includes("10") || text.includes("عاشر")) return "grade-10";
+  if (text.includes("9") || text.includes("brevet")) return "grade-9";
+  if (text.includes("8")) return "grade-8";
+  if (text.includes("7")) return "grade-7";
+  return "grade-12";
+}
+
 export function runEmployeeCommand(input: string, settings: PlatformSettings): CommandResult {
   const text = input.trim();
   const lower = text.toLowerCase();

@@ -1,8 +1,25 @@
 node_modules
 .next
+.netlify
 __pycache__/
 *.pyc
+# Runtime data (JSON stores, SQLite auth.db + WAL sidecars, uploads). Only the folder marker is tracked.
+data/*
+!data/.gitkeep
 data/store.json
+data/heygen-jobs.json
+data/studio-events.json
+data/auth.json
+data/math-queries.json
+data/voice-math.json
+data/voice-audio-*.json
+data/live-sessions.json
+data/livekit-rooms.json
+data/whatsapp-outbox.json
+data/notifications.json
+data/gamification.json
+data/billing.json
+data/exam-attempts.json
 data/uploads
 data/*.db
 data/*.db-*
@@ -12,4 +29,4 @@ public/uploads
 .env*.local
 *.zip
 .DS_Store
-tsconfig.tsbuildinfo
+*.tsbuildinfo

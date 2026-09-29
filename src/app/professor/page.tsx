@@ -82,6 +82,8 @@ export default function ProfessorPage() {
       </p>
       <div className="row">
         <a className="btn dark" href="/classroom">Classroom videos</a>
+        <a className="btn" href="/studio/script">AI lesson script</a>
+        <a className="btn" href="/lessons/interactive">Interactive board</a>
         <a className="btn" href="/assistant">AI manager</a>
       </div>
       {message ? <p className="success">{message}</p> : null}
@@ -122,7 +124,8 @@ export default function ProfessorPage() {
               <option value="grade-7">صف 7 — EB7</option>
               <option value="grade-8">صف 8 — EB8</option>
               <option value="grade-9">صف 9 — شهادة متوسطة</option>
-              <option value="grade-11">صف 11 — S1</option>
+              <option value="grade-10">صف 10 — سنة أولى ثانوي</option>
+              <option value="grade-11">صف 11 — سنة ثانية ثانوي</option>
               <option value="grade-12">صف 12 — ثانوية</option>
               <option value="sat">SAT Math</option>
             </select>
