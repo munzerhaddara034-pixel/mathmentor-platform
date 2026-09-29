@@ -37,6 +37,7 @@ function linksFor(user: SessionUser | null): NavLink[] {
       { href: "/bank", label: "بنك الأستاذ" },
       { href: "/admin", label: "الإدارة" },
       { href: "/admin/agent-hub", label: "الوكيل" },
+      { href: "/admin/team", label: "الفريق" },
       { href: "/admin/b2b-manager", label: "الشراكات" },
       { href: "/admin/exams", label: "تصحيح" },
       { href: "/studio/script", label: "السكربت" },
