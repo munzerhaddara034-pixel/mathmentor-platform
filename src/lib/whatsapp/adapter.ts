@@ -1,3 +1,4 @@
+import { graphUrl } from "./graphBase";
 import { appendWhatsAppMessage } from "./store";
 import type { WhatsAppKind, WhatsAppMessage, WhatsAppProvider } from "./types";
 
@@ -97,7 +98,7 @@ async function sendMeta(to: string, body: string) {
   const token = metaAccessToken();
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID!.trim();
   const toDigits = to.replace(/^\+/, "");
-  const response = await fetch(`https://graph.facebook.com/v21.0/${encodeURIComponent(phoneId)}/messages`, {
+  const response = await fetch(graphUrl(`${encodeURIComponent(phoneId)}/messages`), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -215,7 +216,7 @@ export async function fetchMetaMediaById(mediaId: string): Promise<MetaMediaFetc
     };
   }
   try {
-    const metaRes = await fetch(`https://graph.facebook.com/v21.0/${encodeURIComponent(mediaId)}`, {
+    const metaRes = await fetch(graphUrl(encodeURIComponent(mediaId)), {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!metaRes.ok) {

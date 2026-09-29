@@ -19,6 +19,9 @@ import {
   normalizeWhatsAppDigits,
   teacherWhatsApp,
 } from "@/lib/whatsapp/adapter";
+import { categoryForMime, type InboundMediaKind } from "@/lib/whatsapp/media/policy";
+import { parseMockExamRequest } from "@/lib/agent/media/captionIntent";
+import { dispatchInboundMedia, dispatchMockExam } from "@/lib/agent/media/dispatch";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -37,8 +40,34 @@ type InboundParsed = {
   demo?: boolean;
   /** Meta/UltraMsg/Twilio message type when known (text|audio|image|…). */
   messageType?: string;
+  /** Non-audio media (image/document/video/sticker) → media handler instead of the voice pipeline. */
+  mediaKind?: InboundMediaKind;
+  caption?: string;
+  /** Provider message id (Meta wamid) — dedupe + reply context. */
+  messageId?: string;
   isWebhookStyle: boolean;
 };
+
+const META_MEDIA_TYPES = new Set(["image", "document", "video", "sticker"]);
+
+/**
+ * Non-audio media kind for a MIME (staff uploads / Twilio). Voice-like MIMEs (incl. video/mp4
+ * recordings) stay on the voice pipeline. `strict` (staff uploads) only routes allow-listed types;
+ * otherwise unknown image/application types are routed so the sender gets a clear "unsupported" reply.
+ */
+function mediaKindForMime(mimeType: string | undefined, strict = false): InboundMediaKind | undefined {
+  if (!mimeType || VOICE_MIME_HINT.test(mimeType)) return undefined;
+  const category = categoryForMime(mimeType);
+  if (category === "image" || category === "document" || category === "video") return category;
+  if (strict) return undefined;
+  if (/^image\//i.test(mimeType)) return "image";
+  if (/^(application|text)\//i.test(mimeType)) return "document";
+  return undefined;
+}
+
+function asMediaKind(type: string): InboundMediaKind | undefined {
+  return type === "image" || type === "document" || type === "video" || type === "sticker" ? type : undefined;
+}
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -68,6 +97,25 @@ function parseMetaPayload(body: Record<string, unknown>): InboundParsed | null {
         if (!m) continue;
         const senderPhone = pickString(m.from);
         const type = pickString(m.type)?.toLowerCase() || "";
+        const messageId = pickString(m.id);
+        const mediaObj = META_MEDIA_TYPES.has(type) ? asRecord(m[type]) : null;
+        const mediaMime = pickString(mediaObj?.mime_type, mediaObj?.mimeType);
+        // Documents that are really audio files keep the legacy voice path.
+        const audioAsDocument = type === "document" && Boolean(mediaMime && /^audio\//i.test(mediaMime));
+        if (mediaObj && !audioAsDocument) {
+          return {
+            source: "meta",
+            senderPhone,
+            mediaKind: asMediaKind(type),
+            mediaId: pickString(mediaObj.id),
+            mimeType: mediaMime,
+            filename: pickString(mediaObj.filename),
+            caption: pickString(mediaObj.caption),
+            messageId,
+            messageType: type,
+            isWebhookStyle: true,
+          };
+        }
         const textObj = asRecord(m.text);
         const audioObj = asRecord(m.audio) || asRecord(m.voice) || asRecord(m.document);
         const textBody = pickString(textObj?.body, m.body);
@@ -82,6 +130,7 @@ function parseMetaPayload(body: Record<string, unknown>): InboundParsed | null {
           source: "meta",
           senderPhone,
           textBody,
+          messageId,
           mediaId: isAudio ? (pickString(audioObj?.id) || undefined) : undefined,
           mimeType: mimeType || (isAudio ? "audio/ogg" : undefined),
           filename: isAudio ? "voice.ogg" : undefined,
@@ -115,6 +164,22 @@ function parseUltraMsgPayload(body: Record<string, unknown>): InboundParsed | nu
       type === "chat" ||
       Boolean(asRecord(body.data)));
   if (!looksUltra) return null;
+  const ultraMediaKind = asMediaKind(type);
+  if (ultraMediaKind && mediaUrl) {
+    const caption = pickString(data.caption, body.caption) || (bodyText && !/^https?:\/\//i.test(bodyText) ? bodyText : undefined);
+    return {
+      source: "ultramsg",
+      senderPhone: from,
+      mediaKind: ultraMediaKind,
+      mediaUrl,
+      mimeType: pickString(data.mimetype, data.mimeType, data.mime_type),
+      filename: pickString(data.filename, body.filename),
+      caption,
+      messageId: pickString(data.id, body.id),
+      messageType: type,
+      isWebhookStyle: true,
+    };
+  }
   const isAudio = type === "ptt" || type === "audio" || type === "voice" || Boolean(mediaUrl && !bodyText);
   return {
     source: "ultramsg",
@@ -134,6 +199,20 @@ function parseTwilioForm(form: FormData): InboundParsed | null {
   const mediaUrl = pickString(form.get("MediaUrl0"), form.get("MediaUrl"), form.get("mediaUrl"));
   const mimeType = pickString(form.get("MediaContentType0"), form.get("mimeType"));
   if (!from && !mediaUrl && !bodyText) return null;
+  const twilioMediaKind = mediaUrl ? mediaKindForMime(mimeType) : undefined;
+  if (twilioMediaKind) {
+    return {
+      source: "twilio",
+      senderPhone: from?.replace(/^whatsapp:/i, ""),
+      mediaKind: twilioMediaKind,
+      mediaUrl,
+      mimeType,
+      caption: bodyText,
+      messageId: pickString(form.get("MessageSid")),
+      messageType: twilioMediaKind,
+      isWebhookStyle: true,
+    };
+  }
   const numMedia = Number(pickString(form.get("NumMedia")) || "0");
   const isAudio =
     numMedia > 0 ||
@@ -172,10 +251,13 @@ async function parseStaffMultipart(form: FormData): Promise<InboundParsed> {
   const senderPhone = pickString(form.get("from"), form.get("sender"), form.get("phone"));
   const demoField = form.get("demo");
   const demo = demoField === "1" || demoField === "true";
+  const mediaKind = bytes ? mediaKindForMime(mimeType, true) : undefined;
   return {
     source: "staff",
     senderPhone,
-    textBody: transcript,
+    mediaKind,
+    caption: mediaKind ? pickString(form.get("caption"), transcript) : undefined,
+    textBody: mediaKind ? undefined : transcript,
     mediaUrl,
     mediaId,
     mimeType,
@@ -187,6 +269,27 @@ async function parseStaffMultipart(form: FormData): Promise<InboundParsed> {
 }
 
 function parseStaffJson(body: Record<string, unknown>): InboundParsed {
+  const fileBase64 = pickString(body.fileBase64);
+  const fileMime = pickString(body.mimeType, body.mime_type);
+  const fileKind = fileBase64 ? mediaKindForMime(fileMime, true) : undefined;
+  if (fileBase64 && fileKind) {
+    let fileBytes: Buffer | undefined;
+    try {
+      fileBytes = Buffer.from(fileBase64, "base64");
+    } catch {
+      fileBytes = undefined;
+    }
+    return {
+      source: "staff",
+      senderPhone: pickString(body.from, body.sender, body.phone, body.senderPhone),
+      mediaKind: fileKind,
+      bytes: fileBytes,
+      mimeType: fileMime,
+      filename: pickString(body.filename),
+      caption: pickString(body.caption, body.text),
+      isWebhookStyle: false,
+    };
+  }
   const audioBase64 = pickString(body.audioBase64);
   let bytes: Buffer | undefined;
   if (audioBase64) {
@@ -282,7 +385,7 @@ export async function POST(request: Request) {
       const ultra = meta ? null : parseUltraMsgPayload(body);
       if (meta && (meta.senderPhone || meta.mediaId || meta.textBody || meta.source === "meta")) {
         // Empty status callbacks: ACK quickly (no phone / no content)
-        if (!meta.senderPhone && !meta.mediaId && !meta.textBody && !meta.mediaUrl) {
+        if (!meta.senderPhone && !meta.mediaId && !meta.textBody && !meta.mediaUrl && !meta.mediaKind) {
           return NextResponse.json({ ok: true, ignored: "meta_status_or_empty" });
         }
         parsed = meta;
@@ -316,6 +419,55 @@ export async function POST(request: Request) {
           outbound,
         });
       }
+    }
+
+    // Image / document / video (sticker ignored) → media handler (download, store, act, reply).
+    if (parsed.mediaKind && parsed.mediaKind !== "audio") {
+      if (parsed.mediaKind === "sticker") {
+        return NextResponse.json({ ok: true, source: parsed.source, ignored: "sticker" });
+      }
+      // Webhook senders are already allowlist-gated above; staff uploads always reply to the instructor.
+      const from =
+        senderDigits && (parsed.isWebhookStyle || isAuthorizedInstructorPhone(senderDigits))
+          ? senderDigits
+          : instructorWhatsAppNumber();
+      const dispatched = await dispatchInboundMedia(
+        {
+          provider: parsed.source,
+          from,
+          kind: parsed.mediaKind,
+          mediaId: parsed.mediaId,
+          mediaUrl: parsed.mediaUrl,
+          bytes: parsed.bytes,
+          mimeType: parsed.mimeType,
+          filename: parsed.filename,
+          caption: parsed.caption,
+          messageId: parsed.messageId,
+        },
+        parsed.isWebhookStyle,
+      );
+      if (dispatched.mode === "background") {
+        return NextResponse.json({
+          ok: true,
+          source: parsed.source,
+          accepted: "media",
+          mediaKind: parsed.mediaKind,
+          duplicate: Boolean(dispatched.duplicate),
+        });
+      }
+      const result = dispatched.result;
+      return NextResponse.json({
+        ok: result.ok,
+        source: parsed.source,
+        mediaKind: parsed.mediaKind,
+        action: result.action ?? null,
+        mediaRecord: result.record ?? null,
+        task: result.reply?.task ?? null,
+        whatsappReply: result.reply?.task.automatedReplyText ?? null,
+        outboundWhatsApp: result.reply?.outbound ?? null,
+        attachment: result.reply?.attachment ?? null,
+        error: result.error ?? null,
+      });
     }
 
     let transcript = parsed.textBody;
@@ -419,6 +571,29 @@ export async function POST(request: Request) {
       }
     }
 
+    // "امتحان تجريبي" / "mock exam" text → generated mock exam PDF sent back as a document.
+    const mockExam = !mediaId && !mediaUrl && !bytes ? parseMockExamRequest(transcript) : { matched: false };
+    if (mockExam.matched) {
+      const to = senderDigits && isAuthorizedInstructorPhone(senderDigits) ? senderDigits : instructorWhatsAppNumber();
+      const dispatched = await dispatchMockExam(
+        { to, track: mockExam.track, messageId: parsed.messageId },
+        parsed.isWebhookStyle,
+      );
+      if (dispatched.mode === "background") {
+        return NextResponse.json({ ok: true, source: parsed.source, accepted: "mock_exam_pdf", duplicate: Boolean(dispatched.duplicate) });
+      }
+      return NextResponse.json({
+        ok: dispatched.result.ok,
+        source: parsed.source,
+        mockExam: true,
+        task: dispatched.result.reply?.task ?? null,
+        whatsappReply: dispatched.result.reply?.task.automatedReplyText ?? null,
+        outboundWhatsApp: dispatched.result.reply?.outbound ?? null,
+        attachment: dispatched.result.reply?.attachment ?? null,
+        error: dispatched.result.error ?? null,
+      });
+    }
+
     const hasExecutable = Boolean(bytes || mediaUrl || mediaId || transcript || demo);
 
     // Authorized instructor inbound with no text/audio — never silent-drop.
@@ -445,7 +620,7 @@ export async function POST(request: Request) {
         status: "failed",
         automatedReplyText:
           `تم استلام رسالتكم على واتساب، لكن نوع الرسالة (${unsupportedType}) غير مدعوم حالياً.\n` +
-          `يرجى إرسال نص أو مذكرة صوتية. — الأستاذ منذر حداره / MathMentor`,
+          `يرجى إرسال نص، مذكرة صوتية، صورة، أو ملف PDF. — الأستاذ منذر حداره / MathMentor`,
         relatedIds: [],
         createdAt: now,
         updatedAt: now,
