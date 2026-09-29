@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "db:migrate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/db-migrate.mjs",
     "banks:g12": "python3 scripts/build-g12-banks.py",
     "video:limits": "python3 scripts/render-lesson-video.py content/grade-12-ls-limits/intro-video.json public/videos/grade-12-ls-limits-intro.mp4 --lang ar",
     "video:continuity": "python3 scripts/render-lesson-video.py content/lessons/grade-12-ls-continuity/video.json --both",
@@ -27,6 +28,7 @@
     "livekit-server-sdk": "^2.19.0",
     "next": "^15.5.2",
     "pdf-parse": "^1.1.1",
+    "pg": "^8.23.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "zod": "^3.24.2"
@@ -34,6 +36,7 @@
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.16.0",
     "@types/node": "^24.3.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "typescript": "^5.9.2"

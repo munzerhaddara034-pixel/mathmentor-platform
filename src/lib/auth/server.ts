@@ -19,17 +19,17 @@ export function toDashboardRole(role: string): UserRole {
   return "student";
 }
 
-/** SQLite profile lookup that never breaks auth (e.g. read-only serverless FS, Node without node:sqlite). */
-function profileForEmail(email: string): SessionUser | null {
+/** Profile lookup (Postgres or SQLite) that never breaks auth (e.g. read-only serverless FS, DB outage). */
+async function profileForEmail(email: string): Promise<SessionUser | null> {
   try {
-    return findProfileByEmail(email)?.user ?? null;
+    return (await findProfileByEmail(email))?.user ?? null;
   } catch {
     return null;
   }
 }
 
-export function sessionUserFromLive(user: PublicUser): SessionUser {
-  const profile = profileForEmail(user.email);
+export async function sessionUserFromLive(user: PublicUser): Promise<SessionUser> {
+  const profile = await profileForEmail(user.email);
   return {
     id: profile?.id ?? user.id,
     email: user.email,

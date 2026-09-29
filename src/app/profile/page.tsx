@@ -9,10 +9,10 @@ import { BADGE_META, getProfile } from "@/lib/gamification/store";
 
 export const dynamic = "force-dynamic";
 
-function linkedStudentFor(user: SessionUser): SessionUser | null {
+async function linkedStudentFor(user: SessionUser): Promise<SessionUser | null> {
   if (!user.linkedStudentId) return null;
   try {
-    return findUserById(user.linkedStudentId) ?? null;
+    return (await findUserById(user.linkedStudentId)) ?? null;
   } catch {
     return null;
   }
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
   const live = await getLiveSession();
   const user = await getFreshSession();
   if (!live.ok || !user) redirect("/login?next=/profile");
-  const linked = linkedStudentFor(user);
+  const linked = await linkedStudentFor(user);
   const profile = await getProfile(live.user.id, live.user.name);
   const wallet = await walletSnapshot(live.user.id);
   return (
