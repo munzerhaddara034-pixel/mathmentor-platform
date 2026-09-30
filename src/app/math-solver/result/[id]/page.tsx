@@ -25,11 +25,11 @@ export default async function SolverResultPage({ params }: { params: Promise<{ i
   return (
     <main className="shell studio-shell relative-watermark">
       <PageWatermark name={viewer.name} phone={viewer.phone} />
-      <p className="eyebrow">Solution · Prof. Munzer Haddara</p>
+      <p className="eyebrow">الحل · الأستاذ منذر حداره</p>
       <p className="muted">
-        <Link href="/math-solver">← New question</Link>
+        <Link href="/math-solver">مسألة جديدة</Link>
         {" · "}
-        <Link href={`/lessons/interactive-explanation?id=${query.id}`}>Split player</Link>
+        <Link href={`/lessons/interactive-explanation?id=${query.id}`}>شاهد الشرح على السبورة</Link>
       </p>
       <SolverResultView initial={{ ...query, timeline }} viewer={viewer} canTeach={Boolean(staff)} />
     </main>
