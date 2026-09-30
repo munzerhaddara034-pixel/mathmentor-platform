@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import type { SessionUser } from "@/lib/auth/types";
+import { OPEN_ASSISTANT_EVENT } from "@/components/ChatWidget";
 import { Icon } from "@/components/ui/Icon";
 import { MenuLinks } from "./MenuLinks";
 import { MenuSettings } from "./MenuSettings";
@@ -48,6 +49,16 @@ export function MobileSheet({
             <Icon name="close" />
           </button>
         </div>
+        <button
+          type="button"
+          className="btn dark mm-sheet-assistant"
+          onClick={() => {
+            onClose();
+            window.dispatchEvent(new Event(OPEN_ASSISTANT_EVENT));
+          }}
+        >
+          <Icon name="chat" size={20} /> اسأل مساعد الأستاذ منذر
+        </button>
         <p className="mm-sheet-group">التعلّم</p>
         <MenuLinks items={model.primary} pathname={pathname} onNavigate={onClose} />
         {model.more.length ? (

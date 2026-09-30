@@ -137,6 +137,10 @@ body.mm-sheet-open { overflow: hidden; }
 @media (max-width: 959px) {
   .chat-widget { left: 14px; bottom: calc(var(--tabbar-h) + 14px + env(safe-area-inset-bottom)); }
   .chat-fab { width: 46px; height: 46px; }
+  /* Phones: no floating button over content. The assistant opens from the menu sheet / dashboard. */
+  .chat-widget:not(.is-open) .chat-fab { display: none; }
+  .chat-widget.is-open .chat-fab { display: none; }
+  .chat-widget.is-open .chat-panel { position: fixed; left: 12px; right: 12px; width: auto; bottom: calc(var(--tabbar-h) + 12px + env(safe-area-inset-bottom)); }
 }
 @media (min-width: 960px) {
   .app-frame { padding-bottom: 8px; }
@@ -181,3 +185,5 @@ body.mm-sheet-open { overflow: hidden; }
 .mm-field input:focus-visible, .mm-field select:focus-visible, .mm-field textarea:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
 .mm-field input[dir="ltr"] { text-align: left; }
 .mm-math { unicode-bidi: isolate; }
+
+.mm-sheet-assistant { display: flex; align-items: center; gap: 10px; width: 100%; margin: 4px 0 8px; justify-content: center; }

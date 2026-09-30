@@ -16,3 +16,5 @@
 .mm-curriculum-banner { margin: 0; }
 .mm-solver .solver-form .btn.dark.mm-btn-lg:last-child { width: 100%; }
 @media (min-width: 640px) { .mm-solver-photo { display: flex; flex-wrap: wrap; } }
+.shell.mm-solver { max-width: 820px; }
+.mm-solver .solver-card { max-width: none; }
