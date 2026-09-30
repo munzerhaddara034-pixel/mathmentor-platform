@@ -15,8 +15,9 @@ function stripWrappers(tex: string): string {
 
 function normalizeLabel(label: string): string {
   return label
-    .replace(/\\text\s*\{[^{}]*\}|\\left|\\right|\\[,;!]|\s|[{}]/g, "")
-    .replace(/^\d+\)|^[a-z]\)/, "")
+    .replace(/^\s*(?:\\text\s*\{\s*)?\(?(?:\d+|[a-z])\)\s*\}?/i, "")
+    .replace(/\\text\s*\{[^{}]*\}|\\left|\\right|\\[,;! ]|\\(?=\s)|\s|[{}]/g, "")
+    .replace(/^\(?(?:\d+|[a-z])\)/i, "")
     .trim();
 }
 

@@ -73,7 +73,8 @@ export async function solveAndVerify(request: GeminiSolveRequest): Promise<MathS
   const meta: SolverMeta = solution.solverMeta;
   let report = cas(solution, question);
 
-  if (meta.tier === "strong" && report.failed > 0) {
+  // One repair pass whenever the CAS rejects the answer (both tiers; fast tier stays on fast models).
+  if (report.failed > 0) {
     try {
       const repaired = await solveWithGemini({ ...request, decision, feedback: casFailureSummary(report) });
       const second = cas(repaired, question);

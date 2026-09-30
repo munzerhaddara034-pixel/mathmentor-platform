@@ -67,7 +67,8 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
           source: "demo",
         });
       }
-      return demoFallback(request, error instanceof Error ? error.message : "Gemini failed; used demo solver.");
+      console.warn("[mathmentor] Gemini solve failed:", error instanceof Error ? error.message : error);
+      return demoFallback(request, "يحتاج مراجعة — the AI tutor is busy right now; this is a basic offline answer. Please try again in a minute.");
     }
   }
 

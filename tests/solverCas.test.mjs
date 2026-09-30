@@ -89,3 +89,13 @@ test("malformed checks never throw", () => {
   assert.equal(r.failed, 0);
   assert.ok(r.skipped >= 2);
 });
+
+test("final box vs steps with numbered lines (SAT retest): box x + y = 3 vs steps 5", () => {
+  const report = runCasChecks({
+    question: "",
+    checks: [],
+    finalAnswerLatex: "\\begin{array}{l} 1)\\ x + y = 3 \\text{ (Choice A)} \\\\ 2)\\ c = 25 \\text{ (Choice D)} \\end{array}",
+    stepLatex: ["\\begin{aligned} x + y &= 2 + 3 = 5 \\end{aligned}", "\\Delta = 100 - 4c = 0 \\\\ c = 25"],
+  });
+  assert.deepEqual(report.outcomes.map((o) => o.status).sort(), ["fail", "pass"]);
+});
