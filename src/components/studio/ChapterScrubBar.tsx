@@ -2,7 +2,7 @@
 
 import type { LessonChapter } from "@/lib/studio/timeline";
 import { chapterAt, formatClock } from "@/lib/studio/timeline";
-import type { LessonLocale } from "@/lib/studio/i18n";
+import type { LessonLanguage, LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 
 export function ChapterScrubBar({
@@ -10,27 +10,32 @@ export function ChapterScrubBar({
   durationSec,
   currentTime,
   language,
+  uiLanguage,
   onSeek,
 }: {
   chapters: LessonChapter[];
   durationSec: number;
   currentTime: number;
+  /** Lesson content language (chapter labels). */
   language: LessonLocale;
+  /** Player chrome language (defaults to the content language). */
+  uiLanguage?: LessonLanguage;
   onSeek: (time: number) => void;
 }) {
   if (chapters.length === 0 || durationSec <= 0) return null;
   const active = chapterAt(chapters, currentTime);
+  const ui = uiLanguage ?? language;
   const progress = Math.max(0, Math.min(100, (currentTime / durationSec) * 100));
 
   return (
-    <div className="studio-chapters" aria-label={pickText(STUDIO_UI.chapters, language)}>
+    <div className="studio-chapters" aria-label={pickText(STUDIO_UI.chapters, ui)}>
       <div className="studio-chapters-head">
-        <p className="eyebrow">{pickText(STUDIO_UI.chapters, language)}</p>
-        <span className="muted">
+        <p className="eyebrow">{pickText(STUDIO_UI.chapters, ui)}</p>
+        <bdi className="muted" dir="ltr" lang={language}>
           {active ? pickText(active.label, language) : ""} · {formatClock(currentTime)}
-        </span>
+        </bdi>
       </div>
-      <div className="studio-chapters-track" aria-hidden>
+      <div className="studio-chapters-track" aria-hidden dir="ltr">
         <span className="studio-chapters-fill" style={{ width: `${progress}%` }} />
         {chapters.map((chapter) => (
           <i
@@ -40,7 +45,7 @@ export function ChapterScrubBar({
           />
         ))}
       </div>
-      <div className="studio-chapter-row" role="tablist">
+      <div className="studio-chapter-row" role="tablist" dir="ltr" lang={language}>
         {chapters.map((chapter) => (
           <button
             key={chapter.id}

@@ -1,33 +1,39 @@
-import { MathSolverForm } from "@/components/solver/MathSolverForm";
+import Link from "next/link";
 import { PedagogicalTutorPanel } from "@/components/curriculum/PedagogicalTutorPanel";
 import { SolverCurriculumBanner } from "@/components/curriculum/SolverCurriculumBanner";
-import Link from "next/link";
+import { MathSolverForm } from "@/components/solver/MathSolverForm";
+import { getSession } from "@/lib/auth/server";
+import "@/styles/solver.css";
 
 export const dynamic = "force-dynamic";
 
-export default function MathSolverPage() {
+export default async function MathSolverPage() {
+  const user = await getSession();
+  const staff = user?.role === "teacher";
   return (
-    <main className="shell mm-mobile-stack">
-      <p className="eyebrow">AI Math Solver · Prof. Munzer Haddara</p>
-      <h1>حلّال الرياضيات</h1>
-      <SolverCurriculumBanner />
-      <p className="muted">
-        Text, LaTeX, or a photo of the notebook. The engine writes a curriculum-aware solution (Lebanese official
-        sequence by default: D_f → limits/asymptotes → f&apos; / variation table → C_f), a HeyGen avatar script, and a
-        time-synced math canvas. Instructor: <strong>Prof. Munzer Haddara / الأستاذ منذر حداره</strong>.
-      </p>
+    <main className="shell mm-mobile-stack mm-solver">
+      <header className="mm-solver-head">
+        <p className="eyebrow">حلّال المسائل · الأستاذ منذر حداره</p>
+        <h1>حلّ مسألة</h1>
+        <p className="muted">
+          صوّر المسألة من دفترك أو اكتبها، واحصل على حل مرتّب خطوة بخطوة وفق تسلسل الامتحان الرسمي اللبناني.
+        </p>
+        <SolverCurriculumBanner />
+      </header>
       <div className="card solver-card">
         <MathSolverForm />
       </div>
       <PedagogicalTutorPanel />
-      <p className="muted" style={{ marginTop: 16 }}>
-        After solving, open the split player or generate a talking-avatar clip.{" "}
-        <Link href="/lessons/interactive">Classroom board</Link>
-        {" · "}
-        <Link href="/studio/voice-solver">Voice-to-Math (teachers)</Link>
-        {" · "}
-        <Link href="/live">Book a live hour</Link>
+      <p className="muted mm-solver-more">
+        بعد الحل يمكنك متابعة الشرح على <Link href="/lessons/interactive">السبورة التفاعلية</Link> أو{" "}
+        <Link href="/live">حجز حصة مباشرة</Link> مع الأستاذ منذر.
       </p>
+      {staff ? (
+        <p className="muted mm-solver-more" dir="ltr" lang="en">
+          Staff: <Link href="/studio/voice-solver">Voice-to-Math</Link> ·{" "}
+          <Link href="/admin/video-generator">HeyGen avatar clips</Link>
+        </p>
+      ) : null}
     </main>
   );
 }

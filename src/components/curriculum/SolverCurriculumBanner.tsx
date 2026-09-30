@@ -2,23 +2,17 @@
 
 import { useCurriculum } from "./CurriculumProvider";
 
+/** Current curriculum + its key terms, Arabic first with the English term isolated LTR. */
 export function SolverCurriculumBanner() {
   const { curriculum, terminology, ready } = useCurriculum();
   if (!ready) return null;
   return (
     <p className="mm-curriculum-banner" role="status">
-      <strong>{curriculum.labelEn}</strong>
-      <span dir="rtl" lang="ar">
-        {" "}
-        · {curriculum.labelAr}
-      </span>
-      {" — "}
-      {terminology.derivative.en} / <span dir="rtl">{terminology.derivative.ar}</span>
+      <strong>{curriculum.labelAr}</strong>
       {" · "}
-      {terminology.limits.en} / <span dir="rtl">{terminology.limits.ar}</span>
-      {curriculum.contentPhase !== "default" ? (
-        <span className="muted"> ({curriculum.contentPhase} content)</span>
-      ) : null}
+      {terminology.derivative.ar} (<bdi dir="ltr">{terminology.derivative.en}</bdi>)
+      {" · "}
+      {terminology.limits.ar} (<bdi dir="ltr">{terminology.limits.en}</bdi>)
     </p>
   );
 }

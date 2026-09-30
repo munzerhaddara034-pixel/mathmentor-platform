@@ -56,7 +56,7 @@ npm install
 npm run dev
 ```
 
-1. Sign in: `student@mathmentor.local` / `demo-student` (BOTH, 4 live credits). See [AUTH.md](./AUTH.md).
+1. Sign in: `student@mathmentor.local` (BOTH, 4 live credits). See [AUTH.md](./AUTH.md).
 2. Open `/math-solver`. Tap **x² − 5x + 6 = 0** (or type a limit / `f(x)=(x-1)e^x` / a 2×2 system / 3-4-5 triangle).
 3. **Solve with Prof. Munzer AI** → `/math-solver/result/[id]`.
    - `source: "demo"` when `GEMINI_API_KEY` and `OPENAI_API_KEY` are empty.
@@ -150,7 +150,7 @@ Promo codes (signed in on `/redeem`):
 - `MUNZER-LIVE-4C` → Live (+4 credits)
 - `MUNZER-BOTH-1X` → bundle (+8 credits)
 
-Extra QA logins: `ai@mathmentor.local` / `demo-ai`, `live@mathmentor.local` / `demo-live`.
+Extra QA logins: `ai@mathmentor.local`, `live@mathmentor.local`.
 
 ## Admin / teacher audit
 

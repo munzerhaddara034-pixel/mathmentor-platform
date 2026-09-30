@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { useState } from "react";
 import { LessonNotes } from "@/components/LessonNotes";
 import { LessonVideoPlayer } from "@/components/LessonVideoPlayer";
+import { Ltr } from "@/components/ui/Ltr";
 import { getAcademyLesson } from "@/lib/academyLessons";
 import { DEFAULT_LESSON_LANG, type LessonLang } from "@/lib/lessonNotes";
 import { watermarkText } from "@/lib/videoSecurity";
@@ -12,12 +15,11 @@ import {
   scenesForPack,
   type VideoLessonPack,
 } from "@/lib/videoLessons";
-import Link from "next/link";
-import { useState } from "react";
 
+/** Arabic (RTL) page chrome around an EN/FR video lesson; the video, board and notes stay LTR. */
 export function LessonWatchView({
   pack,
-  watermarkName = "Academy student",
+  watermarkName = "طالب المنصة",
 }: {
   pack: VideoLessonPack;
   watermarkName?: string;
@@ -28,37 +30,38 @@ export function LessonWatchView({
   const watermark = watermarkText(watermarkName, "76532421");
 
   return (
-    <main className="shell" dir="ltr">
-      <p className="eyebrow">{copy.trackLabel}</p>
-      <h1>{copy.title}</h1>
+    <main className="shell mm-watch" dir="rtl" lang="ar">
+      <p className="eyebrow">{pack.trackLabelAr}</p>
+      <h1>{pack.titleAr}</h1>
       <p className="muted">
-        {lang === "fr"
-          ? "Vidéo de cours : accroche, une idée, exemple résolu, erreur fréquente, bilan. Un clic EN | FR change la voix et le tableau ensemble."
-          : "Classroom video: hook, one idea, worked example, common mistake, recap. One EN | FR click switches voice and board together."}
+        <Ltr>{copy.title}</Ltr> · فيديو صفّي: مدخل، فكرة واحدة، مثال محلول، خطأ شائع، وخلاصة. بدّل بين الإنكليزية
+        والفرنسية بنقرة واحدة.
       </p>
-      <LessonVideoPlayer
-        videoUrl={pack.videoEn}
-        videoUrlFr={pack.videoFr}
-        heading={`${copy.trackLabel} · ${copy.title}`}
-        scenes={scenesForPack(pack, lang, lesson)}
-        scenesFr={pack.fallbackFr}
-        watermark={watermark}
-        lang={lang}
-        onLangChange={setLang}
-      />
-      <LessonNotes blocks={notesForPack(pack, lang)} dir="ltr" />
+      <div dir="ltr" lang={lang}>
+        <LessonVideoPlayer
+          videoUrl={pack.videoEn}
+          videoUrlFr={pack.videoFr}
+          heading={`${copy.trackLabel} · ${copy.title}`}
+          scenes={scenesForPack(pack, lang, lesson)}
+          scenesFr={pack.fallbackFr}
+          watermark={watermark}
+          lang={lang}
+          onLangChange={setLang}
+        />
+        <LessonNotes blocks={notesForPack(pack, lang)} dir="ltr" />
+      </div>
       <article className="card" style={{ marginTop: 24 }}>
-        <h3>{lang === "fr" ? "Après cette vidéo" : "After this video"}</h3>
-        <p className="muted">{copy.afterVideo}</p>
+        <h3>بعد هذا الفيديو</h3>
+        <p className="muted">أعد قراءة ما على اللوح، ثم انتقل إلى التدريب أو المسابقة.</p>
         <div className="row">
           <Link href={pack.practiceHref} className="btn dark">
-            {copy.practice}
+            تدرّب على الدرس
           </Link>
           <Link href={pack.contestHref} className="btn">
-            {copy.contestLabel}
+            المسابقة
           </Link>
-          <Link href={`/classroom/${pack.lessonId}`} className="btn">
-            {copy.classroom}
+          <Link href={`/classroom/${pack.lessonId}`} className="ghost-btn ink">
+            صفحة الصف
           </Link>
         </div>
       </article>

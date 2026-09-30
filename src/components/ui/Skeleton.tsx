@@ -24,7 +24,7 @@ export function Skeleton({
   height = 16,
   width = "100%",
   className = "",
-  label = "Loading…",
+  label = "جارٍ التحميل…",
   rounded = "md",
 }: SkeletonProps) {
   const h = typeof height === "number" ? `${height}px` : height;
@@ -42,7 +42,7 @@ export function Skeleton({
 
 export function SkeletonBlock({
   lines = 3,
-  label = "Loading…",
+  label = "جارٍ التحميل…",
   className = "",
 }: {
   lines?: number;
@@ -68,14 +68,18 @@ export function ApiErrorBanner({
   className?: string;
 }) {
   if (!error && !errorAr) return null;
+  // Arabic-first UI: show the Arabic message; English only when no Arabic copy exists.
   return (
     <div className={`studio-teacher-error mm-api-error ${className}`.trim()} role="alert">
-      {error ? <p>{error}</p> : null}
       {errorAr ? (
         <p dir="rtl" lang="ar">
           {errorAr}
         </p>
-      ) : null}
+      ) : (
+        <p dir="ltr" lang="en">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

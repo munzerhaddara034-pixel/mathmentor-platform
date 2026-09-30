@@ -41,13 +41,13 @@ function daysLeft(iso: string) {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
-export function buildRoleDashboard(user: SessionUser): RoleDashboard {
-  const subject = user.role === "parent" && user.linkedStudentId ? findUserById(user.linkedStudentId) : user;
+export async function buildRoleDashboard(user: SessionUser): Promise<RoleDashboard> {
+  const subject = user.role === "parent" && user.linkedStudentId ? await findUserById(user.linkedStudentId) : user;
   const owner = subject ?? user;
-  const progress = asProgressEntries(owner.id);
-  const lessonRows = listLessonProgress(owner.id);
+  const progress = await asProgressEntries(owner.id);
+  const lessonRows = await listLessonProgress(owner.id);
   const percentByLesson = new Map(lessonRows.map((row) => [row.lesson_id, row.percent]));
-  const enrolled = listEnrollments(owner.id);
+  const enrolled = await listEnrollments(owner.id);
   const catalog = platformCourses();
   const courses = enrolled
     .map((enrollment) => {
@@ -70,7 +70,7 @@ export function buildRoleDashboard(user: SessionUser): RoleDashboard {
     })
     .filter((item): item is DashboardCourse => Boolean(item));
 
-  const reminders = listReminders(owner.id, owner.track).map((row) => ({
+  const reminders = (await listReminders(owner.id, owner.track)).map((row) => ({
     id: row.id,
     title: row.title,
     arabicTitle: row.arabic_title,

@@ -18,6 +18,8 @@ export default function AdminPage() {
         {" · "}
         <Link href="/admin/agent-hub">Agent Hub / الوكيل</Link>
         {" · "}
+        <Link href="/admin/team">دردشة الفريق / Team chat</Link>
+        {" · "}
         <Link href="/admin/b2b-manager">B2B ops / الشراكات</Link>
         {" · "}
         <Link href="/dashboard">promo + live-hour codes</Link>

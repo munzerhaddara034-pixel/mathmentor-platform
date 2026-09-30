@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import type { LessonLocale } from "@/lib/studio/i18n";
+import type { LessonLanguage, LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import type { QuizMcq } from "@/lib/studio/quiz";
 import { MixedMathText } from "./MixedMathText";
@@ -9,13 +9,18 @@ import { MixedMathText } from "./MixedMathText";
 export function QuizOverlay({
   quiz,
   language,
+  uiLanguage,
   onResolved,
 }: {
   quiz: QuizMcq;
+  /** Question content language. */
   language: LessonLocale;
+  /** Overlay chrome language (defaults to the content language). */
+  uiLanguage?: LessonLanguage;
   onResolved: () => void;
 }) {
   const titleId = useId();
+  const ui = uiLanguage ?? language;
   const [picked, setPicked] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [revealed, setRevealed] = useState(false);
@@ -44,13 +49,13 @@ export function QuizOverlay({
 
   return (
     <div className="studio-quiz-overlay" role="dialog" aria-modal="true" aria-labelledby={titleId}>
-      <div className="studio-quiz-card">
-        <p className="eyebrow">{pickText(STUDIO_UI.quizEyebrow, language)}</p>
-        <h2 id={titleId}>
+      <div className="studio-quiz-card" dir={ui === "ar" ? "rtl" : "ltr"} lang={ui}>
+        <p className="eyebrow">{pickText(STUDIO_UI.quizEyebrow, ui)}</p>
+        <h2 id={titleId} dir="ltr" lang={language}>
           <MixedMathText text={pickText(quiz.question, language)} />
         </h2>
-        <p className="muted studio-quiz-rule">{pickText(STUDIO_UI.quizRule, language)}</p>
-        <div className="studio-quiz-choices" role="radiogroup">
+        <p className="muted studio-quiz-rule">{pickText(STUDIO_UI.quizRule, ui)}</p>
+        <div className="studio-quiz-choices" role="radiogroup" dir="ltr" lang={language}>
           {quiz.choices.map((choice) => {
             const selected = picked === choice.id;
             const showMark = revealed || (checked && selected);
@@ -77,20 +82,20 @@ export function QuizOverlay({
           })}
         </div>
         {checked && !correct && !revealed ? (
-          <p className="studio-quiz-feedback wrong">{pickText(STUDIO_UI.quizWrong, language)}</p>
+          <p className="studio-quiz-feedback wrong">{pickText(STUDIO_UI.quizWrong, ui)}</p>
         ) : null}
-        {checked && correct ? <p className="studio-quiz-feedback ok">{pickText(STUDIO_UI.quizRight, language)}</p> : null}
+        {checked && correct ? <p className="studio-quiz-feedback ok">{pickText(STUDIO_UI.quizRight, ui)}</p> : null}
         {revealed && quiz.explanation ? (
           <div className="studio-quiz-solution">
-            <p className="eyebrow">{pickText(STUDIO_UI.quizSolution, language)}</p>
-            <p>
+            <p className="eyebrow">{pickText(STUDIO_UI.quizSolution, ui)}</p>
+            <p dir="ltr" lang={language}>
               <MixedMathText text={pickText(quiz.explanation, language)} />
             </p>
           </div>
         ) : null}
         <div className="studio-quiz-actions">
           <button className="btn dark" type="button" onClick={check} disabled={!picked || canContinue}>
-            {pickText(STUDIO_UI.quizCheck, language)}
+            {pickText(STUDIO_UI.quizCheck, ui)}
           </button>
           <button
             className="btn"
@@ -98,10 +103,10 @@ export function QuizOverlay({
             onClick={() => setRevealed(true)}
             disabled={canContinue && correct}
           >
-            {pickText(STUDIO_UI.quizShowSolution, language)}
+            {pickText(STUDIO_UI.quizShowSolution, ui)}
           </button>
           <button className="btn ok" type="button" onClick={onResolved} disabled={!canContinue}>
-            {pickText(STUDIO_UI.quizContinue, language)}
+            {pickText(STUDIO_UI.quizContinue, ui)}
           </button>
         </div>
       </div>

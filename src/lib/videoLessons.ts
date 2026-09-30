@@ -36,6 +36,9 @@ export type VideoLessonPack = {
   watchPath: string;
   titleEn: string;
   titleFr: string;
+  /** Arabic title shown in the Arabic (default) site chrome; the video itself is EN/FR. */
+  titleAr: string;
+  trackLabelAr: string;
   trackLabelEn: string;
   trackLabelFr: string;
   videoEn: string;
@@ -58,6 +61,8 @@ export const videoLessonPacks: VideoLessonPack[] = [
     watchPath: "/lessons/grade-12-ls-continuity",
     titleEn: "Continuity at a point",
     titleFr: "Continuité en un point",
+    titleAr: "الاتصال عند نقطة",
+    trackLabelAr: "الثانوية العامة · علوم الحياة",
     trackLabelEn: "Grade 12 LS",
     trackLabelFr: "Terminale SV",
     videoEn: GRADE_12_LS_CONTINUITY_VIDEO_EN,
@@ -78,6 +83,8 @@ export const videoLessonPacks: VideoLessonPack[] = [
     watchPath: "/lessons/grade-12-ls-derivatives",
     titleEn: "Derivative at a point",
     titleFr: "Nombre dérivé",
+    titleAr: "العدد المشتق عند نقطة",
+    trackLabelAr: "الثانوية العامة · علوم الحياة",
     trackLabelEn: "Grade 12 LS",
     trackLabelFr: "Terminale SV",
     videoEn: GRADE_12_LS_DERIVATIVES_VIDEO_EN,
@@ -98,6 +105,8 @@ export const videoLessonPacks: VideoLessonPack[] = [
     watchPath: "/lessons/brevet-geometry",
     titleEn: "Thales in a triangle",
     titleFr: "Thalès dans un triangle",
+    titleAr: "مبرهنة طاليس في المثلث",
+    trackLabelAr: "الشهادة المتوسطة · هندسة",
     trackLabelEn: "Brevet geometry",
     trackLabelFr: "Géométrie Brevet",
     videoEn: BREVET_GEOMETRY_VIDEO_EN,
@@ -160,6 +169,8 @@ export function featuredWatchCards() {
       href: LIMITS_WATCH_PATH,
       titleEn: "Limits intro",
       titleFr: "Limites — intro",
+      titleAr: "مدخل إلى النهايات",
+      trackAr: "الثانوية العامة · علوم الحياة",
       lessonId: GRADE_12_LS_LIMITS_LESSON_ID,
       bilingual: false,
       notes: grade12LsLimitsNotes.length > 0,
@@ -168,6 +179,8 @@ export function featuredWatchCards() {
       href: pack.watchPath,
       titleEn: pack.titleEn,
       titleFr: pack.titleFr,
+      titleAr: pack.titleAr,
+      trackAr: pack.trackLabelAr,
       lessonId: pack.lessonId,
       bilingual: pack.bilingual,
       notes: true,

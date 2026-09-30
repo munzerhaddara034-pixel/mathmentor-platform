@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   // SQLite profile (enrollments, linked student, reminders for /dashboard). Optional when the
   // runtime has no writable disk / node:sqlite — the session store below is the login authority.
   try {
-    const created = createUser({
+    const created = await createUser({
       email,
       name,
       password,
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: created.error }, { status: 400 });
     }
   } catch (error) {
-    console.warn("signup: SQLite profile unavailable, continuing with session store only", error);
+    console.warn("signup: profile DB unavailable, continuing with session store only", error);
   }
 
   const user = await ensureUserForProfile({ email, name, role, passwordHash: hashPassword(password) });

@@ -6,7 +6,7 @@ JSON stores (`auth.json`, notifications, exam attempts, …) use **Netlify Blobs
 
 No extra env vars are required (`@netlify/blobs` is zero-config on Netlify). Demo accounts stay in [AUTH.md](./AUTH.md) (not on `/login`).
 
-Sign in as `student@mathmentor.local` / `demo-student` unless noted.
+Sign in as `student@mathmentor.local` unless noted.
 
 ## 1) Anti-account sharing
 
@@ -23,7 +23,7 @@ Sign in as `student@mathmentor.local` / `demo-student` unless noted.
 
 **How to test the teacher exemption**
 
-1. Sign in as `teacher@mathmentor.local` / `demo-teacher` on a desktop.
+1. Sign in as `teacher@mathmentor.local` on a desktop.
 2. Sign in again from a second desktop profile (do not set `mm_qa_device_class`). The first session stays valid.
 3. Open `/dashboard`: the new device is listed and the bell shows «جهاز جديد نشط / New active device» with the device name.
 
@@ -68,7 +68,7 @@ Live 15-minute in-app reminders also run when the bell fetches `/api/notificatio
 - Teacher generates codes: `/dashboard` → “أكواد شحن ساعات الحصص المباشرة”.
 - Ledger of activations, top-ups, and booked live slots is on `/wallet`.
 
-Staff: `teacher@mathmentor.local` / `demo-teacher`.
+Staff: `teacher@mathmentor.local`.
 
 ## Demo URLs
 

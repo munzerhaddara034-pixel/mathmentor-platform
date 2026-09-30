@@ -14,9 +14,9 @@ export const runtime = "nodejs";
  * When the session store does not accept the credentials, try that DB and mirror the account.
  */
 async function authenticateViaProfile(email: string, password: string): Promise<AuthUser | null> {
-  let profile: ReturnType<typeof findProfileByEmail>;
+  let profile: Awaited<ReturnType<typeof findProfileByEmail>>;
   try {
-    profile = findProfileByEmail(email);
+    profile = await findProfileByEmail(email);
   } catch {
     return null;
   }

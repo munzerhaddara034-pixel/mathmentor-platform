@@ -1,37 +1,69 @@
+/*
+ * Design tokens · منذر حداره / MathMentor (redesign-v1)
+ * Navy + gold: gold is an ACCENT (buttons, badges, fills) — never small body text on light surfaces.
+ * Text colours below are >= 4.5:1 on --paper and --card (checked with WCAG relative luminance).
+ */
 :root {
-  --navy: #10213d;
-  --gold: #d9aa53;
-  --gold-soft: #f8edda;
-  --ink: #15233b;
-  --muted: #61708a;
-  --line: #dfe7f1;
-  --paper: #f4f1ea;
+  /* brand */
+  --navy: #0b1b34;          /* primary / dark surfaces */
+  --navy-700: #1b3563;      /* links, secondary ink on light */
+  --navy-50: #eef2f8;
+  --gold: #e0a83e;          /* accent fill only (buttons, chips, bars) */
+  --gold-strong: #c98f22;
+  --gold-ink: #7a5000;      /* gold-coloured TEXT on light (6.4:1 on --gold-soft) */
+  --gold-soft: #fbf3e2;
+  --teal: #0b6e5f;          /* progress / success (5.4:1 on --teal-soft) */
+  --teal-soft: #e3f4f0;
+  --coral: #b9461a;         /* warnings (4.6:1 on --coral-soft) */
+  --coral-soft: #fcede5;
+  /* surfaces + ink */
+  --ink: #14213a;           /* 14.6:1 on paper */
+  --muted: #46546e;         /* 7.6:1 on card, 6.9:1 on paper */
+  --line: #e7e2d8;
+  --paper: #f7f4ee;         /* warm paper background */
   --white: #ffffff;
-  --card: #ffffff;
-  --nav-bg: rgba(255, 255, 255, 0.86);
+  --card: #ffffff;          /* white cards */
+  --nav-bg: rgba(247, 244, 238, 0.94);
   --input-bg: #ffffff;
-  --bot-bg: #eef3f8;
-  --hero-muted: #c7d4e6;
-  --shadow: 0 16px 40px rgba(16, 33, 61, 0.08);
+  --bot-bg: #eef2f8;
+  --hero-muted: #c9d3e3;
+  --shadow: 0 1px 2px rgba(11, 27, 52, 0.06), 0 4px 14px rgba(11, 27, 52, 0.06);
+  --shadow-lg: 0 10px 30px rgba(11, 27, 52, 0.12);
+  /* shape + spacing (4pt grid) */
+  --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+  --tabbar-h: 72px;
+  /* type */
+  --font-ui: var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-display: var(--font-tajawal), var(--font-plex-arabic), "Tajawal", sans-serif;
   color-scheme: light;
 }
 
 [data-theme="dark"],
 html.theme-dark {
   --navy: #0c1524;
+  --navy-700: #b7c8e6;
+  --navy-50: #1a2436;
   --gold: #e3bc6a;
+  --gold-strong: #e3bc6a;
+  --gold-ink: #e8c77f;
   --gold-soft: #3a2f1a;
+  --teal: #5fd0bb;
+  --teal-soft: #11302b;
+  --coral: #f29a74;
+  --coral-soft: #3a2118;
   --ink: #e8eef7;
-  --muted: #9aa8bd;
+  --muted: #a9b6c9;
   --line: #2a3a52;
   --paper: #070b12;
   --white: #121a28;
   --card: #121a28;
-  --nav-bg: rgba(8, 12, 20, 0.88);
+  --nav-bg: rgba(8, 12, 20, 0.9);
   --input-bg: #0e1624;
   --bot-bg: #1a2436;
   --hero-muted: #b7c5d8;
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 }
 
@@ -39,7 +71,8 @@ html.theme-dark {
 html, body { margin: 0; padding: 0; }
 html { min-height: 100%; }
 body {
-  font-family: inherit;
+  font-family: var(--font-ui);
+  font-size: 16px;
   color: var(--ink);
   background: var(--paper);
   line-height: 1.7;
@@ -139,7 +172,7 @@ button, input, select, textarea {
   font-size: 12px;
   font-weight: 800;
   background: var(--gold-soft);
-  color: #aa7c2c;
+  color: var(--gold-ink);
 }
 [data-theme="dark"] .role-badge,
 html.theme-dark .role-badge { color: var(--gold); }
@@ -170,7 +203,12 @@ html.theme-dark .role-badge { color: var(--gold); }
   box-shadow: var(--shadow);
 }
 .ghost-btn.ink { color: var(--ink); border-color: var(--line); }
-.eyebrow { color: var(--gold); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; }
+.eyebrow { color: var(--gold-ink); font-size: 13px; font-weight: 700; }
+/* Latin-only eyebrows may keep a little tracking; Arabic must never be letter-spaced (breaks joining). */
+.eyebrow:lang(en), .eyebrow[lang="en"] { letter-spacing: .06em; }
+h1, h2, h3, .display { font-family: var(--font-display); line-height: 1.3; }
+h1 { font-weight: 800; }
+h2, h3 { font-weight: 700; }
 .muted { color: var(--muted); }
 label { display: grid; gap: 6px; font-weight: 700; font-size: 14px; }
 input, select, textarea {
@@ -179,7 +217,7 @@ input, select, textarea {
 textarea { min-height: 120px; resize: vertical; }
 .badge {
   display: inline-flex; border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 800;
-  background: var(--gold-soft); color: #aa7c2c;
+  background: var(--gold-soft); color: var(--gold-ink);
 }
 .badge.pending { background: #fff4d6; }
 .badge.approved { background: #dcfce7; color: #166534; }
@@ -714,7 +752,7 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .solver-boxed-flag {
   font-weight: 800;
-  color: var(--gold);
+  color: var(--gold-ink);
   margin-top: 8px;
 }
 .studio-step-index {
@@ -880,7 +918,7 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-engine-tag {
   font-size: 12px;
   font-weight: 800;
-  color: #aa7c2c;
+  color: var(--gold-ink);
 }
 @keyframes studio-pulse {
   0%, 100% { filter: brightness(1); }

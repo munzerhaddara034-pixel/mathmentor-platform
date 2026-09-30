@@ -1,5 +1,11 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pgGetDocument, pgSetDocument } from "./db/documents";
+import { isPostgresEnabled } from "./db/pg";
+
+/**
+ * JSON store resolution order: test override → Postgres (DATABASE_URL) → Netlify Blobs → data/ files.
+ */
 
 /** Site-scoped Netlify Blobs store. Keys are JSON filenames (`auth.json`, …). */
 export const NETLIFY_BLOBS_STORE_NAME = "mathmentor-data";
@@ -106,6 +112,33 @@ async function filesystemBackend(): Promise<JsonBackend> {
   };
 }
 
+/**
+ * Postgres (Neon) document backend — used whenever DATABASE_URL is set.
+ * First read of a key that is missing in Postgres imports an existing local data/<key>
+ * file once (set PG_IMPORT_LOCAL_FILES=0 to disable), so local data migrates transparently.
+ */
+function postgresBackend(): JsonBackend {
+  return {
+    async getJSON(key) {
+      const data = await pgGetDocument(key);
+      if (data != null) return data;
+      if (process.env.PG_IMPORT_LOCAL_FILES === "0") return null;
+      let local: unknown = null;
+      try {
+        local = JSON.parse(await readFile(dataFile(key), "utf8")) as unknown;
+      } catch {
+        local = null;
+      }
+      if (local == null) return null;
+      await pgSetDocument(key, local);
+      return local;
+    },
+    async setJSON(key, value) {
+      await pgSetDocument(key, value);
+    },
+  };
+}
+
 async function blobsBackend(store: BlobsJsonStore): Promise<JsonBackend> {
   return {
     async getJSON(key) {
@@ -118,8 +151,9 @@ async function blobsBackend(store: BlobsJsonStore): Promise<JsonBackend> {
   };
 }
 
-export async function resolveJsonBackend(): Promise<"blobs" | "filesystem"> {
+export async function resolveJsonBackend(): Promise<"postgres" | "blobs" | "filesystem"> {
   if (backendOverride) return "blobs";
+  if (isPostgresEnabled()) return "postgres";
   const store = await blobsStore();
   return store ? "blobs" : "filesystem";
 }
@@ -136,6 +170,7 @@ export function setPersistentStoreOverride(store: JsonBackend | null) {
 
 async function activeBackend(): Promise<JsonBackend> {
   if (backendOverride) return backendOverride;
+  if (isPostgresEnabled()) return postgresBackend();
   const store = await blobsStore();
   if (store) {
     try {
@@ -180,7 +215,8 @@ export async function readJsonFile<T>(name: string, fallback: T, options?: { per
     }
     return data as T;
   } catch (error) {
-    if (backendOverride) throw error;
+    // Postgres errors must surface: silently writing to the ephemeral disk would lose data.
+    if (backendOverride || isPostgresEnabled()) throw error;
     if (shouldUseNetlifyBlobs() && isBlobsConfigError(error)) {
       blobsGaveUp = true;
       blobsStorePromise = undefined;
@@ -211,7 +247,8 @@ export async function writeJsonFile<T>(name: string, data: T) {
     const backend = await activeBackend();
     await backend.setJSON(key, data);
   } catch (error) {
-    if (backendOverride) throw error;
+    // Postgres errors must surface: silently writing to the ephemeral disk would lose data.
+    if (backendOverride || isPostgresEnabled()) throw error;
     if (shouldUseNetlifyBlobs() && isBlobsConfigError(error)) {
       blobsGaveUp = true;
       blobsStorePromise = undefined;

@@ -156,7 +156,7 @@ JSON store `agent-ops.json` via `src/lib/dataDir.ts` (local `data/` or Netlify B
 
 Reuses: `voiceMath/whisper`, `studio/heygen*`, `whish/client`, `b2b/*`, `whatsapp/*`, `pedagogy/lebanese`.
 
-## Teacher QA (`teacher@mathmentor.local` / `demo-teacher`)
+## Teacher QA (`teacher@mathmentor.local`)
 
 1. Sign in → open `/admin/agent-hub`.
 2. **Voice**: click **تسجيل صوتي مباشر** (MediaRecorder → multipart `/api/agent/whatsapp-voice`), أو رفع صوت / تشغيل التجريبي → Arabic confirmation + intent; Recent voice shows outbound WhatsApp status.

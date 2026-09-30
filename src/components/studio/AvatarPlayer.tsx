@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { LessonLocale } from "@/lib/studio/i18n";
+import type { LessonLanguage, LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import { DEMO_AVATAR_VIDEO } from "@/lib/studio/heygenClient";
 import { IdentityWatermark } from "./IdentityWatermark";
@@ -10,6 +10,10 @@ export type VideoClockSource = "raf" | "timeupdate" | "seeked" | "play" | "pause
 
 type Props = {
   language: LessonLocale;
+  /** Player chrome language (defaults to the content language). */
+  uiLanguage?: LessonLanguage;
+  /** Technical clock/demo hints; staff only (default true for studio pages). */
+  showHints?: boolean;
   speaking: boolean;
   frozen: boolean;
   playing: boolean;
@@ -35,6 +39,8 @@ const DEFAULT_POSTER = "/teachers/munzer.jpg?v=4";
 
 export function AvatarPlayer({
   language,
+  uiLanguage,
+  showHints = true,
   speaking,
   frozen,
   playing,
@@ -265,18 +271,19 @@ export function AvatarPlayer({
     if (drift > 0.35) audio.currentTime = currentTime;
   }, [audioIsClock, currentTime, audioUrl]);
 
+  const ui = uiLanguage ?? language;
   const status = frozen
-    ? pickText(STUDIO_UI.boardFreeze, language)
+    ? pickText(STUDIO_UI.boardFreeze, ui)
     : speaking
-      ? pickText(STUDIO_UI.speaking, language)
-      : pickText(STUDIO_UI.paused, language);
+      ? pickText(STUDIO_UI.speaking, ui)
+      : pickText(STUDIO_UI.paused, ui);
 
   const isLocalDemo = videoUrl === DEMO_AVATAR_VIDEO || videoUrl?.startsWith("/studio/demo-avatar");
 
   return (
-    <section className={`studio-avatar-panel ${speaking ? "speaking" : ""} ${frozen ? "frozen" : ""}`} aria-label={pickText(STUDIO_UI.avatar, language)}>
+    <section className={`studio-avatar-panel ${speaking ? "speaking" : ""} ${frozen ? "frozen" : ""}`} aria-label={pickText(STUDIO_UI.avatar, ui)}>
       <p className="eyebrow">
-        {pickText(STUDIO_UI.avatar, language)} · {status}
+        {pickText(STUDIO_UI.avatar, ui)} · {status}
       </p>
       <div className="studio-avatar-frame">
         {videoUrl ? (
@@ -297,10 +304,11 @@ export function AvatarPlayer({
           phone={watermarkPhone ?? "76532421"}
           variant="dark"
         />
-        {frozen ? <div className="studio-freeze">{pickText(STUDIO_UI.freeze, language)}</div> : null}
+        {frozen ? <div className="studio-freeze">{pickText(STUDIO_UI.freeze, ui)}</div> : null}
         <p className="teacher-nameplate">{teacherName}</p>
       </div>
       {audioUrl ? <audio ref={audioRef} src={audioUrl} preload="auto" /> : null}
+      {showHints ? (
       <p className="muted studio-demo-hint">
         {audioIsClock
           ? pickText(
@@ -316,6 +324,7 @@ export function AvatarPlayer({
               : pickText(STUDIO_UI.videoHint, language)
             : pickText(STUDIO_UI.demoHint, language)}
       </p>
+      ) : null}
     </section>
   );
 }

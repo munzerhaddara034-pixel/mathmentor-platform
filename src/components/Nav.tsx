@@ -2,75 +2,30 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { roleLabel, type SessionUser } from "@/lib/auth/types";
+import { useCallback, useEffect, useState } from "react";
+import type { SessionUser } from "@/lib/auth/types";
+import { Icon } from "@/components/ui/Icon";
+import { AccountMenu } from "./nav/AccountMenu";
+import { BrandMark } from "./nav/BrandMark";
+import { MenuLinks } from "./nav/MenuLinks";
+import { MenuSettings } from "./nav/MenuSettings";
+import { MobileSheet } from "./nav/MobileSheet";
+import { MobileTabBar } from "./nav/MobileTabBar";
+import { NavDropdown } from "./nav/NavDropdown";
+import { isActivePath, navFor } from "./nav/navConfig";
 import { NotificationBell } from "./NotificationBell";
-import { ThemeToggle } from "./ThemeToggle";
-import { CurriculumSwitcher } from "./curriculum/CurriculumSwitcher";
 
-type NavLink = { href: string; label: string };
+type MeResponse = { user?: SessionUser | null };
 
-/** Links shared by every signed-in or guest visitor (AI board, solver, live, exam simulator). */
-const LEARNING_LINKS: NavLink[] = [
-  { href: "/lessons", label: "الدروس" },
-  { href: "/lessons/interactive", label: "السبورة" },
-  { href: "/math-solver", label: "الحلّال" },
-  { href: "/live", label: "مباشر" },
-  { href: "/exams", label: "المحاكاة" },
-  { href: "/practice", label: "الاختبارات" },
-];
-
-function linksFor(user: SessionUser | null): NavLink[] {
-  if (!user) {
-    return [
-      { href: "/", label: "الرئيسية" },
-      ...LEARNING_LINKS,
-      { href: "/classroom", label: "الصف" },
-      { href: "/subscribe", label: "الاشتراك" },
-    ];
-  }
-  if (user.role === "teacher") {
-    return [
-      { href: "/dashboard", label: "لوحة التحكم" },
-      { href: "/professor", label: "الأستاذ" },
-      { href: "/assistant", label: "الموظف" },
-      { href: "/bank", label: "بنك الأستاذ" },
-      { href: "/admin", label: "الإدارة" },
-      { href: "/admin/agent-hub", label: "الوكيل" },
-      { href: "/admin/b2b-manager", label: "الشراكات" },
-      { href: "/admin/exams", label: "تصحيح" },
-      { href: "/studio/script", label: "السكربت" },
-      { href: "/studio/voice-solver", label: "الصوت" },
-      { href: "/admin/video-generator", label: "الفيديو" },
-      ...LEARNING_LINKS,
-    ];
-  }
-  if (user.role === "parent") {
-    return [
-      { href: "/dashboard", label: "لوحة ولي الأمر" },
-      ...LEARNING_LINKS,
-      { href: "/wallet", label: "المحفظة" },
-      { href: "/profile", label: "ملفي" },
-    ];
-  }
-  return [
-    { href: "/dashboard", label: "لوحة الطالب" },
-    ...LEARNING_LINKS,
-    { href: "/classroom", label: "الصف" },
-    { href: "/resources", label: "المرفقات" },
-    { href: "/leaderboard", label: "الصدارة" },
-    { href: "/student", label: "دردشة" },
-    { href: "/wallet", label: "المحفظة" },
-    { href: "/redeem", label: "تفعيل" },
-    { href: "/profile", label: "ملفي" },
-  ];
-}
-
+/**
+ * Light top bar: brand · ~5 links · «المزيد» · account menu.
+ * Mobile: brand + bell + menu button, plus the bottom tab bar.
+ */
 export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const pathname = usePathname() || "/";
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [user, setUser] = useState(initialUser);
-  const links = linksFor(user);
+  const model = navFor(user);
 
   useEffect(() => {
     setUser(initialUser);
@@ -78,73 +33,99 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/auth/me", { credentials: "include" })
-      .then((response) => response.json())
-      .then((payload: { user?: SessionUser | null }) => {
+    const refresh = async () => {
+      try {
+        const response = await fetch("/api/auth/me", { credentials: "include" });
+        if (!response.ok) return;
+        const payload = (await response.json()) as MeResponse;
         if (!cancelled) setUser(payload.user ?? null);
-      })
-      .catch(() => undefined);
+      } catch {
+        /* keep the server-rendered user on network errors */
+      }
+    };
+    void refresh();
     return () => {
       cancelled = true;
     };
   }, [pathname]);
 
-  const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+  const closeSheet = useCallback(() => setSheetOpen(false), []);
+
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+    } catch {
+      /* the redirect below still clears the UI */
+    }
     setUser(null);
-    setOpen(false);
+    setSheetOpen(false);
     window.location.assign("/login");
-  };
+  }, []);
 
   return (
-    <header className="nav">
-      <Link href="/" className="brand" dir="ltr">
-        <img className="brand-logo" src="/brand/mathmentor-logo.svg" alt="" width={40} height={40} />
-        <span className="brand-text">
-          MathMentor
-          <span className="brand-kicker" lang="ar" dir="rtl">
-            أكاديمية منذر حداره
-          </span>
-        </span>
-      </Link>
-      <button type="button" className="nav-burger" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
-        القائمة
-      </button>
-      <nav className={`links ${open ? "open" : ""}`}>
-        <CurriculumSwitcher />
-        {links.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={pathname === link.href ? "active" : undefined}
-            onClick={() => setOpen(false)}
-          >
-            {link.label}
-          </Link>
-        ))}
-        <ThemeToggle />
-        {user ? (
-          <>
-            <NotificationBell />
-            <Link href="/profile" className="nav-user" onClick={() => setOpen(false)}>
-              <span className="role-badge">{roleLabel(user.role)}</span>
-              <span>{user.name}</span>
-            </Link>
-            <button type="button" className="ghost-link" onClick={() => void logout()}>
-              خروج
+    <>
+      <header className="mm-nav">
+        <div className="mm-nav-inner">
+          <BrandMark href={user ? "/dashboard" : "/"} />
+          <nav className="mm-nav-links" aria-label="التنقل الرئيسي">
+            {model.primary.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={isActivePath(pathname, link.href) ? "active" : undefined}
+                aria-current={isActivePath(pathname, link.href) ? "page" : undefined}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <NavDropdown label="المزيد" className="mm-more">
+              {(close) => (
+                <>
+                  <MenuLinks items={model.more} pathname={pathname} onNavigate={close} />
+                  {user ? null : <MenuSettings />}
+                </>
+              )}
+            </NavDropdown>
+          </nav>
+          <div className="mm-nav-end">
+            {user ? (
+              <>
+                <NotificationBell />
+                <div className="mm-desktop-only">
+                  <AccountMenu user={user} items={model.account} pathname={pathname} onLogout={() => void logout()} />
+                </div>
+              </>
+            ) : (
+              <div className="mm-desktop-only mm-guest-actions">
+                <Link href="/login" className="ghost-btn ink mm-btn-sm">
+                  دخول
+                </Link>
+                <Link href="/signup" className="btn dark mm-btn-sm">
+                  ابدأ مجاناً
+                </Link>
+              </div>
+            )}
+            <button
+              type="button"
+              className="mm-icon-btn mm-mobile-only"
+              aria-expanded={sheetOpen}
+              aria-label="القائمة"
+              onClick={() => setSheetOpen(true)}
+            >
+              <Icon name="menu" />
             </button>
-          </>
-        ) : (
-          <>
-            <Link href="/login" className="ghost-link" onClick={() => setOpen(false)}>
-              دخول
-            </Link>
-            <Link href="/signup" className="btn nav-cta" onClick={() => setOpen(false)}>
-              حساب جديد
-            </Link>
-          </>
-        )}
-      </nav>
-    </header>
+          </div>
+        </div>
+      </header>
+      <MobileSheet
+        open={sheetOpen}
+        model={model}
+        user={user}
+        pathname={pathname}
+        onClose={closeSheet}
+        onLogout={() => void logout()}
+      />
+      <MobileTabBar user={user} pathname={pathname} />
+    </>
   );
 }

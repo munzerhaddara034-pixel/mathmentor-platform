@@ -1,5 +1,7 @@
 import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
+import { isPostgresEnabled } from "@/lib/db/pg";
+import { pgGetQuery, pgInsertQuery, pgListQueries, pgPatchQuery } from "./storePg";
 import type { MathQueryRecord, VideoJobStatus } from "./types";
 
 const STORE_FILE = "math-queries.json";
@@ -16,7 +18,6 @@ async function writeQueryStore(store: QueryStore) {
 }
 
 export async function saveMathQuery(record: Omit<MathQueryRecord, "id" | "createdAt" | "updatedAt"> & { id?: string }) {
-  const store = await readQueryStore();
   const now = new Date().toISOString();
   const next: MathQueryRecord = {
     ...record,
@@ -24,25 +25,41 @@ export async function saveMathQuery(record: Omit<MathQueryRecord, "id" | "create
     createdAt: now,
     updatedAt: now,
   };
+  if (isPostgresEnabled()) {
+    await pgInsertQuery(next);
+    return next;
+  }
+  const store = await readQueryStore();
   store.queries.unshift(next);
   await writeQueryStore(store);
   return next;
 }
 
 export async function getMathQuery(id: string) {
+  if (isPostgresEnabled()) return pgGetQuery(id);
   const store = await readQueryStore();
   return store.queries.find((item) => item.id === id);
 }
 
 export async function listMathQueries(filter?: { userId?: string; limit?: number }) {
+  const limit = filter?.limit ?? 200;
+  if (isPostgresEnabled()) return pgListQueries({ userId: filter?.userId, limit });
   const store = await readQueryStore();
   let rows = store.queries;
   if (filter?.userId) rows = rows.filter((item) => item.userId === filter.userId);
-  const limit = filter?.limit ?? 200;
   return rows.slice(0, limit);
 }
 
 export async function patchMathQuery(id: string, patch: Partial<MathQueryRecord>) {
+  if (isPostgresEnabled()) {
+    return pgPatchQuery(id, (current) => ({
+      ...current,
+      ...patch,
+      id: current.id,
+      createdAt: current.createdAt,
+      updatedAt: new Date().toISOString(),
+    }));
+  }
   const store = await readQueryStore();
   const index = store.queries.findIndex((item) => item.id === id);
   if (index < 0) return undefined;

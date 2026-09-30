@@ -14,7 +14,8 @@ export default function AgentHubPage() {
       <p className="muted">
         Autonomous Operations & Growth for {INSTRUCTOR_EN} / {INSTRUCTOR_AR}. Voice → intent → HeyGen /
         school reports / health.{" "}
-        <Link href="/admin">/admin</Link> · <code>docs/AGENT_OPS.md</code>.
+        <Link href="/admin">/admin</Link> · <Link href="/admin/team">دردشة الفريق (محمد · سامي · المبرمج)</Link> ·{" "}
+        <code>docs/AGENT_OPS.md</code>.
       </p>
       <AgentHub />
     </main>

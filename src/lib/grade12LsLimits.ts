@@ -301,7 +301,7 @@ export const grade12LsLimitsFallbackScenes: StoryboardScene[] = [
 ];
 
 export const grade12LsLimitsPrintableNotes = `صف 12 علوم الحياة — وحدة النهايات
-أكاديمية الأستاذ منذر حدارة
+أكاديمية الأستاذ منذر حداره
 
 الفكرة: النهاية هي قيمة الاقتراب، لا قيمة النقطة.
 الرمز: lim_{x→a} f(x) = L

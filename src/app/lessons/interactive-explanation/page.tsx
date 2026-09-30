@@ -48,17 +48,16 @@ export default async function InteractiveExplanationPage({
   return (
     <main className="shell studio-shell relative-watermark">
       <PageWatermark name={viewer.name} phone={viewer.phone} />
-      <p className="eyebrow">Interactive explanation · Prof. Munzer Haddara / الأستاذ منذر حداره</p>
-      <h1>{query ? query.topic || query.question : "Avatar + math canvas"}</h1>
+      <p className="eyebrow">شرح تفاعلي · الأستاذ منذر حداره</p>
+      <h1 dir="auto">{query ? query.topic || query.question : "شرح بالفيديو على السبورة"}</h1>
       <p className="muted">
-        Split player: HeyGen (or demo) video on one side, KaTeX / Function Plot canvas driven by <code>video.currentTime</code>.
-        Pause and rewind; the board rebuilds.{" "}
-        {query ? <Link href={`/math-solver/result/${query.id}`}>Solution sheet</Link> : <Link href="/math-solver">Solver</Link>}
+        الفيديو على جهة والسبورة على الجهة الأخرى، وتُعاد كتابة السبورة كلما أوقفت أو أرجعت الفيديو.{" "}
+        {query ? <Link href={`/math-solver/result/${query.id}`}>ورقة الحل</Link> : <Link href="/math-solver">حلّ مسألة</Link>}
       </p>
       {query ? (
-        <p className="muted">
-          {query.finalAnswer} · video {query.videoStatus}
-          {query.warning ? ` · ${query.warning}` : ""}
+        <p className="muted" dir="auto">
+          {query.finalAnswer}
+          {staff ? ` · video ${query.videoStatus}${query.warning ? ` · ${query.warning}` : ""}` : ""}
         </p>
       ) : null}
       <InteractiveLessonPlayer timeline={timeline} teacherMode={false} canTeach={Boolean(staff)} viewer={viewer} />

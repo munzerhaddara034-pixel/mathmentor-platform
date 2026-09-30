@@ -12,7 +12,7 @@ export function ParentDashboard({ data }: { data: RoleDashboard }) {
           <h1>أهلاً {data.user.name}</h1>
           <p className="muted">
             {student
-              ? `متابعة تقدم ${student.name} في Math Mentor — دروس الأستاذ منذر حدارة ومواعيد الامتحانات.`
+              ? `متابعة تقدم ${student.name} في Math Mentor — دروس الأستاذ منذر حداره ومواعيد الامتحانات.`
               : "اربط بريد الطالب من صفحة الملف لمتابعة التقدم."}
           </p>
         </div>
