@@ -49,7 +49,7 @@ export function AvatarPlayer({
   videoUrl,
   audioUrl,
   poster = DEFAULT_POSTER,
-  teacherName = "Prof. Munzer Haddara · الأستاذ منذر حداره",
+  teacherName = "Professor Munzer",
   watermarkName,
   watermarkPhone,
   clockMaster = false,
@@ -300,7 +300,7 @@ export function AvatarPlayer({
           <img src={poster} alt={teacherName} draggable={false} />
         )}
         <IdentityWatermark
-          name={watermarkName ?? "طالب المنصة"}
+          name={watermarkName ?? ""}
           phone={watermarkPhone ?? "76532421"}
           variant="dark"
         />
@@ -311,18 +311,12 @@ export function AvatarPlayer({
       {showHints ? (
       <p className="muted studio-demo-hint">
         {audioIsClock
-          ? pickText(
-              {
-                en: "Teacher voice is the clock: the math canvas follows the recording timestamps.",
-                fr: "La voix du professeur est l’horloge : le tableau suit l’enregistrement.",
-              },
-              language,
-            )
+          ? pickText(STUDIO_UI.voiceClock, ui)
           : videoUrl
             ? isLocalDemo
-              ? pickText(STUDIO_UI.demoVideoHint, language)
-              : pickText(STUDIO_UI.videoHint, language)
-            : pickText(STUDIO_UI.demoHint, language)}
+              ? pickText(STUDIO_UI.demoVideoHint, ui)
+              : pickText(STUDIO_UI.videoHint, ui)
+            : pickText(STUDIO_UI.demoHint, ui)}
       </p>
       ) : null}
     </section>

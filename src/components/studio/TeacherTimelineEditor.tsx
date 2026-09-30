@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/components/i18n/I18nProvider";
 import { useEffect, useMemo, useState } from "react";
 import type { LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
@@ -162,7 +163,8 @@ function draftToAction(draft: DraftEvent): unknown {
   };
 }
 
-export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
+export function TeacherTimelineEditor({ timeline, onApply }: Props) {
+  const { locale: chrome } = useI18n();
   const [drafts, setDrafts] = useState<DraftEvent[]>(() =>
     (timeline.events?.length ? timeline.events : []).map(actionToDraft),
   );
@@ -225,7 +227,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
     if (!parsed.ok) return;
     onApply(parsed.events);
     setRawJson(JSON.stringify(parsed.events, null, 2));
-    setStatus(pickText(STUDIO_UI.teacherApplied, language));
+    setStatus(pickText(STUDIO_UI.teacherApplied, chrome));
   };
 
   const save = async () => {
@@ -253,7 +255,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
         setStatus("");
         return;
       }
-      setStatus(pickText(STUDIO_UI.teacherSaved, language));
+      setStatus(pickText(STUDIO_UI.teacherSaved, chrome));
     } catch (error) {
       const detail = error instanceof Error ? error.message : "network";
       setErrorEn(`Could not reach the events API (${detail}). Events are still in sessionStorage.`);
@@ -264,36 +266,33 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
   };
 
   return (
-    <section className="studio-teacher-editor" aria-label={pickText(STUDIO_UI.teacherTitle, language)}>
+    <section className="studio-teacher-editor" aria-label={pickText(STUDIO_UI.teacherTitle, chrome)}>
       <header className="studio-teacher-head">
         <div>
-          <p className="eyebrow">{pickText(STUDIO_UI.teacherEyebrow, language)}</p>
-          <h2>{pickText(STUDIO_UI.teacherTitle, language)}</h2>
+          <p className="eyebrow">{pickText(STUDIO_UI.teacherEyebrow, chrome)}</p>
+          <h2>{pickText(STUDIO_UI.teacherTitle, chrome)}</h2>
           <p className="muted">
-            {eventCount} {pickText(STUDIO_UI.teacherEvents, language)} · {timeline.id}
+            {eventCount} {pickText(STUDIO_UI.teacherEvents, chrome)} · {timeline.id}
             {" · "}
-            <a href="/studio/voice-solver">تسجيل الشرح الصوتي / Voice-to-Math</a>
+            <a href="/studio/voice-solver">{pickText(STUDIO_UI.voiceToMath, chrome)}</a>
           </p>
         </div>
         <div className="studio-teacher-head-actions">
           <button className="btn" type="button" onClick={() => setMode((value) => (value === "form" ? "json" : "form"))}>
-            {mode === "form" ? pickText(STUDIO_UI.teacherJsonMode, language) : pickText(STUDIO_UI.teacherFormMode, language)}
+            {mode === "form" ? pickText(STUDIO_UI.teacherJsonMode, chrome) : pickText(STUDIO_UI.teacherFormMode, chrome)}
           </button>
           <button className="btn dark" type="button" onClick={applyLive}>
-            {pickText(STUDIO_UI.teacherApply, language)}
+            {pickText(STUDIO_UI.teacherApply, chrome)}
           </button>
           <button className="btn ok" type="button" onClick={() => void save()} disabled={saving}>
-            {saving ? pickText(STUDIO_UI.teacherSaving, language) : pickText(STUDIO_UI.teacherSave, language)}
+            {saving ? pickText(STUDIO_UI.teacherSaving, chrome) : pickText(STUDIO_UI.teacherSave, chrome)}
           </button>
         </div>
       </header>
 
       {errorEn || errorAr ? (
         <div className="studio-teacher-error" role="alert">
-          <p>{errorEn}</p>
-          <p dir="rtl" lang="ar">
-            {errorAr}
-          </p>
+          <p>{chrome === "ar" ? errorAr || errorEn : errorEn || errorAr}</p>
         </div>
       ) : null}
       {status ? <p className="studio-teacher-status">{status}</p> : null}
@@ -303,7 +302,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
           className="studio-teacher-json"
           value={rawJson}
           spellCheck={false}
-          aria-label="Timeline events JSON"
+          aria-label={pickText(STUDIO_UI.teacherJsonMode, chrome)}
           onChange={(event) => setRawJson(event.target.value)}
         />
       ) : (
@@ -312,7 +311,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
             <article key={`ev-${index}`} className="studio-teacher-row">
               <div className="studio-teacher-row-head">
                 <label>
-                  {pickText(STUDIO_UI.teacherTime, language)}
+                  {pickText(STUDIO_UI.teacherTime, chrome)}
                   <input
                     type="number"
                     min={0}
@@ -322,7 +321,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
                   />
                 </label>
                 <label>
-                  {pickText(STUDIO_UI.teacherType, language)}
+                  {pickText(STUDIO_UI.teacherType, chrome)}
                   <select
                     value={draft.type}
                     onChange={(event) => setDraft(index, { type: event.target.value as CanvasActionType })}
@@ -339,17 +338,17 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
                   type="button"
                   onClick={() => setDrafts((current) => current.filter((_, i) => i !== index))}
                 >
-                  {pickText(STUDIO_UI.teacherRemove, language)}
+                  {pickText(STUDIO_UI.teacherRemove, chrome)}
                 </button>
               </div>
               {draft.type === "quiz_mcq" ? (
                 <>
                   <label>
-                    {pickText(STUDIO_UI.teacherQuestion, language)}
+                    {pickText(STUDIO_UI.teacherQuestion, chrome)}
                     <input value={draft.question} onChange={(event) => setDraft(index, { question: event.target.value })} />
                   </label>
                   <label>
-                    {pickText(STUDIO_UI.teacherChoices, language)}
+                    {pickText(STUDIO_UI.teacherChoices, chrome)}
                     <textarea
                       rows={4}
                       value={draft.choices}
@@ -357,11 +356,11 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
                     />
                   </label>
                   <label>
-                    {pickText(STUDIO_UI.teacherCorrect, language)}
+                    {pickText(STUDIO_UI.teacherCorrect, chrome)}
                     <input value={draft.correctId} onChange={(event) => setDraft(index, { correctId: event.target.value })} />
                   </label>
                   <label>
-                    {pickText(STUDIO_UI.teacherExplanation, language)}
+                    {pickText(STUDIO_UI.teacherExplanation, chrome)}
                     <textarea
                       rows={2}
                       value={draft.explanation}
@@ -376,14 +375,14 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
                     <input value={draft.latex} onChange={(event) => setDraft(index, { latex: event.target.value })} />
                   </label>
                   <label>
-                    {pickText(STUDIO_UI.teacherExpression, language)}
+                    {pickText(STUDIO_UI.teacherExpression, chrome)}
                     <input
                       value={draft.expression}
                       onChange={(event) => setDraft(index, { expression: event.target.value })}
                     />
                   </label>
                   <label>
-                    {pickText(STUDIO_UI.teacherDomain, language)}
+                    {pickText(STUDIO_UI.teacherDomain, chrome)}
                     <input
                       value={draft.domain}
                       placeholder="-3, 2"
@@ -391,7 +390,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
                     />
                   </label>
                   <label>
-                    {pickText(STUDIO_UI.teacherHighlights, language)}
+                    {pickText(STUDIO_UI.teacherHighlights, chrome)}
                     <textarea
                       rows={3}
                       value={draft.highlights}
@@ -401,7 +400,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
                 </>
               )}
               <label>
-                {pickText(STUDIO_UI.teacherPayload, language)}
+                {pickText(STUDIO_UI.teacherPayload, chrome)}
                 <textarea
                   rows={2}
                   value={draft.payloadJson}
@@ -412,7 +411,7 @@ export function TeacherTimelineEditor({ timeline, language, onApply }: Props) {
             </article>
           ))}
           <button className="btn" type="button" onClick={() => setDrafts((current) => [...current, emptyDraft("0")])}>
-            {pickText(STUDIO_UI.teacherAdd, language)}
+            {pickText(STUDIO_UI.teacherAdd, chrome)}
           </button>
         </div>
       )}

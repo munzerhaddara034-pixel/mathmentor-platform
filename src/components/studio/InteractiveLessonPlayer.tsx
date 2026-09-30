@@ -22,6 +22,7 @@ import { PlayerControls } from "./PlayerControls";
 import { QuizOverlay } from "./QuizOverlay";
 import { TeacherTimelineEditor } from "./TeacherTimelineEditor";
 import { useFullscreenHosts, useSavedTimelineEvents, useViewerIdentity } from "./usePlayerRemote";
+import { useI18n } from "@/components/i18n/I18nProvider";
 import "@/styles/player.css";
 
 function pickVoice(language: LessonLocale) {
@@ -57,21 +58,22 @@ export function InteractiveLessonPlayer({
   teacherMode: teacherModeProp,
   canTeach = false,
   viewer,
-  chromeLanguage = "ar",
+  chromeLanguage,
 }: {
   timeline: LessonTimeline;
   /** Content language: voice, board, captions (EN default for the Lebanese Terminale lessons). */
   initialLanguage?: LessonLocale;
-  /** Player chrome language. Arabic by default (the site is Arabic/RTL first). */
+  /** Player chrome language. Defaults to the site locale (en default, ar RTL, fr). */
   chromeLanguage?: LessonLanguage;
   teacherMode?: boolean;
   canTeach?: boolean;
   viewer?: { name: string; phone: string };
 }) {
   const [timeline, setTimeline] = useState(initialTimeline);
-  const ui = chromeLanguage;
+  const { locale } = useI18n();
+  const ui: LessonLanguage = chromeLanguage ?? locale;
   const [uiLanguage, setUiLanguage] = useState<LessonLocale>(
-    initialLanguage ?? toLessonLocale(initialTimeline.defaultLanguage ?? initialTimeline.language),
+    initialLanguage ?? (locale === "fr" ? "fr" : toLessonLocale(initialTimeline.defaultLanguage ?? initialTimeline.language)),
   );
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
@@ -370,7 +372,7 @@ export function InteractiveLessonPlayer({
             videoUrl={videoUrl}
             audioUrl={timeline.media?.audioUrl}
             poster={timeline.media?.poster ?? "/teachers/munzer.jpg?v=4"}
-            teacherName={instructor}
+            teacherName={instructorLabel}
             watermarkName={identity.name}
             watermarkPhone={identity.phone}
             clockMaster={clockMaster}

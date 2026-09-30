@@ -7,7 +7,8 @@ import { eventsStorageKey, validateTimelineEvents } from "@/lib/studio/timeline"
 type Identity = { name: string; phone: string };
 type SessionPayload = { ok?: boolean; user?: { name?: string; phone?: string }; canTeach?: boolean };
 
-const GUEST_IDENTITY: Identity = { name: "طالب المنصة", phone: "76532421" };
+/** Empty name → IdentityWatermark shows the localized "platform student" label. */
+const GUEST_IDENTITY: Identity = { name: "", phone: "76532421" };
 
 /** Records the lesson view and resolves the watermark identity + staff unlock from /api/auth/session. */
 export function useViewerIdentity(lessonId: string, viewer: Identity | undefined, canTeach: boolean) {

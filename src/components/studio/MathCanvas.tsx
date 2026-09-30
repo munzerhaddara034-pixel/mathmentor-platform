@@ -44,7 +44,7 @@ export function MathCanvas({ state, language, uiLanguage, currentTime, watermark
       </p>
       <h2 dir={uiDir}>{pickText(STUDIO_UI.canvasSub, ui)}</h2>
       <div ref={boardRef} className="studio-board">
-        <IdentityWatermark name={watermarkName ?? "طالب المنصة"} phone={watermarkPhone ?? "76532421"} variant="light" />
+        <IdentityWatermark name={watermarkName ?? ""} phone={watermarkPhone ?? "76532421"} variant="light" />
         {state.equations.length === 0 && !state.graph && state.steps.length === 0 && state.examTips.length === 0 ? (
           <p className="muted" dir={uiDir}>
             {pickText(STUDIO_UI.waiting, ui)}
@@ -52,8 +52,8 @@ export function MathCanvas({ state, language, uiLanguage, currentTime, watermark
         ) : null}
 
         {state.examTips.length ? (
-          <aside className="studio-exam-tip" aria-label={pickText({ en: "Key Idea / Exam Tip", fr: "Idée clé / Conseil d’épreuve" }, language)}>
-            <p className="eyebrow">{pickText({ en: "Key Idea / Exam Tip", fr: "Idée clé / Conseil d’épreuve" }, language)}</p>
+          <aside className="studio-exam-tip" aria-label={pickText(STUDIO_UI.keyIdea, ui)}>
+            <p className="eyebrow">{pickText(STUDIO_UI.keyIdea, ui)}</p>
             {state.examTips.map((tip, index) => (
               <div key={`tip-${tip.appearedAt}-${index}`}>
                 {tip.text ? <p>{pickText(tip.text, language)}</p> : null}
@@ -109,8 +109,8 @@ export function MathCanvas({ state, language, uiLanguage, currentTime, watermark
         ) : null}
 
         {state.variationTables.length ? (
-          <section className="studio-variation" aria-label={pickText({ en: "Table of variations", fr: "Tableau de variation" }, language)}>
-            <p className="eyebrow">{pickText({ en: "Table of variations", fr: "Tableau de variation" }, language)}</p>
+          <section className="studio-variation" aria-label={pickText(STUDIO_UI.variationTable, ui)}>
+            <p className="eyebrow">{pickText(STUDIO_UI.variationTable, ui)}</p>
             {state.variationTables.map((table, index) => (
               <div key={`var-${table.appearedAt}-${index}`}>
                 {table.text ? <p>{pickText(table.text, language)}</p> : null}
@@ -121,8 +121,8 @@ export function MathCanvas({ state, language, uiLanguage, currentTime, watermark
         ) : null}
 
         {state.boxedAnswers.length ? (
-          <section className="studio-boxed-answer" aria-label={pickText({ en: "Boxed Final Answer", fr: "Réponse encadrée" }, language)}>
-            <p className="eyebrow">{pickText({ en: "Boxed Final Answer · barème", fr: "Réponse encadrée · barème" }, language)}</p>
+          <section className="studio-boxed-answer" aria-label={pickText(STUDIO_UI.boxedAnswer, ui)}>
+            <p className="eyebrow">{pickText(STUDIO_UI.boxedAnswerMarks, ui)}</p>
             {state.boxedAnswers.map((box, index) => (
               <article key={`box-${box.appearedAt}-${index}`}>
                 {box.marks ? <p className="muted">{box.marks}</p> : null}

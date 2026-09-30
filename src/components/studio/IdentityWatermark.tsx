@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { watermarkDate, watermarkText } from "@/lib/videoSecurity";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 export function IdentityWatermark({
   name,
@@ -12,12 +13,13 @@ export function IdentityWatermark({
   phone: string;
   variant?: "dark" | "light";
 }) {
+  const { m } = useI18n();
   const [day, setDay] = useState(watermarkDate);
   useEffect(() => {
     const tick = window.setInterval(() => setDay(watermarkDate()), 60_000);
     return () => window.clearInterval(tick);
   }, []);
-  const text = watermarkText(name || "طالب المنصة", phone || "76532421", day);
+  const text = watermarkText(name || m.result.watermarkGuest, phone || "76532421", day);
   return (
     <div className={`identity-watermark ${variant}`} aria-hidden>
       <span className="dynamic-watermark">{text}</span>
@@ -30,7 +32,7 @@ export function IdentityWatermark({
 export function PageWatermark({ name, phone }: { name?: string; phone?: string }) {
   return (
     <div className="page-watermark" aria-hidden>
-      <IdentityWatermark name={name || "طالب المنصة"} phone={phone || "76532421"} variant="light" />
+      <IdentityWatermark name={name ?? ""} phone={phone || "76532421"} variant="light" />
     </div>
   );
 }
