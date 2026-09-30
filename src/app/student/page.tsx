@@ -4,9 +4,13 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { academyLessons } from "@/lib/academyLessons";
 import { defaultSettings } from "@/lib/settings";
+import { useNs } from "@/components/i18n/useNs";
+import { fmt } from "@/lib/i18n/format";
+import { accountMessages } from "@/lib/i18n/ns/account";
 import type { PlatformSettings, ProgressEntry, StoreData, StudentChatMessage } from "@/lib/types";
 
 export default function StudentPage() {
+  const t = useNs(accountMessages).student;
   const [settings, setSettings] = useState<PlatformSettings>(defaultSettings);
   const [progress, setProgress] = useState<ProgressEntry[]>([]);
   const [messages, setMessages] = useState<StudentChatMessage[]>([]);
@@ -55,62 +59,62 @@ export default function StudentPage() {
   };
 
   return (
-    <main className="shell" dir="rtl">
-      <p className="eyebrow">Student desk</p>
-      <h1>تقدمك، درسك التالي، ودردشة مع صورة الدفتر</h1>
+    <main className="shell">
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
       <p className="muted">
-        Completed {progress.length} lessons. Next: {next?.title}. WhatsApp {settings.phone}.
+        {fmt(t.summary, { done: progress.length, next: next?.title ?? "—", phone: settings.phone })}
       </p>
-      <div className="card" style={{ marginTop: 12 }}>
+      <div className="card" style={{ marginBlockStart: 12 }}>
         <h2>
-          🔥 {streak} Days Streak · {xp} XP
+          🔥 {fmt(t.streakXp, { streak, xp })}
         </h2>
-        <p className="muted">{badges.length ? badges.join(" · ") : "Earn Calculus Master, Probability Pro, Brevet Champ."}</p>
+        <p className="muted">{badges.length ? badges.join(" · ") : t.badgesHint}</p>
         <div className="row">
           <Link className="btn" href="/profile">
-            Profile / badges
+            {t.profileBadges}
           </Link>
           <Link className="btn" href="/wallet">
-            Wallet
+            {t.wallet}
           </Link>
           <Link className="btn" href="/exams">
-            Official exam sim
+            {t.examSim}
           </Link>
           <Link className="btn" href="/leaderboard">
-            Monthly XP
+            {t.monthlyXp}
           </Link>
         </div>
       </div>
       <div className="grid two">
         <article className="card">
-          <h2>Keep moving</h2>
+          <h2>{t.keepMoving}</h2>
           <p>
-            {next?.gradeLabel} · Chapter {next?.chapter} · {next?.title}
+            {next?.gradeLabel} · {fmt(t.chapter, { n: next?.chapter ?? "" })} · {next?.title}
           </p>
           <div className="row">
             <Link className="btn dark" href={`/classroom/${next?.id}`}>
-              Continue classroom video
+              {t.continueVideo}
             </Link>
             <Link className="btn" href="/math-solver">
-              AI solver
+              {t.solver}
             </Link>
             <Link className="btn" href="/live">
-              Book Prof. Munzer
+              {t.book}
             </Link>
             <Link className="btn dark" href="/live/classroom/demo">
-              انضم للحصة
+              {t.joinSession}
             </Link>
             <Link className="btn" href="/subscribe">
-              Subscription
+              {t.subscription}
             </Link>
           </div>
         </article>
         <article className="card">
-          <h2>Ask the tutor</h2>
+          <h2>{t.askTutor}</h2>
           <div className="paper" style={{ maxHeight: 220, overflow: "auto" }}>
             {messages.map((message) => (
               <p key={message.id}>
-                <strong>{message.from === "tutor" ? "Tutor" : "You"}:</strong> {message.body}
+                <strong>{message.from === "tutor" ? t.tutor : t.you}:</strong> {message.body}
                 {message.fileUrl ? (
                   <>
                     {" "}
@@ -123,25 +127,25 @@ export default function StudentPage() {
             ))}
           </div>
           <form onSubmit={send}>
-            <textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder="Ask in English or Arabic. Attach a notebook photo or PDF." />
+            <textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder={t.askPlaceholder} />
             <input type="file" accept="image/*,.pdf,.txt" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
             <div className="row">
               <button className="btn dark" disabled={busy} type="submit">
-                Send question
+                {t.send}
               </button>
             </div>
           </form>
         </article>
       </div>
-      <h2>Plans</h2>
+      <h2>{t.plans}</h2>
       <div className="grid two">
         {settings.plans.map((plan) => (
           <article className="card" key={plan.id}>
             <h3>{plan.arabicName}</h3>
-            <p>${plan.usdMonthly} / month · ${plan.usdTerm} / term</p>
+            <p>{fmt(t.planPrice, { monthly: plan.usdMonthly, term: plan.usdTerm })}</p>
             <p className="muted">{plan.includes}</p>
             <Link className="btn dark" href="/subscribe">
-              ادفع عبر Whish / Pay with Whish
+              {t.payWhish}
             </Link>
           </article>
         ))}

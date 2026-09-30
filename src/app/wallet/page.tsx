@@ -3,6 +3,11 @@
 import { subscriptionLabel } from "@/lib/auth/tiers";
 import type { LedgerEntry } from "@/lib/billing/store";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { useNs } from "@/components/i18n/useNs";
+import { INTL_LOCALE } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import { accountMessages } from "@/lib/i18n/ns/account";
 
 type WalletPayload = {
   name: string;
@@ -26,16 +31,24 @@ type WalletPayload = {
 };
 
 export default function WalletPage() {
+  const { locale, m } = useI18n();
+  const t = useNs(accountMessages).wallet;
   const [data, setData] = useState<WalletPayload | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [code, setCode] = useState("");
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
   const load = () => {
+    setLoadError(false);
     void fetch("/api/billing/wallet", { credentials: "same-origin" })
-      .then((response) => response.json())
-      .then(setData);
+      .then((response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.json() as Promise<WalletPayload>;
+      })
+      .then(setData)
+      .catch(() => setLoadError(true));
   };
 
   useEffect(() => {
@@ -45,14 +58,19 @@ export default function WalletPage() {
   const redeem = async () => {
     setBusy(true);
     setMessage("");
-    const response = await fetch("/api/billing/redeem", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ code }),
-    });
-    const payload = (await response.json()) as { ok?: boolean; message?: string; messageAr?: string; error?: string };
-    setMessage(payload.message || payload.messageAr || payload.error || "");
+    let payload: { ok?: boolean; message?: string; messageAr?: string; error?: string } = {};
+    try {
+      const response = await fetch("/api/billing/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ code }),
+      });
+      payload = (await response.json()) as typeof payload;
+    } catch {
+      payload = { ok: false, error: t.loadFailed };
+    }
+    setMessage((locale === "ar" ? payload.messageAr || payload.message : payload.message || payload.messageAr) || payload.error || "");
     setBusy(false);
     if (payload.ok) {
       setOpen(false);
@@ -61,61 +79,69 @@ export default function WalletPage() {
     }
   };
 
-  if (!data) return <main className="shell">Loading wallet…</main>;
+  if (loadError && !data) {
+    return (
+      <main className="shell">
+        <p className="studio-teacher-error" role="alert">
+          {t.loadFailed}
+        </p>
+      </main>
+    );
+  }
+  if (!data) return <main className="shell" aria-busy="true">{t.loading}</main>;
   const label = subscriptionLabel(data.subscriptionType);
   const expires = data.aiExpiresAt
-    ? new Date(data.aiExpiresAt).toLocaleDateString("en-GB", { timeZone: "Asia/Beirut" })
+    ? new Date(data.aiExpiresAt).toLocaleDateString(INTL_LOCALE[locale], { timeZone: "Asia/Beirut" })
     : "—";
 
   return (
     <main className="shell">
-      <p className="eyebrow">Credit balance · Prof. Munzer Haddara</p>
-      <h1>المحفظة والفواتير</h1>
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
       <div className="grid two">
         <article className="card">
-          <h2>AI Platform Access</h2>
-          <p style={{ fontSize: 28 }}>{data.aiStatus === "active" ? "Active" : data.aiStatus === "expired" ? "Expired" : "None"}</p>
-          <p className="muted">Expires: {expires} · {label.en}</p>
+          <h2>{t.aiTitle}</h2>
+          <p style={{ fontSize: 28 }}>{t.aiState[data.aiStatus]}</p>
+          <p className="muted">
+            {fmt(t.expires, { date: expires })} · {locale === "ar" ? label.ar : label.en}
+          </p>
         </article>
         <article className="card">
-          <h2>Live class credits</h2>
-          <p style={{ fontSize: 28 }}>{data.liveCredits} h</p>
-          <p className="muted">Hours remaining for 1-on-1 booking with Prof. Munzer Haddara.</p>
+          <h2>{t.liveTitle}</h2>
+          <p style={{ fontSize: 28 }}>{fmt(t.hoursShort, { n: data.liveCredits })}</p>
+          <p className="muted">{t.liveLead}</p>
           <button className="btn dark" type="button" onClick={() => setOpen(true)}>
-            Redeem top-up code
+            {t.redeemOpen}
           </button>
         </article>
       </div>
-      <section className="card" style={{ marginTop: 20 }}>
+      <section className="card" style={{ marginBlockStart: 20 }}>
         <h2>
-          {data.sharingExempt
-            ? "أجهزتي النشطة / Active devices"
-            : "Active devices (1 mobile + 1 desktop)"}
+          {data.sharingExempt ? t.devicesTeacher : t.devicesStudent}
         </h2>
         {data.sharingExempt ? (
-          <p className="muted">حساب الأستاذ يبقى مسجّلاً على أكثر من جهاز؛ الطلاب محدودون بجهاز من كل نوع.</p>
+          <p className="muted">{t.teacherDevices}</p>
         ) : null}
-        {(data.devices ?? []).length === 0 ? <p className="muted">No stored sessions.</p> : null}
+        {(data.devices ?? []).length === 0 ? <p className="muted">{t.noDevices}</p> : null}
         {(data.devices ?? []).map((device) => (
           <p key={device.id}>
-            {device.deviceNameAr || device.deviceName || device.deviceClass}
-            {device.deviceName ? ` · ${device.deviceName}` : ` · ${device.deviceClass}`}
+            {(locale === "ar" ? device.deviceNameAr : device.deviceName) || device.deviceName || device.deviceClass}
             {" · "}
             {device.createdAtBeirut || device.createdAt.slice(0, 16).replace("T", " ")}
-            {device.current ? " · this device" : ""}
+            {device.current ? ` · ${t.thisDevice}` : ""}
           </p>
         ))}
       </section>
-      <section className="card" style={{ marginTop: 20, overflowX: "auto" }}>
-        <h2>Transaction history</h2>
+      <section className="card" style={{ marginBlockStart: 20, overflowX: "auto" }}>
+        <h2>{t.history}</h2>
         <table className="data-table">
           <thead>
             <tr>
-              <th>When</th>
-              <th>Kind</th>
-              <th>Hours</th>
-              <th>Code</th>
-              <th>Note</th>
+              <th>{t.cols.when}</th>
+              <th>{t.cols.kind}</th>
+              <th>{t.cols.hours}</th>
+              <th>{t.cols.code}</th>
+              <th>{t.cols.note}</th>
             </tr>
           </thead>
           <tbody>
@@ -132,20 +158,20 @@ export default function WalletPage() {
         </table>
       </section>
       {open ? (
-        <div className="modal-backdrop" role="dialog">
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-label={t.topupTitle}>
           <div className="card modal-card">
-            <h2>Live-hour top-up</h2>
-            <p className="muted">Enter a code generated by Prof. Munzer Haddara.</p>
+            <h2>{t.topupTitle}</h2>
+            <p className="muted">{t.topupLead}</p>
             <label>
-              Code
+              {t.code}
               <input value={code} onChange={(event) => setCode(event.target.value)} autoFocus />
             </label>
             <div className="row">
               <button className="btn dark" type="button" disabled={busy} onClick={() => void redeem()}>
-                {busy ? "Redeeming…" : "Redeem"}
+                {busy ? t.redeeming : t.redeem}
               </button>
               <button className="btn" type="button" onClick={() => setOpen(false)}>
-                Cancel
+                {m.common.cancel}
               </button>
             </div>
           </div>

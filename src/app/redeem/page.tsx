@@ -6,6 +6,10 @@ import { ApiErrorBanner, Skeleton, SkeletonBlock } from "@/components/ui/Skeleto
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { useNs } from "@/components/i18n/useNs";
+import { fmt } from "@/lib/i18n/format";
+import { accountMessages } from "@/lib/i18n/ns/account";
 
 type RedeemResponse = {
   ok?: boolean;
@@ -21,6 +25,8 @@ type RedeemResponse = {
 
 export default function RedeemPage() {
   const router = useRouter();
+  const { locale, m } = useI18n();
+  const t = useNs(accountMessages).redeem;
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -75,14 +81,14 @@ export default function RedeemPage() {
       const data = (await response.json()) as RedeemResponse;
       if (!response.ok || !data.ok) {
         setOk(false);
-        setError(data.error ?? data.message ?? "Redeem failed.");
-        setErrorAr(data.error ?? data.message ?? "فشل التفعيل");
-        setMessage(data.error ?? data.message ?? "فشل التفعيل");
+        setError(data.error ?? data.message ?? t.failed);
+        setErrorAr(data.error ?? data.message ?? t.failed);
+        setMessage(data.error ?? data.message ?? t.failed);
         return;
       }
       setOk(true);
       setPlanName(data.planName ?? "");
-      setMessage(data.message ?? "تم التفعيل");
+      setMessage(data.message ?? t.doneTitle);
       setEntitlements({
         aiAccess: data.aiAccess,
         liveAccess: data.liveAccess,
@@ -94,9 +100,9 @@ export default function RedeemPage() {
       router.refresh();
     } catch {
       setOk(false);
-      setError("Network error.");
-      setErrorAr("خطأ في الشبكة.");
-      setMessage("خطأ في الشبكة");
+      setError(t.network);
+      setErrorAr(t.network);
+      setMessage(t.network);
     } finally {
       setBusy(false);
     }
@@ -104,50 +110,44 @@ export default function RedeemPage() {
 
   if (sessionLoading) {
     return (
-      <main className="shell" dir="rtl">
-        <p className="eyebrow">تفعيل الاشتراك</p>
-        <h1>أدخل كود البطاقة</h1>
-        <SkeletonBlock lines={4} label="Loading session…" />
-        <div style={{ marginTop: 12 }}>
-          <Skeleton height={48} width="100%" label="Loading form…" />
+      <main className="shell">
+        <p className="eyebrow">{t.eyebrow}</p>
+        <h1>{t.title}</h1>
+        <SkeletonBlock lines={4} label={t.loadingSession} />
+        <div style={{ marginBlockStart: 12 }}>
+          <Skeleton height={48} width="100%" label={t.loadingForm} />
         </div>
       </main>
     );
   }
 
   return (
-    <main className="shell" dir="rtl">
-      <p className="eyebrow">تفعيل الاشتراك</p>
-      <h1>أدخل كود البطاقة</h1>
-      <p className="muted">اشترِ البطاقة من مكتب معتمد أو اطلب الكود من الأستاذ منذر حداره.</p>
+    <main className="shell">
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
+      <p className="muted">{t.lead}</p>
       {need ? (
         <p className="studio-teacher-error" role="alert">
-          {needKind === "ai"
-            ? "AI_TIER or BOTH is required for the math solver and interactive lessons."
-            : needKind === "live"
-              ? "LIVE_TIER or BOTH is required to book Prof. Munzer Haddara."
-              : "Your account is signed in but the subscription is not active. Redeem a card to open lessons."}
-          <br />
-          <span dir="rtl" lang="ar">
-            {needKind === "live"
-              ? "يلزم اشتراك الحصص المباشرة مع الأستاذ منذر حداره."
-              : "الحساب مسجّل لكن الاشتراك غير مفعّل. أدخل كود البطاقة لفتح الدروس أو الحلّال."}
-          </span>
+          {needKind === "ai" ? t.needAi : needKind === "live" ? t.needLive : t.needAny}
         </p>
       ) : null}
       {entitlements && (entitlements.aiAccess || entitlements.liveAccess) ? (
         <p className="success" role="status">
-          Active: {entitlements.subscriptionType ?? "plan"} · AI {entitlements.aiAccess ? "yes" : "no"} · Live{" "}
-          {entitlements.liveAccess ? "yes" : "no"} · credits {entitlements.liveCredits ?? 0}
+          {fmt(t.active, {
+            plan: entitlements.subscriptionType ?? t.plan,
+            ai: entitlements.aiAccess ? m.common.yes : m.common.no,
+            live: entitlements.liveAccess ? m.common.yes : m.common.no,
+            credits: entitlements.liveCredits ?? 0,
+          })}
         </p>
       ) : null}
       <div className="card activate-card">
         <label>
-          الاسم
+          {t.name}
           <input value={name} onChange={(event) => setName(event.target.value)} disabled={busy} />
         </label>
         <label>
-          رقم الهاتف
+          {t.phone}
           <input
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
@@ -156,36 +156,36 @@ export default function RedeemPage() {
           />
         </label>
         <label>
-          رمز البطاقة / البرومو
+          {t.code}
           <input value={code} onChange={(event) => setCode(event.target.value)} disabled={busy} />
         </label>
         <button className="btn dark" type="button" onClick={() => void submit()} disabled={busy || !code.trim()}>
-          {busy ? "جاري التفعيل…" : "تفعيل الدورة فوراً"}
+          {busy ? t.busy : t.submit}
         </button>
-        {busy ? <SkeletonBlock lines={2} label="Redeeming…" /> : null}
+        {busy ? <SkeletonBlock lines={2} label={t.busy} /> : null}
         <ApiErrorBanner error={error} errorAr={errorAr} />
         {message && ok ? <p className="success">{message}</p> : null}
         {ok ? (
           <div className="welcome-banner">
-            <h2>تم الاشتراك</h2>
+            <h2>{t.doneTitle}</h2>
             <p>
-              مرحباً {name || "بك"} في منصة الأستاذ منذر. فُتحت لك: {planName}.
-              {entitlements?.aiAccess ? " AI unlocked instantly — no logout needed." : ""}
+              {fmt(t.doneLead, { name: name ? ` ${name}` : "", plan: planName })}
+              {entitlements?.aiAccess ? ` ${t.aiUnlocked}` : ""}
             </p>
             <Link className="btn ok" href="/math-solver">
-              الحلّال
+              {t.solver}
             </Link>
             <Link className="btn" href="/lessons/interactive">
-              ابدأ الدروس
+              {t.startLessons}
             </Link>
             <Link className="btn" href="/live">
-              حجز مباشرة
+              {t.bookLive}
             </Link>
           </div>
         ) : null}
       </div>
-      <p className="muted" style={{ marginTop: 16 }}>
-        الخطط: {defaultSettings.plans.map((plan) => plan.arabicName).join(" · ")}
+      <p className="muted" style={{ marginBlockStart: 16 }}>
+        {t.plans} {defaultSettings.plans.map((plan) => (locale === "ar" ? plan.arabicName : plan.name)).join(" · ")}
       </p>
     </main>
   );
