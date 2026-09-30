@@ -14,8 +14,7 @@ export default function Grade12LsChapter1Page() {
       <p className="eyebrow">صف 12 · علوم الحياة</p>
       <h1>وحدة النهايات</h1>
       <p className="muted">
-        فيديو شرح حقيقي (أسلوب صف: افتتاح، فكرة واحدة، مثال محلول، خطأ شائع، خلاصة) ثم الملخص العربي وبنك الأسئلة.
-        لا يوجد ادّعاء أن كل دروس الصفوف الأخرى مصوّرة بعد.
+        فيديو شرح بأسلوب الصف (افتتاح، فكرة واحدة، مثال محلول، خطأ شائع، خلاصة)، ثم الملخص العربي وبنك الأسئلة.
       </p>
       <LessonVideoPlayer
         videoUrl={lesson?.videoUrl ?? GRADE_12_LS_LIMITS_VIDEO_URL}
@@ -27,7 +26,7 @@ export default function Grade12LsChapter1Page() {
       <article className="card" style={{ marginTop: 24 }}>
         <h3>بعد هذا الفيديو</h3>
         <p className="muted">
-          تدريب النهايات، أو مسابقة المسألة الرابعة (دراسة الدوال: نهاية، استمرار، مشتقة، جدول تغيرات، تقارب، دالة عكسية) مرتّبة سهل فمتوسط فصعب. البنود بأسلوب النماذج وليست نسخاً من دورة رسمية.
+          تدريب النهايات، أو مسابقة المسألة الرابعة (دراسة الدوال: نهاية، استمرار، مشتقة، جدول تغيّرات، تقارب، دالة عكسية) مرتّبة من السهل إلى الصعب، بأسلوب النماذج الرسمية.
         </p>
         <div className="row">
           <Link href={`/practice/take?lessonId=${GRADE_12_LS_LIMITS_LESSON_ID}&mode=free`} className="btn dark">

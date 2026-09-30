@@ -78,7 +78,7 @@ export function LessonVideoPlayer({
       <div>
         <div className="lesson-media-toolbar">
           <p className="muted" style={{ margin: 0 }}>
-            {currentLang === "fr" ? "Tableau interactif · bascule EN | FR" : "Interactive board · EN | FR toggle"}
+            سبورة تفاعلية · الشرح بالإنكليزية أو الفرنسية
           </p>
           {toggle}
         </div>
@@ -115,15 +115,12 @@ export function LessonVideoPlayer({
         <span className="dynamic-watermark">{watermark}</span>
         <span className="dynamic-watermark delay">{watermark}</span>
         <p className="classroom-tag">
-          {currentLang === "fr" ? "FR · audio + texte" : "EN · audio + text"} · {media.providerLabel} ·{" "}
-          {currentLang === "fr" ? "protégé" : "protected"}
+          <bdi dir="ltr">{currentLang.toUpperCase()}</bdi> · <bdi dir="ltr">{media.providerLabel}</bdi> · محمي
         </p>
       </div>
       {bilingual ? (
         <p className="muted" style={{ marginTop: 8 }}>
-          {currentLang === "fr"
-            ? "Un clic sur FR change la voix et tout ce qui est écrit au tableau."
-            : "One click on FR switches the voice and every line written on the board."}
+          نقرة واحدة على <bdi dir="ltr">EN | FR</bdi> تبدّل الصوت وكل ما يُكتب على اللوح معاً.
         </p>
       ) : null}
     </div>

@@ -6,6 +6,7 @@ import { getStudioEvents } from "@/lib/studio/studioEventsStore";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
 import Link from "next/link";
+import { MathInline } from "@/components/ui/MathInline";
 
 export const dynamic = "force-dynamic";
 
@@ -31,32 +32,29 @@ export default async function InteractiveLessonDemoPage({
   return (
     <main className="shell studio-shell relative-watermark">
       <PageWatermark name={viewer.name} phone={viewer.phone} />
-      <p className="eyebrow">Classroom studio · protected lesson</p>
-      <details className="studio-lesson-notes">
-        <summary>Prof. Munzer Haddara / الأستاذ منذر حداره · lesson notes</summary>
-        <p className="muted">
-          Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — Key Idea, domain D_f,
-          limits with <code>y=0</code>, derivative, table of variations, timed graph of C_f, boxed exercise{" "}
-          <code>f(x)=−1/2</code> (IVT after continuity + monotonicity), common pitfalls. English default, live French
-          toggle. Editor: <Link href="/studio/script">/studio/script</Link>
-          {" · "}
-          <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>
-          {" · "}
-          <Link href="/studio/player?lesson=complex">Complex numbers</Link>
-          {" · "}
-          <Link href="/admin/video-generator">HeyGen generator</Link>
-          {staff ? (
-            <>
-              {" · "}
-              <Link href="/lessons/interactive?teacher=1">teacher timeline</Link>
-              {" · "}
-              <Link href="/studio/voice-solver">تسجيل الشرح الصوتي</Link>
-            </>
-          ) : null}
-          {timeline.media?.videoUrl ? " · canvas follows video.currentTime" : ""}
-          {timeline.media?.studentEnabled ? " · enabled for students" : ""}
-        </p>
-      </details>
+      {staff ? (
+        <details className="studio-lesson-notes" dir="ltr" lang="en">
+          <summary>Staff · lesson notes &amp; studio links</summary>
+          <p className="muted">
+            Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — Key Idea, domain D_f,
+            limits with <code>y=0</code>, derivative, table of variations, timed graph of C_f, boxed exercise{" "}
+            <code>f(x)=−1/2</code> (IVT after continuity + monotonicity), common pitfalls. Editor:{" "}
+            <Link href="/studio/script">/studio/script</Link>
+            {" · "}
+            <Link href="/studio/player?lesson=leb-term-func-01">3-scene seed</Link>
+            {" · "}
+            <Link href="/studio/player?lesson=complex">Complex numbers</Link>
+            {" · "}
+            <Link href="/admin/video-generator">HeyGen generator</Link>
+            {" · "}
+            <Link href="/lessons/interactive?teacher=1">teacher timeline</Link>
+            {" · "}
+            <Link href="/studio/voice-solver">تسجيل الشرح الصوتي</Link>
+            {timeline.media?.videoUrl ? " · canvas follows video.currentTime" : ""}
+            {timeline.media?.studentEnabled ? " · enabled for students" : ""}
+          </p>
+        </details>
+      ) : null}
       <InteractiveLessonPlayer
         timeline={timeline}
         initialLanguage="en"
@@ -64,6 +62,10 @@ export default async function InteractiveLessonDemoPage({
         canTeach={Boolean(staff)}
         viewer={viewer}
       />
+      <p className="studio-intro">
+        دراسة كاملة للدالة <MathInline tex="f(x)=(x-1)e^{x}" /> بأسلوب الامتحان الرسمي: الفكرة الأساسية، مجال التعريف،
+        النهايات، المشتقة، جدول التغيّرات، والرسم البياني. الشرح بالإنكليزية، ويمكنك التبديل إلى الفرنسية.
+      </p>
     </main>
   );
 }
