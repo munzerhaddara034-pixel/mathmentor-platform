@@ -3,8 +3,11 @@
 import { useEffect } from "react";
 import { MathTex } from "@/components/MathTex";
 import type { NoteBlock } from "@/lib/lessonNotes";
+import { useNs } from "@/components/i18n/useNs";
+import { lessonsMessages } from "@/lib/i18n/ns/lessons";
 
 export function LessonNotes({ blocks, dir = "ltr" }: { blocks: NoteBlock[]; dir?: "ltr" | "rtl" }) {
+  const t = useNs(lessonsMessages);
   useEffect(() => {
     void window.MathJax?.typesetPromise?.();
   }, [blocks]);
@@ -37,7 +40,7 @@ export function LessonNotes({ blocks, dir = "ltr" }: { blocks: NoteBlock[]; dir?
                   <li key={step}>{step}</li>
                 ))}
               </ol>
-              <p className="note-result">النتيجة: {block.result}</p>
+              <p className="note-result">{t.noteResult} {block.result}</p>
             </section>
           );
         }
@@ -45,11 +48,11 @@ export function LessonNotes({ blocks, dir = "ltr" }: { blocks: NoteBlock[]; dir?
           <section key={key} className="note-mistake">
             <h3>{block.title}</h3>
             <p>
-              <strong>خطأ: </strong>
+              <strong>{t.noteMistake} </strong>
               {block.wrong}
             </p>
             <p>
-              <strong>الصحيح: </strong>
+              <strong>{t.noteCorrect} </strong>
               {block.right}
             </p>
           </section>

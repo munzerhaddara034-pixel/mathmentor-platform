@@ -5,6 +5,9 @@ import { useState } from "react";
 import { LessonNotes } from "@/components/LessonNotes";
 import { LessonVideoPlayer } from "@/components/LessonVideoPlayer";
 import { Ltr } from "@/components/ui/Ltr";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { useNs } from "@/components/i18n/useNs";
+import { lessonsMessages } from "@/lib/i18n/ns/lessons";
 import { getAcademyLesson } from "@/lib/academyLessons";
 import { DEFAULT_LESSON_LANG, type LessonLang } from "@/lib/lessonNotes";
 import { watermarkText } from "@/lib/videoSecurity";
@@ -16,26 +19,32 @@ import {
   type VideoLessonPack,
 } from "@/lib/videoLessons";
 
-/** Arabic (RTL) page chrome around an EN/FR video lesson; the video, board and notes stay LTR. */
+/** Page chrome in the UI locale (RTL for ar) around an EN/FR video lesson; the video, board and notes stay LTR. */
 export function LessonWatchView({
   pack,
-  watermarkName = "طالب المنصة",
+  watermarkName,
 }: {
   pack: VideoLessonPack;
   watermarkName?: string;
 }) {
+  const { locale, m } = useI18n();
+  const t = useNs(lessonsMessages);
   const [lang, setLang] = useState<LessonLang>(DEFAULT_LESSON_LANG);
   const lesson = academyLessonForPack(pack) ?? getAcademyLesson(pack.lessonId);
   const copy = copyForLang(pack, lang);
-  const watermark = watermarkText(watermarkName, "76532421");
+  const watermark = watermarkText(watermarkName ?? m.result.watermarkGuest, "76532421");
 
   return (
-    <main className="shell mm-watch" dir="rtl" lang="ar">
-      <p className="eyebrow">{pack.trackLabelAr}</p>
-      <h1>{pack.titleAr}</h1>
+    <main className="shell mm-watch">
+      <p className="eyebrow">{locale === "ar" ? pack.trackLabelAr : locale === "fr" ? pack.trackLabelFr : pack.trackLabelEn}</p>
+      <h1>{locale === "ar" ? pack.titleAr : locale === "fr" ? pack.titleFr : pack.titleEn}</h1>
       <p className="muted">
-        <Ltr>{copy.title}</Ltr> · فيديو صفّي: مدخل، فكرة واحدة، مثال محلول، خطأ شائع، وخلاصة. بدّل بين الإنكليزية
-        والفرنسية بنقرة واحدة.
+        {locale === "ar" ? (
+          <>
+            <Ltr>{copy.title}</Ltr> ·{" "}
+          </>
+        ) : null}
+        {t.watchLead}
       </p>
       <div dir="ltr" lang={lang}>
         <LessonVideoPlayer
@@ -51,17 +60,17 @@ export function LessonWatchView({
         <LessonNotes blocks={notesForPack(pack, lang)} dir="ltr" />
       </div>
       <article className="card" style={{ marginTop: 24 }}>
-        <h3>بعد هذا الفيديو</h3>
-        <p className="muted">أعد قراءة ما على اللوح، ثم انتقل إلى التدريب أو المسابقة.</p>
+        <h3>{t.afterTitle}</h3>
+        <p className="muted">{t.afterLead}</p>
         <div className="row">
           <Link href={pack.practiceHref} className="btn dark">
-            تدرّب على الدرس
+            {t.practice}
           </Link>
           <Link href={pack.contestHref} className="btn">
-            المسابقة
+            {t.contest}
           </Link>
           <Link href={`/classroom/${pack.lessonId}`} className="ghost-btn ink">
-            صفحة الصف
+            {t.classPage}
           </Link>
         </div>
       </article>

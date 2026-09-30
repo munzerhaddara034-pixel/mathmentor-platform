@@ -6,6 +6,9 @@ import { getStudioEvents } from "@/lib/studio/studioEventsStore";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
 import Link from "next/link";
+import { getI18n } from "@/lib/i18n/server";
+import { lessonsMessages } from "@/lib/i18n/ns/lessons";
+import { rich } from "@/lib/i18n/rich";
 import { MathInline } from "@/components/ui/MathInline";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +19,8 @@ export default async function InteractiveLessonDemoPage({
   searchParams: Promise<{ job?: string; teacher?: string; admin?: string }>;
 }) {
   const { job: jobId, teacher, admin } = await searchParams;
+  const { locale, m } = await getI18n();
+  const t = lessonsMessages[locale];
   const live = await getLiveSession();
   const staff = live.ok && isStaffRole(live.user.role);
   const job = jobId ? await getHeyGenJob(jobId) : undefined;
@@ -27,14 +32,14 @@ export default async function InteractiveLessonDemoPage({
   const teacherMode = Boolean(staff && (teacher === "1" || admin === "1"));
   const viewer = live.ok
     ? { name: live.user.name, phone: live.user.phone }
-    : { name: "طالب المنصة", phone: "76532421" };
+    : { name: m.result.watermarkGuest, phone: "76532421" };
 
   return (
     <main className="shell studio-shell relative-watermark">
       <PageWatermark name={viewer.name} phone={viewer.phone} />
       {staff ? (
         <details className="studio-lesson-notes" dir="ltr" lang="en">
-          <summary>Staff · lesson notes &amp; studio links</summary>
+          <summary>{t.staffNotes}</summary>
           <p className="muted">
             Official exam pattern: complete Terminale study of <code>f(x)=(x-1)e^x</code> — Key Idea, domain D_f,
             limits with <code>y=0</code>, derivative, table of variations, timed graph of C_f, boxed exercise{" "}
@@ -49,7 +54,7 @@ export default async function InteractiveLessonDemoPage({
             {" · "}
             <Link href="/lessons/interactive?teacher=1">teacher timeline</Link>
             {" · "}
-            <Link href="/studio/voice-solver">تسجيل الشرح الصوتي</Link>
+            <Link href="/studio/voice-solver">{t.recordVoice}</Link>
             {timeline.media?.videoUrl ? " · canvas follows video.currentTime" : ""}
             {timeline.media?.studentEnabled ? " · enabled for students" : ""}
           </p>
@@ -62,10 +67,7 @@ export default async function InteractiveLessonDemoPage({
         canTeach={Boolean(staff)}
         viewer={viewer}
       />
-      <p className="studio-intro">
-        دراسة كاملة للدالة <MathInline tex="f(x)=(x-1)e^{x}" /> بأسلوب الامتحان الرسمي: الفكرة الأساسية، مجال التعريف،
-        النهايات، المشتقة، جدول التغيّرات، والرسم البياني. الشرح بالإنكليزية، ويمكنك التبديل إلى الفرنسية.
-      </p>
+      <p className="studio-intro">{rich(t.interactiveIntro, { tex: <MathInline tex="f(x)=(x-1)e^{x}" /> })}</p>
     </main>
   );
 }

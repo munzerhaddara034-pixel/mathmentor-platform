@@ -6,6 +6,8 @@ import { resolveLessonVideo } from "@/lib/lessonMedia";
 import { DEFAULT_LESSON_LANG, type LessonLang } from "@/lib/lessonNotes";
 import type { StoryboardScene } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
+import { useNs } from "@/components/i18n/useNs";
+import { lessonsMessages } from "@/lib/i18n/ns/lessons";
 
 export function LessonVideoPlayer({
   videoUrl,
@@ -26,6 +28,7 @@ export function LessonVideoPlayer({
   lang?: LessonLang;
   onLangChange?: (lang: LessonLang) => void;
 }) {
+  const t = useNs(lessonsMessages);
   const [internalLang, setInternalLang] = useState<LessonLang>(DEFAULT_LESSON_LANG);
   const currentLang = lang ?? internalLang;
   const setLang = (next: LessonLang) => {
@@ -78,7 +81,7 @@ export function LessonVideoPlayer({
       <div>
         <div className="lesson-media-toolbar">
           <p className="muted" style={{ margin: 0 }}>
-            سبورة تفاعلية · الشرح بالإنكليزية أو الفرنسية
+            {t.boardMode}
           </p>
           {toggle}
         </div>
@@ -115,12 +118,12 @@ export function LessonVideoPlayer({
         <span className="dynamic-watermark">{watermark}</span>
         <span className="dynamic-watermark delay">{watermark}</span>
         <p className="classroom-tag">
-          <bdi dir="ltr">{currentLang.toUpperCase()}</bdi> · <bdi dir="ltr">{media.providerLabel}</bdi> · محمي
+          <bdi dir="ltr">{currentLang.toUpperCase()}</bdi> · <bdi dir="ltr">{media.providerLabel}</bdi> · {t.protectedTag}
         </p>
       </div>
       {bilingual ? (
-        <p className="muted" style={{ marginTop: 8 }}>
-          نقرة واحدة على <bdi dir="ltr">EN | FR</bdi> تبدّل الصوت وكل ما يُكتب على اللوح معاً.
+        <p className="muted" style={{ marginBlockStart: 8 }}>
+          {t.langHint}
         </p>
       ) : null}
     </div>
