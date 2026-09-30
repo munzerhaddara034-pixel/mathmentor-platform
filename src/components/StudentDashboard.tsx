@@ -1,98 +1,51 @@
-import Link from "next/link";
+import { ContinueLesson } from "@/components/dashboard/ContinueLesson";
+import { CoursesSection } from "@/components/dashboard/CoursesSection";
+import { ExamReminder, RemindersList } from "@/components/dashboard/ExamReminder";
+import { OverviewProvider } from "@/components/dashboard/OverviewContext";
+import { NextSessionWidget, PlanWidget, StreakWidget } from "@/components/dashboard/OverviewWidgets";
+import { QuickActions } from "@/components/dashboard/QuickActions";
 import type { RoleDashboard } from "@/lib/auth/dashboard";
-import { roleLabel } from "@/lib/auth/types";
+import { formatBeirut } from "@/lib/format/dates";
+import "@/styles/dashboard.css";
 
+function greeting(now: Date) {
+  const hour = Number(formatBeirut(now.toISOString(), { hour: "numeric", hour12: false }));
+  return hour >= 5 && hour < 12 ? "صباح الخير" : "مساء الخير";
+}
+
+/**
+ * Student home: server data (courses, reminders from the profile DB) renders immediately;
+ * plan / next session / streak come from /api/me/overview with skeletons and per-widget errors.
+ */
 export function StudentDashboard({ data }: { data: RoleDashboard }) {
   const { user, courses, reminders } = data;
+  const now = new Date();
+  const firstName = user.name.split(" ")[0] || user.name;
+  const [nearest, ...laterReminders] = reminders;
   return (
-    <main className="shell">
-      <p className="eyebrow">لوحة الطالب</p>
-      <div className="dash-hero">
-        <div>
-          <h1>أهلاً {user.name}</h1>
-          <p className="muted">تابع تقدمك في مسارات الشهادة، راقب مواعيد الامتحانات، وافتح صف الأستاذ منذر من هنا.</p>
+    <main className="shell mm-dash">
+      <header className="mm-dash-hello">
+        <p className="eyebrow">
+          {greeting(now)} · {formatBeirut(now.toISOString(), { weekday: "long", day: "numeric", month: "long" })}
+        </p>
+        <h1>أهلاً {firstName}</h1>
+      </header>
+      <OverviewProvider>
+        <div className="mm-dash-grid">
+          <div className="mm-dash-col">
+            <PlanWidget />
+            {nearest ? <ExamReminder reminder={nearest} /> : null}
+            <ContinueLesson courses={courses} />
+            <QuickActions />
+          </div>
+          <aside className="mm-dash-col">
+            <NextSessionWidget />
+            <StreakWidget />
+            {laterReminders.length ? <RemindersList reminders={laterReminders} /> : null}
+          </aside>
         </div>
-        <span className="role-badge large">{roleLabel(user.role)}</span>
-      </div>
-
-      <section className="grid two dash-section">
-        <article className="card">
-          <h2>تقدم الدورات</h2>
-          {courses.length ? (
-            courses.map((course) => (
-              <div key={course.id} className="progress-block">
-                <div className="progress-head">
-                  <strong>{course.arabicTitle}</strong>
-                  <span>{course.percent}%</span>
-                </div>
-                <div className="progress-track">
-                  <span style={{ width: `${course.percent}%` }} />
-                </div>
-                <p className="muted">{course.title}</p>
-              </div>
-            ))
-          ) : (
-            <p className="muted">لا دورات مسجّلة بعد. ابدأ من الصف أو الاختبارات.</p>
-          )}
-        </article>
-        <article className="card">
-          <h2>تذكير الامتحانات</h2>
-          {reminders.length ? (
-            <ul className="reminder-list">
-              {reminders.map((item) => (
-                <li key={item.id}>
-                  <div>
-                    <strong>{item.arabicTitle}</strong>
-                    <p className="muted">{item.title}</p>
-                  </div>
-                  <div className="reminder-meta">
-                    <span className="badge">{item.daysLeft === 0 ? "اليوم" : `بعد ${item.daysLeft} يوم`}</span>
-                    {item.href ? (
-                      <Link href={item.href} className="ghost-link">
-                        فتح
-                      </Link>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="muted">لا مواعيد قريبة حالياً.</p>
-          )}
-        </article>
-      </section>
-
-      <section className="dash-section">
-        <h2>دوراتي المسجّلة</h2>
-        <div className="grid two">
-          {courses.map((course) => (
-            <article className="card course-card" key={course.id}>
-              <p className="eyebrow">{course.title}</p>
-              <h3>{course.arabicTitle}</h3>
-              <div className="progress-track">
-                <span style={{ width: `${course.percent}%` }} />
-              </div>
-              <p className="muted">إنجاز {course.percent}% · دروس الصف والبنوك الرسمية للمنصة</p>
-              <ul className="lesson-mini">
-                {course.lessons.map((lesson) => (
-                  <li key={lesson.id}>
-                    <Link href={lesson.href}>{lesson.arabicTitle || lesson.title}</Link>
-                    <span>{lesson.percent}%</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="row">
-                <Link className="btn dark" href={course.href}>
-                  الصف
-                </Link>
-                <Link className="ghost-btn ink" href={course.practiceHref}>
-                  تدريب / مسابقة
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      </OverviewProvider>
+      <CoursesSection courses={courses} />
     </main>
   );
 }

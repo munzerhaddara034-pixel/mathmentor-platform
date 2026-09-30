@@ -24,7 +24,7 @@ export function Skeleton({
   height = 16,
   width = "100%",
   className = "",
-  label = "Loading…",
+  label = "جارٍ التحميل…",
   rounded = "md",
 }: SkeletonProps) {
   const h = typeof height === "number" ? `${height}px` : height;
@@ -42,7 +42,7 @@ export function Skeleton({
 
 export function SkeletonBlock({
   lines = 3,
-  label = "Loading…",
+  label = "جارٍ التحميل…",
   className = "",
 }: {
   lines?: number;
