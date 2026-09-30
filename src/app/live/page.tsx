@@ -2,44 +2,55 @@ import { LiveBookingBoard } from "@/components/live/LiveBookingBoard";
 import { PendingSubscribeOrders } from "@/components/billing/PendingSubscribeOrders";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
+import { liveMessages } from "@/lib/i18n/ns/live";
+import { rich } from "@/lib/i18n/rich";
+import { getI18n } from "@/lib/i18n/server";
 import { dualLiveSessionPrices } from "@/lib/whish/client";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-const JOIN_NOTICES: Record<string, string> = {
-  expired: "انتهت صلاحية رابط الدخول. اطلب رابطاً جديداً من الأستاذ عبر واتساب.",
-  pending: "الحجز بانتظار تأكيد الدفع عبر Whish. يصلك رابط الدخول بعد التأكيد.",
-  invalid: "رابط الدخول غير صالح. تأكّد من نسخه كاملاً أو اطلب رابطاً جديداً.",
-  error: "تعذّر فتح الصف الآن. حاول مجدداً بعد قليل.",
-};
+const JOIN_NOTICE_KEYS = {
+  expired: "joinExpired",
+  pending: "joinPending",
+  invalid: "joinInvalid",
+  error: "joinError",
+} as const;
+
+function isJoinKey(value: string): value is keyof typeof JOIN_NOTICE_KEYS {
+  return Object.prototype.hasOwnProperty.call(JOIN_NOTICE_KEYS, value);
+}
 
 export default async function LivePage({ searchParams }: { searchParams: Promise<{ join?: string }> }) {
   const { join } = await searchParams;
-  const joinNotice = join ? JOIN_NOTICES[join] ?? JOIN_NOTICES.invalid : null;
+  const { locale } = await getI18n();
+  const t = liveMessages[locale].page;
+  const joinNotice = join ? t[JOIN_NOTICE_KEYS[isJoinKey(join) ? join : "invalid"]] : null;
   const live = await getLiveSession();
   const staff = live.ok && isStaffRole(live.user.role);
   const dual = dualLiveSessionPrices();
   return (
     <main className="shell mm-mobile-stack">
-      <p className="eyebrow">حصص فردية مباشرة · منذر أحمد حداره</p>
-      <h1>حجز حصة مباشرة</h1>
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
       {joinNotice ? (
         <p className="error" role="alert">
           {joinNotice}
         </p>
       ) : null}
       <p className="muted">
-        مشترك في المنصة <bdi dir="ltr">${dual.member.amount}</bdi> · من خارج المنصة <bdi dir="ltr">${dual.external.amount}</bdi>.
-        الدفع عبر تحويل <bdi dir="ltr">Whish Money</bdi> باسم <strong>منذر أحمد حداره</strong> قبل تأكيد الحصة. للاشتراكات:{" "}
-        <Link href="/subscribe">صفحة الاشتراك</Link>.
+        {rich(t.lead, {
+          member: <bdi dir="ltr">${dual.member.amount}</bdi>,
+          external: <bdi dir="ltr">${dual.external.amount}</bdi>,
+          name: <strong>{locale === "ar" ? "منذر أحمد حداره" : "Munzer Ahmad Haddara"}</strong>,
+          link: <Link href="/subscribe">{t.subscribeLink}</Link>,
+        })}
       </p>
       {staff ? <PendingSubscribeOrders staff /> : null}
       <LiveBookingBoard staff={Boolean(staff)} />
       {staff ? (
         <p className="muted" style={{ marginTop: 16 }}>
-          للموظفين: الصف يستخدم <bdi dir="ltr">LiveKit Cloud</bdi>، وبدون مفاتيح تبقى الواجهة في وضع تجريبي.{" "}
-          <a href="/live/classroom/demo">الحصة التجريبية</a>
+          {t.staffNote} <a href="/live/classroom/demo">{t.demoRoom}</a>
         </p>
       ) : null}
     </main>

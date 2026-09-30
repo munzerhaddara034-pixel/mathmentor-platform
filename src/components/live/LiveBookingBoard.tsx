@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LiveBooking, LiveSlot, TeacherAvailability } from "@/lib/live/types";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { INTL_LOCALE, type Locale } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import { liveMessages } from "@/lib/i18n/ns/live";
+import { pickLang } from "@/lib/i18n/pick";
 
 type PricingTier = "member" | "external";
 
@@ -30,20 +35,17 @@ type PricesBundle = {
   bannerAr: string;
 };
 
-const WEEKDAYS = [
-  { n: 1, label: "Mon" },
-  { n: 2, label: "Tue" },
-  { n: 3, label: "Wed" },
-  { n: 4, label: "Thu" },
-  { n: 5, label: "Fri" },
-  { n: 6, label: "Sat" },
-  { n: 0, label: "Sun" },
-];
+const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0] as const;
+type Weekday = (typeof WEEKDAYS)[number];
 
-function formatWhen(iso: string) {
+function isWeekday(n: number): n is Weekday {
+  return (WEEKDAYS as readonly number[]).includes(n);
+}
+
+function formatWhen(iso: string, locale: Locale) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString("ar-LB-u-nu-latn", {
+  return date.toLocaleString(INTL_LOCALE[locale], {
     timeZone: "Asia/Beirut",
     weekday: "short",
     month: "short",
@@ -69,6 +71,9 @@ function envFallbackAmount(tier: PricingTier) {
 }
 
 export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
+  const { locale } = useI18n();
+  const t = liveMessages[locale].board;
+  const statusLabel = (status: LiveBooking["status"]) => t.status[status] ?? status;
   const [slots, setSlots] = useState<LiveSlot[]>([]);
   const [bookings, setBookings] = useState<LiveBooking[]>([]);
   const [credits, setCredits] = useState(0);
@@ -85,7 +90,7 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [startsAt, setStartsAt] = useState("");
-  const [note, setNote] = useState("1-on-1 with Munzer Ahmad Haddara");
+  const [note, setNote] = useState<string>(t.defaultNote);
   const [days, setDays] = useState<number[]>([1, 3]);
   const [startHour, setStartHour] = useState("16:00");
   const [endHour, setEndHour] = useState("19:00");
@@ -142,7 +147,7 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
         }
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : "Failed to load.");
+        setError(err instanceof Error ? err.message : t.loadFailed);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -163,7 +168,7 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
     setMessage("");
     if (needsGuestForm) {
       if (!guestName.trim() || !guestPhone.trim()) {
-        setError("Name and phone are required for outside-platform booking. · الاسم والهاتف مطلوبان.");
+        setError(t.guestRequired);
         return;
       }
     }
@@ -200,20 +205,20 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
         meetingLink?: string;
       };
       if (!response.ok) {
-        setError(`${payload.error ?? "Could not book."} ${payload.errorAr ?? ""}`);
+        setError(pickLang(locale, payload.error, payload.errorAr) || t.bookFailed);
         return;
       }
       if (payload.transfer) setTransfer(payload.transfer);
       if (payload.price) setPrice(payload.price);
       if (payload.pricingTier) setPricingTier(payload.pricingTier);
       setMessage(
-        `${payload.message ?? "OK."} ${payload.messageAr ?? ""}${
+        `${pickLang(locale, payload.message, payload.messageAr) || t.ok}${
           payload.classroomUrl ? ` · ${payload.classroomUrl}` : payload.meetingLink ? ` · ${payload.meetingLink}` : ""
         }`.trim(),
       );
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Booking failed.");
+      setError(err instanceof Error ? err.message : t.bookFailed);
     } finally {
       setBusy(false);
     }
@@ -232,13 +237,13 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
       });
       const payload = (await response.json()) as { error?: string; message?: string; messageAr?: string };
       if (!response.ok) {
-        setError(payload.error ?? "Could not update payment.");
+        setError(payload.error ?? t.payFailed);
         return;
       }
-      setMessage(`${payload.message ?? "Updated."} ${payload.messageAr ?? ""}`.trim());
+      setMessage(pickLang(locale, payload.message, payload.messageAr) || t.ok);
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Payment update failed.");
+      setError(err instanceof Error ? err.message : t.payFailed);
     } finally {
       setBusy(false);
     }
@@ -279,10 +284,10 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
       });
       const payload = (await response.json()) as { error?: string; slotCount?: number };
       if (!response.ok) {
-        setError(payload.error ?? "Could not save hours.");
+        setError(payload.error ?? t.saveHoursFailed);
         return;
       }
-      setMessage(`Weekly hours saved. ${payload.slotCount ?? 0} open slots (Asia/Beirut).`);
+      setMessage(fmt(t.hoursSaved, { n: payload.slotCount ?? 0 }));
       load();
     } finally {
       setBusy(false);
@@ -298,15 +303,15 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
   const checkoutPrice = price ?? prices?.[checkoutTier] ?? null;
   const priceLabel = checkoutPrice?.configured
     ? checkoutPrice.display
-    : "السعر يحدده الأستاذ · Price set by the teacher";
+    : t.priceByTeacher;
 
   const weekLabel = useMemo(() => {
-    if (!availability?.windows.length) return "Mon/Wed 16:00–19:00 Asia/Beirut (default)";
+    if (!availability?.windows.length) return t.defaultHours;
     const names = availability.windows
-      .map((item) => WEEKDAYS.find((d) => d.n === item.weekday)?.label || String(item.weekday))
+      .map((item) => (isWeekday(item.weekday) ? t.weekdays[item.weekday] : String(item.weekday)))
       .join("/");
     return `${names} ${availability.windows[0].start}–${availability.windows[0].end} ${availability.timezone}`;
-  }, [availability]);
+  }, [availability, t]);
 
   const pendingBookings = bookings.filter((booking) => booking.status === "pending_payment");
   const canBook = true; // Whish pay-per-session — members $15, guests $25; no credit gate
@@ -314,20 +319,17 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
   return (
     <div className="live-board">
       <div className="card" style={{ marginBottom: 16 }}>
-        <p className="eyebrow">Whish Money · منذر أحمد حداره</p>
-        <h2 style={{ marginTop: 4 }}>دفع الحصة / Session payment</h2>
+        <p className="eyebrow">{t.payEyebrow}</p>
+        <h2 style={{ marginTop: 4 }}>{t.payTitle}</h2>
         <p className="muted">
-          Live credits: {credits}. Hours: {weekLabel}. Instructor: <strong>Munzer Ahmad Haddara</strong>.
+          {fmt(t.summary, { credits, hours: weekLabel, name: locale === "ar" ? "منذر أحمد حداره" : "Munzer Ahmad Haddara" })}
         </p>
-        <p dir="rtl" style={{ fontSize: "1.05rem", marginTop: 8 }}>
-          <strong>مشترك المنصة ${memberAmount} · خارج المنصة ${externalAmount}</strong>
-        </p>
-        <p className="muted">
-          Platform member ${memberAmount} · Outside platform ${externalAmount}
+        <p style={{ fontSize: "1.05rem", marginTop: 8 }}>
+          <strong>{fmt(t.prices, { member: memberAmount, external: externalAmount })}</strong>
         </p>
         <p>
-          <strong>Your checkout / سعرك:</strong> {priceLabel}
-          {checkoutTier === "member" ? " · member" : " · external"}
+          <strong>{t.yourPrice}</strong> <bdi dir="ltr">{priceLabel}</bdi>
+          {checkoutTier === "member" ? ` · ${t.tierMember}` : ` · ${t.tierExternal}`}
         </p>
         {authenticated && hasPlatformPlan && !staff ? (
           <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
@@ -336,23 +338,23 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
               checked={forceExternal}
               onChange={(event) => setForceExternal(event.target.checked)}
             />
-            Book as outside platform (${externalAmount}) / احجز كخارج المنصة
+            {fmt(t.bookAsExternal, { amount: externalAmount })}
           </label>
         ) : null}
         {needsGuestForm ? (
           <div className="grid two" style={{ marginTop: 12 }}>
             <label>
-              الاسم / Name *
+              {t.guestName}
               <input
                 value={guestName}
                 onChange={(event) => setGuestName(event.target.value)}
-                placeholder="اسم الطالب"
+                placeholder={t.guestNamePh}
                 autoComplete="name"
                 required
               />
             </label>
             <label>
-              الهاتف / Phone * (WhatsApp)
+              {t.guestPhone}
               <input
                 value={guestPhone}
                 onChange={(event) => setGuestPhone(event.target.value)}
@@ -362,7 +364,7 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
               />
             </label>
             <label style={{ gridColumn: "1 / -1" }}>
-              البريد / Email (optional)
+              {t.guestEmail}
               <input
                 type="email"
                 value={guestEmail}
@@ -375,57 +377,48 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
         ) : null}
         {transfer ? (
           <div style={{ marginTop: 10 }}>
-            <p dir="rtl">
-              <strong>حوّل عبر Whish إلى:</strong> {transfer.phone} — <strong>{transfer.nameAr}</strong>
-            </p>
             <p>
-              <strong>Transfer via Whish to:</strong> {transfer.phone} — {transfer.nameEn}
+              <strong>{t.transferTo}</strong> <bdi dir="ltr">{transfer.phone}</bdi> —{" "}
+              <strong>{locale === "ar" ? transfer.nameAr : transfer.nameEn}</strong>
             </p>
-            <ul className="muted" dir="rtl" style={{ paddingInlineStart: 18 }}>
-              {transfer.linesAr.map((line) => (
-                <li key={`ar-${line}`}>{line}</li>
-              ))}
-            </ul>
             <ul className="muted" style={{ paddingInlineStart: 18 }}>
-              {transfer.linesEn.map((line) => (
-                <li key={`en-${line}`}>{line}</li>
+              {(locale === "ar" ? transfer.linesAr : transfer.linesEn).map((line) => (
+                <li key={line}>{line}</li>
               ))}
             </ul>
           </div>
         ) : null}
       </div>
 
-      {loading ? <SkeletonBlock lines={4} label="Loading live calendar" /> : null}
-      {busy ? <SkeletonBlock lines={2} label="Updating booking" /> : null}
+      {loading ? <SkeletonBlock lines={4} label={t.loadingCalendar} /> : null}
+      {busy ? <SkeletonBlock lines={2} label={t.updating} /> : null}
       {error ? <p className="error">{error}</p> : null}
       {message ? <p className="success">{message}</p> : null}
 
       {pendingBookings.length > 0 ? (
         <div className="card" style={{ marginBottom: 16 }}>
-          <h3>بانتظار تحويل Whish / Awaiting Whish</h3>
+          <h3>{t.awaiting}</h3>
           {pendingBookings.map((booking) => (
             <div key={booking.id} style={{ marginTop: 12, display: "grid", gap: 8 }}>
               <p>
-                <strong>{formatWhen(booking.startsAt)}</strong> · {booking.studentName}
+                <strong>{formatWhen(booking.startsAt, locale)}</strong> · {booking.studentName}
                 {booking.paymentAmount != null
-                  ? ` · $${booking.paymentAmount} ${booking.pricingTier ?? ""}`
+                  ? ` · $${booking.paymentAmount} ${booking.pricingTier ? (booking.pricingTier === "member" ? t.tierMember : t.tierExternal) : ""}`
                   : ""}
-                {booking.studentMarkedPaidAt ? " · student marked transferred" : ""}
+                {booking.studentMarkedPaidAt ? ` · ${t.studentMarked}` : ""}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {authenticated && !staff ? (
                   <button className="btn dark" type="button" disabled={busy} onClick={() => void confirmPayment(booking.id, "student_mark")}>
-                    لقد حوّلت / I&apos;ve transferred
+                    {t.iTransferred}
                   </button>
                 ) : null}
                 {staff || authenticated ? (
                   <button className="btn dark" type="button" disabled={busy} onClick={() => void confirmPayment(booking.id, "teacher_confirm")}>
-                    {staff ? "تأكيد الدفع / Confirm payment" : "تأكيد بعد التحويل / Confirm after transfer"}
+                    {staff ? t.confirmPayment : t.confirmAfter}
                   </button>
                 ) : (
-                  <p className="muted" dir="rtl">
-                    بعد التحويل سيؤكّد الأستاذ الدفع عبر واتساب. احفظ رقم الحجز: {booking.id}
-                  </p>
+                  <p className="muted">{fmt(t.afterTransfer, { id: booking.id })}</p>
                 )}
               </div>
             </div>
@@ -435,94 +428,95 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
 
       {staff ? (
         <div className="card" style={{ marginBottom: 16 }}>
-          <h3>Teacher availability (Asia/Beirut)</h3>
+          <h3>{t.availability}</h3>
           <div className="weekday-row">
             {WEEKDAYS.map((day) => (
-              <label key={day.n} className={days.includes(day.n) ? "chip" : "chip ghost-chip"}>
-                <input type="checkbox" checked={days.includes(day.n)} onChange={() => toggleDay(day.n)} />
-                {day.label}
+              <label key={day} className={days.includes(day) ? "chip" : "chip ghost-chip"}>
+                <input type="checkbox" checked={days.includes(day)} onChange={() => toggleDay(day)} />
+                {t.weekdays[day]}
               </label>
             ))}
           </div>
           <div className="grid two">
             <label>
-              Start
+              {t.start}
               <input type="time" value={startHour} onChange={(event) => setStartHour(event.target.value)} />
             </label>
             <label>
-              End
+              {t.end}
               <input type="time" value={endHour} onChange={(event) => setEndHour(event.target.value)} />
             </label>
           </div>
           <label>
-            Slot length (minutes)
+            {t.slotLength}
             <input type="number" min={30} max={90} value={duration} onChange={(event) => setDuration(Number(event.target.value) || 45)} />
           </label>
           <button className="btn dark" type="button" disabled={busy} onClick={() => void saveAvailability()}>
-            Save weekly hours &amp; generate slots
+            {t.saveHours}
           </button>
-          <h3 style={{ marginTop: 20 }}>One-off slot</h3>
+          <h3 style={{ marginTop: 20 }}>{t.oneOff}</h3>
           <label>
-            Starts at
+            {t.startsAt}
             <input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} />
           </label>
           <label>
-            Note
+            {t.note}
             <input value={note} onChange={(event) => setNote(event.target.value)} />
           </label>
           <button className="btn" type="button" disabled={busy} onClick={() => void addSlot()}>
-            Add slot
+            {t.addSlot}
           </button>
         </div>
       ) : null}
 
       <div className="grid two">
         <section className="card">
-          <h2>المواعيد المتاحة</h2>
-          {slots.length === 0 ? <p className="muted">لا مواعيد متاحة حالياً. عُد لاحقاً أو راسلنا عبر المساعد.</p> : null}
+          <h2>{t.available}</h2>
+          {slots.length === 0 ? <p className="muted">{t.noSlots}</p> : null}
           <ul className="slot-list">
             {slots.slice(0, staff ? 40 : 12).map((slot) => (
               <li key={slot.id}>
                 <div>
-                  <strong>{formatWhen(slot.startsAt)}</strong>
+                  <strong>{formatWhen(slot.startsAt, locale)}</strong>
                   <p className="muted">
-                    <bdi dir="ltr">{slot.durationMinutes}</bdi> دقيقة · {slot.note || "منذر أحمد حداره"} · بتوقيت بيروت ·{" "}
-                    <bdi dir="ltr">
-                      {checkoutPrice?.configured ? checkoutPrice.display : `$${checkoutTier === "member" ? memberAmount : externalAmount}`}
-                    </bdi>
+                    {fmt(t.slotMeta, {
+                      min: slot.durationMinutes,
+                      note: slot.note || t.defaultNote,
+                      price: checkoutPrice?.configured ? checkoutPrice.display : `$${checkoutTier === "member" ? memberAmount : externalAmount}`,
+                    })}
                   </p>
                 </div>
                 <button className="btn dark" type="button" disabled={!canBook || busy} onClick={() => void book(slot.id)}>
-                  احجز · <bdi dir="ltr">${checkoutTier === "member" ? memberAmount : externalAmount}</bdi>
+                  {fmt(t.book, { price: `$${checkoutTier === "member" ? memberAmount : externalAmount}` })}
                 </button>
               </li>
             ))}
           </ul>
         </section>
         <section className="card">
-          <h2>{staff ? "Calendar · all sessions" : authenticated ? "Your calendar" : "Guest bookings"}</h2>
+          <h2>{staff ? t.calendarAll : authenticated ? t.calendarMine : t.guestBookings}</h2>
           {bookings.length === 0 ? (
-            <p className="muted">{authenticated ? "None yet." : "Sign in to see past bookings, or book below as a guest."}</p>
+            <p className="muted">{authenticated ? t.none : t.signInToSee}</p>
           ) : null}
           <ul className="slot-list">
             {bookings.map((booking) => (
               <li key={booking.id}>
                 <div>
-                  <strong>{formatWhen(booking.startsAt)}</strong>
+                  <strong>{formatWhen(booking.startsAt, locale)}</strong>
                   <p className="muted">
-                    {booking.status}
-                    {booking.paymentStatus ? ` · pay:${booking.paymentStatus}` : ""}
+                    {statusLabel(booking.status)}
+                    {booking.paymentStatus ? ` · ${t.paymentLabel}: ${t.paymentStatus[booking.paymentStatus] ?? booking.paymentStatus}` : ""}
                     {booking.paymentAmount != null ? ` · $${booking.paymentAmount}` : ""} · {booking.studentName}
                   </p>
                 </div>
                 {booking.status === "confirmed" ? (
                   <a className="btn dark" href={classroomHref(booking)}>
-                    انضم للحصة
+                    {t.join}
                   </a>
                 ) : booking.status === "pending_payment" ? (
-                  <span className="badge">pending Whish</span>
+                  <span className="badge">{t.pendingWhish}</span>
                 ) : (
-                  <span className="badge">{booking.status}</span>
+                  <span className="badge">{statusLabel(booking.status)}</span>
                 )}
               </li>
             ))}
