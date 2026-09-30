@@ -17,6 +17,11 @@ import { isStaffRole } from "@/lib/auth/paths";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
+import type { Locale } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import { examsMessages, type ExamsMessages } from "@/lib/i18n/ns/exams";
+import { rich } from "@/lib/i18n/rich";
+import { getI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -33,34 +38,39 @@ function resolveCurriculumId(
   return parseCurriculumId(cookieRaw);
 }
 
-function PlannedCards({ cards, phaseNote }: { cards: PlannedExamCard[]; phaseNote: string }) {
+function PlannedCards({
+  cards,
+  phaseNote,
+  locale,
+  t,
+}: {
+  cards: PlannedExamCard[];
+  phaseNote: string;
+  locale: Locale;
+  t: ExamsMessages["hub"];
+}) {
   if (!cards.length) return null;
+  const isAr = locale === "ar";
   return (
     <section style={{ marginBottom: 28 }}>
-      <h2>Sample / planned · عيّنات ومخطّط</h2>
+      <h2>{t.planned}</h2>
       <p className="muted">{phaseNote}</p>
       <div className="grid two">
         {cards.map((card) => (
           <article className="card mm-planned-exam-card" key={card.id}>
             <span className={`badge ${card.phase === "planned" ? "pending" : "approved"}`}>
-              {card.phase === "planned" ? "Planned · مخطّط" : "Sample · عيّنة"}
+              {card.phase === "planned" ? t.plannedBadge : t.sampleBadge}
             </span>
-            <h3>{card.titleEn}</h3>
-            <p className="muted" dir="rtl" lang="ar">
-              {card.titleAr}
-            </p>
-            <p className="muted">{card.blurbEn}</p>
-            <p className="muted" dir="rtl" lang="ar">
-              {card.blurbAr}
-            </p>
+            <h3>{isAr ? card.titleAr || card.titleEn : card.titleEn}</h3>
+            <p className="muted">{isAr ? card.blurbAr || card.blurbEn : card.blurbEn}</p>
             {card.sampleLatex ? (
               <p className="muted">
-                <code>{card.sampleLatex}</code>
+                <code dir="ltr">{card.sampleLatex}</code>
               </p>
             ) : null}
             <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
               <Link className="btn" href="/math-solver">
-                Open pedagogical tutor
+                {t.openTutor}
               </Link>
               <span className="badge">{card.trackLabelEn}</span>
             </div>
@@ -96,6 +106,14 @@ export default async function ExamsHubPage({
   const live = await getLiveSession();
   const staff = live.ok && isStaffRole(live.user.role);
 
+  const { locale } = await getI18n();
+  const t = examsMessages[locale].hub;
+  const isAr = locale === "ar";
+  const trackLabel = (track: ExamTrack) => (isAr ? TRACK_LABELS[track].ar : TRACK_LABELS[track].en);
+  const paperTitle = (paper: { title: string; titleAr?: string }) =>
+    isAr ? paper.titleAr || paper.title : paper.title;
+  const curriculumLabel = isAr ? curriculum.labelAr : curriculum.labelEn;
+
   const chipTracks: ExamTrack[] =
     curriculumId === "sat"
       ? ["sat"]
@@ -105,24 +123,21 @@ export default async function ExamsHubPage({
 
   return (
     <main className="shell mm-mobile-stack">
-      <p className="eyebrow">Official &amp; curriculum exam simulations</p>
-      <h1>Exam hub · محاكاة الامتحان</h1>
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
       <p className="muted">
-        Curriculum: <strong>{curriculum.labelEn}</strong> / <span dir="rtl">{curriculum.labelAr}</span> · Instructor:
-        Prof. Munzer Haddara / الأستاذ منذر أحمد حداره. Live timer, formula drawer,{" "}
-        <strong>official Barème / سلّم</strong>, AI grading, PDF report, and Generate similar (على نسقه). Use the header{" "}
-        <strong>Curriculum</strong> switcher (cookie <code>mm_curriculum</code>) to filter this hub.
+        {rich(t.lead, {
+          curriculum: <strong>{curriculumLabel}</strong>,
+          bareme: <strong>{t.bareme}</strong>,
+          switcher: <strong>{t.switcher}</strong>,
+        })}
       </p>
 
       <p className="muted mm-exam-paywall-hook" role="note">
-        {EXAM_PAYWALL_HOOK.hintEn}{" "}
-        <Link href={EXAM_PAYWALL_HOOK.subscribeHref}>Subscribe</Link>
+        {isAr ? EXAM_PAYWALL_HOOK.hintAr : EXAM_PAYWALL_HOOK.hintEn}{" "}
+        <Link href={EXAM_PAYWALL_HOOK.subscribeHref}>{t.subscribe}</Link>
         {" · "}
-        <Link href={EXAM_PAYWALL_HOOK.redeemHref}>Redeem</Link>
-        <span dir="rtl" lang="ar">
-          {" "}
-          — {EXAM_PAYWALL_HOOK.hintAr}
-        </span>
+        <Link href={EXAM_PAYWALL_HOOK.redeemHref}>{t.redeem}</Link>
       </p>
 
       <Suspense fallback={null}>
@@ -135,7 +150,7 @@ export default async function ExamsHubPage({
             className={`btn${!trackFilter ? " dark" : ""}`}
             href={curriculumId === "sat" ? "/exams?track=sat" : "/exams"}
           >
-            {curriculumId === "sat" ? "SAT" : "All Lebanese"}
+            {curriculumId === "sat" ? "SAT" : t.allLebanese}
           </Link>
           {chipTracks.map((track) => (
             <Link
@@ -143,7 +158,7 @@ export default async function ExamsHubPage({
               className={`btn${trackFilter === track ? " dark" : ""}`}
               href={`/exams?track=${track}`}
             >
-              {TRACK_LABELS[track].en}
+              {trackLabel(track)}
             </Link>
           ))}
         </div>
@@ -158,28 +173,22 @@ export default async function ExamsHubPage({
 
       {satPapers.length > 0 ? (
         <section style={{ marginBottom: 28 }}>
-          <h2>تدريب المنصة · Platform SAT practice</h2>
-          <p className="muted">
-            Original MathMentor demo papers (not College Board). Digital SAT–style Algebra, Advanced Math,
-            Problem-Solving/Data, Geometry/Trig. MCQ + SPR. Plan <code>sat</code> ($45/mo) unlocks via AI access.
-          </p>
+          <h2>{t.platformSat}</h2>
+          <p className="muted">{rich(t.platformSatLead, { plan: <code dir="ltr">sat</code> })}</p>
           <div className="grid two">
             {satPapers.map((paper) => (
               <article className="card" key={paper.id}>
-                <span className="badge">تدريب المنصة · Platform</span>
-                <h3>{paper.title}</h3>
-                <p className="muted" dir="rtl">
-                  {paper.titleAr}
-                </p>
+                <span className="badge">{t.platform}</span>
+                <h3>{paperTitle(paper)}</h3>
                 <p className="muted">
-                  {paper.durationMinutes} min · {paper.totalMarks} pts · {paper.sessionLabel}
+                  {fmt(t.paperMeta, { min: paper.durationMinutes, pts: paper.totalMarks, session: paper.sessionLabel })}
                 </p>
                 <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
                   <Link className="btn dark" href={`/exams/simulator?paper=${paper.id}`}>
-                    Start SAT simulation
+                    {t.startSat}
                   </Link>
                   <Link className="btn" href={`/exams/simulator?paper=${paper.id}#gensim`}>
-                    Generate similar
+                    {t.generateSimilar}
                   </Link>
                 </div>
               </article>
@@ -192,24 +201,24 @@ export default async function ExamsHubPage({
         <section style={{ marginBottom: 28 }}>
           <h2>
             {trackFilter && trackFilter !== "sat"
-              ? TRACK_LABELS[trackFilter].en
-              : "Lebanese official · رسمي لبناني"}
+              ? trackLabel(trackFilter)
+              : t.lebanese}
           </h2>
-          <p className="muted">
-            Demo Brevet + Terminale papers with visible official Barème beside each question. Aligned to CRDP-style
-            pedagogy (not a verbatim ministry scan).
-          </p>
+          <p className="muted">{t.lebaneseLead}</p>
           <div className="grid two">
             {otherPapers.map((paper) => (
               <article className="card" key={paper.id}>
-                <span className="badge">{TRACK_LABELS[paper.track].en}</span>
-                <h3>{paper.title}</h3>
-                <p dir="rtl">{paper.titleAr}</p>
+                <span className="badge">{trackLabel(paper.track)}</span>
+                <h3>{paperTitle(paper)}</h3>
                 <p className="muted">
-                  {paper.durationMinutes} min · {paper.totalMarks} pts · Barème on each sub · {paper.sessionLabel}
+                  {fmt(t.paperMetaBareme, {
+                    min: paper.durationMinutes,
+                    pts: paper.totalMarks,
+                    session: paper.sessionLabel,
+                  })}
                 </p>
                 <Link className="btn dark" href={`/exams/simulator?paper=${paper.id}`}>
-                  Start simulation · باريم ظاهر
+                  {t.start}
                 </Link>
               </article>
             ))}
@@ -219,11 +228,13 @@ export default async function ExamsHubPage({
 
       <PlannedCards
         cards={hub.planned}
-        phaseNote={`${curriculum.labelEn} content phase: ${curriculum.contentPhase}. Original sample prompts only — we do not host copyrighted past papers.`}
+        phaseNote={fmt(t.phaseNote, { curriculum: curriculumLabel, phase: curriculum.contentPhase })}
+        locale={locale}
+        t={t}
       />
 
       {hub.papers.length === 0 && hub.planned.length === 0 ? (
-        <p className="muted">No papers for this filter.</p>
+        <p className="muted">{t.none}</p>
       ) : null}
     </main>
   );

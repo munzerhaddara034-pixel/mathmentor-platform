@@ -11,6 +11,10 @@ import {
 } from "@/lib/exams/officialSatBlueprint";
 import type { GeneratedSimilarQuestion, GeneratedSimilarSet } from "@/lib/exams/types";
 import { useMemo, useState } from "react";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { examsMessages } from "@/lib/i18n/ns/exams";
+import { rich } from "@/lib/i18n/rich";
 
 const SKILL_OPTIONS = [
   "",
@@ -25,6 +29,8 @@ type Props = {
 };
 
 export function AiEmployeeOfficialCommand({ compact }: Props) {
+  const { locale } = useI18n();
+  const t = examsMessages[locale].aiCommand;
   const [officialTest, setOfficialTest] = useState<OfficialSatTestNumber>(5);
   const [count, setCount] = useState(3);
   const [skill, setSkill] = useState("");
@@ -55,8 +61,8 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError("Could not copy to clipboard.");
-      setErrorAr("تعذّر النسخ إلى الحافظة.");
+      setError(t.copyFailed);
+      setErrorAr(examsMessages.ar.aiCommand.copyFailed);
     }
   };
 
@@ -87,7 +93,7 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
         tag?: string;
       };
       if (!response.ok || !payload.set) {
-        setError(payload.error || "Could not generate from official style.");
+        setError(payload.error || t.failed);
         setErrorAr(payload.errorAr);
         return;
       }
@@ -96,8 +102,8 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError("Network error while generating.");
-      setErrorAr("خطأ في الشبكة أثناء التوليد.");
+      setError(t.network);
+      setErrorAr(examsMessages.ar.aiCommand.network);
     } finally {
       setBusy(false);
     }
@@ -105,21 +111,12 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
 
   return (
     <section className="card" style={{ marginBottom: compact ? 16 : 24 }}>
-      <h2 style={{ marginTop: 0 }} dir="rtl">
-        أمر لموظف الذكاء الاصطناعي
-      </h2>
-      <p className="muted" dir="rtl">
-        أمر جاهز لإنشاء أسئلة أصلية على نسق النموذج الرسمي College Board (بدون نسخ الأسئلة). انسخ الأمر أو شغّله
-        مباشرة.
-      </p>
-      <p className="muted" dir="ltr">
-        Ready prompt for the AI employee — original items tagged{" "}
-        <code>official-sat-style-{officialTest}</code>. Links only to CB PDFs; no CB text stored.
-      </p>
+      <h2 style={{ marginTop: 0 }}>{t.title}</h2>
+      <p className="muted">{rich(t.lead, { tag: <code dir="ltr">official-sat-style-{officialTest}</code> })}</p>
 
       <div className="row" style={{ flexWrap: "wrap", gap: 12, marginTop: 12 }}>
         <label>
-          Official test · النموذج
+          {t.test}
           <select
             value={officialTest}
             onChange={(e) => setOfficialTest(Number(e.target.value) as OfficialSatTestNumber)}
@@ -133,7 +130,7 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
           </select>
         </label>
         <label>
-          Count · العدد
+          {t.count}
           <input
             type="number"
             min={1}
@@ -144,25 +141,25 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
           />
         </label>
         <label>
-          Module
+          {t.module}
           <select
             value={module}
             onChange={(e) => setModule(e.target.value as "" | "1" | "2")}
             style={{ display: "block", marginTop: 4 }}
           >
-            <option value="">Any</option>
+            <option value="">{t.any}</option>
             <option value="1">1</option>
             <option value="2">2</option>
           </select>
         </label>
         <label>
-          Skill · مهارة
+          {t.skill}
           <select
             value={skill}
             onChange={(e) => setSkill(e.target.value)}
             style={{ display: "block", marginTop: 4, minWidth: 160 }}
           >
-            <option value="">Mixed / متنوعة</option>
+            <option value="">{t.mixed}</option>
             {SKILL_OPTIONS.filter(Boolean).map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -173,12 +170,12 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
       </div>
 
       <label style={{ display: "block", marginTop: 12 }}>
-        Teacher skill note (optional) · ملاحظة المعلّم
+        {t.note}
         <input
           type="text"
           value={skillNote}
           onChange={(e) => setSkillNote(e.target.value)}
-          placeholder="e.g. systems with word context / جمل بمعادلات"
+          placeholder={t.notePlaceholder}
           style={{ display: "block", width: "100%", marginTop: 4 }}
         />
       </label>
@@ -201,21 +198,21 @@ export function AiEmployeeOfficialCommand({ compact }: Props) {
 
       <div className="row" style={{ flexWrap: "wrap", gap: 8, marginTop: 10 }}>
         <button className="btn" type="button" onClick={() => void copyPrompt()}>
-          {copied ? "Copied · تم النسخ" : "Copy prompt · نسخ الأمر"}
+          {copied ? t.copied : t.copy}
         </button>
         <button className="btn dark" type="button" disabled={busy} onClick={() => void run()}>
-          {busy ? "Generating…" : "Run AI employee · نفّذ التوليد"}
+          {busy ? examsMessages[locale].similar.generating : t.run}
         </button>
         {set?.tag ? <span className="badge">{set.tag}</span> : null}
       </div>
 
       <ApiErrorBanner error={error} errorAr={errorAr} />
-      {busy ? <SkeletonBlock lines={3} label="AI employee generating official-style items…" /> : null}
+      {busy ? <SkeletonBlock lines={3} label={t.loading} /> : null}
 
       {set ? (
         <div style={{ marginTop: 12 }}>
           <p className="muted">
-            Set {set.id} · {set.questions.length} original items · {set.source} · saved for review
+            {fmt(t.setLine, { id: set.id, n: set.questions.length, source: set.source })}
           </p>
           {set.questions.map((q, index) => (
             <OfficialGenCard
@@ -243,6 +240,8 @@ function OfficialGenCard({
   revealed: boolean;
   onReveal: () => void;
 }) {
+  const { locale } = useI18n();
+  const s = examsMessages[locale].similar;
   return (
     <article className="card" style={{ marginTop: 10 }}>
       <span className="badge">
@@ -263,12 +262,12 @@ function OfficialGenCard({
         </ul>
       ) : null}
       <button className="btn" type="button" onClick={onReveal}>
-        {revealed ? "Answer shown" : "Show answer / solution"}
+        {revealed ? s.shown : s.show}
       </button>
       {revealed ? (
         <div style={{ marginTop: 8 }}>
           <p>
-            <strong>Answer:</strong> {question.correctAnswer}
+            <strong>{s.answer}</strong> {question.correctAnswer}
           </p>
           <p>
             <MixedMathText text={question.solution} />

@@ -2,6 +2,9 @@
 
 import { baremeStepsForSub, questionMarksTotal, sumSteps } from "@/lib/exams/bareme";
 import type { ExamQuestion, ExamSubQuestion, SubGrade } from "@/lib/exams/types";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { examsMessages } from "@/lib/i18n/ns/exams";
 
 type Props = {
   /** Single sub — compact mark ladder beside the prompt. */
@@ -21,17 +24,17 @@ function StepList({
   sub: ExamSubQuestion;
   awarded?: number;
 }) {
+  const { locale } = useI18n();
+  const t = examsMessages[locale].bareme;
   const steps = baremeStepsForSub(sub);
   const stepTotal = sumSteps(steps);
   return (
-    <div className="mm-bareme-block" aria-label={`Barème ${sub.label}`}>
+    <div className="mm-bareme-block" aria-label={fmt(t.label, { label: sub.label })}>
       <div className="mm-bareme-head">
-        <span className="badge mm-bareme-badge">
-          سلّم · Barème · {sub.label}
-        </span>
+        <span className="badge mm-bareme-badge">{fmt(t.badge, { label: sub.label })}</span>
         <strong className="mm-bareme-total">
           {awarded != null ? `${awarded} / ` : ""}
-          {sub.marks} pts
+          {fmt(t.pts, { n: sub.marks })}
         </strong>
       </div>
       <ul className="mm-bareme-steps">
@@ -39,16 +42,17 @@ function StepList({
           <li key={step.id}>
             <span className="mm-bareme-step-marks">{step.marks}</span>
             <span>
-              <span className="mm-bareme-step-en">{step.labelEn}</span>
-              <span className="mm-bareme-step-ar" dir="rtl" lang="ar">
-                {step.labelAr}
-              </span>
+              {locale === "ar" ? (
+                <span className="mm-bareme-step-ar">{step.labelAr || step.labelEn}</span>
+              ) : (
+                <span className="mm-bareme-step-en">{step.labelEn}</span>
+              )}
             </span>
           </li>
         ))}
       </ul>
       {Math.abs(stepTotal - sub.marks) > 1e-9 ? (
-        <p className="muted mm-bareme-warn">Step sum {stepTotal} ≠ sub max {sub.marks}</p>
+        <p className="muted mm-bareme-warn">{fmt(t.warn, { sum: stepTotal, max: sub.marks })}</p>
       ) : null}
     </div>
   );
@@ -58,6 +62,8 @@ function StepList({
  * Official mark distribution beside a question / sub so students can sum totals.
  */
 export function BaremeAside({ sub, question, gradesBySub, compact = false }: Props) {
+  const { locale } = useI18n();
+  const t = examsMessages[locale].bareme;
   if (sub) {
     const grade = gradesBySub?.[sub.id];
     return (
@@ -78,10 +84,10 @@ export function BaremeAside({ sub, question, gradesBySub, compact = false }: Pro
   return (
     <aside className={`mm-bareme-aside mm-bareme-question${compact ? " compact" : ""}`}>
       <div className="mm-bareme-head">
-        <span className="badge mm-bareme-badge">سلّم السؤال · Question barème</span>
+        <span className="badge mm-bareme-badge">{t.question}</span>
         <strong className="mm-bareme-total">
           {hasGrades ? `${awardedSum} / ` : ""}
-          {qTotal} pts
+          {fmt(t.pts, { n: qTotal })}
         </strong>
       </div>
       {question.subs.map((item) => (

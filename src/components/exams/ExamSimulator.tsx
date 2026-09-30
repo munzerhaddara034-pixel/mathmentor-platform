@@ -10,6 +10,10 @@ import { SkeletonBlock } from "@/components/ui/Skeleton";
 import { paperBaremeSummary } from "@/lib/exams/bareme";
 import type { GradeResult, OfficialPaper, SubGrade } from "@/lib/exams/types";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { examsMessages } from "@/lib/i18n/ns/exams";
+import { rich } from "@/lib/i18n/rich";
 
 export function ExamSimulator({
   paper,
@@ -18,6 +22,10 @@ export function ExamSimulator({
   paper: OfficialPaper;
   student: { name: string; phone: string };
 }) {
+  const { locale } = useI18n();
+  const t = examsMessages[locale].sim;
+  const isAr = locale === "ar";
+  const [submitError, setSubmitError] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [secondsLeft, setSecondsLeft] = useState(paper.durationMinutes * 60);
   const [busy, setBusy] = useState(false);
@@ -65,6 +73,7 @@ export function ExamSimulator({
     if (submitted.current) return;
     submitted.current = true;
     setBusy(true);
+    setSubmitError(false);
     try {
       const response = await fetch("/api/exams/simulator", {
         method: "POST",
@@ -78,9 +87,13 @@ export function ExamSimulator({
       });
       const payload = (await response.json()) as typeof result & { error?: string };
       if (payload?.attempt) setResult({ attempt: payload.attempt, reportUrl: payload.reportUrl });
-      else submitted.current = false;
+      else {
+        submitted.current = false;
+        setSubmitError(true);
+      }
     } catch {
       submitted.current = false;
+      setSubmitError(true);
     } finally {
       setBusy(false);
     }
@@ -90,9 +103,9 @@ export function ExamSimulator({
     return (
       <section className="exam-sim relative-watermark">
         <PageWatermark name={student.name} phone={student.phone} />
-        <p className="eyebrow">AI barème · جاري التصحيح</p>
-        <h2>Grading against the official mark distribution…</h2>
-        <SkeletonBlock lines={6} label="Grading exam…" />
+        <p className="eyebrow">{t.grading}</p>
+        <h2>{t.gradingTitle}</h2>
+        <SkeletonBlock lines={6} label={t.gradingLabel} />
       </section>
     );
   }
@@ -103,19 +116,15 @@ export function ExamSimulator({
       <section className="exam-sim relative-watermark">
         <PageWatermark name={student.name} phone={student.phone} />
         <div className={`result-hero ${grading.percent >= 50 ? "pass" : "fail"}`}>
-          <p className="eyebrow">Barème · {grading.source} grader · سلّم التصحيح</p>
+          <p className="eyebrow">{fmt(t.resultEyebrow, { source: grading.source })}</p>
           <h2>
             {grading.totalAwarded} / {grading.totalMax}
           </h2>
           <p>
-            {grading.percent}% · {grading.summary}
-          </p>
-          <p className="muted" dir="rtl">
-            {grading.summaryAr}
+            {grading.percent}% · {isAr ? grading.summaryAr || grading.summary : grading.summary}
           </p>
           <p className="muted">
-            Sum of sub-max = {baremeSummary.totalMarks} · {baremeSummary.subCount} graded items · Prof. Munzer
-            Haddara / الأستاذ منذر حداره
+            {fmt(t.sumLine, { total: baremeSummary.totalMarks, count: baremeSummary.subCount })}
           </p>
         </div>
         {paper.parts.map((part) =>
@@ -141,11 +150,8 @@ export function ExamSimulator({
                     >
                       {sub.label} · {grade?.awarded ?? 0}/{sub.marks}
                     </span>
-                    <p>{grade?.comment}</p>
-                    <p className="muted" dir="rtl">
-                      {grade?.commentAr}
-                    </p>
-                    <p className="muted">Your answer: {answers[sub.id] || "—"}</p>
+                    <p>{isAr ? grade?.commentAr || grade?.comment : grade?.comment}</p>
+                    <p className="muted">{fmt(t.yourAnswer, { v: answers[sub.id] || "—" })}</p>
                   </div>
                 );
               })}
@@ -154,17 +160,17 @@ export function ExamSimulator({
         )}
         <div className="row" style={{ marginTop: 16, flexWrap: "wrap", gap: 8 }}>
           <a className="btn dark" href={result.reportUrl}>
-            Download PDF report
+            {t.pdf}
           </a>
           <a className="btn" href={`${result.reportUrl}?format=html`} target="_blank" rel="noreferrer">
-            Open HTML report
+            {t.html}
           </a>
         </div>
         {isSat ? (
           <div className="card" style={{ marginTop: 16 }}>
-            <h3>Practice more · على نسقه</h3>
-            <p className="muted">Generate new SAT-style items in the same patterns as this paper.</p>
-            <GenerateSimilarPanel paperId={paper.id} label="Generate similar set (على نسقه)" />
+            <h3>{t.practiceMore}</h3>
+            <p className="muted">{t.practiceMoreLead}</p>
+            <GenerateSimilarPanel paperId={paper.id} label={t.similarSet} />
           </div>
         ) : null}
       </section>
@@ -172,16 +178,13 @@ export function ExamSimulator({
   }
 
   return (
-    <section className="exam-sim relative-watermark" dir="ltr">
+    <section className="exam-sim relative-watermark">
       <PageWatermark name={student.name} phone={student.phone} />
       <div className="exam-toolbar">
         <div>
           <p className="eyebrow">{paper.sessionLabel}</p>
-          <h2>{paper.title}</h2>
-          <p dir="rtl">{paper.titleAr}</p>
-          <p className="muted">
-            Official barème visible · {paper.totalMarks} pts total · Prof. Munzer Haddara
-          </p>
+          <h2>{isAr ? paper.titleAr || paper.title : paper.title}</h2>
+          <p className="muted">{fmt(t.visible, { pts: paper.totalMarks })}</p>
         </div>
         <div className="exam-clock" aria-live="polite">
           {clock}
@@ -191,16 +194,14 @@ export function ExamSimulator({
       {isSat ? (
         <div className="card" style={{ marginBottom: 12 }}>
           <p className="muted" style={{ margin: 0 }}>
-            SAT Math demo · MCQ (A–D) and student-produced response (SPR). Use{" "}
-            <strong>Generate similar (على نسقه)</strong> under any question for new items in the same skill.
+            {rich(t.satIntro, { similar: <strong>{examsMessages[locale].similar.default}</strong> })}
           </p>
-          <GenerateSimilarPanel paperId={paper.id} label="Generate similar set for whole paper" />
+          <GenerateSimilarPanel paperId={paper.id} label={t.similarWhole} />
         </div>
       ) : (
         <div className="card mm-bareme-intro" style={{ marginBottom: 12 }}>
           <p className="muted" style={{ margin: 0 }}>
-            Each sub-question shows the <strong>official Barème / سلّم التصحيح</strong> (points per step). Add the
-            step marks to check your total before you submit.
+            {rich(t.baremeIntro, { bareme: <strong>{t.baremeName}</strong> })}
           </p>
         </div>
       )}
@@ -216,7 +217,7 @@ export function ExamSimulator({
             <article key={question.id} className="exam-question mm-exam-q-grid">
               <div className="mm-exam-q-main">
                 <h4>
-                  Question {question.number}
+                  {fmt(t.question, { n: question.number })}
                   {question.title ? ` — ${question.title}` : ""}
                 </h4>
                 {question.prompt ? (
@@ -237,7 +238,7 @@ export function ExamSimulator({
                       <p>
                         <strong>{sub.label}.</strong> <MixedMathText text={sub.prompt} />{" "}
                         <span className="badge">
-                          {sub.marks} pts
+                          {fmt(t.pts, { n: sub.marks })}
                           {responseType === "spr" ? " · SPR" : isMcq ? " · MCQ" : ""}
                         </span>
                       </p>
@@ -250,7 +251,7 @@ export function ExamSimulator({
                       <BaremeAside sub={sub} compact />
                       {isMcq && sub.choices ? (
                         <fieldset style={{ border: "none", padding: 0, margin: "8px 0" }}>
-                          <legend className="sr-only">Choices for {sub.label}</legend>
+                          <legend className="sr-only">{fmt(t.choicesFor, { label: sub.label })}</legend>
                           {sub.choices.map((choice) => (
                             <label
                               key={choice.id}
@@ -284,9 +285,7 @@ export function ExamSimulator({
                             setAnswers((current) => ({ ...current, [sub.id]: event.target.value }))
                           }
                           placeholder={
-                            responseType === "spr"
-                              ? "Student-produced response (number or expression)…"
-                              : "Write the official-style answer…"
+                            responseType === "spr" ? t.sprPlaceholder : t.openPlaceholder
                           }
                         />
                       )}
@@ -294,7 +293,7 @@ export function ExamSimulator({
                         <GenerateSimilarPanel
                           paperId={paper.id}
                           questionId={sub.id}
-                          label={`Similar to Q${sub.label} (على نسقه)`}
+                          label={fmt(t.similarTo, { label: sub.label })}
                         />
                       ) : null}
                     </div>
@@ -306,8 +305,13 @@ export function ExamSimulator({
           ))}
         </section>
       ))}
+      {submitError ? (
+        <p className="error" role="alert">
+          {t.submitFailed}
+        </p>
+      ) : null}
       <button className="btn dark" type="button" disabled={busy} onClick={() => void submit()}>
-        {busy ? "Grading…" : "Submit for AI grading / إرسال للتصحيح"}
+        {busy ? t.gradingBusy : t.submit}
       </button>
     </section>
   );

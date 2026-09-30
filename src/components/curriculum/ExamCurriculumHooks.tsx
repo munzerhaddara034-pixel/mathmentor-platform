@@ -5,6 +5,9 @@ import { useRouter, usePathname } from "next/navigation";
 import { useCurriculum } from "./CurriculumProvider";
 import { examsUrlForCurriculum } from "@/lib/exams/curriculumHub";
 import type { CurriculumId } from "@/lib/curriculum/types";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { examsMessages } from "@/lib/i18n/ns/exams";
+import { rich } from "@/lib/i18n/rich";
 
 /**
  * When the header curriculum changes on /exams, sync the URL:
@@ -16,6 +19,8 @@ import type { CurriculumId } from "@/lib/curriculum/types";
  */
 export function ExamCurriculumHooks() {
   const { curriculumId, ready, curriculum } = useCurriculum();
+  const { locale } = useI18n();
+  const t = examsMessages[locale].hub;
   const router = useRouter();
   const pathname = usePathname();
   const lastCurriculum = useRef<CurriculumId | null>(null);
@@ -37,13 +42,11 @@ export function ExamCurriculumHooks() {
 
   return (
     <p className="muted mm-curriculum-exam-note" role="status">
-      {curriculum.labelEn} exam archive is <strong>{curriculum.contentPhase}</strong> — full papers ship in a later
-      phase. Cards below are original samples / planned stubs (no copyrighted past papers). Try sample topics in the
-      pedagogical tutor on <a href="/math-solver">/math-solver</a>.
-      <span dir="rtl" lang="ar">
-        {" "}
-        أرشيف {curriculum.labelAr} ما زال في مرحلة {curriculum.contentPhase} — دون أوراق محمية بحقوق النشر.
-      </span>
+      {rich(t.archiveNote, {
+        curriculum: locale === "ar" ? curriculum.labelAr : curriculum.labelEn,
+        phase: <strong>{curriculum.contentPhase}</strong>,
+        link: <a href="/math-solver">/math-solver</a>,
+      })}
     </p>
   );
 }

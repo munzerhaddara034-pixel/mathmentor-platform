@@ -1,5 +1,9 @@
 "use client";
 
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { examsMessages } from "@/lib/i18n/ns/exams";
+
 import { Katex } from "@/components/studio/Katex";
 import { MixedMathText } from "@/components/studio/MixedMathText";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
@@ -13,6 +17,8 @@ type Props = {
 };
 
 export function GenerateSimilarPanel({ paperId, questionId, label }: Props) {
+  const { locale } = useI18n();
+  const t = examsMessages[locale].similar;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [errorAr, setErrorAr] = useState<string | undefined>();
@@ -38,15 +44,15 @@ export function GenerateSimilarPanel({ paperId, questionId, label }: Props) {
         note?: string;
       };
       if (!response.ok || !payload.set) {
-        setError(payload.error || "Could not generate similar questions.");
+        setError(payload.error || t.failed);
         setErrorAr(payload.errorAr);
         return;
       }
       setResult(payload.set);
       setRevealed({});
     } catch {
-      setError("Network error while generating similar questions.");
-      setErrorAr("خطأ في الشبكة أثناء توليد أسئلة مشابهة.");
+      setError(t.network);
+      setErrorAr(examsMessages.ar.similar.network);
     } finally {
       setBusy(false);
     }
@@ -56,18 +62,18 @@ export function GenerateSimilarPanel({ paperId, questionId, label }: Props) {
     <div className="gensim-panel" style={{ marginTop: 12 }}>
       <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
         <button className="btn" type="button" disabled={busy} onClick={() => void run(3)}>
-          {busy ? "Generating…" : label ?? "Generate similar (على نسقه)"}
+          {busy ? t.generating : (label ?? t.default)}
         </button>
         {set ? (
-          <span className="badge">{set.source === "demo" ? "Demo variants" : "LLM variants"}</span>
+          <span className="badge">{set.source === "demo" ? t.demo : t.llm}</span>
         ) : null}
       </div>
       <ApiErrorBanner error={error} errorAr={errorAr} />
-      {busy ? <SkeletonBlock lines={4} label="Generating similar SAT items…" /> : null}
+      {busy ? <SkeletonBlock lines={4} label={t.loading} /> : null}
       {set ? (
         <div style={{ marginTop: 12 }}>
           <p className="muted">
-            Similar set {set.id} · {set.questions.length} items · saved for teacher review
+            {fmt(t.setLine, { id: set.id, n: set.questions.length })}
           </p>
           {set.questions.map((q, index) => (
             <SimilarCard
@@ -95,10 +101,12 @@ function SimilarCard({
   revealed: boolean;
   onReveal: () => void;
 }) {
+  const { locale } = useI18n();
+  const t = examsMessages[locale].similar;
   return (
     <article className="card" style={{ marginTop: 10 }}>
       <span className="badge">
-        Similar {index} · {question.skill} · {question.responseType}
+        {fmt(t.card, { i: index, skill: question.skill, type: question.responseType })}
       </span>
       <p>
         <MixedMathText text={question.prompt} />
@@ -120,12 +128,12 @@ function SimilarCard({
         </ul>
       ) : null}
       <button className="btn" type="button" onClick={onReveal}>
-        {revealed ? "Answer shown" : "Show answer / solution"}
+        {revealed ? t.shown : t.show}
       </button>
       {revealed ? (
         <div style={{ marginTop: 8 }}>
           <p>
-            <strong>Answer:</strong> {question.correctAnswer}
+            <strong>{t.answer}</strong> {question.correctAnswer}
           </p>
           <p>
             <MixedMathText text={question.solution} />
