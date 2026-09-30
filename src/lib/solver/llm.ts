@@ -65,7 +65,9 @@ const geminiJsonSchema = z.object({
       yDomain: z.tuple([z.number(), z.number()]).optional(),
       highlights: z.unknown().optional(),
     })
-    .optional(),
+    .optional()
+    // A malformed optional graph/trap must not discard an otherwise valid solution.
+    .catch(undefined),
   trap: z
     .object({
       wrong: z.string(),
@@ -74,7 +76,8 @@ const geminiJsonSchema = z.object({
       correctionFr: z.string(),
       latex: z.string(),
     })
-    .optional(),
+    .optional()
+    .catch(undefined),
 });
 
 export function geminiApiKey() {
@@ -164,6 +167,17 @@ function solutionFromLlm(
   });
 }
 
+/**
+ * LaTeX commands whose first letter is also a JSON escape (\\f \\t \\b \\n \\r): a single backslash
+ * would silently turn "\\frac" into form-feed + "rac". Double it before JSON.parse.
+ */
+const LATEX_ESCAPE_COLLISIONS =
+  /(?<!\\)\\(frac|forall|text|textbf|times|theta|tan|tanh|to|tfrac|top|beta|bar|binom|boxed|bmatrix|begin|bullet|neq|nabla|notin|not|nu|newline|right|rightarrow|Rightarrow|rho|rangle|rfloor|rceil)(?![A-Za-z])/g;
+
+export function protectLatexEscapes(json: string): string {
+  return json.replace(LATEX_ESCAPE_COLLISIONS, "\\\\$1");
+}
+
 export function extractJson(text: string) {
   const trimmed = text.trim();
   const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -171,7 +185,16 @@ export function extractJson(text: string) {
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
   if (start < 0 || end <= start) throw new Error("Gemini did not return JSON.");
-  return JSON.parse(raw.slice(start, end + 1)) as unknown;
+  const body = protectLatexEscapes(raw.slice(start, end + 1));
+  try {
+    return JSON.parse(body) as unknown;
+  } catch (error) {
+    // LLMs often emit raw LaTeX backslashes (\lim, \sqrt, \infty) inside JSON strings.
+    // Retry once with only the *invalid* escapes doubled; valid JSON escapes are untouched.
+    const repaired = body.replace(/\\(["\\/bfnrtu])|\\/g, (match: string, valid?: string) => (valid ? match : "\\\\"));
+    if (repaired === body) throw error;
+    return JSON.parse(repaired) as unknown;
+  }
 }
 
 export async function solveWithGemini(
