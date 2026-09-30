@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { AppNotification } from "@/lib/notifications/store";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { INTL_LOCALE } from "@/lib/i18n/config";
 
 export function NotificationBell() {
+  const { locale, m } = useI18n();
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(0);
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -53,36 +56,33 @@ export function NotificationBell() {
 
   return (
     <div className="notif-bell" ref={box}>
-      <button type="button" className="notif-bell-btn" onClick={() => setOpen((value) => !value)} aria-label="Notifications">
+      <button type="button" className="notif-bell-btn" onClick={() => setOpen((value) => !value)} aria-label={m.common.notifications}>
         🔔
         {unread > 0 ? <span className="notif-badge">{unread > 9 ? "9+" : unread}</span> : null}
       </button>
       {open ? (
         <div className="notif-dropdown">
           <header>
-            <strong>التنبيهات / Alerts</strong>
+            <strong>{m.common.notifications}</strong>
             <button type="button" className="ghost" onClick={() => void readAll()}>
-              تعليم الكل مقروء
+              {m.common.markAllRead}
             </button>
           </header>
-          {items.length === 0 ? <p className="muted">لا تنبيهات بعد. / No notifications yet.</p> : null}
+          {items.length === 0 ? <p className="muted">{m.common.noNotifications}</p> : null}
           <ul>
             {items.slice(0, 8).map((item) => (
               <li key={item.id}>
                 <button type="button" className={item.read ? "read" : "unread"} onClick={() => void openItem(item)}>
-                  <strong>
-                    {item.titleAr} / {item.title}
-                  </strong>
-                  <span>{item.bodyAr}</span>
+                  <strong dir="auto">{locale === "ar" ? item.titleAr || item.title : item.title || item.titleAr}</strong>
+                  <span dir="auto">{locale === "ar" ? item.bodyAr || item.body : item.body || item.bodyAr}</span>
                   <span className="muted">
-                    {item.body}
                     {item.createdAt
-                      ? ` · ${new Intl.DateTimeFormat("en-GB", {
+                      ? new Intl.DateTimeFormat(INTL_LOCALE[locale], {
                           timeZone: "Asia/Beirut",
                           dateStyle: "short",
                           timeStyle: "short",
                           hourCycle: "h23",
-                        }).format(new Date(item.createdAt))}`
+                        }).format(new Date(item.createdAt))
                       : ""}
                   </span>
                 </button>

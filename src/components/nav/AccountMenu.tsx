@@ -1,6 +1,6 @@
 "use client";
 
-import { roleLabel, type SessionUser } from "@/lib/auth/types";
+import type { SessionUser } from "@/lib/auth/types";
 import { Icon } from "@/components/ui/Icon";
 import { NavDropdown } from "./NavDropdown";
 import { useI18n } from "@/components/i18n/I18nProvider";
@@ -38,7 +38,7 @@ export function AccountMenu({
         <>
           <div className="mm-account-head">
             <strong>{user.name}</strong>
-            <span className="role-badge">{roleLabel(user.role)}</span>
+            <span className="role-badge">{m.auth.roles[user.role]}</span>
           </div>
           <MenuLinks items={items} pathname={pathname} onNavigate={close} />
           <MenuSettings />

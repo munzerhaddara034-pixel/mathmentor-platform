@@ -1,3 +1,7 @@
+"use client";
+
+import { useI18n } from "@/components/i18n/I18nProvider";
+
 /** Mobile-first skeleton placeholders for API-bound UI. */
 
 export type SkeletonProps = {
@@ -24,9 +28,10 @@ export function Skeleton({
   height = 16,
   width = "100%",
   className = "",
-  label = "جارٍ التحميل…",
+  label,
   rounded = "md",
 }: SkeletonProps) {
+  const { m } = useI18n();
   const h = typeof height === "number" ? `${height}px` : height;
   const w = typeof width === "number" ? `${width}px` : width;
   return (
@@ -35,22 +40,23 @@ export function Skeleton({
       style={{ height: h, width: w, borderRadius: RADIUS[rounded] }}
       role="status"
       aria-busy="true"
-      aria-label={label}
+      aria-label={label ?? m.common.loading}
     />
   );
 }
 
 export function SkeletonBlock({
   lines = 3,
-  label = "جارٍ التحميل…",
+  label,
   className = "",
 }: {
   lines?: number;
   label?: string;
   className?: string;
 }) {
+  const { m } = useI18n();
   return (
-    <div className={`mm-skeleton-block ${className}`.trim()} role="status" aria-busy="true" aria-label={label}>
+    <div className={`mm-skeleton-block ${className}`.trim()} role="status" aria-busy="true" aria-label={label ?? m.common.loading}>
       {Array.from({ length: lines }, (_, index) => (
         <Skeleton key={index} height={index === 0 ? 22 : 14} width={index === lines - 1 ? "72%" : "100%"} label="" />
       ))}
@@ -67,16 +73,18 @@ export function ApiErrorBanner({
   errorAr?: string;
   className?: string;
 }) {
+  const { locale } = useI18n();
   if (!error && !errorAr) return null;
-  // Arabic-first UI: show the Arabic message; English only when no Arabic copy exists.
+  // Server errors come as ar + en: Arabic UI shows the Arabic copy, en/fr show English (fallback to the other).
+  const showAr = locale === "ar" ? Boolean(errorAr) : !error;
   return (
     <div className={`studio-teacher-error mm-api-error ${className}`.trim()} role="alert">
-      {errorAr ? (
+      {showAr ? (
         <p dir="rtl" lang="ar">
           {errorAr}
         </p>
       ) : (
-        <p dir="ltr" lang="en">
+        <p dir="auto" lang="en">
           {error}
         </p>
       )}
