@@ -1,6 +1,6 @@
 import type { Messages } from "./en";
 
-/** العربية (RTL). نصوص المعاينات (mockups) هي مرجع هذه اللغة. العلامة: «منذر حداره» مع MathMentor — لا «حدارة». */
+/** العربية (RTL). نصوص المعاينات (mockups) هي مرجع هذه اللغة. العلامة: «منذر حداره» مع MathMentor (بالهاء، لا بالتاء المربوطة). */
 export const ar: Messages = {
   meta: {
     title: "منذر حداره · MathMentor",
