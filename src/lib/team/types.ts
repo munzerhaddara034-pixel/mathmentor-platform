@@ -115,8 +115,11 @@ export const TEAM_AGENT_NAMES_AR: Record<TeamAgentId, string> = {
  * Display name for a message author. Agent messages use the CURRENT agent name
  * (e.g. «حمزة» for "developer") so rows stored under an older name still read right.
  */
-export function teamAuthorDisplayName(message: Pick<TeamMessage, "authorKind" | "authorId" | "authorName">): string {
-  if (message.authorKind === "agent" && isTeamAgentId(message.authorId)) return TEAM_AGENT_NAMES_AR[message.authorId];
+export function teamAuthorDisplayName(
+  message: Pick<TeamMessage, "authorKind" | "authorId" | "authorName">,
+  names: Record<TeamAgentId, string> = TEAM_AGENT_NAMES_AR,
+): string {
+  if (message.authorKind === "agent" && isTeamAgentId(message.authorId)) return names[message.authorId];
   return message.authorName;
 }
 

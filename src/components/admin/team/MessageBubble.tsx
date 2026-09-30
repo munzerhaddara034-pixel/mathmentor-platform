@@ -4,6 +4,10 @@ import { teamAuthorDisplayName, type TeamMessage, type TeamProposal } from "@/li
 import { AttachmentView } from "./AttachmentView";
 import { ProposalCard } from "./ProposalCard";
 import { RichText } from "./RichText";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { INTL_LOCALE, type Locale } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import { teamMessages } from "@/lib/i18n/ns/team";
 
 type Props = {
   message: TeamMessage;
@@ -12,24 +16,26 @@ type Props = {
   onDecided: (proposal: TeamProposal, message: TeamMessage) => void;
 };
 
-function timeLabel(iso: string) {
+function timeLabel(iso: string, locale: Locale) {
   try {
-    return new Date(iso).toLocaleTimeString("ar-LB", { timeZone: "Asia/Beirut", hour: "2-digit", minute: "2-digit", hour12: false });
+    return new Date(iso).toLocaleTimeString(INTL_LOCALE[locale], { timeZone: "Asia/Beirut", hour: "2-digit", minute: "2-digit", hour12: false });
   } catch {
     return "";
   }
 }
 
 export function MessageBubble({ message, proposal, referredByName, onDecided }: Props) {
-  const authorName = teamAuthorDisplayName(message);
+  const { locale } = useI18n();
+  const t = teamMessages[locale];
+  const authorName = teamAuthorDisplayName(message, t.agents);
   const side = message.authorKind === "human" ? "is-human" : message.authorKind === "system" ? "is-system" : "is-agent";
   return (
-    <article className={`team-row ${side}`} aria-label={`رسالة من ${authorName}`}>
+    <article className={`team-row ${side}`} aria-label={fmt(t.messageFrom, { name: authorName })}>
       <div className={`team-bubble ${side} team-author-${message.authorId}`}>
         <header className="team-bubble-head">
           <span className="team-bubble-name">{authorName}</span>
-          {referredByName ? <span className="team-badge">إحالة من {referredByName}</span> : null}
-          <time dateTime={message.createdAt}>{timeLabel(message.createdAt)}</time>
+          {referredByName ? <span className="team-badge">{fmt(t.referredBy, { name: referredByName })}</span> : null}
+          <time dateTime={message.createdAt}>{timeLabel(message.createdAt, locale)}</time>
         </header>
         {message.text ? <RichText text={message.text} /> : null}
         {message.attachments.length ? (
@@ -41,7 +47,7 @@ export function MessageBubble({ message, proposal, referredByName, onDecided }: 
         ) : null}
         {message.imagePrompt ? (
           <details className="team-image-prompt">
-            <summary>Prompt الصورة</summary>
+            <summary>{t.imagePrompt}</summary>
             <p dir="ltr">{message.imagePrompt}</p>
           </details>
         ) : null}

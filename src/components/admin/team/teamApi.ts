@@ -1,7 +1,23 @@
-/** Client helpers for /api/admin/team — every call is wrapped in try/catch and returns an Arabic error. */
+/** Client helpers for /api/admin/team — every call is wrapped in try/catch and returns a typed error. */
+import type { Locale } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import type { TeamMessages } from "@/lib/i18n/ns/team";
 import type { TeamMessage, TeamProposal, TeamSendResponse, TeamThreadResponse } from "@/lib/team/types";
 
-export type ApiResult<T> = { ok: true; data: T } | { ok: false; errorAr: string };
+/** Server text (Arabic, sometimes English) when the API sent one; otherwise a client key for the UI to translate. */
+export type TeamApiError = { errorAr?: string; error?: string; key?: "session" | "status" | "network"; status?: number };
+
+export type ApiResult<T> = { ok: true; data: T } | ({ ok: false } & TeamApiError);
+
+/** Text for the active locale: translated client errors; server text in ar (Arabic) or English when provided. */
+export function teamErrorText(err: TeamApiError, locale: Locale, t: TeamMessages): string {
+  if (err.key === "session") return t.errors.session;
+  if (err.key === "network") return t.errors.network;
+  if (locale === "ar" && err.errorAr) return err.errorAr;
+  if (locale !== "ar" && err.error) return err.error;
+  if (err.key === "status" || !err.errorAr) return fmt(t.errors.status, { status: err.status ?? 0 });
+  return err.errorAr;
+}
 
 type ErrorBody = { errorAr?: unknown; error?: unknown };
 
@@ -14,13 +30,10 @@ async function parse<T>(response: Response): Promise<ApiResult<T>> {
   }
   if (!response.ok) {
     const err = (body ?? {}) as ErrorBody;
-    const errorAr =
-      typeof err.errorAr === "string"
-        ? err.errorAr
-        : response.status === 401
-          ? "انتهت الجلسة — سجّل الدخول مجدداً."
-          : `تعذّر الطلب (${response.status}).`;
-    return { ok: false, errorAr };
+    const errorAr = typeof err.errorAr === "string" ? err.errorAr : undefined;
+    const error = typeof err.error === "string" ? err.error : undefined;
+    if (errorAr || error) return { ok: false, errorAr, error, status: response.status };
+    return { ok: false, key: response.status === 401 ? "session" : "status", status: response.status };
   }
   return { ok: true, data: body as T };
 }
@@ -29,7 +42,7 @@ async function safe<T>(run: () => Promise<Response>): Promise<ApiResult<T>> {
   try {
     return await parse<T>(await run());
   } catch {
-    return { ok: false, errorAr: "تعذّر الاتصال بالخادم. تحقّق من الشبكة وحاول مجدداً." };
+    return { ok: false, key: "network" };
   }
 }
 

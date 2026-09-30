@@ -2,7 +2,10 @@
 
 import { useRef, useState, type KeyboardEvent } from "react";
 import { AgentVoiceRecorder, type AgentVoiceClip } from "@/components/admin/agent/AgentVoiceRecorder";
-import { transcribeVoice } from "./teamApi";
+import { teamErrorText, transcribeVoice } from "./teamApi";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { teamMessages } from "@/lib/i18n/ns/team";
 
 type Props = {
   disabled: boolean;
@@ -16,6 +19,8 @@ const ACCEPT = "image/*,application/pdf,.txt,.csv,.md,.docx,.xlsx";
 
 /** Text + voice (Whisper → Gemini fallback) + file/image attach. Enter = send, Shift+Enter = new line. */
 export function Composer({ disabled, placeholder, onSend }: Props) {
+  const { locale } = useI18n();
+  const t = teamMessages[locale];
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [voiceBusy, setVoiceBusy] = useState(false);
@@ -27,11 +32,11 @@ export function Composer({ disabled, placeholder, onSend }: Props) {
     const next = [...files];
     for (const file of Array.from(list)) {
       if (next.length >= MAX_FILES) {
-        setHint(`حدّ أقصى ${MAX_FILES} مرفقات.`);
+        setHint(fmt(t.maxFiles, { n: MAX_FILES }));
         break;
       }
       if (file.size > MAX_BYTES) {
-        setHint(`${file.name} أكبر من 8MB.`);
+        setHint(fmt(t.tooBig, { name: file.name }));
         continue;
       }
       next.push(file);
@@ -59,27 +64,27 @@ export function Composer({ disabled, placeholder, onSend }: Props) {
 
   const onVoice = async (clip: AgentVoiceClip) => {
     setVoiceBusy(true);
-    setHint("جارٍ تفريغ التسجيل الصوتي…");
+    setHint(t.transcribing);
     const result = await transcribeVoice(clip.blob, clip.filename);
     setVoiceBusy(false);
     if (!result.ok) {
-      setHint(result.errorAr);
+      setHint(teamErrorText(result, locale, t));
       return;
     }
     setText((current) => (current.trim() ? `${current.trim()}\n${result.data.text}` : result.data.text));
-    setHint("تم التفريغ — راجع النص ثم أرسل.");
+    setHint(t.transcribed);
   };
 
   return (
     <div className="team-composer">
       {files.length ? (
-        <ul className="team-file-chips" aria-label="المرفقات">
+        <ul className="team-file-chips" aria-label={t.attachments}>
           {files.map((file, index) => (
             <li key={`${file.name}-${index}`}>
               <span>📎 {file.name}</span>
               <button
                 type="button"
-                aria-label={`إزالة ${file.name}`}
+                aria-label={fmt(t.remove, { name: file.name })}
                 onClick={() => setFiles(files.filter((_, i) => i !== index))}
               >
                 ×
@@ -97,7 +102,7 @@ export function Composer({ disabled, placeholder, onSend }: Props) {
         <button
           type="button"
           className="team-icon-btn"
-          aria-label="إرفاق ملف أو صورة"
+          aria-label={t.attach}
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
         >
@@ -113,7 +118,7 @@ export function Composer({ disabled, placeholder, onSend }: Props) {
           disabled={disabled}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={onKeyDown}
-          aria-label="نص الرسالة"
+          aria-label={t.messageText}
         />
         <button
           type="button"
@@ -121,7 +126,7 @@ export function Composer({ disabled, placeholder, onSend }: Props) {
           disabled={disabled || (!text.trim() && !files.length)}
           onClick={() => void submit()}
         >
-          إرسال
+          {t.send}
         </button>
       </div>
       <div className="team-voice">

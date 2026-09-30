@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiErrorBanner } from "@/components/ui/Skeleton";
 import { routeHumanMessage } from "@/lib/team/routing";
 import {
-  TEAM_AGENT_NAMES_AR,
   TEAM_CHANNELS,
   teamAuthorDisplayName,
   type TeamChannelId,
@@ -15,31 +14,29 @@ import { ChannelList } from "./ChannelList";
 import { Composer } from "./Composer";
 import { MessageBubble } from "./MessageBubble";
 import { TeamThreadSkeleton, TeamTypingBubble } from "./TeamChatSkeleton";
-import { fetchThread, sendTeamMessage } from "./teamApi";
+import { fetchThread, sendTeamMessage, teamErrorText } from "./teamApi";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { teamMessages } from "@/lib/i18n/ns/team";
 
 type Thread = { messages: TeamMessage[]; proposals: Record<string, TeamProposal>; loaded: boolean };
 
 const EMPTY: Thread = { messages: [], proposals: {}, loaded: false };
 
-const PLACEHOLDERS: Record<TeamChannelId, string> = {
-  team: "اكتب للفريق… (@محمد، @سامي، @حمزة)",
-  mohamed: "اكتب لمحمد: موعد، موجز، حل رياضيات، نموذج امتحان…",
-  sami: "اكتب لسامي: بانر، بوستر، واجهة، فيديو…",
-  developer: "اكتب لحمزة (المبرمج): التعديل المطلوب — يقترح Diff ثم ينتظر موافقتك",
-};
-
 function indexProposals(list: TeamProposal[]): Record<string, TeamProposal> {
   return Object.fromEntries(list.map((proposal) => [proposal.id, proposal]));
 }
 
-/** Messenger-style team chat for staff (RTL, mobile-first). */
+/** Messenger-style team chat for staff (follows the site locale; RTL in ar, mobile-first). */
 export function TeamChat({ staffName }: { staffName: string }) {
+  const { locale } = useI18n();
+  const t = teamMessages[locale];
   const [channel, setChannel] = useState<TeamChannelId>("team");
   const [threads, setThreads] = useState<Partial<Record<TeamChannelId, Thread>>>({});
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<TeamChannelId | null>(null);
   const [typingNames, setTypingNames] = useState("");
-  const [errorAr, setErrorAr] = useState("");
+  const [errorText, setErrorText] = useState("");
   const [storage, setStorage] = useState<"postgres" | "file" | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -48,11 +45,11 @@ export function TeamChat({ staffName }: { staffName: string }) {
 
   const load = useCallback(async (target: TeamChannelId) => {
     setLoading(true);
-    setErrorAr("");
+    setErrorText("");
     const result = await fetchThread(target);
     setLoading(false);
     if (!result.ok) {
-      setErrorAr(result.errorAr);
+      setErrorText(teamErrorText(result, locale, t));
       return;
     }
     setStorage(result.data.storage);
@@ -60,7 +57,7 @@ export function TeamChat({ staffName }: { staffName: string }) {
       ...current,
       [target]: { messages: result.data.messages, proposals: indexProposals(result.data.proposals), loaded: true },
     }));
-  }, []);
+  }, [locale, t]);
 
   useEffect(() => {
     void load(channel);
@@ -71,16 +68,16 @@ export function TeamChat({ staffName }: { staffName: string }) {
   }, [thread.messages.length, sending]);
 
   const referredNames = useMemo(() => {
-    const byId = new Map(thread.messages.map((message) => [message.id, teamAuthorDisplayName(message)]));
+    const byId = new Map(thread.messages.map((message) => [message.id, teamAuthorDisplayName(message, t.agents)]));
     return (message: TeamMessage) => (message.referredById ? byId.get(message.referredById) : undefined);
-  }, [thread.messages]);
+  }, [thread.messages, t]);
 
   const onSend = async (text: string, files: File[]) => {
     const target = channel;
     const route = routeHumanMessage(target, text);
-    setTypingNames(route.responders.map((agent) => TEAM_AGENT_NAMES_AR[agent]).join(" و"));
+    setTypingNames(route.responders.map((agent) => t.agents[agent]).join(t.and));
     setSending(target);
-    setErrorAr("");
+    setErrorText("");
     const optimistic: TeamMessage = {
       id: `local-${Date.now()}`,
       channel: target,
@@ -98,7 +95,7 @@ export function TeamChat({ staffName }: { staffName: string }) {
     const result = await sendTeamMessage(target, text, files);
     setSending(null);
     if (!result.ok) {
-      setErrorAr(result.errorAr);
+      setErrorText(teamErrorText(result, locale, t));
       setThreads((current) => {
         const base = current[target] ?? EMPTY;
         return { ...current, [target]: { ...base, messages: base.messages.filter((m) => m.id !== optimistic.id) } };
@@ -135,27 +132,27 @@ export function TeamChat({ staffName }: { staffName: string }) {
   };
 
   return (
-    <div className="team-chat" dir="rtl" lang="ar">
+    <div className="team-chat">
       <ChannelList active={channel} unread={{}} onSelect={setChannel} />
-      <section className="team-thread" aria-label={`محادثة ${meta.labelAr}`}>
+      <section className="team-thread" aria-label={fmt(t.conversation, { name: t.channels[meta.id].label })}>
         <header className="team-thread-head">
           <span className={`team-avatar team-avatar-${meta.id}`} aria-hidden>
             {meta.avatar}
           </span>
           <div>
-            <h2>{meta.labelAr}</h2>
-            <p className="muted">{meta.subtitleAr}</p>
+            <h2>{t.channels[meta.id].label}</h2>
+            <p className="muted">{t.channels[meta.id].subtitle}</p>
           </div>
           {storage ? (
-            <span className={`team-storage is-${storage}`} title="مكان حفظ الرسائل">
-              {storage === "postgres" ? "محفوظ على Postgres" : "حفظ محلي (ملف)"}
+            <span className={`team-storage is-${storage}`} title={t.storageTitle}>
+              {storage === "postgres" ? t.storagePostgres : t.storageFile}
             </span>
           ) : null}
         </header>
         <div className="team-messages" aria-live="polite">
           {loading && !thread.loaded ? <TeamThreadSkeleton /> : null}
           {thread.loaded && !thread.messages.length ? (
-            <p className="team-empty">لا رسائل بعد. ابدأ المحادثة — كل الرسائل محفوظة للتدقيق.</p>
+            <p className="team-empty">{t.empty}</p>
           ) : null}
           {thread.messages.map((message) => {
             const proposal = message.proposalId ? thread.proposals[message.proposalId] : undefined;
@@ -169,11 +166,11 @@ export function TeamChat({ staffName }: { staffName: string }) {
               />
             );
           })}
-          {sending === channel ? <TeamTypingBubble names={typingNames || "الفريق"} /> : null}
+          {sending === channel ? <TeamTypingBubble names={typingNames || t.teamTyping} /> : null}
           <div ref={endRef} />
         </div>
-        <ApiErrorBanner errorAr={errorAr} />
-        <Composer disabled={sending !== null} placeholder={PLACEHOLDERS[channel]} onSend={onSend} />
+        <ApiErrorBanner error={errorText} errorAr={errorText} />
+        <Composer disabled={sending !== null} placeholder={t.placeholders[channel]} onSend={onSend} />
       </section>
     </div>
   );
