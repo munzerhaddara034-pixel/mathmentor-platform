@@ -1,15 +1,30 @@
 "use client";
 
+import { useI18n } from "@/components/i18n/I18nProvider";
 import { academyLessons, gradeGroups } from "@/lib/academyLessons";
+import type { Locale } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import { practiceMessages, type PracticeMessages } from "@/lib/i18n/ns/practice";
+import { pickTitle } from "@/lib/i18n/pick";
 import { groupTopicBankCards, listTopicBankCards } from "@/lib/topicBanks";
 import type { ExamPaper, GradeTrack } from "@/lib/types";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+type BankCardData = ReturnType<typeof listTopicBankCards>[number];
+type ContestTopic = NonNullable<BankCardData["contestTopics"]>[number];
+
+function topicTitle(locale: Locale, topic: ContestTopic): string {
+  return locale === "ar" ? (topic.arabicTitle ?? topic.title) : topic.title;
+}
+
 export default function PracticeHubPage() {
+  const { locale } = useI18n();
+  const t = practiceMessages[locale].hub;
   const [track, setTrack] = useState<GradeTrack>("grade-12");
   const [lessonId, setLessonId] = useState("grade-12-ch1");
   const [exams, setExams] = useState<ExamPaper[]>([]);
+  const [examsError, setExamsError] = useState(false);
   const grouped = groupTopicBankCards();
 
   const lessons = useMemo(() => academyLessons.filter((item) => item.track === track), [track]);
@@ -19,74 +34,59 @@ export default function PracticeHubPage() {
   }, [lessons, lessonId]);
 
   useEffect(() => {
-    void fetch("/api/exams")
-      .then((response) => response.json())
-      .then((data: { exams?: ExamPaper[] }) => setExams(data.exams ?? []));
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/exams");
+        const data = (await response.json().catch(() => ({}))) as { exams?: ExamPaper[] };
+        if (!cancelled) setExams(data.exams ?? []);
+      } catch {
+        if (!cancelled) setExamsError(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
+  const sections = [
+    { key: "ls", title: t.ls, lead: t.lsLead, cards: grouped.ls, first: true },
+    { key: "se", title: t.se, lead: t.seLead, cards: grouped.se, first: false },
+    { key: "gs", title: t.gs, lead: t.gsLead, cards: grouped.gs, first: false },
+    { key: "brevet", title: t.brevet, lead: t.brevetLead, cards: grouped.brevet, first: false },
+  ] as const;
+
   return (
-    <main className="shell" dir="rtl">
-      <p className="eyebrow">بنك الأسئلة</p>
-      <h1>الاختبارات والتدرّب</h1>
-      <p className="muted">مسابقة الشهادة حسب الموضوع، أو تدريب درس واحد. الأسئلة بمستوى النماذج اللبنانية لا قوالب تعريف.</p>
+    <main className="shell">
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
+      <p className="muted">{t.lead}</p>
 
       <section className="card" style={{ marginTop: 8 }}>
-        <h2>مسابقات الشهادة حسب الموضوع</h2>
-        <p className="muted">أربعة فروع للشهادة: علوم الحياة، اجتماع واقتصاد، علوم عامة، والشهادة المتوسطة. البنود أكاديمية أصلية بأسلوب النماذج، وليست نسخاً من دورات رسمية.</p>
+        <h2>{t.contests}</h2>
+        <p className="muted">{t.contestsLead}</p>
 
-        <h3 style={{ marginTop: 16 }}>صف 12 · علوم الحياة</h3>
-        <p className="muted">النموذج الرسمي أربع مسائل: أسئلة مختلطة، هندسة فضاء، احتمالات، ثم دراسة الدوال.</p>
-        {grouped.ls[0]?.contestTopics?.map((topic) => (
-          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
-            {topic.arabicTitle ?? topic.title}
-            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
-          </p>
-        ))}
-        {grouped.ls.map((card) => (
-          <BankCard key={card.id} card={card} />
-        ))}
-
-        <h3 style={{ marginTop: 24 }}>صف 12 · اجتماع واقتصاد</h3>
-        <p className="muted">مسابقة الاقتصاد والاجتماع: أسئلة مختلطة (لوغاريتم ومالية وإحصاء)، احتمالات، ثم دوال بتحليل اقتصادي (كلفة، ربح، مرونة الطلب).</p>
-        {grouped.se[0]?.contestTopics?.map((topic) => (
-          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
-            {topic.arabicTitle ?? topic.title}
-            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
-          </p>
-        ))}
-        {grouped.se.map((card) => (
-          <BankCard key={card.id} card={card} />
-        ))}
-
-        <h3 style={{ marginTop: 24 }}>صف 12 · علوم عامة</h3>
-        <p className="muted">مسابقة العلوم العامة: أسئلة مختلطة، هندسة فضاء، احتمالات، أعداد مركبة، ثم دراسة الدوال (بما فيها المعادلات التفاضلية).</p>
-        {grouped.gs[0]?.contestTopics?.map((topic) => (
-          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
-            {topic.arabicTitle ?? topic.title}
-            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
-          </p>
-        ))}
-        {grouped.gs.map((card) => (
-          <BankCard key={card.id} card={card} />
-        ))}
-
-        <h3 style={{ marginTop: 24 }}>صف 9 · الشهادة المتوسطة</h3>
-        <p className="muted">مسابقة البروفيه عادةً ست أو سبع مسائل. البنوك الخمسة جاهزة للمسابقة: أعداد، جبر، مسائل لفظية، هندسة، هندسة تحليلية.</p>
-        {grouped.brevet[0]?.contestTopics?.map((topic) => (
-          <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
-            {topic.arabicTitle ?? topic.title}
-            {topic.implemented ? " — هذا البنك" : " — لاحقاً"}
-          </p>
-        ))}
-        {grouped.brevet.map((card) => (
-          <BankCard key={card.id} card={card} />
+        {sections.map((section) => (
+          <div key={section.key}>
+            <h3 style={{ marginTop: section.first ? 16 : 24 }}>{section.title}</h3>
+            <p className="muted">{section.lead}</p>
+            {section.cards[0]?.contestTopics?.map((topic) => (
+              <p key={topic.id} className="muted" style={{ margin: "4px 0" }}>
+                {topicTitle(locale, topic)}
+                {topic.implemented ? t.thisBank : t.later}
+              </p>
+            ))}
+            {section.cards.map((card) => (
+              <BankCard key={card.id} card={card} locale={locale} t={t} />
+            ))}
+          </div>
         ))}
       </section>
 
       <div className="card" style={{ marginTop: 20 }}>
-        <h2>تدريب درس واحد</h2>
+        <h2>{t.single}</h2>
         <label>
-          الصف / المادة
+          {t.track}
           <select value={track} onChange={(event) => setTrack(event.target.value as GradeTrack)}>
             {gradeGroups.map((group) => (
               <option key={group.track} value={group.track}>
@@ -96,31 +96,36 @@ export default function PracticeHubPage() {
           </select>
         </label>
         <label>
-          الوحدة / الدرس
+          {t.lesson}
           <select value={lessonId} onChange={(event) => setLessonId(event.target.value)}>
             {lessons.map((lesson) => (
               <option key={lesson.id} value={lesson.id}>
-                Chapter {lesson.chapter} · {lesson.arabicTitle || lesson.title}
+                {fmt(t.chapter, { n: lesson.chapter, title: pickTitle(locale, lesson) })}
               </option>
             ))}
           </select>
         </label>
         <div className="row">
           <Link className="btn" href={`/practice/take?lessonId=${lessonId}&mode=free`}>
-            تدريب حر
+            {t.free}
           </Link>
           <Link className="btn dark" href={`/practice/take?lessonId=${lessonId}&mode=exam`}>
-            امتحان الدرس (15 دقيقة)
+            {t.lessonExam}
           </Link>
         </div>
       </div>
+      {examsError ? (
+        <p className="error" role="alert" style={{ marginTop: 20 }}>
+          {t.loadFailed}
+        </p>
+      ) : null}
       {exams.length ? (
         <section className="card" style={{ marginTop: 20 }}>
-          <h2>اختبارات شاملة أعدّها الأستاذ</h2>
+          <h2>{t.teacherExams}</h2>
           {exams.map((exam) => (
             <p key={exam.id}>
               <Link href={`/practice/take?lessonId=${exam.lessonId || lessonId}&mode=exam&examId=${exam.id}`}>
-                {exam.title} · {exam.durationMinutes} min · pass {exam.passScore}%
+                {fmt(t.examLine, { title: exam.title, min: exam.durationMinutes, pass: exam.passScore })}
               </Link>
             </p>
           ))}
@@ -130,43 +135,44 @@ export default function PracticeHubPage() {
   );
 }
 
-function BankCard({
-  card,
-}: {
-  card: ReturnType<typeof listTopicBankCards>[number];
-}) {
+function BankCard({ card, locale, t }: { card: BankCardData; locale: Locale; t: PracticeMessages["hub"] }) {
   const blurb =
     card.id === "g12-ls-functions"
-      ? "أسلوب المسألة الرابعة في نماذج علوم الحياة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+      ? t.blurbLsFunctions
       : card.certificate === "LS"
-        ? "أسلوب نماذج علوم الحياة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+        ? t.blurbLs
         : card.certificate === "SE"
-          ? "أسلوب نماذج الاجتماع والاقتصاد (كلفة، طلب، مالية، إحصاء). البنود أكاديمية أصلية وليست نماذج منسوخة."
+          ? t.blurbSe
           : card.certificate === "GS"
-            ? "أسلوب نماذج العلوم العامة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+            ? t.blurbGs
             : card.certificate === "Brevet"
-              ? "أسلوب الشهادة المتوسطة. البنود أكاديمية أصلية وليست نماذج منسوخة."
+              ? t.blurbBrevet
               : null;
+  const title = pickTitle(locale, card);
   return (
     <article className="card" style={{ marginTop: 12 }}>
       <span className="badge">{card.certificate}</span>
       <h3>
-        {card.certificate} — {card.arabicTitle}
+        {card.certificate} — {title}
       </h3>
       <p className="muted">
-        {card.questionCount} سؤالاً · {card.slices.map((slice) => slice.arabicTitle).join(" · ")} · المسابقة {card.contestMinutes} دقيقة
+        {fmt(t.bankMeta, {
+          n: card.questionCount,
+          slices: card.slices.map((slice) => pickTitle(locale, slice)).join(" · "),
+          min: card.contestMinutes,
+        })}
       </p>
       {blurb ? <p className="muted">{blurb}</p> : null}
       <div className="row">
         <Link className="btn dark" href={`/practice/take?bank=${card.id}&mode=contest`}>
-          مسابقة {card.arabicTitle}
+          {fmt(t.contest, { title })}
         </Link>
         <Link className="btn" href={`/practice/take?bank=${card.id}&mode=free`}>
-          تدريب البنك كاملاً
+          {t.wholeBank}
         </Link>
         {card.id === "g12-ls-functions" ? (
           <Link className="btn" href="/classroom/grade-12-ch1">
-            درس النهايات (فيديو)
+            {t.limitsVideo}
           </Link>
         ) : null}
       </div>

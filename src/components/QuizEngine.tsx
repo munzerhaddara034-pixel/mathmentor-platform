@@ -2,7 +2,9 @@
 
 import { MathTex } from "@/components/MathTex";
 import { MixedMathText } from "@/components/studio/MixedMathText";
-import { difficultyLabel } from "@/lib/quizBank";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { practiceMessages } from "@/lib/i18n/ns/practice";
 import type { QuizQuestion } from "@/lib/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -31,6 +33,10 @@ export function QuizEngine({
   lessonId: string;
   onSaved?: (passed: boolean, percent: number) => void;
 }) {
+  const { locale } = useI18n();
+  const t = practiceMessages[locale].engine;
+  const difficultyLabel = practiceMessages[locale].difficulty;
+  const [saveFailed, setSaveFailed] = useState(false);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
   const [flagged, setFlagged] = useState<boolean[]>(() => questions.map(() => false));
@@ -73,11 +79,16 @@ export function QuizEngine({
     const elapsedSec = Math.round((Date.now() - startedAt) / 1000);
     const passed = percent >= passScore;
     setResult({ score: correct, percent, elapsedSec, passed, answers: finalAnswers });
-    await fetch("/api/quiz", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lessonId, score: percent, studentName, passScore }),
-    });
+    try {
+      const response = await fetch("/api/quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId, score: percent, studentName, passScore }),
+      });
+      if (!response.ok) setSaveFailed(true);
+    } catch {
+      setSaveFailed(true);
+    }
     onSaved?.(passed, percent);
   };
 
@@ -87,38 +98,47 @@ export function QuizEngine({
     return `${m}:${s.toString().padStart(2, "0")}`;
   }, [secondsLeft]);
 
-  if (!questions.length) return <p className="muted">لا أسئلة في هذا الدرس بعد.</p>;
+  if (!questions.length) return <p className="muted">{t.empty}</p>;
 
   if (result) {
     return (
-      <section className="quiz-results" dir="rtl">
+      <section className="quiz-results">
         <div className={`result-hero ${result.passed ? "pass" : "fail"}`}>
-          <p className="eyebrow">{result.passed ? "أحسنت" : "حاول مرة أخرى"}</p>
+          <p className="eyebrow">{result.passed ? t.wellDone : t.tryAgain}</p>
           <h2>
             {result.score} / {questions.length}
           </h2>
           <p>
-            النسبة {result.percent}% · الوقت {Math.floor(result.elapsedSec / 60)}:{String(result.elapsedSec % 60).padStart(2, "0")} · النجاح من {passScore}%
+            {fmt(t.summary, {
+              percent: result.percent,
+              time: `${Math.floor(result.elapsedSec / 60)}:${String(result.elapsedSec % 60).padStart(2, "0")}`,
+              pass: passScore,
+            })}
           </p>
         </div>
+        {saveFailed ? (
+          <p className="error" role="alert">
+            {t.saveFailed}
+          </p>
+        ) : null}
         {questions.map((item, i) => {
           const picked = result.answers[i];
           const ok = picked === item.correctIndex;
           return (
             <article className="card" key={item.id} style={{ marginTop: 12 }}>
-              <span className={`badge ${ok ? "approved" : "rejected"}`}>{ok ? "صح" : "خطأ"}</span>
+              <span className={`badge ${ok ? "approved" : "rejected"}`}>{ok ? t.right : t.wrong}</span>
               <p>
                 {i + 1}. <MixedMathText text={item.prompt} />
               </p>
               <MathTex tex={item.latex} />
               <p className="muted">
-                إجابتك: {picked == null ? "بدون إجابة" : <MixedMathText text={item.options[picked]} />}
+                {t.yourAnswer} {picked == null ? t.noAnswer : <MixedMathText text={item.options[picked]} />}
               </p>
               <p>
-                الصحيح: <MixedMathText text={item.options[item.correctIndex]} />
+                {t.correct} <MixedMathText text={item.options[item.correctIndex]} />
               </p>
               <div className="paper">
-                <strong>خطوات الحل</strong>
+                <strong>{t.steps}</strong>
                 {item.steps.map((step) => (
                   <p key={step}>
                     <MixedMathText text={step} />
@@ -133,14 +153,19 @@ export function QuizEngine({
   }
 
   return (
-    <section className="quiz-engine" dir="rtl">
+    <section className="quiz-engine">
       <div className="quiz-toolbar">
         <div className="progress-track">
           <span style={{ width: `${percentDone}%` }} />
         </div>
         <p className="muted">
-          سؤال {index + 1} / {questions.length} · صعوبة {difficultyLabel[question.difficulty]} · أُجيب {answered}
-          {timed ? ` · الوقت ${clock}` : " · تدريب حر"}
+          {fmt(t.progress, {
+            i: index + 1,
+            n: questions.length,
+            d: difficultyLabel[question.difficulty],
+            a: answered,
+          })}
+          {timed ? fmt(t.time, { clock }) : t.freeMode}
         </p>
       </div>
       <article className="card">
@@ -170,7 +195,7 @@ export function QuizEngine({
       </article>
       <div className="row" style={{ marginTop: 16 }}>
         <button className="btn" type="button" disabled={index === 0} onClick={() => setIndex((value) => value - 1)}>
-          السابق
+          {t.prev}
         </button>
         <button
           className="btn"
@@ -178,7 +203,7 @@ export function QuizEngine({
           disabled={index >= questions.length - 1}
           onClick={() => setIndex((value) => value + 1)}
         >
-          التالي
+          {t.next}
         </button>
         <button
           className="btn"
@@ -191,10 +216,10 @@ export function QuizEngine({
             })
           }
         >
-          {flagged[index] ? "أُزيل من المراجعة" : "مراجعة لاحقاً"}
+          {flagged[index] ? t.unflag : t.flag}
         </button>
         <button className="btn ok" type="button" onClick={() => void finish(answers)}>
-          تسليم الامتحان
+          {t.submit}
         </button>
       </div>
       <div className="quiz-dots">
