@@ -26,7 +26,7 @@ export type OverviewStreak = {
   streakDays: number;
   lastActivityDate: string;
   xp: number;
-  badges: { id: string; titleAr: string }[];
+  badges: { id: string; title: string; titleAr: string }[];
 };
 
 export type StudentOverview = {
@@ -77,7 +77,7 @@ async function loadStreak(user: OverviewSubject): Promise<OverviewStreak> {
     streakDays: profile.streakDays,
     lastActivityDate: profile.lastActivityDate,
     xp: profile.xp,
-    badges: profile.badges.map((id) => ({ id, titleAr: BADGE_META[id]?.titleAr ?? id })),
+    badges: profile.badges.map((id) => ({ id, title: BADGE_META[id]?.title ?? id, titleAr: BADGE_META[id]?.titleAr ?? id })),
   };
 }
 

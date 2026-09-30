@@ -5,6 +5,8 @@ import { TeacherOpsPanel } from "@/components/TeacherOpsPanel";
 import { buildRoleDashboard, type RoleDashboard } from "@/lib/auth/dashboard";
 import { getFreshSession } from "@/lib/auth/server";
 import type { SessionUser } from "@/lib/auth/types";
+import { getI18n } from "@/lib/i18n/server";
+import { getTeacherLiveStatus } from "@/lib/live/teacherLiveStatus";
 
 async function dashboardFor(user: SessionUser): Promise<RoleDashboard> {
   try {
@@ -22,5 +24,6 @@ export default async function DashboardPage() {
   if (user.role === "teacher") return <TeacherOpsPanel />;
   const data = await dashboardFor(user);
   if (user.role === "parent") return <ParentDashboard data={data} />;
-  return <StudentDashboard data={data} />;
+  const [{ m, locale }, teacherStatus] = await Promise.all([getI18n(), getTeacherLiveStatus()]);
+  return <StudentDashboard data={data} m={m} locale={locale} teacherStatus={teacherStatus} />;
 }
