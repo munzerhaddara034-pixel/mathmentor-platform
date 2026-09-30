@@ -227,8 +227,8 @@ type TierBudget = { thinking: "low" | "medium" | "high"; maxOutputTokens: number
 /** Token caps and time budgets per level. Middle school targets < 15 s. */
 function budgetFor(decision: CurriculumDecision, tier: ModelTier): TierBudget {
   if (tier === "fast") return { thinking: "low", maxOutputTokens: 8192, deadlineMs: 30_000, callTimeoutMs: 25_000 };
-  if (decision.level === "university") return { thinking: "high", maxOutputTokens: 32_768, deadlineMs: 150_000, callTimeoutMs: 120_000 };
-  return { thinking: "medium", maxOutputTokens: 24_576, deadlineMs: 120_000, callTimeoutMs: 90_000 };
+  if (decision.level === "university") return { thinking: "high", maxOutputTokens: 20_480, deadlineMs: 180_000, callTimeoutMs: 100_000 };
+  return { thinking: "medium", maxOutputTokens: 16_384, deadlineMs: 120_000, callTimeoutMs: 90_000 };
 }
 
 export function decideFor(request: GeminiSolveRequest): CurriculumDecision {

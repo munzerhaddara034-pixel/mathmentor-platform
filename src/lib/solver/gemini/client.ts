@@ -82,7 +82,7 @@ function responseText(json: GeminiResponse): string {
     .join("\n");
 }
 
-async function callOnce(model: string, key: string, options: GenerateOptions, timeoutMs: number) {
+async function callOnce(model: string, key: string, options: GenerateOptions, timeoutMs: number, temperature: number) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const t0 = Date.now();
@@ -95,7 +95,7 @@ async function callOnce(model: string, key: string, options: GenerateOptions, ti
       body: JSON.stringify({
         contents: [{ role: "user", parts: options.parts }],
         generationConfig: {
-          temperature: 0,
+          temperature,
           maxOutputTokens: options.maxOutputTokens,
           ...(options.json === false ? {} : { responseMimeType: "application/json" }),
           thinkingConfig: { thinkingLevel: options.thinking },
@@ -131,11 +131,14 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     }
     const retries = retriedModels < 2 ? maxRetries : 0;
     let usedRetry = false;
+    // Temperature 0 by default (deterministic grading). Gemini 3 can loop at temperature 0 until
+    // MAX_TOKENS; in that case the same model is retried once at its recommended temperature 1.0.
+    let temperature = 0;
     for (let attempt = 0; attempt <= retries; attempt++) {
       const left = options.deadlineMs - (Date.now() - started);
       if (left < 1500) throw new GeminiError(`Gemini deadline reached. Last: ${lastError}`, calls);
       try {
-        const { status, body, ms } = await callOnce(model, key, options, Math.min(options.callTimeoutMs, left));
+        const { status, body, ms } = await callOnce(model, key, options, Math.min(options.callTimeoutMs, left), temperature);
         if (status !== 200) {
           const kind = classify(status, body);
           calls.push({ model, status, ms, promptTokens: 0, outputTokens: 0, costUsd: 0, note: kind });
@@ -160,6 +163,11 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
         const text = responseText(json);
         if (!text.trim() || finish === "MAX_TOKENS") {
           lastError = `Gemini ${model} ${finish || "empty"}`;
+          if (finish === "MAX_TOKENS" && temperature === 0) {
+            temperature = 1;
+            attempt = Math.min(attempt, retries - 1);
+            continue;
+          }
           break;
         }
         return { text, model, calls };
