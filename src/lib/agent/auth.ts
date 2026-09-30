@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
+import { safeEqual } from "@/lib/security/webhookSignature";
 
 export type AgentAuthOk = { ok: true; mode: "staff" | "secret" | "demo" };
 export type AgentAuthFail = { ok: false; error: NextResponse };
@@ -33,11 +34,16 @@ function configuredSecrets(): string[] {
   ].filter(Boolean);
 }
 
+export function agentDemoModeAllowed(env: Record<string, string | undefined> = process.env) {
+  if (env.AGENT_ALLOW_DEMO_MODE === "1") return true;
+  return env.NODE_ENV !== "production";
+}
+
 export async function authorizeAgentRequest(request: Request): Promise<AgentAuthResult> {
   try {
     const secrets = configuredSecrets();
     const provided = providedSecrets(request);
-    if (secrets.length > 0 && provided.some((p) => secrets.includes(p))) {
+    if (secrets.length > 0 && provided.some((p) => secrets.some((s) => safeEqual(p, s)))) {
       return { ok: true, mode: "secret" };
     }
 
@@ -46,8 +52,9 @@ export async function authorizeAgentRequest(request: Request): Promise<AgentAuth
       return { ok: true, mode: "staff" };
     }
 
-    if (secrets.length === 0) {
-      // Local / Netlify QA without secrets — allow demo pipeline (same spirit as JOBS_SECRET empty).
+    if (secrets.length === 0 && agentDemoModeAllowed()) {
+      // Local / QA without secrets — allow demo pipeline (same spirit as JOBS_SECRET empty).
+      // Never in production unless AGENT_ALLOW_DEMO_MODE=1 (it would open the agent APIs to anyone).
       return { ok: true, mode: "demo" };
     }
 
@@ -91,5 +98,5 @@ export function agentWebhookSecretOk(request: Request, body: unknown): boolean {
     url.searchParams.get("secret"),
     bodySecret,
   ];
-  return candidates.some((value) => Boolean(value) && value === secret);
+  return candidates.some((value) => Boolean(value) && safeEqual(String(value), secret));
 }

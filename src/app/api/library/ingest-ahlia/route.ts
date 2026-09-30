@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { apiRequireStaff } from "@/lib/auth/guards";
 import { ingestAhliaBooks, withAhliaMerge } from "@/lib/ingestAhlia";
 import { readStore, writeStore } from "@/lib/store";
 
 export async function POST() {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const store = await readStore();
   const { added, skipped } = await ingestAhliaBooks(store.library);
   if (added.length) {

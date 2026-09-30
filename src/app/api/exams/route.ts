@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiRequireStaff } from "@/lib/auth/guards";
 import { addExam, readStore } from "@/lib/store";
 import { createId } from "@/lib/ids";
 import type { GradeTrack } from "@/lib/types";
@@ -9,6 +10,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const body = (await request.json()) as {
     title?: string;
     arabicTitle?: string;

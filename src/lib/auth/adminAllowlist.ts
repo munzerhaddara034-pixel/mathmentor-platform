@@ -7,8 +7,9 @@
  * - TEAM_APPROVER_EMAILS (same format): who may click «موافقة ونشر» in /admin/team.
  *   When unset or blank it falls back to the ADMIN_EMAILS allowlist.
  *
- * Signup does not verify email ownership yet, so an allowlisted address must be registered by
- * its real owner before anyone else does.
+ * Admin rights activate only after the allowlisted address is verified (confirmation link +
+ * password at login; see src/lib/auth/emailVerification.ts). Accounts that existed before e-mail
+ * verification shipped are grandfathered as verified.
  */
 
 /** Documented fallback for ADMIN_EMAILS only — not a stored account and never has a password. */

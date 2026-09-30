@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
+import { apiRequireStaff } from "@/lib/auth/guards";
 import { createId } from "@/lib/ids";
 import { addLibraryItem } from "@/lib/store";
 import type { GradeTrack, Language, SourceKind } from "@/lib/types";
 
 export async function POST(request: Request) {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const form = await request.formData();
   const title = String(form.get("title") ?? "").trim();
   const kind = String(form.get("kind") ?? "book") as SourceKind;

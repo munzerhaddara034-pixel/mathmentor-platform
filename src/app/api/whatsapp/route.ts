@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyMetaSignature } from "@/lib/security/webhookSignature";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -58,7 +59,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json().catch(() => ({}))) as MetaWebhookBody;
+    const rawBody = await request.text();
+    // Unsigned POSTs could make us message any number with attacker text; verify Meta's signature
+    // whenever WHATSAPP_APP_SECRET is configured.
+    const appSecret = process.env.WHATSAPP_APP_SECRET?.trim() || "";
+    if (appSecret && !verifyMetaSignature(rawBody, request.headers.get("x-hub-signature-256"), appSecret)) {
+      return NextResponse.json({ status: "invalid_signature" }, { status: 401 });
+    }
+    let body: MetaWebhookBody = {};
+    try {
+      body = JSON.parse(rawBody || "{}") as MetaWebhookBody;
+    } catch {
+      body = {};
+    }
     const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
     const fromNumber = message?.from;
     const incomingText = message?.text?.body;

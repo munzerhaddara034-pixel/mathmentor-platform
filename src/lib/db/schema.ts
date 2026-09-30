@@ -112,6 +112,32 @@ export const SCHEMA_MIGRATIONS: SchemaMigration[] = [
       );
     `,
   },
+  {
+    id: "005_audit_log",
+    description: "Append-only audit log for destructive / admin actions (UPDATE and DELETE are rejected by trigger)",
+    sql: `
+      CREATE TABLE IF NOT EXISTS mm_audit_log (
+        id BIGSERIAL PRIMARY KEY,
+        at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        action TEXT NOT NULL,
+        actor_id TEXT,
+        actor_email TEXT,
+        actor_role TEXT,
+        target TEXT,
+        ip TEXT,
+        details JSONB NOT NULL DEFAULT '{}'::jsonb
+      );
+      CREATE INDEX IF NOT EXISTS mm_audit_log_at_idx ON mm_audit_log (at DESC);
+      CREATE OR REPLACE FUNCTION mm_audit_log_append_only() RETURNS trigger LANGUAGE plpgsql AS $fn$
+      BEGIN
+        RAISE EXCEPTION 'mm_audit_log is append-only';
+      END;
+      $fn$;
+      CREATE OR REPLACE TRIGGER mm_audit_log_no_update_delete
+        BEFORE UPDATE OR DELETE ON mm_audit_log
+        FOR EACH ROW EXECUTE FUNCTION mm_audit_log_append_only();
+    `,
+  },
 ];
 
 export const MIGRATIONS_TABLE_SQL = `

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyMetaSignature } from "@/lib/security/webhookSignature";
 import { createId } from "@/lib/ids";
 import { authorizeAgentRequest } from "@/lib/agent/auth";
 import { latestHealth } from "@/lib/agent/store";
@@ -376,12 +377,20 @@ export async function POST(request: Request) {
       }
     } else {
       let body: Record<string, unknown>;
+      let rawBody = "";
       try {
-        body = (await request.json()) as Record<string, unknown>;
+        rawBody = await request.text();
+        body = JSON.parse(rawBody) as Record<string, unknown>;
       } catch {
         return NextResponse.json({ ok: false, error: "Invalid JSON or multipart body." }, { status: 400 });
       }
       const meta = parseMetaPayload(body);
+      // Meta signs every webhook (X-Hub-Signature-256). When WHATSAPP_APP_SECRET is set, forged
+      // "from the instructor's phone" payloads are rejected before any agent action runs.
+      const appSecret = process.env.WHATSAPP_APP_SECRET?.trim() || "";
+      if (meta && appSecret && !verifyMetaSignature(rawBody, request.headers.get("x-hub-signature-256"), appSecret)) {
+        return NextResponse.json({ ok: false, error: "Invalid webhook signature." }, { status: 401 });
+      }
       const ultra = meta ? null : parseUltraMsgPayload(body);
       if (meta && (meta.senderPhone || meta.mediaId || meta.textBody || meta.source === "meta")) {
         // Empty status callbacks: ACK quickly (no phone / no content)

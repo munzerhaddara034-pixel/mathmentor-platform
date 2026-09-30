@@ -1,8 +1,11 @@
 import { readFile } from "node:fs/promises";
+import { apiRequireStaff } from "@/lib/auth/guards";
 import { NextResponse } from "next/server";
 import { readStore } from "@/lib/store";
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const { id } = await context.params;
   const store = await readStore();
   const item = store.library.find((entry) => entry.id === id);

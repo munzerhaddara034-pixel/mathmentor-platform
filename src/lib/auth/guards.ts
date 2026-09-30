@@ -91,3 +91,37 @@ export async function apiRequireAiAccess(): Promise<
   };
 }
 
+
+type OkLive = Extract<LiveSession, { ok: true }>;
+
+/** API guard: signed-in teacher/admin (staff). */
+export async function apiRequireStaff(): Promise<{ live: OkLive; error: null } | { live: null; error: NextResponse }> {
+  const guard = await apiSession();
+  if (guard.error) return { live: null, error: guard.error };
+  if (!isStaffRole(guard.live.user.role)) {
+    return {
+      live: null,
+      error: NextResponse.json({ ok: false, error: "Staff only.", errorAr: "للطاقم فقط." }, { status: 403 }),
+    };
+  }
+  return { live: guard.live, error: null };
+}
+
+/**
+ * API guard for destructive operations: admin role only (ADMIN_EMAILS + verified e-mail).
+ * Teachers are staff but cannot delete.
+ */
+export async function apiRequireAdmin(): Promise<{ live: OkLive; error: null } | { live: null; error: NextResponse }> {
+  const guard = await apiSession();
+  if (guard.error) return { live: null, error: guard.error };
+  if (guard.live.user.role !== "admin" || !guard.live.user.emailVerified) {
+    return {
+      live: null,
+      error: NextResponse.json(
+        { ok: false, error: "Admin only (destructive action).", errorAr: "للإدارة فقط (عملية حذف)." },
+        { status: 403 },
+      ),
+    };
+  }
+  return { live: guard.live, error: null };
+}

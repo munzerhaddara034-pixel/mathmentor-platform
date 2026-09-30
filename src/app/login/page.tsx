@@ -36,6 +36,7 @@ function ReasonNotice({ reason }: { reason: string | null }) {
 function LoginForm() {
   const params = useSearchParams();
   const next = params.get("next") || "";
+  const verifyToken = params.get("verify") || "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -50,7 +51,7 @@ function LoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ email, password, next, fingerprint: collectDeviceFingerprint() }),
+        body: JSON.stringify({ email, password, next, verifyToken: verifyToken || undefined, fingerprint: collectDeviceFingerprint() }),
       });
       const payload = (await response.json()) as LoginResponse;
       if (!response.ok || !payload.ok) {
@@ -68,6 +69,11 @@ function LoginForm() {
   return (
     <AuthCard title="تسجيل الدخول" lead="أهلاً بعودتك. ادخل لمتابعة دروسك وحصصك.">
       <ReasonNotice reason={params.get("reason")} />
+      {verifyToken ? (
+        <AuthNotice>
+          <p>أدخل بريدك وكلمة المرور لتأكيد البريد وتفعيل حسابك.</p>
+        </AuthNotice>
+      ) : null}
       <form onSubmit={(event) => void submit(event)} className="mm-auth-form">
         <label className="mm-field">
           <span>البريد الإلكتروني</span>

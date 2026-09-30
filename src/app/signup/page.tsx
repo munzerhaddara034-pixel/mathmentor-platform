@@ -24,21 +24,30 @@ export default function SignupPage() {
   const [role, setRole] = useState<UserRole>("student");
   const [linkedStudentEmail, setLinkedStudentEmail] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setBusy(true);
     setError("");
+    setNotice("");
     try {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, role, linkedStudentEmail }),
       });
-      const payload = (await response.json()) as { error?: string };
+      const payload = (await response.json()) as { error?: string; verificationRequired?: boolean; message?: string };
       if (!response.ok) {
         setError(payload.error ?? "تعذّر إنشاء الحساب");
+        setBusy(false);
+        return;
+      }
+      if (payload.verificationRequired) {
+        // No session yet: the account activates after the e-mailed link + sign-in.
+        setNotice(payload.message ?? "أرسلنا رابط التأكيد إلى بريدك. افتحه ثم سجّل الدخول.");
+        setPassword("");
         setBusy(false);
         return;
       }
@@ -95,6 +104,11 @@ export default function SignupPage() {
         {error ? (
           <AuthNotice tone="error">
             <p>{error}</p>
+          </AuthNotice>
+        ) : null}
+        {notice ? (
+          <AuthNotice>
+            <p>{notice}</p>
           </AuthNotice>
         ) : null}
         <button className="btn dark" type="submit" disabled={busy}>

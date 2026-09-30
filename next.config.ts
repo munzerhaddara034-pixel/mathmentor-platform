@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { securityHeaders } from "./src/lib/security/headers";
 
 const nextConfig: NextConfig = {
   // Render deploy (owner edit): self-contained server bundle.
@@ -10,6 +11,11 @@ const nextConfig: NextConfig = {
   // Type errors now fail the build again: the merged tree passes `tsc --noEmit` cleanly.
   typescript: {
     ignoreBuildErrors: false,
+  },
+  // Security headers on every response (CSP itself is report-only; see src/lib/security/headers.ts).
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders() }];
   },
   serverExternalPackages: ["pdf-parse", "@netlify/blobs", "livekit-server-sdk", "pg", "typescript"],
 };

@@ -4,6 +4,7 @@
  * this route keeps the owner's contract: POST { problem | question | text } → { success, data }.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { apiRequireAiAccess } from "@/lib/auth/guards";
 import { GoogleGenAI } from "@google/genai";
 
 export const runtime = "nodejs";
@@ -11,6 +12,9 @@ export const runtime = "nodejs";
 type SolveBody = { problem?: unknown; question?: unknown; text?: unknown };
 
 export async function POST(req: NextRequest) {
+  // Was open to anonymous callers (spends the Gemini key): require an AI-tier session.
+  const aiGuard = await apiRequireAiAccess();
+  if (aiGuard.error) return aiGuard.error;
   try {
     const body = (await req.json().catch(() => ({}))) as SolveBody;
     const candidate = [body.problem, body.question, body.text].find(

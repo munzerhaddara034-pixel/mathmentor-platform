@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+import { apiRequireStaff } from "@/lib/auth/guards";
 import { runEmployeeCommand } from "@/lib/commandEngine";
 import { createId } from "@/lib/ids";
 import { stampMessage } from "@/lib/manager";
 import { addCustomLesson, addManagerMessage, addOutreach, patchSettings, readStore } from "@/lib/store";
 
 export async function GET() {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const store = await readStore();
   return NextResponse.json({
     messages: store.managerMessages,
@@ -14,6 +17,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const body = (await request.json()) as { message?: string };
   const text = body.message?.trim();
   if (!text) return NextResponse.json({ error: "Give an order." }, { status: 400 });

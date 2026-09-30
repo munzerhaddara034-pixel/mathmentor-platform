@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiRequireStaff } from "@/lib/auth/guards";
 import { addCustomQuestion, readStore, updateCustomQuestion } from "@/lib/store";
 import { createId } from "@/lib/ids";
 import { formatLebaneseEquation, formatMathIslands } from "@/lib/math/lebaneseEquationFormat";
@@ -21,6 +22,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const body = (await request.json()) as Partial<QuizQuestion>;
   if (!body.lessonId || !body.prompt || !body.options?.length) {
     return NextResponse.json({ error: "أدخل السؤال والخيارات والدرس" }, { status: 400 });
@@ -42,6 +45,8 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+  const staffGuard = await apiRequireStaff();
+  if (staffGuard.error) return staffGuard.error;
   const body = (await request.json()) as Partial<QuizQuestion> & { id?: string };
   if (!body.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   const question = await updateCustomQuestion(body.id, { ...body, ...cleanQuestionFields(body) });

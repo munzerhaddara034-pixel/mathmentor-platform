@@ -1,6 +1,14 @@
 import { createId } from "../ids";
 import { readJsonFile, withStoreLock, writeJsonFile } from "../dataDir";
 import { isAdminEmail } from "./adminAllowlist";
+import {
+  checkVerificationToken,
+  isEmailVerified,
+  isPlausibleVerificationToken,
+  newVerificationToken,
+  shouldResendVerification,
+  type EmailVerificationState,
+} from "./emailVerification";
 import { classifyDevice, deviceDisplayName, fingerprintHash, formatDeviceTimestamp, type DeviceClass, type DeviceFingerprint } from "./device";
 import { hashPassword, hashToken } from "./passwords";
 import { isSessionSharingExempt, type AuthRole } from "./paths";
@@ -30,6 +38,12 @@ export type AuthUser = {
   liveCredits?: number;
   aiExpiresAt?: string | null;
   createdAt: string;
+  /**
+   * E-mail verification. `undefined` = account created before verification existed (grandfathered,
+   * treated as verified). `null` = signup pending confirmation. ISO string = verified at.
+   */
+  emailVerifiedAt?: string | null;
+  emailVerification?: EmailVerificationState | null;
 };
 
 export type AuthSession = {
@@ -69,6 +83,7 @@ export type PublicUser = {
   subscriptionType: SubscriptionType | null;
   liveCredits: number;
   aiExpiresAt: string | null;
+  emailVerified: boolean;
 };
 
 export function defaultAiExpiry(from = new Date(), days = AI_ACCESS_DAYS) {
@@ -114,6 +129,7 @@ function toPublic(user: AuthUser): PublicUser {
     subscriptionType: migrated.subscriptionType ?? null,
     liveCredits: migrated.liveCredits ?? 0,
     aiExpiresAt: migrated.aiExpiresAt ?? null,
+    emailVerified: isEmailVerified(migrated),
   };
 }
 
@@ -242,6 +258,8 @@ export async function ensureUserForProfile(input: {
   role: AuthRole;
   passwordHash: string;
   phone?: string;
+  /** New self-signups pass true: the account stays locked until the e-mail link is clicked. */
+  requireEmailVerification?: boolean;
 }): Promise<AuthUser> {
   const email = input.email.trim().toLowerCase();
   return mutateAuth((store) => {
@@ -258,6 +276,7 @@ export async function ensureUserForProfile(input: {
       liveCredits: 0,
       aiExpiresAt: null,
       createdAt: new Date().toISOString(),
+      ...(input.requireEmailVerification ? { emailVerifiedAt: null, emailVerification: null } : {}),
     });
     store.users.push(created);
     return created;
@@ -272,7 +291,8 @@ export async function ensureAdminRoleForAllowlistedEmail(userId: string): Promis
   return mutateAuth((store) => {
     const user = store.users.find((item) => item.id === userId);
     if (!user) return undefined;
-    if (isAdminEmail(user.email) && user.role !== "admin") {
+    // Admin rights only activate once the allowlisted address has proven ownership.
+    if (isAdminEmail(user.email) && isEmailVerified(user) && user.role !== "admin") {
       user.role = "admin";
       Object.assign(user, migrateUser(user));
     }
@@ -455,6 +475,8 @@ export async function findSessionByToken(token: string) {
   if (!session) return undefined;
   const user = store.users.find((item) => item.id === session.userId);
   if (!user) return undefined;
+  // Defense in depth: an unverified account never has a usable session.
+  if (!isEmailVerified(user)) return undefined;
   return { session, user, publicUser: toPublic(user) };
 }
 
@@ -478,3 +500,76 @@ export async function deleteSessionsForUser(userId: string) {
     store.sessions = store.sessions.filter((item) => item.userId !== userId);
   });
 }
+
+/**
+ * Issue (or re-issue) an e-mail verification token for a pending account.
+ * Returns the raw token (only ever sent by e-mail) or null when the account is already verified,
+ * missing, or a link was sent less than the resend gap ago (unless `force`).
+ */
+export async function issueEmailVerification(
+  userId: string,
+  opts: { force?: boolean; now?: number } = {},
+): Promise<{ token: string; user: AuthUser } | null> {
+  return mutateAuth((store) => {
+    const user = store.users.find((item) => item.id === userId);
+    if (!user || isEmailVerified(user)) return null;
+    if (!opts.force && !shouldResendVerification(user.emailVerification, opts.now)) return null;
+    const { token, state } = newVerificationToken(opts.now);
+    user.emailVerification = state;
+    return { token, user };
+  });
+}
+
+export type VerifyEmailOutcome =
+  | { ok: true; user: AuthUser; alreadyVerified: boolean }
+  | { ok: false; reason: "invalid" | "expired" };
+
+/**
+ * Redeem a verification token for one account. Called from login only after the password has
+ * been checked, so the account that gets verified is one whose password the link-holder knows
+ * (an e-mail squatter cannot get their password verified with the real owner's link).
+ * Activates admin rights when the address is on ADMIN_EMAILS.
+ */
+export async function verifyEmailForUser(userId: string, token: string, now = Date.now()): Promise<VerifyEmailOutcome> {
+  if (!isPlausibleVerificationToken(token)) return { ok: false, reason: "invalid" };
+  return mutateAuth((store) => {
+    const user = store.users.find((item) => item.id === userId);
+    if (!user) return { ok: false as const, reason: "invalid" as const };
+    if (isEmailVerified(user)) return { ok: true as const, user, alreadyVerified: true };
+    const check = checkVerificationToken(user.emailVerification, token, now);
+    if (!check.ok) return { ok: false as const, reason: check.reason === "expired" ? ("expired" as const) : ("invalid" as const) };
+    user.emailVerifiedAt = new Date(now).toISOString();
+    user.emailVerification = null;
+    if (isAdminEmail(user.email) && user.role !== "admin") {
+      user.role = "admin";
+      Object.assign(user, migrateUser(user));
+    }
+    return { ok: true as const, user, alreadyVerified: false };
+  });
+}
+
+/**
+ * Signup again with an address whose account was never verified: the new password/name replace
+ * the pending ones (the squatter never proved ownership). Verified accounts are never touched.
+ */
+export async function replacePendingSignup(
+  userId: string,
+  patch: { name: string; passwordHash: string; role: AuthRole },
+): Promise<AuthUser | undefined> {
+  return mutateAuth((store) => {
+    const user = store.users.find((item) => item.id === userId);
+    if (!user || isEmailVerified(user)) return undefined;
+    user.name = patch.name.trim() || user.name;
+    user.passwordHash = patch.passwordHash;
+    user.role = patch.role === "admin" || patch.role === "teacher" ? "student" : patch.role;
+    user.emailVerification = null;
+    return user;
+  });
+}
+
+/** Legacy accounts (created before e-mail verification) have no emailVerifiedAt field. */
+export function isLegacyAccount(user: Pick<AuthUser, "emailVerifiedAt">) {
+  return user.emailVerifiedAt === undefined;
+}
+
+export { isEmailVerified } from "./emailVerification";

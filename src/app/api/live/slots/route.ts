@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { apiRequireAdmin } from "@/lib/auth/guards";
+import { appendAuditLog } from "@/lib/security/audit";
+import { clientIpFrom } from "@/lib/security/rateLimit";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
 import { userAccess, userHasLiveAccess } from "@/lib/auth/store";
@@ -108,16 +111,20 @@ export async function POST(request: Request) {
   return NextResponse.json({ slot });
 }
 
+/** Destructive: admin only, and every deletion is written to the append-only audit log. */
 export async function DELETE(request: Request) {
-  const live = await getLiveSession();
-  if (!live.ok) {
-    return NextResponse.json({ error: "Sign in required.", errorAr: "يلزم تسجيل الدخول." }, { status: 401 });
-  }
-  if (!isStaffRole(live.user.role)) {
-    return NextResponse.json({ error: "Staff only." }, { status: 403 });
-  }
+  const guard = await apiRequireAdmin();
+  if (guard.error) return guard.error;
   const id = new URL(request.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id required." }, { status: 400 });
+  const before = (await listSlots()).find((slot) => slot.id === id);
+  await appendAuditLog({
+    action: "live_slot.delete",
+    actor: { id: guard.live.user.id, email: guard.live.user.email, role: guard.live.user.role },
+    target: `live-slot:${id}`,
+    ip: clientIpFrom(request.headers),
+    details: { existed: Boolean(before), slot: before ?? null },
+  });
   await removeSlot(id);
   return NextResponse.json({ ok: true });
 }

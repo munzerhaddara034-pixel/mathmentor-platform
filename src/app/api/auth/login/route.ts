@@ -6,9 +6,14 @@ import {
   ensureUserForProfile,
   findUserByEmail,
   asPublicUser,
+  isEmailVerified,
+  isLegacyAccount,
   userAccess,
+  verifyEmailForUser,
   type AuthUser,
 } from "@/lib/auth/store";
+import { sendVerificationEmail } from "@/lib/auth/sendVerification";
+import { authRateLimits, clientIpFrom, tooManyRequestsBody } from "@/lib/security/rateLimit";
 import { hashPassword, verifyPassword } from "@/lib/auth/passwords";
 import { startExclusiveSession } from "@/lib/auth/session";
 import { deviceClassLabel, deviceDisplayName, type DeviceFingerprint } from "@/lib/auth/device";
@@ -36,12 +41,23 @@ async function authenticateViaProfile(email: string, password: string): Promise<
   });
 }
 
+function limited(retryAfterSec: number) {
+  return NextResponse.json(tooManyRequestsBody(retryAfterSec), {
+    status: 429,
+    headers: { "Retry-After": String(retryAfterSec) },
+  });
+}
+
 export async function POST(request: Request) {
+  const ipLimit = authRateLimits.loginIp.hit(clientIpFrom(request.headers));
+  if (!ipLimit.ok) return limited(ipLimit.retryAfterSec);
   let body: {
     email?: string;
     password?: string;
     next?: string;
     fingerprint?: DeviceFingerprint;
+    /** Token from the confirmation e-mail link (/login?verify=…). */
+    verifyToken?: string;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -59,12 +75,57 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+  const emailKey = `login:${email}`;
+  const emailLimit = authRateLimits.loginEmailFailures.check(emailKey);
+  if (!emailLimit.ok) return limited(emailLimit.retryAfterSec);
+
   const stored = await findUserByEmail(email);
-  const authenticated =
-    stored && verifyPassword(password, stored.passwordHash) ? stored : await authenticateViaProfile(email, password);
-  // ADMIN_EMAILS allowlist: an existing account on the list is (re)granted the admin role at login.
+  let authenticated: AuthUser | null = null;
+  if (stored && verifyPassword(password, stored.passwordHash)) {
+    authenticated = stored;
+  } else if (!stored || isLegacyAccount(stored)) {
+    // Profile-DB fallback only for accounts that predate e-mail verification (or exist only in the
+    // profile DB). New accounts always carry their password in the session store.
+    authenticated = await authenticateViaProfile(email, password);
+  }
+
+  if (authenticated && !isEmailVerified(authenticated)) {
+    const token = body.verifyToken?.trim() || "";
+    const verified = token ? await verifyEmailForUser(authenticated.id, token) : null;
+    if (verified?.ok) {
+      authenticated = verified.user;
+    } else {
+      authRateLimits.loginEmailFailures.reset(emailKey);
+      let resent = false;
+      try {
+        resent = (await sendVerificationEmail(authenticated.id, request.url)).sent;
+      } catch {
+        resent = false;
+      }
+      const expired = verified && !verified.ok && verified.reason === "expired";
+      return NextResponse.json(
+        {
+          ok: false,
+          needsVerification: true,
+          resent,
+          error: expired
+            ? "This confirmation link expired. We sent a new one if possible — check your inbox."
+            : "Confirm your email first: open the link we sent you, then sign in again.",
+          errorAr: expired
+            ? "انتهت صلاحية رابط التأكيد. أرسلنا رابطاً جديداً إن أمكن — تحقّق من بريدك."
+            : resent
+              ? "يجب تأكيد بريدك أولاً. أرسلنا لك رابط تأكيد جديداً — افتحه ثم سجّل الدخول."
+              : "يجب تأكيد بريدك أولاً: افتح رابط التأكيد المرسل إليك ثم سجّل الدخول مجدداً.",
+        },
+        { status: 403 },
+      );
+    }
+  }
+
+  // ADMIN_EMAILS allowlist: an existing, verified account on the list is (re)granted admin at login.
   const user = authenticated ? ((await ensureAdminRoleForAllowlistedEmail(authenticated.id)) ?? authenticated) : null;
   if (!user) {
+    authRateLimits.loginEmailFailures.hit(emailKey);
     return NextResponse.json(
       {
         error: "Wrong email or password.",
@@ -73,6 +134,7 @@ export async function POST(request: Request) {
       { status: 401 },
     );
   }
+  authRateLimits.loginEmailFailures.reset(emailKey);
   const ua = request.headers.get("user-agent") ?? undefined;
   const started = await startExclusiveSession(user.id, body.fingerprint?.userAgent || ua, body.fingerprint);
   const publicUser = asPublicUser(user);
