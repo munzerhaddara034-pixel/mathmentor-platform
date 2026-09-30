@@ -12,6 +12,8 @@ import { DemoLocalAvPreview } from "./DemoLocalAvPreview";
 import { MediaPermissionBanner } from "./MediaPermissionBanner";
 import { useClassroomBoard } from "./useClassroomBoard";
 import { useClassroomToken, type ClassroomUser } from "./useClassroomToken";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
 
 const LiveKitClassroom = dynamic(
   () => import("./LiveConnectedRoom").then((mod) => mod.LiveKitClassroom),
@@ -33,12 +35,13 @@ function toggleList(list: string[], identity: string, allowed: boolean) {
 }
 
 function AccessDenied({ error, errorAr }: ActionError) {
+  const t = useNs(liveMessages).room;
   return (
-    <main className="shell live-classroom-page mm-mobile-stack" dir="rtl">
+    <main className="shell live-classroom-page mm-mobile-stack">
       <ApiErrorBanner error={error} errorAr={errorAr} className="live-token-error" />
       <p>
         <Link className="btn dark" href="/live">
-          العودة إلى الحجز / Back to booking
+          {t.backToBooking}
         </Link>
       </p>
     </main>
@@ -46,6 +49,7 @@ function AccessDenied({ error, errorAr }: ActionError) {
 }
 
 export function LiveClassroomComponent({ roomId, user, staff }: Props) {
+  const t = useNs(liveMessages).room;
   const { session, loading, allowed, live, reload } = useClassroomToken(roomId, user, staff);
   const sendRef = useRef<(message: ClassroomDataMessage) => void>(() => undefined);
   const send = useCallback((message: ClassroomDataMessage) => sendRef.current(message), []);
@@ -103,17 +107,17 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
         });
         if (!response.ok) {
           const payload = (await response.json().catch(() => ({}))) as ActionError;
-          setActionError({ error: payload.error ?? "Permission not saved.", errorAr: payload.errorAr ?? "لم تُحفظ الصلاحية." });
+          setActionError({ error: payload.error ?? t.permissionFailed, errorAr: payload.errorAr ?? t.permissionFailed });
           return;
         }
         setActionError({});
         if (typeof patch.canWriteBoard === "boolean") broadcast({ kind: "whiteboard.grant", identity, allowed: patch.canWriteBoard });
         if (typeof patch.canPublishAv === "boolean") broadcast({ kind: "av.grant", identity, allowed: patch.canPublishAv });
       } catch {
-        setActionError({ error: "Permission not saved.", errorAr: "تعذّر حفظ الصلاحية — تحقّق من الاتصال." });
+        setActionError({ error: t.permissionFailed, errorAr: t.permissionFailed });
       }
     },
-    [broadcast, roomId],
+    [broadcast, roomId, t],
   );
 
   const endClass = useCallback(async () => {
@@ -126,16 +130,16 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
       });
       if (!response.ok) {
         const payload = (await response.json().catch(() => ({}))) as ActionError;
-        setActionError({ error: payload.error ?? "Could not end the class.", errorAr: payload.errorAr ?? "تعذّر إنهاء الحصة." });
+        setActionError({ error: payload.error ?? t.endFailed, errorAr: payload.errorAr ?? t.endFailed });
         return;
       }
       broadcast({ kind: "class.end" });
     } catch {
-      setActionError({ error: "Could not end the class.", errorAr: "تعذّر إنهاء الحصة — تحقّق من الاتصال." });
+      setActionError({ error: t.endFailed, errorAr: t.endFailed });
     }
-  }, [broadcast, roomId]);
+  }, [broadcast, roomId, t]);
 
-  /** Teacher «ابدأ من جديد»: a fresh token request reopens the room server-side. */
+  /** Teacher "Start again": a fresh token request reopens the room server-side. */
   const restartClass = useCallback(async () => {
     await reload();
     await boardApi.pullBoard();
@@ -193,26 +197,17 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
   return (
     <main className="live-classroom-page mm-mobile-stack">
       <ApiErrorBanner error={errors.error} errorAr={errors.errorAr} className="live-token-error" />
-      <p className="muted live-sync-hint" role="status" dir="rtl">
-        {live
-          ? "مزامنة السبورة عبر قناة LiveKit (بيانات خفيفة) · Whiteboard: LiveKit data"
-          : "وضع تجريبي: مزامنة السبورة كل ٤ ثوانٍ عبر HTTP · Demo mode: HTTP sync every 4 s"}
+      <p className="muted live-sync-hint" role="status">
+        {live ? t.syncLive : t.syncDemo}
       </p>
       {!live ? (
         <MediaPermissionBanner
           tone="info"
-          error={
-            demoAvAllowed
-              ? "Demo mode: no LiveKit connection. Local camera/mic preview only (not broadcast)."
-              : "Demo mode: camera & microphone are not connected yet."
-          }
-          errorAr={
-            demoAvAllowed
-              ? "وضع تجريبي: لا اتصال فيديو بعد. معاينة محلية للكاميرا/الميكروفون فقط (بدون بث)."
-              : "وضع تجريبي: الصوت والصورة غير متصلين بعد. السبورة تعمل ويراها الجميع."
-          }
+          error={demoAvAllowed ? t.demoPreview : t.demoNoAv}
+          errorAr={demoAvAllowed ? t.demoPreview : t.demoNoAv}
           hint={mediaPermissionCopy("both").hint}
           hintAr={mediaPermissionCopy("both").hintAr}
+          hintFr={mediaPermissionCopy("both").hintFr}
         />
       ) : null}
       {live ? (
@@ -233,7 +228,7 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
           userId={user.id}
           stage={stage}
           roster={demoRoster}
-          rosterNotice="وضع تجريبي: لا تظهر قائمة الحضور الحقيقية ولا تصل الدردشة للآخرين قبل ربط LiveKit. السبورة مشتركة."
+          rosterNotice={t.demoRoster}
           video={demoAvAllowed ? <DemoLocalAvPreview enabled muted={muted} cameraOff={cameraOff} /> : undefined}
         />
       )}

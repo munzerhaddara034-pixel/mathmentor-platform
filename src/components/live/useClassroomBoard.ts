@@ -10,6 +10,8 @@ import type {
   WhiteboardStroke,
 } from "@/lib/livekit/protocol";
 import { chunkStroke, StrokeAssembler } from "@/lib/livekit/strokeCodec";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
 
 /** Demo/HTTP mode poll interval. With LiveKit the board only re-syncs on (re)connect / tab focus. */
 export const DEMO_POLL_MS = 4_000;
@@ -35,6 +37,7 @@ export function useClassroomBoard(input: {
   send: (message: ClassroomDataMessage) => void;
 }) {
   const { roomId, live, ready, send } = input;
+  const t = useNs(liveMessages).room;
   const [board, setBoard] = useState<BoardSnapshot>(emptyBoard);
   const [boardError, setBoardError] = useState<BoardError>({});
   const [loaded, setLoaded] = useState(false);
@@ -53,7 +56,7 @@ export function useClassroomBoard(input: {
       if (response.status === 304) return;
       const payload = (await response.json()) as BoardGetResponse;
       if (!response.ok || !payload.delta) {
-        setBoardError({ error: payload.error ?? "Board unavailable.", errorAr: payload.errorAr ?? "تعذّر تحميل السبورة." });
+        setBoardError({ error: payload.error ?? t.boardUnavailable, errorAr: payload.errorAr ?? t.boardUnavailable });
         return;
       }
       const delta = payload.delta;
@@ -61,12 +64,12 @@ export function useClassroomBoard(input: {
       setBoard((current) => applyBoardDelta(current, delta));
       setBoardError({});
     } catch {
-      setBoardError({ error: "Board sync failed — retrying.", errorAr: "تعذّرت مزامنة السبورة — نعيد المحاولة." });
+      setBoardError({ error: t.boardSyncFailed, errorAr: t.boardSyncFailed });
     } finally {
       inFlight.current = false;
       setLoaded(true);
     }
-  }, [roomId]);
+  }, [roomId, t]);
 
   const postOp = useCallback(
     async (op: BoardOpBody) => {
@@ -79,13 +82,13 @@ export function useClassroomBoard(input: {
         });
         if (!response.ok) {
           const payload = (await response.json().catch(() => ({}))) as BoardError;
-          setBoardError({ error: payload.error ?? "Could not save to the board.", errorAr: payload.errorAr ?? "تعذّر الحفظ على السبورة." });
+          setBoardError({ error: payload.error ?? t.boardSaveFailed, errorAr: payload.errorAr ?? t.boardSaveFailed });
         }
       } catch {
-        setBoardError({ error: "Could not save to the board.", errorAr: "تعذّر الحفظ على السبورة — تحقّق من الاتصال." });
+        setBoardError({ error: t.boardSaveFailed, errorAr: t.boardSaveFailed });
       }
     },
-    [roomId],
+    [roomId, t],
   );
 
   // Initial load + demo-mode polling (paused while the tab is hidden).

@@ -5,6 +5,10 @@ import { INSTRUCTOR_AR, INSTRUCTOR_EN } from "@/lib/pedagogy/lebanese";
 import type { ClassroomChatLine, ClassroomTokenPayload, WhiteboardEquation, WhiteboardPlot, WhiteboardStroke } from "@/lib/livekit/protocol";
 import { MathWhiteboard } from "./MathWhiteboard";
 import { VoiceToBoardPanel } from "./VoiceToBoardPanel";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { liveMessages } from "@/lib/i18n/ns/live";
+import { pickLang } from "@/lib/i18n/pick";
+import { rich } from "@/lib/i18n/rich";
 
 export type RosterEntry = {
   identity: string;
@@ -34,7 +38,7 @@ export type ClassroomStageState = {
   onGrantWrite: (identity: string, allowed: boolean) => void;
   onGrantAv: (identity: string, allowed: boolean) => void;
   onEndClass: () => void;
-  /** Teacher only: reopen an ended class («ابدأ من جديد»). */
+  /** Teacher only: reopen an ended class ("Start again"). */
   onRestartClass: () => void;
   ended: boolean;
   muted: boolean;
@@ -59,51 +63,48 @@ type Props = {
 };
 
 export function ClassroomStage({ session, userId, stage, roster, rosterNotice, mediaExtras, video, avControls, chat, onLeave }: Props) {
+  const { locale } = useI18n();
+  const t = liveMessages[locale].room;
+  const instructor = locale === "ar" ? INSTRUCTOR_AR : INSTRUCTOR_EN;
+  const sessionError = pickLang(locale, session.error, session.errorAr);
   return (
-    <div className="live-classroom mm-mobile-stack" dir="rtl">
+    <div className="live-classroom mm-mobile-stack">
       <header className="live-classroom-banner">
         <div>
-          <p className="eyebrow">صف مباشر · Live classroom</p>
-          <h1>
-            {INSTRUCTOR_AR} / {INSTRUCTOR_EN}
-          </h1>
+          <p className="eyebrow">{t.eyebrow}</p>
+          <h1>{instructor}</h1>
           <p className="muted">
-            الغرفة <span dir="ltr">{session.roomName}</span>
-            {session.demo ? " · وضع تجريبي بدون LiveKit Cloud" : ""}
-            {session.isTeacher ? " · أستاذ" : " · طالب"}
+            {rich(t.room, { name: <span dir="ltr">{session.roomName}</span> })}
+            {session.demo ? ` · ${t.demo}` : ""}
+            {session.isTeacher ? ` · ${t.teacher}` : ` · ${t.student}`}
           </p>
         </div>
         <div className="live-classroom-banner-actions">
           {session.isTeacher && stage.ended ? (
             <button className="btn dark" type="button" onClick={stage.onRestartClass}>
-              ابدأ الحصة من جديد / Start again
+              {t.restart}
             </button>
           ) : session.isTeacher ? (
             <button className="btn warn" type="button" onClick={stage.onEndClass}>
-              إنهاء الحصة للجميع / End class for all
+              {t.endAll}
             </button>
           ) : (
             <button className="btn" type="button" onClick={onLeave}>
-              مغادرة / Leave
+              {t.leave}
             </button>
           )}
         </div>
       </header>
-      {session.error ? (
+      {sessionError ? (
         <div
           className={session.demo && !session.ok ? "live-demo-banner" : "studio-teacher-error mm-api-error"}
           role="alert"
         >
-          <p>{session.error}</p>
-          {session.errorAr ? (
-            <p dir="rtl" lang="ar">
-              {session.errorAr}
-            </p>
-          ) : null}
+          <p>{sessionError}</p>
         </div>
       ) : null}
       {stage.ended ? (
-        <p className="error">انتهت الحصة. / This class has ended.</p>
+        <p className="error">{t.ended}</p>
       ) : null}
 
       <div className="live-classroom-split">
@@ -122,27 +123,27 @@ export function ClassroomStage({ session, userId, stage, roster, rosterNotice, m
 
         <aside className="live-classroom-side">
           <section className="card live-video-card">
-            <h2>الفيديو / Video</h2>
+            <h2>{t.video}</h2>
             {mediaExtras}
             {video ?? (
               <div className="live-video-grid live-video-placeholders">
                 <article className="live-tile teacher">
-                  <strong>{INSTRUCTOR_EN}</strong>
-                  <span>{INSTRUCTOR_AR}</span>
+                  <strong>{instructor}</strong>
+                  <span>{t.teacherRole}</span>
                 </article>
                 <article className="live-tile">
                   <strong>{session.name}</strong>
-                  <span>{session.isTeacher ? "أستاذ / Teacher" : "طالب / Student"}</span>
+                  <span>{session.isTeacher ? t.teacherRole : t.studentRole}</span>
                 </article>
               </div>
             )}
             {avControls ?? (
               <div className="live-av-toggles">
                 <button className="btn" type="button" onClick={stage.onToggleMute} disabled={!session.isTeacher && !session.canPublishAv}>
-                  {stage.muted ? "إلغاء الكتم / Unmute" : "كتم / Mute"}
+                  {stage.muted ? t.unmute : t.mute}
                 </button>
                 <button className="btn" type="button" onClick={stage.onToggleCamera} disabled={!session.isTeacher && !session.canPublishAv}>
-                  {stage.cameraOff ? "تشغيل الكاميرا / Camera on" : "إيقاف الكاميرا / Camera off"}
+                  {stage.cameraOff ? t.cameraOn : t.cameraOff}
                 </button>
               </div>
             )}
@@ -157,7 +158,7 @@ export function ClassroomStage({ session, userId, stage, roster, rosterNotice, m
           ) : null}
 
           <section className="card">
-            <h2>المشاركون / Participants</h2>
+            <h2>{t.participants}</h2>
             {rosterNotice ? (
               <p className="muted live-roster-notice" role="note">
                 {rosterNotice}
@@ -173,9 +174,9 @@ export function ClassroomStage({ session, userId, stage, roster, rosterNotice, m
                     <div>
                       <strong>{person.name}</strong>
                       <p className="muted">
-                        {raised ? "✋ يد مرفوعة / hand raised · " : ""}
-                        {writer ? "سبورة / board · " : ""}
-                        {person.identity === userId ? "أنت / you" : person.identity}
+                        {raised ? t.handRaised : ""}
+                        {writer ? t.boardTag : ""}
+                        {person.identity === userId ? t.you : person.identity}
                       </p>
                     </div>
                     {session.isTeacher && person.identity !== userId ? (
@@ -185,14 +186,14 @@ export function ClassroomStage({ session, userId, stage, roster, rosterNotice, m
                           type="button"
                           onClick={() => stage.onGrantWrite(person.identity, !stage.writers.includes(person.identity))}
                         >
-                          {stage.writers.includes(person.identity) ? "سحب السبورة / Revoke board" : "سماح السبورة / Grant board"}
+                          {stage.writers.includes(person.identity) ? t.revokeBoard : t.grantBoard}
                         </button>
                         <button
                           className="btn dark"
                           type="button"
                           onClick={() => stage.onGrantAv(person.identity, !av)}
                         >
-                          {av ? "قفل الكاميرا / Lock AV" : "سماح الكاميرا / Grant AV"}
+                          {av ? t.lockAv : t.grantAv}
                         </button>
                       </div>
                     ) : null}
@@ -201,16 +202,16 @@ export function ClassroomStage({ session, userId, stage, roster, rosterNotice, m
               })}
             </ul>
             <button className="btn dark" type="button" onClick={stage.onRaiseHand}>
-              {stage.handRaised ? "إنزال اليد / Lower hand" : "رفع اليد / Raise hand"}
+              {stage.handRaised ? t.lowerHand : t.raiseHand}
             </button>
           </section>
 
           <section className="card live-chat-card">
-            <h2>الدردشة / Chat</h2>
+            <h2>{t.chat}</h2>
             {chat ?? (
               <>
                 <ul className="live-chat-log">
-                  {stage.chatLines.length === 0 ? <li className="muted">لا رسائل بعد.</li> : null}
+                  {stage.chatLines.length === 0 ? <li className="muted">{t.noMessages}</li> : null}
                   {stage.chatLines.map((line) => (
                     <li key={line.id}>
                       <strong>{line.name}:</strong> {line.text}
@@ -227,10 +228,10 @@ export function ClassroomStage({ session, userId, stage, roster, rosterNotice, m
                   <input
                     value={stage.chatText}
                     onChange={(event) => stage.onChatText(event.target.value)}
-                    placeholder="رسالة للصف / Message the class"
+                    placeholder={t.messagePh}
                   />
                   <button className="btn dark" type="submit">
-                    إرسال
+                    {t.send}
                   </button>
                 </form>
               </>

@@ -2,22 +2,25 @@
 
 import { useConnectionQualityIndicator } from "@livekit/components-react";
 import { ConnectionQuality, type Participant } from "livekit-client";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
 
-const LABELS: Record<ConnectionQuality, { ar: string; en: string; tone: string }> = {
-  [ConnectionQuality.Excellent]: { ar: "الاتصال ممتاز", en: "Excellent", tone: "good" },
-  [ConnectionQuality.Good]: { ar: "الاتصال جيد", en: "Good", tone: "good" },
-  [ConnectionQuality.Poor]: { ar: "الاتصال ضعيف — فعّل «صوت فقط»", en: "Poor — try audio only", tone: "poor" },
-  [ConnectionQuality.Lost]: { ar: "انقطع الاتصال… نعيد المحاولة", en: "Reconnecting…", tone: "lost" },
-  [ConnectionQuality.Unknown]: { ar: "جارٍ قياس الاتصال", en: "Measuring…", tone: "unknown" },
+const LABELS: Record<ConnectionQuality, { key: "excellent" | "good" | "poor" | "lost" | "unknown"; tone: string }> = {
+  [ConnectionQuality.Excellent]: { key: "excellent", tone: "good" },
+  [ConnectionQuality.Good]: { key: "good", tone: "good" },
+  [ConnectionQuality.Poor]: { key: "poor", tone: "poor" },
+  [ConnectionQuality.Lost]: { key: "lost", tone: "lost" },
+  [ConnectionQuality.Unknown]: { key: "unknown", tone: "unknown" },
 };
 
 /** Local participant's network quality as reported by the LiveKit server. */
 export function NetworkQualityBadge({ participant }: { participant?: Participant }) {
+  const t = useNs(liveMessages).room.quality;
   const { quality } = useConnectionQualityIndicator({ participant });
   const label = LABELS[quality] ?? LABELS[ConnectionQuality.Unknown];
   return (
-    <p className={`live-net-quality live-net-quality--${label.tone}`} role="status" aria-live="polite" dir="rtl">
-      <span aria-hidden="true">●</span> {label.ar} <span dir="ltr">· {label.en}</span>
+    <p className={`live-net-quality live-net-quality--${label.tone}`} role="status" aria-live="polite">
+      <span aria-hidden="true">●</span> {t[label.key]}
     </p>
   );
 }

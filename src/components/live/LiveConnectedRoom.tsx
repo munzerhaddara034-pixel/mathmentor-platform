@@ -28,6 +28,8 @@ import { ClassroomStage, type ClassroomStageState } from "./ClassroomStage";
 import { MediaPermissionBanner } from "./MediaPermissionBanner";
 import { NetworkQualityBadge } from "./NetworkQualityBadge";
 import { useAudioOnly } from "./useAudioOnly";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages, type LiveMessages } from "@/lib/i18n/ns/live";
 
 type Props = {
   session: ClassroomTokenPayload;
@@ -44,17 +46,17 @@ type Props = {
 type MediaBanner = {
   error?: string;
   errorAr?: string;
+  errorFr?: string;
   hint?: string;
   hintAr?: string;
+  hintFr?: string;
 };
+
+type RoomCopy = LiveMessages["room"];
 
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
-const ENABLE_LABEL = "تفعيل الكاميرا والميكروفون";
-const OVERLAY_CTA = "اضغط لتفعيل الكاميرا والصوت";
-const OVERLAY_CTA_AUDIO = "اضغط لتفعيل الصوت";
-const CONNECTING_LABEL = "جاري الاتصال…";
 
 function kindFromMediaDevice(kind?: MediaDeviceKind): "microphone" | "camera" | "both" {
   if (kind === "audioinput") return "microphone";
@@ -66,25 +68,22 @@ function partialFailureBanner(
   micOk: boolean,
   camOk: boolean,
   failure: MediaBanner,
+  t: RoomCopy,
 ): MediaBanner {
   if (micOk && !camOk) {
     return {
-      error: failure.error ?? "Camera failed; microphone is on.",
-      errorAr: failure.errorAr
-        ? `الميكروفون يعمل. الكاميرا فشلت: ${failure.errorAr}`
-        : "الميكروفون يعمل لكن تعذّر تشغيل الكاميرا.",
-      hint: failure.hint,
-      hintAr: failure.hintAr,
+      ...failure,
+      error: failure.error ? `${t.camFailed} ${failure.error}` : t.camFailed,
+      errorAr: failure.errorAr ? `${t.camFailed} ${failure.errorAr}` : t.camFailed,
+      errorFr: failure.errorFr ? `${t.camFailed} ${failure.errorFr}` : t.camFailed,
     };
   }
   if (!micOk && camOk) {
     return {
-      error: failure.error ?? "Microphone failed; camera is on.",
-      errorAr: failure.errorAr
-        ? `الكاميرا تعمل. الميكروفون فشل: ${failure.errorAr}`
-        : "الكاميرا تعمل لكن تعذّر تشغيل الميكروفون.",
-      hint: failure.hint,
-      hintAr: failure.hintAr,
+      ...failure,
+      error: failure.error ? `${t.micFailed} ${failure.error}` : t.micFailed,
+      errorAr: failure.errorAr ? `${t.micFailed} ${failure.errorAr}` : t.micFailed,
+      errorFr: failure.errorFr ? `${t.micFailed} ${failure.errorFr}` : t.micFailed,
     };
   }
   return failure;
@@ -106,6 +105,7 @@ function ConnectedShell({
   onEnableAv: () => void;
   onEnableFailure: (banner: MediaBanner | null) => void;
 }) {
+  const t = useNs(liveMessages).room;
   const room = useRoomContext();
   const connectionState = useConnectionState(room);
   const { localParticipant, isMicrophoneEnabled, isCameraEnabled } = useLocalParticipant();
@@ -128,7 +128,7 @@ function ConnectedShell({
 
   const [enabling, setEnabling] = useState(false);
   const { audioOnly, setAudioOnly } = useAudioOnly(room);
-  const enableLabel = audioOnly ? "تفعيل الميكروفون (صوت فقط)" : ENABLE_LABEL;
+  const enableLabel = audioOnly ? t.enableMic : t.enableAv;
   const permissions = useLocalParticipantPermissions();
 
   useEffect(() => {
@@ -172,10 +172,10 @@ function ConnectedShell({
     if (!canPublish) return;
     if (!roomConnected) {
       onEnableFailure({
-        error: "Still connecting to the classroom…",
-        errorAr: CONNECTING_LABEL,
-        hint: mediaPermissionCopy("both").hint,
-        hintAr: mediaPermissionCopy("both").hintAr,
+        ...mediaPermissionCopy("both"),
+        error: t.stillConnecting,
+        errorAr: t.stillConnecting,
+        errorFr: t.stillConnecting,
       });
       return;
     }
@@ -188,7 +188,7 @@ function ConnectedShell({
           return;
         }
         if (result.failure) {
-          onEnableFailure(partialFailureBanner(result.micOk, result.camOk, result.failure));
+          onEnableFailure(partialFailureBanner(result.micOk, result.camOk, result.failure, t));
           return;
         }
         onEnableFailure(mediaPermissionCopy("both"));
@@ -198,7 +198,7 @@ function ConnectedShell({
         setEnabling(false);
       }
     })();
-  }, [audioOnly, canPublish, localParticipant, onEnableAv, onEnableFailure, roomConnected]);
+  }, [audioOnly, canPublish, localParticipant, onEnableAv, onEnableFailure, roomConnected, t]);
 
   const showAvOverlay = canPublish && !avLive && roomConnected;
   const showConnectingOverlay = canPublish && !roomConnected;
@@ -219,21 +219,17 @@ function ConnectedShell({
           className="live-av-overlay-cta"
           onClick={enableAv}
           disabled={enabling}
-          aria-label={audioOnly ? OVERLAY_CTA_AUDIO : OVERLAY_CTA}
+          aria-label={audioOnly ? t.tapAudio : t.tapAv}
         >
-          <span className="live-av-overlay-cta-label" dir="rtl" lang="ar">
-            {enabling ? CONNECTING_LABEL : audioOnly ? OVERLAY_CTA_AUDIO : OVERLAY_CTA}
+          <span className="live-av-overlay-cta-label">
+            {enabling ? t.connecting : audioOnly ? t.tapAudio : t.tapAv}
           </span>
-          <span className="live-av-overlay-cta-sub" dir="ltr">
-            {audioOnly ? "Enable mic (audio only)" : "Enable camera & mic"}
-          </span>
+          <span className="live-av-overlay-cta-sub">{enableLabel}</span>
         </button>
       ) : null}
       {showConnectingOverlay ? (
         <div className="live-av-overlay-cta live-av-overlay-connecting" role="status" aria-live="polite">
-          <span className="live-av-overlay-cta-label" dir="rtl" lang="ar">
-            {CONNECTING_LABEL}
-          </span>
+          <span className="live-av-overlay-cta-label">{t.connecting}</span>
         </div>
       ) : null}
     </div>
@@ -243,14 +239,16 @@ function ConnectedShell({
     <>
       <RoomAudioRenderer />
       {!roomConnected ? (
-        <MediaPermissionBanner tone="info" error="Connecting…" errorAr={CONNECTING_LABEL} />
+        <MediaPermissionBanner tone="info" error={t.connecting} errorAr={t.connecting} />
       ) : null}
       {mediaBanner ? (
         <MediaPermissionBanner
           error={mediaBanner.error}
           errorAr={mediaBanner.errorAr}
+          errorFr={mediaBanner.errorFr}
           hint={mediaBanner.hint}
           hintAr={mediaBanner.hintAr}
+          hintFr={mediaBanner.hintFr}
           retryLabel={enableLabel}
           onRetry={enableAv}
         />
@@ -258,10 +256,11 @@ function ConnectedShell({
       {needsEnableNudge ? (
         <MediaPermissionBanner
           tone="info"
-          error="Camera and microphone are off. Tap the overlay or the button below (browser may ask for permission)."
-          errorAr="الكاميرا والميكروفون مطفآن. اضغط على الفيديو أو الزر أدناه (قد يطلب المتصفح الإذن)."
+          error={t.avOff}
+          errorAr={t.avOff}
           hint={mediaPermissionCopy("both").hint}
           hintAr={mediaPermissionCopy("both").hintAr}
+          hintFr={mediaPermissionCopy("both").hintFr}
           retryLabel={enableLabel}
           onRetry={enableAv}
         />
@@ -281,15 +280,15 @@ function ConnectedShell({
         avControls={
           canPublish ? (
             <div className="live-av-toggles">
-              <TrackToggle source={Track.Source.Microphone}>صوت / Mic</TrackToggle>
-              {audioOnly ? null : <TrackToggle source={Track.Source.Camera}>كاميرا / Camera</TrackToggle>}
+              <TrackToggle source={Track.Source.Microphone}>{t.mic}</TrackToggle>
+              {audioOnly ? null : <TrackToggle source={Track.Source.Camera}>{t.camera}</TrackToggle>}
               {session.isTeacher ? (
                 <TrackToggle
                   source={Track.Source.ScreenShare}
                   captureOptions={LOW_DATA_SCREEN_CAPTURE}
                   publishOptions={LOW_DATA_SCREEN_PUBLISH}
                 >
-                  مشاركة الشاشة / Share screen
+                  {t.shareScreen}
                 </TrackToggle>
               ) : null}
               <button
@@ -298,13 +297,11 @@ function ConnectedShell({
                 onClick={enableAv}
                 disabled={enabling || !roomConnected}
               >
-                {!roomConnected ? CONNECTING_LABEL : enabling ? "…" : enableLabel}
+                {!roomConnected ? t.connecting : enabling ? "…" : enableLabel}
               </button>
             </div>
           ) : (
-            <p className="muted">
-              الكاميرا والصوت مقفولان حتى يسمح الأستاذ. / AV locked until the teacher grants publish.
-            </p>
+            <p className="muted">{t.avLocked}</p>
           )
         }
         chat={<Chat />}
@@ -322,7 +319,7 @@ export function LiveKitClassroom(props: Props) {
   const applyFailure = useCallback((failure?: MediaDeviceFailure, kind?: MediaDeviceKind) => {
     const mappedKind = kindFromMediaDevice(kind);
     if (failure === MediaDeviceFailure.PermissionDenied) {
-      setMediaBanner(mediaPermissionCopy(mappedKind, "Permission denied."));
+      setMediaBanner(permissionErrorFromUnknown({ name: "NotAllowedError", message: "Permission denied." }, mappedKind));
       return;
     }
     if (failure === MediaDeviceFailure.NotFound) {

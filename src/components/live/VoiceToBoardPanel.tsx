@@ -6,6 +6,9 @@ import { Katex } from "@/components/studio/Katex";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
 import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
 import { DEMO_DICTATIONS } from "@/lib/voiceMath/demo";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { liveMessages } from "@/lib/i18n/ns/live";
 import {
   callPedagogicalTutorClient,
   tutorLatexFragments,
@@ -70,6 +73,8 @@ function pushLatexList(
 
 export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
   const { curriculumId, curriculum, ready } = useCurriculum();
+  const { locale } = useI18n();
+  const t = liveMessages[locale].voice;
   const [clip, setClip] = useState<RecordedClip | null>(null);
   const [phase, setPhase] = useState<"idle" | "stt" | "tutor">("idle");
   const [error, setError] = useState("");
@@ -102,8 +107,8 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
         form.set("audio", clip.blob, clip.mimeType.includes("wav") ? "dictation.wav" : "dictation.webm");
         form.set("durationSec", String(clip.durationSec));
       } else {
-        setError("Record audio first, or use the demo transcript.");
-        setErrorAr("سجّل صوتًا أولًا، أو استخدم النص التجريبي.");
+        setError(t.recordFirst);
+        setErrorAr(t.recordFirst);
         setPhase("idle");
         return;
       }
@@ -115,8 +120,8 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
       });
       const payload = (await response.json()) as SolvePayload;
       if (!response.ok || !payload.ok || !payload.job) {
-        setError(payload.error || "Could not convert speech to board math.");
-        setErrorAr(payload.errorAr || "تعذّر تحويل الصوت إلى معادلات على السبورة.");
+        setError(payload.error || t.convertFailed);
+        setErrorAr(payload.errorAr || t.convertFailed);
         setPhase("idle");
         return;
       }
@@ -145,7 +150,7 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
               payload.warning || job.warning,
               tutorResult.warning,
               tutorResult.warningAr,
-              `أُرسلت ${voiceCount + tutorCount} معادلة إلى السبورة (صوت + معلّم) / Pushed ${voiceCount + tutorCount} equation(s) (voice + tutor).`,
+              fmt(t.pushed, { n: voiceCount + tutorCount }),
             ]
               .filter(Boolean)
               .join(" · "),
@@ -154,7 +159,7 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
           setNotice(
             payload.warning ||
               job.warning ||
-              `أُرسلت ${voiceCount + tutorCount} معادلة (صوت + معلّم بيداغوجي) / Pushed ${voiceCount + tutorCount} (voice + pedagogical tutor).`,
+              fmt(t.pushed, { n: voiceCount + tutorCount }),
           );
         }
       } else {
@@ -162,19 +167,19 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
           payload.warning ||
             job.warning ||
             (voiceCount > 0
-              ? `أُرسلت ${voiceCount} معادلة من الصوت؛ تعذّر المعلّم. / Voice board OK (${voiceCount}); tutor failed.`
-              : "تم التحويل لكن لم تُستخرج معادلات."),
+              ? fmt(t.pushedVoiceOnly, { n: voiceCount })
+              : t.noEquations),
         );
-        const tutorErr = tutorResult.error || "Tutor failed.";
-        const tutorErrAr = tutorResult.errorAr || "تعذّر المعلّم.";
+        const tutorErr = tutorResult.error || t.tutorFailed;
+        const tutorErrAr = tutorResult.errorAr || t.tutorFailed;
         const paywalled = /AI_TIER|subscription required|اشتراك/i.test(tutorErr + tutorErrAr);
-        setError(paywalled ? `${tutorErr} Redeem at /redeem?need=ai` : tutorErr);
-        setErrorAr(paywalled ? `${tutorErrAr} · فعّل على /redeem` : tutorErrAr);
+        setError(paywalled ? `${tutorErr} · ${t.activateAt}` : tutorErr);
+        setErrorAr(paywalled ? `${tutorErrAr} · ${t.activateAt}` : tutorErrAr);
       }
       setPushedCount(voiceCount + tutorCount);
     } catch {
-      setError("Network error while converting voice.");
-      setErrorAr("خطأ في الشبكة أثناء تحويل الصوت.");
+      setError(t.network);
+      setErrorAr(t.network);
     } finally {
       setPhase("idle");
     }
@@ -183,18 +188,17 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
   const sample = DEMO_DICTATIONS.find((item) => item.id === demoId) ?? DEMO_DICTATIONS[0];
 
   return (
-    <section className="card live-voice-to-board mm-mobile-stack" aria-label="تسجيل صوت للسبورة / Voice to board">
-      <p className="eyebrow">تسجيل صوت للسبورة / Voice → Tutor → Board</p>
-      <h2>الميكروفون → المعلّم البيداغوجي → السبورة</h2>
+    <section className="card live-voice-to-board mm-mobile-stack" aria-label={t.label}>
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h2>{t.title}</h2>
       <p className="muted">
-        سجّل شرحًا قصيرًا؛ Whisper (أو نص تجريبي) → LaTeX → معلّم مباشر ({curriculum.labelAr}
-        {!ready ? "…" : ""}) → KaTeX على السبورة المشتركة.
+        {fmt(t.lead, { curriculum: `${locale === "ar" ? curriculum.labelAr : curriculum.labelEn}${!ready ? "…" : ""}` })}
       </p>
 
       <VoiceRecorder onClip={setClip} disabled={disabled || busy} compact />
 
       <div className="live-voice-demo" style={{ marginTop: 12 }}>
-        <p className="eyebrow">بدون ميكروفون / Demo (no Whisper credits needed)</p>
+        <p className="eyebrow">{t.demoEyebrow}</p>
         <div className="row sample-chips" style={{ marginTop: 8 }}>
           {DEMO_DICTATIONS.map((item) => (
             <button
@@ -204,7 +208,7 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
               disabled={busy || disabled}
               onClick={() => setDemoId(item.id)}
             >
-              {item.labelAr}
+              {locale === "ar" ? item.labelAr : item.labelEn}
             </button>
           ))}
         </div>
@@ -221,10 +225,10 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
           disabled={busy || disabled || !clip}
           onClick={() => void submit({ demo: false })}
         >
-          {busy ? "…" : "إلى السبورة / Push recording"}
+          {busy ? "…" : t.push}
         </button>
         <button className="btn" type="button" disabled={busy || disabled} onClick={() => void submit({ demo: true })}>
-          {busy ? (phase === "tutor" ? "معلّم…" : "جارٍ التحويل…") : "تجربة إلى السبورة / Demo to board"}
+          {busy ? (phase === "tutor" ? t.tutorBusy : t.converting) : t.demo}
         </button>
       </div>
 
@@ -233,7 +237,7 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
         <div className="live-voice-skeleton" style={{ marginTop: 12 }} aria-busy="true">
           <SkeletonBlock
             lines={3}
-            label={phase === "tutor" ? "Pedagogical tutor (Direct)…" : "Whisper / Speech-to-LaTeX…"}
+            label={phase === "tutor" ? t.tutorLabel : t.whisperLabel}
           />
         </div>
       ) : null}
@@ -247,7 +251,7 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
       {tutor ? (
         <div className="live-voice-tutor-preview" style={{ marginTop: 12 }}>
           <p className="eyebrow">
-            معلّم بيداغوجي · Direct · {tutor.curriculumId} · {tutor.source}
+            {t.tutorTag} · {tutor.curriculumId} · {tutor.source}
           </p>
           {tutor.steps.slice(0, 4).map((step, index) => (
             <article key={`${step.title}-${index}`} style={{ marginTop: 8 }}>
@@ -259,7 +263,7 @@ export function VoiceToBoardPanel({ authorId, onEquation, disabled }: Props) {
           ))}
           {tutor.finalAnswerLatex ? (
             <div className="studio-step-boxed" style={{ marginTop: 8 }}>
-              <p className="eyebrow">الجواب النهائي / Final answer</p>
+              <p className="eyebrow">{t.finalAnswer}</p>
               <Katex tex={tutor.finalAnswerLatex} display />
             </div>
           ) : null}

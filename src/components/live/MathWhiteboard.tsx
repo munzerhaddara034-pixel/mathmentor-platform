@@ -6,13 +6,15 @@ import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import type { WhiteboardEquation, WhiteboardPlot, WhiteboardStroke } from "@/lib/livekit/protocol";
 import { compactStroke, roundPoint, shouldSample } from "@/lib/livekit/strokeCodec";
 import { LiveBoardPlot } from "./LiveBoardPlot";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
 
 const COLORS = [
-  { id: "navy", value: "#10213d", label: "Navy" },
-  { id: "gold", value: "#d9aa53", label: "Gold" },
-  { id: "ink", value: "#15233b", label: "Ink" },
-  { id: "red", value: "#9a3412", label: "Red" },
-];
+  { id: "navy", value: "#10213d" },
+  { id: "gold", value: "#d9aa53" },
+  { id: "ink", value: "#15233b" },
+  { id: "red", value: "#9a3412" },
+] as const;
 
 type Props = {
   canWrite: boolean;
@@ -72,11 +74,12 @@ export function MathWhiteboard({
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const draftRef = useRef<WhiteboardStroke | null>(null);
-  const [color, setColor] = useState(COLORS[0].value);
+  const [color, setColor] = useState<string>(COLORS[0].value);
   const [latex, setLatex] = useState("\\lim\\limits_{x \\to 0} \\frac{\\sin x}{x}");
   const [plotExpr, setPlotExpr] = useState("x^2");
   const preview = formatLebaneseEquation(latex);
   const boardId = useId();
+  const t = useNs(liveMessages).whiteboard;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -157,8 +160,8 @@ export function MathWhiteboard({
     <section className="live-whiteboard" aria-labelledby={`${boardId}-title`}>
       <header className="live-whiteboard-head">
         <div>
-          <p className="eyebrow">السبورة الرياضية / Math board</p>
-          <h2 id={`${boardId}-title`}>KaTeX · المنهج اللبناني · Word Equation</h2>
+          <p className="eyebrow">{t.eyebrow}</p>
+          <h2 id={`${boardId}-title`}>{t.title}</h2>
         </div>
         <div className="live-whiteboard-tools">
           {COLORS.map((item) => (
@@ -167,19 +170,19 @@ export function MathWhiteboard({
               type="button"
               className={`live-swatch${color === item.value ? " on" : ""}`}
               style={{ background: item.value }}
-              aria-label={item.label}
+              aria-label={t.colors[item.id]}
               disabled={!canWrite}
               onClick={() => setColor(item.value)}
             />
           ))}
           <button className="btn" type="button" disabled={!canWrite || !canClear} onClick={onClear}>
-            مسح السبورة / Clear
+            {t.clear}
           </button>
         </div>
       </header>
       {!canWrite ? (
         <p className="muted live-board-lock">
-          عرض فقط حتى يسمح الأستاذ بالكتابة على السبورة. / View only until Prof. Munzer Haddara grants write.
+          {t.viewOnly}
         </p>
       ) : null}
       <div className="live-whiteboard-canvas-wrap">
@@ -194,7 +197,7 @@ export function MathWhiteboard({
       </div>
       <ol className="live-eq-list">
         {equations.length === 0 ? (
-          <li className="muted">اكتب معادلة رسمية (كسور مكدّسة، جذور، نهايات تحت الرمز).</li>
+          <li className="muted">{t.emptyHint}</li>
         ) : null}
         {equations.map((item) => (
           <li key={item.id}>
@@ -211,7 +214,7 @@ export function MathWhiteboard({
       ) : null}
       <div className="live-eq-composer">
         <label>
-          LaTeX (يُنظَّف تلقائياً إلى شكل الورقة الرسمية)
+          {t.latexLabel}
           <input
             value={latex}
             disabled={!canWrite}
@@ -220,14 +223,14 @@ export function MathWhiteboard({
             placeholder="\\frac{1}{x} · x^{2} · \\sqrt{x}"
           />
         </label>
-        <div className="live-eq-preview" aria-label="Preview">
-          {preview ? <Katex tex={preview} display /> : <span className="muted">معاينة / Preview</span>}
+        <div className="live-eq-preview" aria-label={t.preview}>
+          {preview ? <Katex tex={preview} display /> : <span className="muted">{t.preview}</span>}
         </div>
         <button className="btn dark" type="button" disabled={!canWrite} onClick={addEquation}>
-          أضف على السبورة / Pin equation
+          {t.pin}
         </button>
         <label>
-          رسم بياني خفيف / Plot y = f(x)
+          {t.plot}
           <input
             value={plotExpr}
             disabled={!canWrite}
@@ -237,7 +240,7 @@ export function MathWhiteboard({
           />
         </label>
         <button className="btn" type="button" disabled={!canWrite} onClick={addPlot}>
-          ثبّت الرسم / Pin plot
+          {t.pinPlot}
         </button>
       </div>
     </section>

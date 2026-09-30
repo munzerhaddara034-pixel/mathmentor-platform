@@ -90,6 +90,7 @@ const en = {
     openCalendar: "Open calendar",
     join: "Join the session",
     loading: "Loading…",
+    booking: "Booking",
   },
   room: {
     eyebrow: "Live classroom",
@@ -175,6 +176,7 @@ const en = {
     pin: "Pin equation",
     plot: "Light graph · y = f(x)",
     pinPlot: "Pin graph",
+    colors: { navy: "Navy", gold: "Gold", ink: "Ink", red: "Red" },
   },
   voice: {
     label: "Voice to board",
@@ -291,6 +293,7 @@ const ar: LiveMessages = {
     openCalendar: "افتح الرزنامة",
     join: "انضم للحصة",
     loading: "جارٍ التحميل…",
+    booking: "رقم الحجز",
   },
   room: {
     eyebrow: "صف مباشر",
@@ -376,6 +379,7 @@ const ar: LiveMessages = {
     pin: "أضف على السبورة",
     plot: "رسم بياني خفيف · y = f(x)",
     pinPlot: "ثبّت الرسم",
+    colors: { navy: "كحلي", gold: "ذهبي", ink: "حبر", red: "أحمر" },
   },
   voice: {
     label: "تسجيل صوت للسبورة",
@@ -490,6 +494,7 @@ const fr: LiveMessages = {
     openCalendar: "Ouvrir le calendrier",
     join: "Rejoindre la séance",
     loading: "Chargement…",
+    booking: "Réservation",
   },
   room: {
     eyebrow: "Classe en direct",
@@ -575,6 +580,7 @@ const fr: LiveMessages = {
     pin: "Épingler l’équation",
     plot: "Courbe légère · y = f(x)",
     pinPlot: "Épingler la courbe",
+    colors: { navy: "Marine", gold: "Or", ink: "Encre", red: "Rouge" },
   },
   voice: {
     label: "Voix vers le tableau",

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { ClassroomTokenPayload } from "@/lib/livekit/protocol";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
 
 export type ClassroomUser = { id: string; name: string; role: string };
 
@@ -34,6 +36,7 @@ export function emptySession(roomId: string, user: ClassroomUser, staff: boolean
 
 /** Fetches (and can re-fetch) the classroom token; the server reopens ended rooms for teachers. */
 export function useClassroomToken(roomId: string, user: ClassroomUser, staff: boolean) {
+  const t = useNs(liveMessages).room;
   const [session, setSession] = useState<ClassroomTokenPayload>(() => emptySession(roomId, user, staff));
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<number>(0);
@@ -58,17 +61,17 @@ export function useClassroomToken(roomId: string, user: ClassroomUser, staff: bo
           isTeacher: false,
           canWriteBoard: false,
           canPublishAv: false,
-          error: payload.error ?? "Could not issue a classroom token.",
-          errorAr: payload.errorAr ?? "تعذّر إصدار رمز الصف.",
+          error: payload.error ?? t.tokenFailed,
+          errorAr: payload.errorAr ?? t.tokenFailed,
         });
       }
     } catch {
       setStatus(0);
-      setSession({ ...base, error: "Could not reach the classroom service.", errorAr: "تعذّر الوصول إلى خدمة الصف — تحقّق من الاتصال." });
+      setSession({ ...base, error: t.serviceUnreachable, errorAr: t.serviceUnreachable });
     } finally {
       setLoading(false);
     }
-  }, [roomId, staff, user]);
+  }, [roomId, staff, user, t]);
 
   useEffect(() => {
     void load();

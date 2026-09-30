@@ -1,52 +1,52 @@
 "use client";
 
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
+import { pickLang } from "@/lib/i18n/pick";
+
 type Props = {
   error?: string;
   errorAr?: string;
+  errorFr?: string;
   hint?: string;
   hintAr?: string;
+  hintFr?: string;
   onRetry?: () => void;
   retryLabel?: string;
   tone?: "warn" | "info";
 };
 
 /**
- * Clear AR/EN banner when camera/mic permission fails or AV needs a user gesture.
+ * Banner when camera/mic permission fails or AV needs a user gesture. Shows the active locale's
+ * variant only (ar → errorAr, fr → errorFr when given, otherwise English).
  */
 export function MediaPermissionBanner({
   error,
   errorAr,
+  errorFr,
   hint,
   hintAr,
+  hintFr,
   onRetry,
-  retryLabel = "تفعيل الكاميرا والميكروفون",
+  retryLabel,
   tone = "warn",
 }: Props) {
+  const { locale } = useI18n();
+  const t = useNs(liveMessages).room;
   if (!error && !errorAr && !hint && !hintAr) return null;
+  const message = pickLang(locale, error, errorAr, errorFr);
+  const hintText = pickLang(locale, hint, hintAr, hintFr);
   return (
     <div
       className={tone === "info" ? "live-demo-banner live-media-banner" : "live-media-banner live-media-banner-warn"}
       role="alert"
     >
-      {errorAr ? (
-        <p dir="rtl" lang="ar">
-          {errorAr}
-        </p>
-      ) : null}
-      {error ? <p dir="ltr">{error}</p> : null}
-      {hintAr ? (
-        <p className="muted" dir="rtl" lang="ar">
-          {hintAr}
-        </p>
-      ) : null}
-      {hint ? (
-        <p className="muted" dir="ltr">
-          {hint}
-        </p>
-      ) : null}
+      {message ? <p>{message}</p> : null}
+      {hintText ? <p className="muted">{hintText}</p> : null}
       {onRetry ? (
         <button className="btn dark live-av-enable-btn" type="button" onClick={onRetry}>
-          {retryLabel}
+          {retryLabel ?? t.enableAv}
         </button>
       ) : null}
     </div>

@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { permissionErrorFromUnknown } from "@/lib/media/permissionCopy";
 import { MediaPermissionBanner } from "./MediaPermissionBanner";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
+import type { MediaPermissionCopy } from "@/lib/media/permissionCopy";
 
 type Props = {
   /** When false, stop tracks and hide preview chrome. */
@@ -16,11 +19,10 @@ type Props = {
  * Starts only after a user gesture (Enable) to avoid silent permission failures.
  */
 export function DemoLocalAvPreview({ enabled, muted, cameraOff }: Props) {
+  const t = useNs(liveMessages).room;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [error, setError] = useState<{ error: string; errorAr: string; hint: string; hintAr: string } | null>(
-    null,
-  );
+  const [error, setError] = useState<MediaPermissionCopy | null>(null);
   const [active, setActive] = useState(false);
 
   const stop = useCallback(() => {
@@ -87,16 +89,18 @@ export function DemoLocalAvPreview({ enabled, muted, cameraOff }: Props) {
         <MediaPermissionBanner
           error={error.error}
           errorAr={error.errorAr}
+          errorFr={error.errorFr}
           hint={error.hint}
           hintAr={error.hintAr}
+          hintFr={error.hintFr}
           onRetry={() => void start()}
         />
       ) : null}
       {!active && !error ? (
         <MediaPermissionBanner
           tone="info"
-          error="Tap Enable to open a local camera/mic preview (demo shell — not broadcast)."
-          errorAr="اضغط تفعيل لفتح معاينة محلية للكاميرا/الميكروفون (وضع تجريبي — بدون بث)."
+          error={t.previewPrompt}
+          errorAr={t.previewPrompt}
           onRetry={() => void start()}
         />
       ) : null}
@@ -110,14 +114,12 @@ export function DemoLocalAvPreview({ enabled, muted, cameraOff }: Props) {
       />
       {active && cameraOff ? (
         <div className="live-tile teacher">
-          <strong>معاينة محلية / Local preview</strong>
-          <span>الكاميرا متوقفة / Camera off</span>
+          <strong>{t.localPreview}</strong>
+          <span>{t.cameraOffLabel}</span>
         </div>
       ) : null}
       <p className="muted" role="note">
-        وضع تجريبي: المعاينة محلية فقط ولن تُبث للطلاب عبر LiveKit.
-        <br />
-        Demo shell: local preview only — not published to students via LiveKit.
+        {t.previewDemo}
       </p>
     </div>
   );

@@ -3,21 +3,22 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
+import { useNs } from "@/components/i18n/useNs";
+import { liveMessages } from "@/lib/i18n/ns/live";
 
 function FailureInner() {
+  const t = useNs(liveMessages).pay;
   const params = useSearchParams();
   const bookingId = params.get("booking") || "";
   return (
     <main className="shell mm-mobile-stack">
-      <p className="eyebrow">MathMentor · أكاديمية منذر حداره</p>
-      <h1>فشل الدفع / Payment failed</h1>
-      <p className="muted">
-        The live booking was not confirmed. You can try again from /live.
-      </p>
+      <p className="eyebrow">{t.brand}</p>
+      <h1>{t.failedTitle}</h1>
+      <p className="muted">{t.failedLead}</p>
       <div className="card">
-        {bookingId ? <p className="muted">Booking: {bookingId}</p> : null}
+        {bookingId ? <p className="muted">{t.booking}: <bdi dir="ltr">{bookingId}</bdi></p> : null}
         <a className="btn dark" href="/live">
-          Back to booking · العودة للحجز
+          {t.backToLive}
         </a>
       </div>
     </main>
@@ -26,7 +27,7 @@ function FailureInner() {
 
 export default function PayFailurePage() {
   return (
-    <Suspense fallback={<main className="shell"><SkeletonBlock lines={3} label="Loading" /></main>}>
+    <Suspense fallback={<main className="shell"><SkeletonBlock lines={3} /></main>}>
       <FailureInner />
     </Suspense>
   );
