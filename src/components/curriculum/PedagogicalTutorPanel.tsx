@@ -7,6 +7,10 @@ import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import type { PedagogicalTutorResult, TutorMode } from "@/lib/curriculum/tutorTypes";
 import { useCurriculum } from "./CurriculumProvider";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { tutorMessages, type TutorMessages } from "@/lib/i18n/ns/tutor";
+import { rich } from "@/lib/i18n/rich";
 
 type TutorResponse = PedagogicalTutorResult | { error?: string; errorAr?: string };
 
@@ -17,33 +21,27 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function friendlyHardFailure(status: number | null, network: boolean): { error: string; errorAr: string } {
-  if (network) {
-    return {
-      error: "Network error. Please retry.",
-      errorAr: "خطأ في الشبكة. أعد المحاولة…",
-    };
-  }
-  if (status === 504 || status === 408) {
-    return {
-      error: "Request timed out. Please retry.",
-      errorAr: "انتهت مهلة الطلب… أعد المحاولة.",
-    };
-  }
-  if (status === 502 || status === 503) {
-    return {
-      error: "Server busy. Please retry.",
-      errorAr: "الخادم مشغول، أعد المحاولة…",
-    };
-  }
-  return {
-    error: "Tutor request failed.",
-    errorAr: "تعذّر طلب المعلّم.",
-  };
+/** Client-side failures: the active locale's text in both slots (ApiErrorBanner picks errorAr for ar). */
+function friendlyHardFailure(
+  status: number | null,
+  network: boolean,
+  e: TutorMessages["errors"],
+): { error: string; errorAr: string } {
+  const text = network
+    ? e.network
+    : status === 504 || status === 408
+      ? e.timeout
+      : status === 502 || status === 503
+        ? e.busy
+        : e.failed;
+  return { error: text, errorAr: text };
 }
 
 export function PedagogicalTutorPanel() {
   const { curriculumId, curriculum, terminology, ready } = useCurriculum();
+  const { locale } = useI18n();
+  const t = tutorMessages[locale];
+  const term = (entry: { en: string; ar: string }) => (locale === "ar" ? entry.ar : entry.en);
   const [text, setText] = useState("");
   const [latex, setLatex] = useState("");
   const [mode, setMode] = useState<TutorMode>("direct");
@@ -107,8 +105,8 @@ export function PedagogicalTutorPanel() {
 
           if (shouldRetry && attempt < MAX_ATTEMPTS) {
             setRetrying(true);
-            setErrorAr("إعادة المحاولة…");
-            setError("Retrying…");
+            setErrorAr(t.retrying);
+            setError(t.retrying);
             await sleep(BACKOFF_MS[attempt - 1] ?? 1600);
             continue;
           }
@@ -116,20 +114,20 @@ export function PedagogicalTutorPanel() {
           if (!response.ok || !payload || !("ok" in payload) || !payload.ok) {
             if (response.status === 403) {
               const fail = (payload ?? {}) as { error?: string; errorAr?: string };
-              setError(fail.error ?? "AI_TIER or BOTH required. Redeem a code to unlock.");
-              setErrorAr(fail.errorAr ?? "يلزم اشتراك الذكاء. فعّل كوداً على /redeem.");
+              setError(fail.error ?? `AI_TIER · ${t.errors.tier}`);
+              setErrorAr(fail.errorAr ?? t.errors.tier);
               lastFail = fail;
               return;
             }
             if (shouldRetry || nonJson) {
-              const friendly = friendlyHardFailure(response.status, false);
+              const friendly = friendlyHardFailure(response.status, false, t.errors);
               setError(friendly.error);
               setErrorAr(friendly.errorAr);
             } else {
               const fail = (payload ?? {}) as { error?: string; errorAr?: string };
               lastFail = fail;
-              setError(fail.error ?? "Tutor request failed.");
-              setErrorAr(fail.errorAr ?? "تعذّر طلب المعلّم.");
+              setError(fail.error ?? t.errors.failed);
+              setErrorAr(fail.errorAr ?? t.errors.failed);
             }
             return;
           }
@@ -143,12 +141,12 @@ export function PedagogicalTutorPanel() {
           networkFail = true;
           if (attempt < MAX_ATTEMPTS) {
             setRetrying(true);
-            setErrorAr("إعادة المحاولة…");
-            setError("Retrying…");
+            setErrorAr(t.retrying);
+            setError(t.retrying);
             await sleep(BACKOFF_MS[attempt - 1] ?? 1600);
             continue;
           }
-          const friendly = friendlyHardFailure(lastStatus, true);
+          const friendly = friendlyHardFailure(lastStatus, true, t.errors);
           setError(friendly.error);
           setErrorAr(friendly.errorAr);
           return;
@@ -156,10 +154,10 @@ export function PedagogicalTutorPanel() {
       }
 
       if (lastFail) {
-        setError(lastFail.error ?? "Tutor request failed.");
-        setErrorAr(lastFail.errorAr ?? "تعذّر طلب المعلّم.");
+        setError(lastFail.error ?? t.errors.failed);
+        setErrorAr(lastFail.errorAr ?? t.errors.failed);
       } else {
-        const friendly = friendlyHardFailure(lastStatus, networkFail);
+        const friendly = friendlyHardFailure(lastStatus, networkFail, t.errors);
         setError(friendly.error);
         setErrorAr(friendly.errorAr);
       }
@@ -171,30 +169,31 @@ export function PedagogicalTutorPanel() {
 
   return (
     <section className="card mm-tutor-panel mm-mobile-stack" style={{ marginTop: 20 }}>
-      <p className="eyebrow">المعلّم الذكي</p>
-      <h2>تعلّم الحل خطوة بخطوة</h2>
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h2>{t.title}</h2>
       <p className="muted">
-        منهج {curriculum.labelAr} · {terminology.derivative.ar} · {terminology.limits.ar}
+        {fmt(t.curriculumLine, {
+          curriculum: locale === "ar" ? curriculum.labelAr : curriculum.labelEn,
+          derivative: term(terminology.derivative),
+          limits: term(terminology.limits),
+        })}
       </p>
       <p className="muted">
-        «مباشر»: حل كامل مع التبرير. «سقراطي»: تلميحات متدرّجة لتصل إلى الحل بنفسك، ولا يظهر الجواب النهائي إلا إذا
-        طلبته.
+        {t.modesHelp}
       </p>
 
       <label className="mm-field">
-        <span>المسألة</span>
+        <span>{t.problem}</span>
         <textarea
           dir="auto"
           rows={3}
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="اكتب المسألة هنا"
+          placeholder={t.problemPh}
         />
       </label>
       <label className="mm-field">
-        <span>
-          صيغة <bdi dir="ltr">LaTeX</bdi> (اختياري)
-        </span>
+        <span>{rich(t.latexLabel, { latex: <bdi dir="ltr">LaTeX</bdi> })}</span>
         <input
           dir="ltr"
           value={latex}
@@ -209,14 +208,14 @@ export function PedagogicalTutorPanel() {
 
       <div className="grid two">
         <label className="mm-field">
-          <span>الأسلوب</span>
+          <span>{t.mode}</span>
           <select value={mode} onChange={(event) => setMode(event.target.value as TutorMode)}>
-            <option value="direct">مباشر</option>
-            <option value="socratic">سقراطي (تلميحات)</option>
+            <option value="direct">{t.direct}</option>
+            <option value="socratic">{t.socratic}</option>
           </select>
         </label>
         <label className="mm-field">
-          <span>لغة الشرح</span>
+          <span>{t.explanationLanguage}</span>
           <select value={language} onChange={(event) => setLanguage(event.target.value as "ar" | "en")}>
             <option value="ar">العربية</option>
             <option value="en">English</option>
@@ -231,7 +230,7 @@ export function PedagogicalTutorPanel() {
             checked={revealAnswer}
             onChange={(event) => setRevealAnswer(event.target.checked)}
           />
-          اكشف الجواب النهائي
+          {t.revealAnswer}
         </label>
       ) : null}
 
@@ -239,58 +238,40 @@ export function PedagogicalTutorPanel() {
       {error && /AI_TIER|اشتراك الذكاء|subscription required/i.test(error + errorAr) ? (
         <p className="muted">
           <Link className="btn" href="/redeem?need=ai&next=%2Fmath-solver">
-            فعّل اشتراك الحلّال
+            {t.unlock}
           </Link>
         </p>
       ) : null}
       {busy ? (
-        <SkeletonBlock lines={4} label={retrying ? "إعادة المحاولة…" : "جارٍ التحضير…"} />
+        <SkeletonBlock lines={4} label={retrying ? t.retrying : t.preparing} />
       ) : null}
       {retrying ? (
         <p className="muted" style={{ marginTop: 4 }}>
-          إعادة المحاولة…
+          {t.retrying}
         </p>
       ) : null}
 
       <button className="btn dark" type="button" disabled={busy || !ready} onClick={() => void submit()}>
-        {busy ? (retrying ? "إعادة المحاولة…" : "جارٍ التحضير…") : "اسأل المعلّم الذكي"}
+        {busy ? (retrying ? t.retrying : t.preparing) : t.ask}
       </button>
 
       {result ? (
         <div className="mm-tutor-result" style={{ marginTop: 16 }}>
           <p>
-            <strong>الهدف:</strong> <span dir="auto">{result.curriculumObjective}</span>
+            <strong>{t.objective}</strong> <span dir="auto">{result.curriculumObjective}</span>
           </p>
           <p>
-            <strong>المتطلّب السابق:</strong> <span dir="auto">{result.prerequisiteConcept}</span>
+            <strong>{t.prerequisite}</strong> <span dir="auto">{result.prerequisiteConcept}</span>
           </p>
           {result.source === "demo" || result.warning || result.warningAr ? (
             <div className="mm-tutor-soft-notice" role="status">
-              {language === "ar" ? (
-                <>
-                  <p dir="rtl" lang="ar">
-                    {result.warningAr ||
-                      "السيرفر تحت ضغط مؤقت، ويتم توليد نموذج تقريبي للتدريب. أعد المحاولة بعد لحظات للحصول على حل الذكاء الكامل."}
-                  </p>
-                  {result.warning ? (
-                    <p dir="ltr" lang="en" className="mm-tutor-soft-notice-secondary">
-                      {result.warning}
-                    </p>
-                  ) : null}
-                </>
-              ) : (
-                <>
-                  <p dir="ltr" lang="en">
-                    {result.warning ||
-                      "The server is under temporary load, so an approximate practice model is shown. Try again in a moment for a full AI solution."}
-                  </p>
-                  {result.warningAr ? (
-                    <p dir="rtl" lang="ar" className="mm-tutor-soft-notice-secondary">
-                      {result.warningAr}
-                    </p>
-                  ) : null}
-                </>
-              )}
+              <p>
+                {locale === "ar"
+                  ? result.warningAr || t.demoNotice
+                  : locale === "fr"
+                    ? t.demoNotice
+                    : result.warning || t.demoNotice}
+              </p>
             </div>
           ) : null}
           <ol>
@@ -307,7 +288,7 @@ export function PedagogicalTutorPanel() {
           </ol>
           {result.hints.length > 0 ? (
             <div>
-              <h3>تلميحات</h3>
+              <h3>{t.hints}</h3>
               <ul>
                 {result.hints.map((hint) => (
                   <li key={hint.level}>
@@ -323,7 +304,7 @@ export function PedagogicalTutorPanel() {
             </div>
           ) : null}
           <div className="mm-tutor-final">
-            <h3>الجواب النهائي</h3>
+            <h3>{t.finalAnswer}</h3>
             <p>{result.finalAnswer}</p>
             {result.finalAnswerLatex ? <Katex tex={result.finalAnswerLatex} display /> : null}
           </div>
