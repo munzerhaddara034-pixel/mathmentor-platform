@@ -1,15 +1,17 @@
 import Link from "next/link";
+import { getI18n } from "@/lib/i18n/server";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { m } = await getI18n();
   return (
     <footer className="site-footer">
       <span>
-        <strong>منذر حداره</strong> · <bdi dir="ltr">MathMentor</bdi> · رياضيات الشهادة المتوسطة والثانوية العامة في لبنان
+        <strong>{m.brand.name}</strong> · <bdi dir="ltr">{m.brand.sub}</bdi> · {m.footer.tagline}
       </span>
-      <nav aria-label="روابط التذييل">
-        <Link href="/subscribe">الاشتراك</Link>
-        <Link href="/live">الحصص المباشرة</Link>
-        <Link href="/lessons">الدروس</Link>
+      <nav aria-label={m.footer.links}>
+        <Link href="/subscribe">{m.nav.subscribe}</Link>
+        <Link href="/live">{m.nav.live}</Link>
+        <Link href="/lessons">{m.nav.lessons}</Link>
       </nav>
     </footer>
   );

@@ -7,6 +7,7 @@ import { OPEN_ASSISTANT_EVENT } from "@/components/ChatWidget";
 import { Icon } from "@/components/ui/Icon";
 import { MenuLinks } from "./MenuLinks";
 import { MenuSettings } from "./MenuSettings";
+import { useI18n } from "@/components/i18n/I18nProvider";
 import type { NavModel } from "./navConfig";
 
 /** Full-height mobile menu (grouped), opened from the header menu button. */
@@ -25,6 +26,7 @@ export function MobileSheet({
   onClose: () => void;
   onLogout: () => void;
 }) {
+  const { m } = useI18n();
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
@@ -40,53 +42,53 @@ export function MobileSheet({
 
   if (!open) return null;
   return (
-    <div className="mm-sheet" role="dialog" aria-modal="true" aria-label="القائمة">
-      <button type="button" className="mm-sheet-scrim" aria-label="إغلاق القائمة" onClick={onClose} />
+    <div className="mm-sheet" role="dialog" aria-modal="true" aria-label={m.nav.menu}>
+      <button type="button" className="mm-sheet-scrim" aria-label={m.nav.closeMenu} onClick={onClose} />
       <div className="mm-sheet-panel">
         <div className="mm-sheet-head">
-          <strong>القائمة</strong>
-          <button type="button" className="mm-icon-btn" onClick={onClose} aria-label="إغلاق">
+          <strong>{m.nav.menu}</strong>
+          <button type="button" className="mm-icon-btn" onClick={onClose} aria-label={m.nav.close}>
             <Icon name="close" />
           </button>
         </div>
         <button
           type="button"
-          className="btn dark mm-sheet-assistant"
+          className="v2-btn v2-btn-primary mm-sheet-assistant"
           onClick={() => {
             onClose();
             window.dispatchEvent(new Event(OPEN_ASSISTANT_EVENT));
           }}
         >
-          <Icon name="chat" size={20} /> اسأل مساعد الأستاذ منذر
+          <Icon name="chat" size={20} /> {m.nav.askAssistant}
         </button>
-        <p className="mm-sheet-group">التعلّم</p>
+        <p className="mm-sheet-group">{m.nav.groupLearning}</p>
         <MenuLinks items={model.primary} pathname={pathname} onNavigate={onClose} />
         {model.more.length ? (
           <>
-            <p className="mm-sheet-group">المزيد</p>
+            <p className="mm-sheet-group">{m.nav.groupMore}</p>
             <MenuLinks items={model.more} pathname={pathname} onNavigate={onClose} />
           </>
         ) : null}
         {user && model.account.length ? (
           <>
-            <p className="mm-sheet-group">حسابي</p>
+            <p className="mm-sheet-group">{m.nav.groupAccount}</p>
             <MenuLinks items={model.account} pathname={pathname} onNavigate={onClose} />
           </>
         ) : null}
-        <p className="mm-sheet-group">الإعدادات</p>
+        <p className="mm-sheet-group">{m.nav.groupSettings}</p>
         <MenuSettings />
         <div className="mm-sheet-foot">
           {user ? (
             <button type="button" className="ghost-btn ink" onClick={onLogout}>
-              تسجيل الخروج
+              {m.nav.logout}
             </button>
           ) : (
             <>
-              <Link href="/signup" className="btn dark" onClick={onClose}>
-                حساب جديد
+              <Link href="/signup" className="v2-btn v2-btn-gold" onClick={onClose}>
+                {m.nav.newAccount}
               </Link>
               <Link href="/login" className="ghost-btn ink" onClick={onClose}>
-                تسجيل الدخول
+                {m.nav.login}
               </Link>
             </>
           )}

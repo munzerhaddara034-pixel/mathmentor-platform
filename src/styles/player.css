@@ -12,7 +12,7 @@
 .studio-lang-seg-label { font-size: 13px; font-weight: 700; color: var(--muted); padding-inline: 8px 4px; }
 .studio-lang-seg button {
   border: 0; background: transparent; border-radius: 999px; padding: 8px 14px; min-height: 36px;
-  font: inherit; font-size: 14px; font-weight: 700; color: var(--navy); cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 700; color: var(--heading); cursor: pointer;
 }
 .studio-lang-seg button.on { background: var(--navy); color: #fff; }
 .studio-caption[dir="ltr"] { text-align: left; }

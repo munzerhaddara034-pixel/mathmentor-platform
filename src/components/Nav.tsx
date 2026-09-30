@@ -14,18 +14,22 @@ import { MobileTabBar } from "./nav/MobileTabBar";
 import { NavDropdown } from "./nav/NavDropdown";
 import { isActivePath, navFor } from "./nav/navConfig";
 import { NotificationBell } from "./NotificationBell";
+import { ThemeToggle } from "./ThemeToggle";
+import { useI18n } from "./i18n/I18nProvider";
+import { LocaleSwitcher } from "./i18n/LocaleSwitcher";
 
 type MeResponse = { user?: SessionUser | null };
 
 /**
- * Light top bar: brand · ~5 links · «المزيد» · account menu.
- * Mobile: brand + bell + menu button, plus the bottom tab bar.
+ * Glass top bar: brand · ~5 links · «المزيد» · theme · account menu.
+ * Mobile: brand + theme + bell + menu button, plus the floating bottom tab bar.
  */
 export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
   const pathname = usePathname() || "/";
   const [sheetOpen, setSheetOpen] = useState(false);
   const [user, setUser] = useState(initialUser);
-  const model = navFor(user);
+  const { m } = useI18n();
+  const model = navFor(user, m.nav);
 
   useEffect(() => {
     setUser(initialUser);
@@ -67,7 +71,7 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
       <header className="mm-nav">
         <div className="mm-nav-inner">
           <BrandMark href={user ? "/dashboard" : "/"} />
-          <nav className="mm-nav-links" aria-label="التنقل الرئيسي">
+          <nav className="mm-nav-links" aria-label={m.nav.main}>
             {model.primary.map((link) => (
               <Link
                 key={link.href}
@@ -78,7 +82,7 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
                 {link.label}
               </Link>
             ))}
-            <NavDropdown label="المزيد" className="mm-more">
+            <NavDropdown label={m.nav.more} className="mm-more">
               {(close) => (
                 <>
                   <MenuLinks items={model.more} pathname={pathname} onNavigate={close} />
@@ -88,6 +92,8 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
             </NavDropdown>
           </nav>
           <div className="mm-nav-end">
+            <LocaleSwitcher />
+            <ThemeToggle compact />
             {user ? (
               <>
                 <NotificationBell />
@@ -97,11 +103,11 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
               </>
             ) : (
               <div className="mm-desktop-only mm-guest-actions">
-                <Link href="/login" className="ghost-btn ink mm-btn-sm">
-                  دخول
+                <Link href="/login" className="v2-btn v2-btn-glass v2-btn-sm">
+                  {m.nav.login}
                 </Link>
-                <Link href="/signup" className="btn dark mm-btn-sm">
-                  ابدأ مجاناً
+                <Link href="/signup" className="v2-btn v2-btn-gold v2-btn-sm">
+                  {m.nav.signup}
                 </Link>
               </div>
             )}
@@ -109,7 +115,7 @@ export function Nav({ initialUser }: { initialUser: SessionUser | null }) {
               type="button"
               className="mm-icon-btn mm-mobile-only"
               aria-expanded={sheetOpen}
-              aria-label="القائمة"
+              aria-label={m.nav.menu}
               onClick={() => setSheetOpen(true)}
             >
               <Icon name="menu" />

@@ -3,13 +3,15 @@
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth/types";
 import { Icon } from "@/components/ui/Icon";
+import { useI18n } from "@/components/i18n/I18nProvider";
 import { isActivePath, tabsFor } from "./navConfig";
 
 /** Mobile-only bottom navigation with the central «حلّ مسألة» action. */
 export function MobileTabBar({ user, pathname }: { user: SessionUser | null; pathname: string }) {
-  const tabs = tabsFor(user);
+  const { m } = useI18n();
+  const tabs = tabsFor(user, m.nav);
   return (
-    <nav className="mm-tabbar" aria-label="التنقل السفلي">
+    <nav className="mm-tabbar" aria-label={m.nav.bottom}>
       {tabs.map((tab, index) => {
         const active = isActivePath(pathname, tab.href);
         const central = index === 2;
@@ -22,7 +24,7 @@ export function MobileTabBar({ user, pathname }: { user: SessionUser | null; pat
           >
             {central ? (
               <span className="mm-tab-bubble">
-                <Icon name={tab.icon ?? "camera"} />
+                <Icon name="spark" size={26} />
               </span>
             ) : (
               <Icon name={tab.icon ?? "home"} />

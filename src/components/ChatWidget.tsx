@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 type BotReply = { reply?: string };
 
 /** Fire from anywhere (e.g. dashboard quick action) to open the assistant panel. */
 export const OPEN_ASSISTANT_EVENT = "mm:open-assistant";
 
-const FALLBACK_REPLY = "تعذّر الرد الآن. جرّب مرة أخرى بعد قليل، أو تواصل مع الأستاذ منذر حداره عبر واتساب.";
-
 export function ChatWidget() {
+  const { m } = useI18n();
+  const a = m.assistant;
+  const FALLBACK_REPLY = a.fallback;
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<{ role: "user" | "bot"; text: string }[]>([
-    { role: "bot", text: "أهلاً بك. أنا «مساعد الأستاذ منذر». اسأل عن درس، تمرين، أو طريقة الاشتراك." },
+    { role: "bot", text: a.greeting },
   ]);
 
   useEffect(() => {
@@ -46,23 +48,23 @@ export function ChatWidget() {
   };
 
   return (
-    <div className={`chat-widget${open ? " is-open" : ""}`} dir="rtl">
+    <div className={`chat-widget${open ? " is-open" : ""}`}>
       {open ? (
-        <div className="chat-panel" role="dialog" aria-label="مساعد الأستاذ منذر">
+        <div className="chat-panel" role="dialog" aria-label={a.name}>
           <header>
-            <strong>مساعد الأستاذ منذر</strong>
-            <button type="button" onClick={() => setOpen(false)} aria-label="إغلاق المساعد">
+            <strong>{a.name}</strong>
+            <button type="button" onClick={() => setOpen(false)} aria-label={a.close}>
               ×
             </button>
           </header>
           <div className="chat-log" aria-live="polite">
             {log.map((row, index) => (
-              <p key={index} className={row.role}>
+              <p key={index} className={row.role} dir="auto">
                 {row.text}
               </p>
             ))}
             {busy ? (
-              <p className="bot chat-typing" aria-label="جارٍ الرد">
+              <p className="bot chat-typing" aria-label={a.typing}>
                 <span />
                 <span />
                 <span />
@@ -75,9 +77,9 @@ export function ChatWidget() {
               void send();
             }}
           >
-            <input value={text} onChange={(event) => setText(event.target.value)} placeholder="اكتب سؤالك…" />
+            <input value={text} onChange={(event) => setText(event.target.value)} placeholder={a.placeholder} />
             <button className="btn dark" type="submit" disabled={busy}>
-              إرسال
+              {a.send}
             </button>
           </form>
         </div>
@@ -87,8 +89,8 @@ export function ChatWidget() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        aria-label="مساعد الأستاذ منذر"
-        title="مساعد الأستاذ منذر"
+        aria-label={a.name}
+        title={a.name}
       >
         <Icon name={open ? "close" : "chat"} />
       </button>

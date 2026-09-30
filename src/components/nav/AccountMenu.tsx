@@ -3,6 +3,7 @@
 import { roleLabel, type SessionUser } from "@/lib/auth/types";
 import { Icon } from "@/components/ui/Icon";
 import { NavDropdown } from "./NavDropdown";
+import { useI18n } from "@/components/i18n/I18nProvider";
 import { MenuLinks } from "./MenuLinks";
 import { MenuSettings } from "./MenuSettings";
 import type { NavItem } from "./navConfig";
@@ -18,7 +19,8 @@ export function AccountMenu({
   pathname: string;
   onLogout: () => void;
 }) {
-  const initial = user.name.trim().charAt(0) || "؟";
+  const { m } = useI18n();
+  const initial = user.name.trim().charAt(0) || "?";
   return (
     <NavDropdown
       className="mm-account"
@@ -49,7 +51,7 @@ export function AccountMenu({
             }}
           >
             <Icon name="arrow" size={20} />
-            تسجيل الخروج
+            {m.nav.logout}
           </button>
         </>
       )}

@@ -1,12 +1,12 @@
 .mm-lessons { display: grid; gap: 22px; padding-top: 16px; }
-.mm-lessons-head h1 { margin: 4px 0 8px; color: var(--navy); font-size: clamp(1.7rem, 6vw, 2.4rem); }
+.mm-lessons-head h1 { margin: 4px 0 8px; color: var(--heading); font-size: clamp(1.7rem, 6vw, 2.4rem); }
 .mm-lessons-head .muted { margin: 0; line-height: 1.8; max-width: 680px; }
 .mm-lessons-head .eyebrow { margin: 0; }
 .mm-lessons-feature { display: flex; align-items: center; gap: 14px; padding: 16px 18px; color: var(--ink); text-decoration: none; }
 .mm-lessons-feature > span:nth-child(2) { display: grid; gap: 4px; flex: 1; min-width: 0; }
-.mm-lessons-feature strong { color: var(--navy); font-size: 17px; }
+.mm-lessons-feature strong { color: var(--heading); font-size: 17px; }
 .mm-lessons-feature > span:nth-child(2) > span { color: var(--muted); font-size: 14px; line-height: 1.6; }
-.mm-lessons-feature > svg { color: var(--navy); flex: 0 0 auto; }
+.mm-lessons-feature > svg { color: var(--heading); flex: 0 0 auto; }
 .mm-lessons-grid { display: grid; gap: 14px; }
 .mm-lesson { display: flex; gap: 14px; padding: 14px; color: var(--ink); text-decoration: none; transition: box-shadow .15s ease, transform .15s ease; }
 .mm-lesson:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
@@ -16,10 +16,10 @@
 }
 .mm-lesson-body { display: grid; gap: 4px; flex: 1; min-width: 0; align-content: start; }
 .mm-lesson-track { font-size: 13px; font-weight: 700; color: var(--gold-ink); }
-.mm-lesson-body strong { font-size: 17px; color: var(--navy); font-family: var(--font-display); }
+.mm-lesson-body strong { font-size: 17px; color: var(--heading); font-family: var(--font-display); }
 .mm-lesson-sub { color: var(--muted); font-size: 13px; }
 .mm-lesson-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
-.mm-pill { font-size: 12px; font-weight: 700; background: var(--navy-50); color: var(--navy); padding: 4px 10px; border-radius: 999px; }
-.mm-lesson-go { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; color: var(--navy); }
+.mm-pill { font-size: 12px; font-weight: 700; background: var(--navy-50); color: var(--heading); padding: 4px 10px; border-radius: 999px; }
+.mm-lesson-go { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; color: var(--heading); }
 @media (min-width: 720px) { .mm-lessons-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 960px) { .mm-lessons { padding-top: 32px; gap: 28px; } .mm-lesson-thumb { width: 110px; flex-basis: 110px; } }
