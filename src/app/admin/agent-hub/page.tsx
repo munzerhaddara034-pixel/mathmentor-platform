@@ -1,22 +1,25 @@
 import Link from "next/link";
 import { AgentHub } from "@/components/admin/agent/AgentHub";
 import { WhatsAppMediaList } from "@/components/admin/agent/WhatsAppMediaList";
-import { INSTRUCTOR_AR, INSTRUCTOR_EN, ACADEMY_LINE } from "@/lib/pedagogy/lebanese";
+import { INSTRUCTOR_AR, INSTRUCTOR_EN } from "@/lib/pedagogy/lebanese";
+import { fmt } from "@/lib/i18n/format";
+import { adminMessages } from "@/lib/i18n/ns/admin";
+import { getI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default function AgentHubPage() {
+export default async function AgentHubPage() {
+  const { locale } = await getI18n();
+  const t = adminMessages[locale].pages;
   return (
     <main className="shell agent-hub-page">
-      <p className="eyebrow">Ops Agent · {ACADEMY_LINE}</p>
-      <h1 dir="rtl" lang="ar">
-        مركز الوكيل الذاتي · Agent Hub
-      </h1>
+      <p className="eyebrow">
+        {t.agentEyebrow} · {t.academy}
+      </p>
+      <h1>{t.agentTitle} · Agent Hub</h1>
       <p className="muted">
-        Autonomous Operations & Growth for {INSTRUCTOR_EN} / {INSTRUCTOR_AR}. Voice → intent → HeyGen /
-        school reports / health.{" "}
-        <Link href="/admin">/admin</Link> · <Link href="/admin/team">دردشة الفريق (محمد · سامي · حمزة)</Link> ·{" "}
-        <code>docs/AGENT_OPS.md</code>.
+        {fmt(t.agentLead, { name: locale === "ar" ? INSTRUCTOR_AR : INSTRUCTOR_EN })} <Link href="/admin">/admin</Link> ·{" "}
+        <Link href="/admin/team">{t.agentTeamLink}</Link> · <code>docs/AGENT_OPS.md</code>.
       </p>
       <AgentHub />
       <WhatsAppMediaList />

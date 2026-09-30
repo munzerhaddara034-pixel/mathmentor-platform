@@ -2,18 +2,21 @@ import Link from "next/link";
 import { TeamChat } from "@/components/admin/team/TeamChat";
 import "@/components/admin/team/teamChat.css";
 import { requireStaff } from "@/lib/auth/guards";
+import { adminMessages } from "@/lib/i18n/ns/admin";
+import { getI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminTeamPage() {
   const live = await requireStaff("/admin/team");
+  const { locale } = await getI18n();
+  const t = adminMessages[locale].pages;
   return (
-    <main className="shell team-page" dir="rtl" lang="ar">
-      <p className="eyebrow">فريق العمل · الأستاذ منذر حداره / MathMentor</p>
-      <h1>دردشة الفريق</h1>
+    <main className="shell team-page">
+      <p className="eyebrow">{t.teamEyebrow}</p>
+      <h1>{t.teamTitle}</h1>
       <p className="muted">
-        محمد · سامي · حمزة — كل Commit يحتاج ضغطك على «موافقة ونشر». <Link href="/admin/agent-hub">Agent Hub</Link> ·{" "}
-        <Link href="/admin">الإدارة</Link>
+        {t.teamLead} <Link href="/admin/agent-hub">Agent Hub</Link> · <Link href="/admin">{t.backToAdmin}</Link>
       </p>
       <TeamChat staffName={live.user.name} />
     </main>

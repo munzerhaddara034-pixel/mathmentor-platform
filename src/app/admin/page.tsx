@@ -1,29 +1,34 @@
 import { AdminConsole } from "@/components/admin/AdminConsole";
+import { adminMessages } from "@/lib/i18n/ns/admin";
+import { getI18n } from "@/lib/i18n/server";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const { locale } = await getI18n();
+  const t = adminMessages[locale].pages;
+  const links = [
+    { href: "/admin/video-generator", label: t.linkVideo },
+    { href: "/studio/voice-solver", label: t.linkVoice },
+    { href: "/admin/exams", label: t.linkExams },
+    { href: "/admin/agent-hub", label: t.linkAgent },
+    { href: "/admin/team", label: t.linkTeam },
+    { href: "/admin/b2b-manager", label: t.linkB2b },
+    { href: "/dashboard", label: t.linkCodes },
+  ];
   return (
     <main className="shell">
-      <p className="eyebrow">Admin · MathMentor · أكاديمية منذر حداره</p>
-      <h1>لوحة الإدارة</h1>
+      <p className="eyebrow">{t.adminEyebrow}</p>
+      <h1>{t.adminTitle}</h1>
       <p className="muted">
-        AI query logs, live session manager, teacher audit, WhatsApp outbox, and student analytics. Video generator remains at{" "}
-        <Link href="/admin/video-generator">/admin/video-generator</Link>
-        {" · "}
-        <Link href="/studio/voice-solver">voice-to-math</Link>
-        {" · "}
-        <Link href="/admin/exams">exam simulations</Link>
-        {" · "}
-        <Link href="/admin/agent-hub">Agent Hub / الوكيل</Link>
-        {" · "}
-        <Link href="/admin/team">دردشة الفريق / Team chat</Link>
-        {" · "}
-        <Link href="/admin/b2b-manager">B2B ops / الشراكات</Link>
-        {" · "}
-        <Link href="/dashboard">promo + live-hour codes</Link>
-        .
+        {t.adminLead}{" "}
+        {links.map((link, index) => (
+          <span key={link.href}>
+            {index > 0 ? " · " : null}
+            <Link href={link.href}>{link.label}</Link>
+          </span>
+        ))}
       </p>
       <AdminConsole />
     </main>

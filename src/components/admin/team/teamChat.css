@@ -100,7 +100,7 @@
 .team-author-mohamed .team-bubble-name { color: #1f5f8b; }
 .team-author-sami .team-bubble-name { color: #8b3f7a; }
 .team-author-developer .team-bubble-name { color: #2f6b3a; }
-.team-badge { font-size: 0.72rem; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; }
+.team-badge { font-size: 0.72rem; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; color: var(--ink); background: var(--surface); }
 .team-rich p { margin: 0.25em 0; }
 .team-rich-h { font-weight: 800; margin-top: 0.6em !important; }
 .team-rich ul, .team-rich ol { margin: 0.25em 0; padding-inline-start: 1.3em; }
