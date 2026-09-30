@@ -1,6 +1,6 @@
 import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
-import { classroomPath } from "@/lib/livekit/rooms";
+import { classroomPath } from "@/lib/livekit/roomNames";
 import { livekitEnv } from "@/lib/livekit/config";
 import { createMeetingLink } from "./meeting";
 import { addYmd, formatInTimeZone, wallTimeToUtc } from "./timezone";
@@ -202,8 +202,9 @@ export async function bookSlot(input: {
   const bookingId = createId("live");
   const classroomUrl = classroomPath(bookingId);
   const livekitReady = livekitEnv().configured;
-  const meeting = livekitReady
-    ? { url: classroomUrl, provider: "livekit" as const, stub: false }
+  // In-app classroom is always the primary link; an external meeting only when a real one exists.
+  const external = livekitReady
+    ? null
     : await createMeetingLink({
         id: bookingId,
         topic: `MathMentor live · ${input.studentName} · Prof. Munzer Ahmad Haddara`,
@@ -222,8 +223,8 @@ export async function bookSlot(input: {
     studentEmail: input.studentEmail,
     studentPhone: input.studentPhone,
     status,
-    meetingLink: meeting.url,
-    meetingProvider: meeting.provider,
+    meetingLink: external?.url,
+    meetingProvider: external?.provider ?? "livekit",
     classroomUrl,
     classroomRoomId: bookingId,
     paymentStatus: input.paymentStatus ?? (status === "pending_payment" ? "pending" : "none"),

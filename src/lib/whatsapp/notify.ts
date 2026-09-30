@@ -1,4 +1,5 @@
 import { publicUserById } from "@/lib/auth/store";
+import { bookingClassroomUrl, studentJoinUrl } from "@/lib/live/joinLink";
 import { bookingsNeedingReminder, patchBooking } from "@/lib/live/store";
 import type { LiveBooking } from "@/lib/live/types";
 import { getMathQuery, listMathQueries, patchMathQuery } from "@/lib/solver/store";
@@ -37,7 +38,7 @@ export async function notifyLiveReminder(booking: LiveBooking) {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const link = booking.classroomUrl || booking.meetingLink || "(link pending)";
+  const link = studentJoinUrl(booking);
   const body = `${TEACHER_EN} · MathMentor\nReminder: live 1-on-1 in ~30 minutes (${when} Asia/Beirut).\nJoin: ${link}`;
   const bodyAr = `${TEACHER_AR} · MathMentor\nتذكير: حصة مباشرة بعد نحو 30 دقيقة (${when} بتوقيت بيروت).\nانضم: ${link}`;
 
@@ -69,7 +70,8 @@ export async function notifyLiveBooked(booking: LiveBooking) {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const link = booking.classroomUrl || booking.meetingLink || "(link pending)";
+  const link = bookingClassroomUrl(booking);
+  const joinLink = studentJoinUrl(booking);
   const phone = booking.studentPhone || "(no phone)";
   const pending = booking.status === "pending_payment" || booking.paymentStatus === "pending";
   const paid = booking.paymentStatus === "paid";
@@ -118,10 +120,10 @@ Booking id: ${booking.id}`;
       kind: "live_booked",
       relatedId: booking.id,
       body: paid
-        ? `${TEACHER_EN} · MathMentor\nLive session confirmed.\nStarts: ${when} Asia/Beirut\nJoin: ${link}\nBooking: ${booking.id}`
+        ? `${TEACHER_EN} · MathMentor\nLive session confirmed.\nStarts: ${when} Asia/Beirut\nJoin: ${joinLink}\nBooking: ${booking.id}`
         : `${TEACHER_EN} · MathMentor\nBooking received — transfer ${amount} via Whish to ${WHISH_PHONE} (${TEACHER_AR}), then tap “I've transferred”.\nStarts: ${when} Asia/Beirut\nBooking: ${booking.id}`,
       bodyAr: paid
-        ? `${TEACHER_AR} · MathMentor\nتم تأكيد حصتك المباشرة.\nالوقت: ${when} بتوقيت بيروت\nانضم: ${link}\nالحجز: ${booking.id}`
+        ? `${TEACHER_AR} · MathMentor\nتم تأكيد حصتك المباشرة.\nالوقت: ${when} بتوقيت بيروت\nانضم: ${joinLink}\nالحجز: ${booking.id}`
         : `${TEACHER_AR} · MathMentor\nتم استلام الحجز — حوّل ${amount} عبر Whish إلى ${WHISH_PHONE} (${TEACHER_AR}) ثم اضغط «لقد حوّلت».\nالوقت: ${when} بتوقيت بيروت\nالحجز: ${booking.id}`,
     });
   }

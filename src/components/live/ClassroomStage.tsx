@@ -21,6 +21,7 @@ export type ClassroomStageState = {
   onPlot: (plot: WhiteboardPlot) => void;
   onClear: () => void;
   canWrite: boolean;
+  canClear: boolean;
   hands: Record<string, string>;
   onRaiseHand: () => void;
   handRaised: boolean;
@@ -33,6 +34,8 @@ export type ClassroomStageState = {
   onGrantWrite: (identity: string, allowed: boolean) => void;
   onGrantAv: (identity: string, allowed: boolean) => void;
   onEndClass: () => void;
+  /** Teacher only: reopen an ended class («ابدأ من جديد»). */
+  onRestartClass: () => void;
   ended: boolean;
   muted: boolean;
   cameraOff: boolean;
@@ -45,13 +48,17 @@ type Props = {
   userId: string;
   stage: ClassroomStageState;
   roster: RosterEntry[];
+  /** Shown above the roster (e.g. demo mode has no real presence list). */
+  rosterNotice?: string;
+  /** Extra controls in the video card (audio-only toggle, network quality…). */
+  mediaExtras?: ReactNode;
   video?: ReactNode;
   avControls?: ReactNode;
   chat?: ReactNode;
   onLeave?: () => void;
 };
 
-export function ClassroomStage({ session, userId, stage, roster, video, avControls, chat, onLeave }: Props) {
+export function ClassroomStage({ session, userId, stage, roster, rosterNotice, mediaExtras, video, avControls, chat, onLeave }: Props) {
   return (
     <div className="live-classroom mm-mobile-stack" dir="rtl">
       <header className="live-classroom-banner">
@@ -67,7 +74,11 @@ export function ClassroomStage({ session, userId, stage, roster, video, avContro
           </p>
         </div>
         <div className="live-classroom-banner-actions">
-          {session.isTeacher ? (
+          {session.isTeacher && stage.ended ? (
+            <button className="btn dark" type="button" onClick={stage.onRestartClass}>
+              ابدأ الحصة من جديد / Start again
+            </button>
+          ) : session.isTeacher ? (
             <button className="btn warn" type="button" onClick={stage.onEndClass}>
               إنهاء الحصة للجميع / End class for all
             </button>
@@ -98,6 +109,7 @@ export function ClassroomStage({ session, userId, stage, roster, video, avContro
       <div className="live-classroom-split">
         <MathWhiteboard
           canWrite={stage.canWrite && !stage.ended}
+          canClear={stage.canClear}
           strokes={stage.strokes}
           equations={stage.equations}
           plots={stage.plots}
@@ -111,6 +123,7 @@ export function ClassroomStage({ session, userId, stage, roster, video, avContro
         <aside className="live-classroom-side">
           <section className="card live-video-card">
             <h2>الفيديو / Video</h2>
+            {mediaExtras}
             {video ?? (
               <div className="live-video-grid live-video-placeholders">
                 <article className="live-tile teacher">
@@ -145,6 +158,11 @@ export function ClassroomStage({ session, userId, stage, roster, video, avContro
 
           <section className="card">
             <h2>المشاركون / Participants</h2>
+            {rosterNotice ? (
+              <p className="muted live-roster-notice" role="note">
+                {rosterNotice}
+              </p>
+            ) : null}
             <ul className="live-roster">
               {roster.map((person) => {
                 const raised = Boolean(stage.hands[person.identity]);

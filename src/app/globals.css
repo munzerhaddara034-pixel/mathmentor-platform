@@ -2361,3 +2361,14 @@ a.voice-mic { text-decoration: none; }
     align-items: flex-start;
   }
 }
+
+/* Live classroom — low-data controls (structural only; live-room visual redesign pending). */
+.live-media-extras { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 4px 0 8px; }
+.live-net-quality { margin: 0; font-size: 0.85rem; }
+.live-net-quality--good span[aria-hidden] { color: #15803d; }
+.live-net-quality--poor span[aria-hidden] { color: #b45309; }
+.live-net-quality--lost span[aria-hidden] { color: #b91c1c; }
+.live-net-quality--unknown span[aria-hidden] { color: #64748b; }
+.live-audio-only { display: inline-flex; gap: 6px; align-items: center; min-height: 44px; font-size: 0.9rem; cursor: pointer; }
+.live-audio-only input { width: 20px; height: 20px; }
+.live-roster-notice { font-size: 0.85rem; margin: 0 0 8px; }

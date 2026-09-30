@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { pgGetDocument, pgSetDocument } from "./db/documents";
+import { pgGetDocument, pgSetDocument, pgUpdateDocument } from "./db/documents";
 import { isPostgresEnabled } from "./db/pg";
 
 /**
@@ -259,4 +259,20 @@ export async function writeJsonFile<T>(name: string, data: T) {
     await ensureDataDir();
     await writeFile(dataFile(key), JSON.stringify(data, null, 2), "utf8");
   }
+}
+
+/**
+ * Locked read-modify-write for one JSON store key.
+ * - In-process: serialised per key by `withStoreLock`.
+ * - Postgres: also row-locked (`SELECT … FOR UPDATE` in a transaction), so several
+ *   instances can update the same document without losing writes.
+ */
+export async function updateJsonFile<T>(name: string, fallback: T, update: (current: T) => T | Promise<T>): Promise<T> {
+  return withStoreLock(name, async () => {
+    if (!backendOverride && isPostgresEnabled()) return pgUpdateDocument(blobKey(name), fallback, update);
+    const current = await readJsonFile<T>(name, fallback, { persistFallback: false });
+    const next = await update(current);
+    await writeJsonFile(name, next);
+    return next;
+  });
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
 import { adjustLiveCredits, findUserById } from "@/lib/auth/store";
+import { bookingClassroomUrl, guestJoinLink } from "@/lib/live/joinLink";
 import { confirmPaidBooking, getBooking, patchBooking } from "@/lib/live/store";
 
 export const runtime = "nodejs";
@@ -128,6 +129,9 @@ export async function POST(request: Request) {
       confirmed: true,
       alreadyPaid: confirmed.alreadyPaid,
       booking: fresh,
+      classroomUrl: bookingClassroomUrl(fresh),
+      /** Staff can copy this signed link for a guest (no account); null for members. */
+      guestJoinUrl: staff ? guestJoinLink(fresh)?.url ?? null : null,
       message: "Payment confirmed. Session is booked.",
       messageAr: "تم تأكيد الدفع. الحصة محجوزة.",
     });

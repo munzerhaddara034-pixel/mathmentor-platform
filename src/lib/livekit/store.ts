@@ -1,86 +1,73 @@
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
-import type { WhiteboardEquation, WhiteboardPlot, WhiteboardStroke } from "./protocol";
-import { sanitizeRoomName } from "./rooms";
+/**
+ * Classroom room store — one JSON document per room (`livekit-room-<name>.json`), every
+ * mutation through `updateJsonFile` (in-process lock + Postgres row lock when DATABASE_URL).
+ * Rooms no longer share one document, so two classes never overwrite each other.
+ */
+import { readJsonFile, updateJsonFile } from "@/lib/dataDir";
+import { sanitizeRoomName } from "./roomNames";
+import {
+  applyBoardOp,
+  applyGrant,
+  emptyRoom,
+  endClass,
+  normalizeRoom,
+  reopenForTeacher,
+  type BoardOp,
+  type ClassroomRoomState,
+} from "./roomState";
 
-const FILE = "livekit-rooms.json";
+export type { ClassroomRoomState } from "./roomState";
 
-export type ClassroomRoomState = {
-  writers: string[];
-  avAllowed: string[];
-  ended: boolean;
-  strokes: WhiteboardStroke[];
-  equations: WhiteboardEquation[];
-  plots: WhiteboardPlot[];
-  updatedAt: string;
-};
+/** Pre-2026-10 shared document; read once as a fallback for rooms not migrated yet. */
+const LEGACY_FILE = "livekit-rooms.json";
 
-export type LivekitRoomStore = {
-  rooms: Record<string, ClassroomRoomState>;
-};
-
-function emptyRoom(): ClassroomRoomState {
-  return {
-    writers: [],
-    avAllowed: [],
-    ended: false,
-    strokes: [],
-    equations: [],
-    plots: [],
-    updatedAt: new Date().toISOString(),
-  };
+function roomKey(roomName: string) {
+  return `livekit-room-${sanitizeRoomName(roomName)}.json`;
 }
 
-function normalizeRoom(raw: Partial<ClassroomRoomState> | undefined): ClassroomRoomState {
-  const base = emptyRoom();
-  if (!raw) return base;
-  return {
-    writers: Array.isArray(raw.writers) ? raw.writers : base.writers,
-    avAllowed: Array.isArray(raw.avAllowed) ? raw.avAllowed : base.avAllowed,
-    ended: Boolean(raw.ended),
-    strokes: Array.isArray(raw.strokes) ? raw.strokes : base.strokes,
-    equations: Array.isArray(raw.equations) ? raw.equations : base.equations,
-    plots: Array.isArray(raw.plots) ? raw.plots : base.plots,
-    updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : base.updatedAt,
-  };
-}
-
-async function readStore(): Promise<LivekitRoomStore> {
-  return readJsonFile<LivekitRoomStore>(FILE, { rooms: {} }, { persistFallback: false });
-}
-
-async function writeStore(store: LivekitRoomStore) {
-  await writeJsonFile(FILE, store);
+async function legacyRoom(roomName: string): Promise<unknown> {
+  try {
+    const legacy = await readJsonFile<{ rooms?: Record<string, unknown> }>(LEGACY_FILE, { rooms: {} }, { persistFallback: false });
+    return legacy.rooms?.[sanitizeRoomName(roomName)] ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getClassroomRoom(roomName: string): Promise<ClassroomRoomState> {
-  const store = await readStore();
-  return normalizeRoom(store.rooms[sanitizeRoomName(roomName)]);
+  const raw = await readJsonFile<unknown>(roomKey(roomName), null, { persistFallback: false });
+  return normalizeRoom(raw ?? (await legacyRoom(roomName)));
 }
 
-export async function patchClassroomRoom(
+async function mutateRoom(
   roomName: string,
-  patch: Partial<ClassroomRoomState>,
+  mutate: (state: ClassroomRoomState) => ClassroomRoomState,
 ): Promise<ClassroomRoomState> {
-  const key = sanitizeRoomName(roomName);
-  const store = await readStore();
-  const current = normalizeRoom(store.rooms[key]);
-  const next: ClassroomRoomState = {
-    ...current,
-    ...patch,
-    writers: patch.writers ?? current.writers,
-    avAllowed: patch.avAllowed ?? current.avAllowed,
-    strokes: patch.strokes ?? current.strokes,
-    equations: patch.equations ?? current.equations,
-    plots: patch.plots ?? current.plots,
-    updatedAt: new Date().toISOString(),
-  };
-  store.rooms[key] = next;
-  await writeStore(store);
-  return next;
+  const seed = await getClassroomRoom(roomName);
+  const stored = await updateJsonFile<unknown>(roomKey(roomName), seed, (current) => mutate(normalizeRoom(current ?? seed)));
+  return normalizeRoom(stored);
 }
 
-export function toggleId(list: string[], identity: string, allowed: boolean) {
-  const next = list.filter((item) => item !== identity);
-  if (allowed) next.push(identity);
-  return next;
+export async function appendBoardOp(roomName: string, op: BoardOp): Promise<ClassroomRoomState> {
+  return mutateRoom(roomName, (state) => applyBoardOp(state, op).state);
 }
+
+export async function grantInRoom(
+  roomName: string,
+  grant: { identity: string; canWriteBoard?: boolean; canPublishAv?: boolean },
+): Promise<ClassroomRoomState> {
+  return mutateRoom(roomName, (state) => applyGrant(state, grant));
+}
+
+export async function endClassroom(roomName: string): Promise<ClassroomRoomState> {
+  return mutateRoom(roomName, (state) => endClass(state));
+}
+
+/** Clears `ended` when a teacher (re)joins; no write when the room is open. */
+export async function reopenClassroomForTeacher(roomName: string): Promise<ClassroomRoomState> {
+  const current = await getClassroomRoom(roomName);
+  if (!current.ended) return current;
+  return mutateRoom(roomName, (state) => reopenForTeacher(state).state);
+}
+
+export { emptyRoom };

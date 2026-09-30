@@ -1,21 +1,7 @@
-import type {
-  WhiteboardBoardState,
-  WhiteboardEquation,
-  WhiteboardPlot,
-  WhiteboardStroke,
-} from "./protocol";
+/** Client-side board snapshot + delta application (pure). */
+import type { WhiteboardBoardDelta, WhiteboardEquation, WhiteboardPlot, WhiteboardStroke } from "./protocol";
 
-function byId<T extends { id: string }>(items: T[]): Map<string, T> {
-  const map = new Map<string, T>();
-  for (const item of items) map.set(item.id, item);
-  return map;
-}
-
-export function mergeBoardLists<T extends { id: string }>(local: T[], remote: T[]): T[] {
-  const map = byId(local);
-  for (const item of remote) map.set(item.id, item);
-  return Array.from(map.values());
-}
+export const CLIENT_MAX_STROKES = 200;
 
 export type BoardSnapshot = {
   strokes: WhiteboardStroke[];
@@ -24,49 +10,50 @@ export type BoardSnapshot = {
   writers: string[];
   avAllowed: string[];
   ended: boolean;
-  updatedAt?: string;
+  version: number;
 };
 
-export function boardFromState(state: WhiteboardBoardState | undefined, updatedAt?: string): BoardSnapshot {
-  return {
-    strokes: state?.strokes ?? [],
-    equations: state?.equations ?? [],
-    plots: state?.plots ?? [],
-    writers: state?.writers ?? [],
-    avAllowed: state?.avAllowed ?? [],
-    ended: Boolean(state?.ended),
-    updatedAt: updatedAt ?? state?.updatedAt,
-  };
+export function emptyBoard(): BoardSnapshot {
+  return { strokes: [], equations: [], plots: [], writers: [], avAllowed: [], ended: false, version: 0 };
+}
+
+/** Append items whose id is not present yet (keeps order, caps length). */
+export function appendById<T extends { id: string }>(current: T[], incoming: T[], cap = Number.POSITIVE_INFINITY): T[] {
+  if (!incoming.length) return current;
+  const seen = new Set(current.map((item) => item.id));
+  const added = incoming.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+  if (!added.length) return current;
+  const next = [...current, ...added];
+  return next.length > cap ? next.slice(next.length - cap) : next;
 }
 
 /**
- * Prefer remote lists when remote.updatedAt is newer (handles clear + late join).
- * Otherwise union by id so optimistic local strokes are not dropped mid-PUT.
+ * Full deltas replace the board (clear / late join); partial deltas append. Local optimistic
+ * items not yet on the server survive a partial delta because nothing is removed.
  */
-export function mergeBoardSnapshot(local: BoardSnapshot, remote: BoardSnapshot): BoardSnapshot {
-  const remoteNewer =
-    Boolean(remote.updatedAt) &&
-    (!local.updatedAt || Date.parse(remote.updatedAt ?? "") >= Date.parse(local.updatedAt ?? ""));
-
-  if (remoteNewer) {
+export function applyBoardDelta(local: BoardSnapshot, delta: WhiteboardBoardDelta): BoardSnapshot {
+  if (delta.full) {
     return {
-      strokes: remote.strokes,
-      equations: remote.equations,
-      plots: remote.plots,
-      writers: remote.writers,
-      avAllowed: remote.avAllowed,
-      ended: remote.ended || local.ended,
-      updatedAt: remote.updatedAt,
+      strokes: delta.strokes.slice(-CLIENT_MAX_STROKES),
+      equations: delta.equations,
+      plots: delta.plots,
+      writers: delta.writers,
+      avAllowed: delta.avAllowed,
+      ended: delta.ended,
+      version: delta.version,
     };
   }
-
   return {
-    strokes: mergeBoardLists(local.strokes, remote.strokes),
-    equations: mergeBoardLists(local.equations, remote.equations),
-    plots: mergeBoardLists(local.plots, remote.plots),
-    writers: Array.from(new Set([...local.writers, ...remote.writers])),
-    avAllowed: Array.from(new Set([...local.avAllowed, ...remote.avAllowed])),
-    ended: local.ended || remote.ended,
-    updatedAt: local.updatedAt,
+    strokes: appendById(local.strokes, delta.strokes, CLIENT_MAX_STROKES),
+    equations: appendById(local.equations, delta.equations),
+    plots: appendById(local.plots, delta.plots),
+    writers: delta.writers,
+    avAllowed: delta.avAllowed,
+    ended: delta.ended,
+    version: Math.max(local.version, delta.version),
   };
 }
