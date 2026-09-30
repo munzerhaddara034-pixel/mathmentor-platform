@@ -1,7 +1,7 @@
 /** Demo profile seed shared by the SQLite and Postgres profile repositories. */
 import { createId } from "@/lib/ids";
 import { hashPassword } from "./password";
-import { DEMO_ACCOUNTS } from "./types";
+import { PROFILE_SEED_ACCOUNTS } from "./profileSeedAccounts";
 import type { ProfileSeed } from "./profileTypes";
 
 function daysFromNow(days: number) {
@@ -14,7 +14,7 @@ function daysFromNow(days: number) {
 export function buildProfileSeed(): ProfileSeed {
   const now = new Date().toISOString();
   const ids: Record<string, string> = {};
-  const users = DEMO_ACCOUNTS.map((account) => {
+  const users = PROFILE_SEED_ACCOUNTS.map((account) => {
     const id = createId(account.role);
     ids[account.role] = id;
     return {

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 import { collectDeviceFingerprint } from "@/lib/auth/clientFingerprint";
-import { DEMO_ACCOUNTS } from "@/lib/auth/types";
 
 type LoginResponse = {
   ok?: boolean;
@@ -112,28 +111,6 @@ function LoginForm() {
           ليس لديك حساب؟ <Link href="/signup">إنشاء حساب</Link>
         </p>
       </section>
-      <aside className="card demo-card">
-        <h2>حسابات التجربة</h2>
-        <ul className="demo-list">
-          {DEMO_ACCOUNTS.map((account) => (
-            <li key={account.email}>
-              <button
-                type="button"
-                className="ghost-link"
-                onClick={() => {
-                  setEmail(account.email);
-                  setPassword(account.password);
-                }}
-              >
-                {account.name}
-              </button>
-              <span className="muted">
-                {account.email} · {account.password}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </aside>
     </main>
   );
 }

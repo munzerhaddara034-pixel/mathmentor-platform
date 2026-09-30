@@ -29,7 +29,7 @@ AI features **inside** a live room (pedagogical tutor via voice-to-board) still 
 
 ## Redeem → instant unlock
 
-1. Sign in (e.g. `pending@mathmentor.local` / `demo-pending`).
+1. Sign in (e.g. `pending@mathmentor.local`).
 2. Open `/redeem`, enter a code, submit.
 3. On success the client:
    - reads returned `aiAccess` / `liveAccess` / `subscriptionType` / `liveCredits`

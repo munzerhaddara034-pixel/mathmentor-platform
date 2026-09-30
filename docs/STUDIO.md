@@ -96,7 +96,7 @@ A **Teacher Quality Checklist** sits on `/studio/script` and `/admin/video-gener
 
 ## Teacher timeline editor
 
-Open `/lessons/interactive?teacher=1` **while signed in as teacher or admin** (`teacher@mathmentor.local` / `demo-teacher`). The mini-panel edits absolute `timeline.events`. **Apply live** updates the player without a reload. **Save** writes `sessionStorage` and `POST /api/studio/events`. Auth, single-session, noindex, and watermarks: [AUTH.md](./AUTH.md).
+Open `/lessons/interactive?teacher=1` **while signed in as teacher or admin** (`teacher@mathmentor.local`). The mini-panel edits absolute `timeline.events`. **Apply live** updates the player without a reload. **Save** writes `sessionStorage` and `POST /api/studio/events`. Auth, single-session, noindex, and watermarks: [AUTH.md](./AUTH.md).
 
 ## In-video quiz
 

@@ -56,19 +56,19 @@ The cookie is `Secure` only on HTTPS (or `AUTH_COOKIE_SECURE=1`). `npm start` on
 
 ## Demo accounts (local / Netlify)
 
-The login screen is **logo + title + email/password + Sign in** only. Demo credentials live in this file, not on `/login`.
+The login screen is **logo + title + email/password + Sign in** only. Demo accounts are seeded server-side (`src/lib/auth/demoAccounts.ts`, profile rows in `src/lib/auth/profileSeedAccounts.ts`); their passwords are never rendered on `/login`, never shipped in client bundles, and not published in public docs.
 
 Seeded on first boot of `auth.json` (Blobs or `data/`):
 
 | Email | Password | Notes |
 | --- | --- | --- |
-| `student@mathmentor.local` | `demo-student` | Sara Nassar · 76111111 · **BOTH** · 4 live credits |
-| `ai@mathmentor.local` | `demo-ai` | Nour Khalil · **AI_TIER** (solver + lessons) |
-| `live@mathmentor.local` | `demo-live` | Hassan Mansour · **LIVE_TIER** · 4 credits |
-| `pending@mathmentor.local` | `demo-pending` | Karim Fares · no plan → redeem |
-| `parent@mathmentor.local` | `demo-parent` | family **AI_TIER** |
-| `teacher@mathmentor.local` | `demo-teacher` | Prof. Munzer Haddara |
-| `admin@mathmentor.local` | `demo-admin` | staff |
+| `student@mathmentor.local` | *(local seed, not published)* | Sara Nassar · 76111111 · **BOTH** · 4 live credits |
+| `ai@mathmentor.local` | *(local seed, not published)* | Nour Khalil · **AI_TIER** (solver + lessons) |
+| `live@mathmentor.local` | *(local seed, not published)* | Hassan Mansour · **LIVE_TIER** · 4 credits |
+| `pending@mathmentor.local` | *(local seed, not published)* | Karim Fares · no plan → redeem |
+| `parent@mathmentor.local` | *(local seed, not published)* | family **AI_TIER** |
+| `teacher@mathmentor.local` | *(local seed, not published)* | Prof. Munzer Haddara |
+| `admin@mathmentor.local` | *(local seed, not published)* | staff |
 
 Unlock while signed in on `/redeem` or `/activate`:
 
@@ -91,7 +91,7 @@ This checks: shared-backend `auth.json` survives a simulated second instance; co
 
 **Local app**
 
-1. `npm run dev`. Sign in as `teacher@mathmentor.local` / `demo-teacher`.
+1. `npm run dev`. Sign in as `teacher@mathmentor.local`.
 2. Open `/dashboard`, then `/lessons/interactive`, then `/studio/script`. You must **not** land on `/login?reason=replaced`.
 3. Student kick: sign in as `student@mathmentor.local` on two desktop profiles. The first session should redirect to `/login?reason=replaced` on the next navigation.
 

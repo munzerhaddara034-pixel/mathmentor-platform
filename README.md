@@ -58,40 +58,18 @@ npm start
 
 جلسة واحدة موحّدة: كعكة `mm_session` تحمل رمزاً معتماً مخزّناً على الخادم (`data/auth.json` محلياً، Netlify Blobs على Netlify) — جلسة هاتف واحدة + جلسة حاسوب واحدة لكل طالب، وحسابات الأستاذ/الإدارة لا تُطرد بل يصل تنبيه باسم الجهاز. ملفات الطلاب للوحة التحكم (الدورات، التقدّم، تذكير الامتحانات، ربط ولي الأمر) في SQLite (`data/auth.db`). الحسابات المنشأة من `/signup` تُسجَّل في الاثنين؛ حسابات SQLite القديمة تُنسخ تلقائياً إلى مخزن الجلسات عند أول دخول. التفاصيل: [docs/AUTH.md](./docs/AUTH.md).
 
-| الدور | البريد | كلمة المرور | بعد الدخول |
-| --- | --- | --- | --- |
-| طالب | `student@mathmentor.lb` | `student123` | [`/dashboard`](http://localhost:3000/dashboard) لوحة الطالب (تقدم، تذكير امتحانات، الدورات) |
-| أستاذ / إدارة | `teacher@mathmentor.lb` | `teacher123` | [`/dashboard`](http://localhost:3000/dashboard) إحصائيات وأكواد التفعيل · [`/professor`](http://localhost:3000/professor) |
-| ولي أمر | `parent@mathmentor.lb` | `parent123` | [`/dashboard`](http://localhost:3000/dashboard) متابعة الطالب المرتبط (سارة) |
+حسابات التجربة للتطوير المحلي تُزرع تلقائياً على الخادم عند أول تشغيل (`src/lib/auth/demoAccounts.ts` و`src/lib/auth/profileSeedAccounts.ts`). لا تُعرض كلمات المرور في واجهة الدخول ولا في هذا الملف العام. اطلب بيانات QA من الأستاذ منذر حداره أو من فريق التشغيل.
 
-Access-tier demo accounts (session store, paywall tiers):
-
-| Account | Password | Access |
-| --- | --- | --- |
-| `student@mathmentor.local` | `demo-student` | AI + Live (4 credits) |
-| `ai@mathmentor.local` | `demo-ai` | Solver + lessons |
-| `live@mathmentor.local` | `demo-live` | Live booking only |
-| `pending@mathmentor.local` | `demo-pending` | Login only → `/redeem` |
-| `parent@mathmentor.local` | `demo-parent` | Lessons + solver |
-| `teacher@mathmentor.local` | `demo-teacher` | Studio + lessons + Agent Hub |
-| `admin@mathmentor.local` | `demo-admin` | Studio + lessons + Agent Hub |
+Local QA accounts are seeded server-side on first boot (see the files above). Passwords are intentionally not published here or on `/login`.
 
 - تسجيل الدخول: [`/login`](http://localhost:3000/login) · حساب جديد (طالب أو ولي أمر فقط؛ حسابات الأستاذ تُنشأ من الإدارة): [`/signup`](http://localhost:3000/signup) · الملف: [`/profile`](http://localhost:3000/profile)
-- Promo cards: `MUNZER-GOLD-9A` (AI), `MUNZER-LIVE-4C` (live), `MUNZER-BOTH-1X` (bundle), live-hour top-up `MUNZER-HRS-2H` on `/redeem` (signed in).
+- بطاقات التفعيل (Promo cards) تُصدر من لوحة الأستاذ `/dashboard` وتُفعَّل على `/redeem` (بعد الدخول). الأكواد لا تُنشر هنا.
 - الدروس (`/lessons/*`) والسبورة والحلّال خاصة وتتطلب اشتراكاً؛ `/watch/[id]` يبقى عاماً.
-- **الوضع الداكن / الفاتح:** زر «داكن» أو «فاتح» في الشريط العلوي. الاختيار يُحفظ في `localStorage` (`mm-theme`).
-- الواجهة عربية واتجاهها من اليمين لليسار (`dir="rtl"`). مشغّلات الدروس الإنجليزية تبقى `ltr` داخلياً.
-- المساعد العائم في كل الصفحات: **«مساعد الأستاذ منذر»**.
+- **الوضع الداكن / الفاتح:** من قائمة الحساب في الشريط العلوي. الاختيار يُحفظ في `localStorage` (`mm-theme`).
+- الواجهة عربية واتجاهها من اليمين لليسار (`dir="rtl"`)، ومشغّل الدروس بواجهة عربية؛ لغة الشرح (EN/FR) والمعادلات تبقى `ltr` معزولة.
+- المساعد في كل الصفحات: **«مساعد الأستاذ منذر»** (زر دائري صغير لا يغطي المحتوى).
 
---- | --- | --- | --- |
-| طالب | `student@mathmentor.lb` | `student123` | [`/dashboard`](http://localhost:3000/dashboard) لوحة الطالب (تقدم، تذكير امتحانات، الدورات، ومساعد الأستاذ منذر) |
-| أستاذ / إدارة | `teacher@mathmentor.lb` | `teacher123` | [`/dashboard`](http://localhost:3000/dashboard) إحصائيات وأكواد التفعيل · [`/professor`](http://localhost:3000/professor) |
-| ولي أمر | `parent@mathmentor.lb` | `parent123` | [`/dashboard`](http://localhost:3000/dashboard) متابعة الطالب المرتبط (سارة) |
-
-- تسجيل الدخول: [`/login`](http://localhost:3000/login) · حساب جديد: [`/signup`](http://localhost:3000/signup) · الملف: [`/profile`](http://localhost:3000/profile)
-- **الوضع الداكن / الفاتح:** زر «داكن» أو «فاتح» في الشريط العلوي. الاختيار يُحفظ في `localStorage` (`mm-theme`).
-- الواجهة عربية واتجاهها من اليمين لليسار (`dir="rtl"`). مشغّلات الدروس الإنجليزية تبقى `ltr` داخلياً.
-- المساعد العائم في كل الصفحات: **«مساعد الأستاذ منذر»**.
+- المساعد في كل الصفحات: **«مساعد الأستاذ منذر»** (زر دائري صغير لا يغطي المحتوى).
 
 ---
 
@@ -260,7 +238,7 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 
 - كتالوج الكتب/النماذج اللبنانية
 - درس الصف 12 علوم الحياة — النهايات (فصل 1)
-- أكواد تجريبية: `MUNZER-GOLD-9A`، `MUNZER-G12-7K`، `BREVET-29-MX`
+- أكواد تجريبية: تُصدر من لوحة الأستاذ (لا تُنشر في هذا الملف).
 
 لا ترفع `.env` أو بطاقات حقيقية أو ملفات الطلاب.
 
@@ -301,7 +279,7 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 ## ملاحظات التجريب / Demo notes
 
 - المنصة تعمل بدون `OPENAI_API_KEY` (ردود محلية).
-- حسابات التجربة في الجدول أعلاه؛ كود تجريبي كامل المنصة: `MUNZER-GOLD-9A` من صفحة `/redeem`.
+- حسابات التجربة تُزرع على الخادم (انظر قسم الدخول أعلاه)؛ أكواد التفعيل تُطلب من الأستاذ وتُفعَّل من `/redeem`.
 - المحتوى المولَّد يبقى في طابور الأستاذ حتى الاعتماد.
 - مجلدات `legacy/` و`legacy-source/` أرشيف للكود السابق وليست جزءاً من تطبيق Next.
 

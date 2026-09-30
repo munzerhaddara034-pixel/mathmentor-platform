@@ -39,7 +39,7 @@ Open `/live/classroom/demo` after signing in with a live-tier or staff account t
 
 ### Teacher / admin (الأستاذ)
 
-1. Sign in as `teacher@mathmentor.local` / `demo-teacher` (or any `teacher` / `admin` role).
+1. Sign in as `teacher@mathmentor.local` (or any `teacher` / `admin` role).
 2. From `/live`, `/dashboard`, or Admin → Live, click **انضم للحصة**.
 3. `POST /api/livekit/token` with `isTeacher: true` (the server **forces** this for staff and **rejects** it for students).
 4. Token grants: `roomJoin`, `canPublish: true`, `canSubscribe: true`, `canPublishData: true`, `roomAdmin: true`, `roomCreate: true`.

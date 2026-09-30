@@ -37,7 +37,7 @@ Source of truth: `src/lib/b2b/pricingStudy.ts` + bilingual UI table.
 ## How to test (demo teacher)
 
 1. Open the live / draft URL.
-2. Login: `teacher@mathmentor.local` / `demo-teacher`.
+2. Login: `teacher@mathmentor.local`.
 3. Nav → **الشراكات** or `/admin/b2b-manager`.
 4. Generate a school proposal → Print.
 5. Record a Whish Reference ID → Confirm → check notification bell + recent list.

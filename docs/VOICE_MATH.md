@@ -21,7 +21,7 @@ npm install
 npm run dev
 ```
 
-1. Sign in as the teacher: `teacher@mathmentor.local` / `demo-teacher` (see [AUTH.md](./AUTH.md)).
+1. Sign in as the teacher: `teacher@mathmentor.local` (see [AUTH.md](./AUTH.md)).
 2. Open **`/studio/voice-solver`** (also `/teacher/voice-math`, or the gold microphone on `/dashboard`).
 3. Tap **تجربة بدون ميكروفون / Demo transcript** (samples include «إكس مربع»، «إكس سكوير»، «واحد على إكس»، «جذر إكس»، «نهاية عند الزائد إنفينيتي»، «ديريفاتيف»).
 4. The board fills immediately with Lebanese-structured LaTeX (`renderMath`, `variationTable`, `plotFunction`, `boxAnswer`, `exam_tip`). Fractions are stacked (`\frac{a}{b}`), powers are true superscripts, radicals use `\sqrt`.
