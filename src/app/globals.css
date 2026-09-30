@@ -1,70 +1,133 @@
 /*
- * Design tokens · منذر حداره / MathMentor (redesign-v1)
- * Navy + gold: gold is an ACCENT (buttons, badges, fills) — never small body text on light surfaces.
- * Text colours below are >= 4.5:1 on --paper and --card (checked with WCAG relative luminance).
+ * Design tokens · منذر حداره / MathMentor — redesign-v2, direction A «أستاذ منذر».
+ * Dark-first: :root IS the dark theme; html.theme-light / [data-theme="light"] is the tokenised light variant.
+ * Two layers:
+ *   1. A tokens as RGB channels (shadcn convention: rgb(var(--x) / <alpha>)), straight from the v2 README.
+ *   2. The redesign-v1 semantic names (--ink, --muted, --card, --navy …) re-pointed at A, so every page
+ *      (lessons, auth, live shell, admin) follows the new palette without per-page rewrites.
+ * Every text/background pair below was checked for WCAG AA (≥ 4.5:1), including text on glass composites
+ * (see docs/redesign-v2-contrast.md).
  */
-:root {
-  /* brand */
-  --navy: #0b1b34;          /* primary / dark surfaces */
-  --navy-700: #1b3563;      /* links, secondary ink on light */
-  --navy-50: #eef2f8;
-  --gold: #e0a83e;          /* accent fill only (buttons, chips, bars) */
-  --gold-strong: #c98f22;
-  --gold-ink: #7a5000;      /* gold-coloured TEXT on light (6.4:1 on --gold-soft) */
-  --gold-soft: #fbf3e2;
-  --teal: #0b6e5f;          /* progress / success (5.4:1 on --teal-soft) */
-  --teal-soft: #e3f4f0;
-  --coral: #b9461a;         /* warnings (4.6:1 on --coral-soft) */
-  --coral-soft: #fcede5;
-  /* surfaces + ink */
-  --ink: #14213a;           /* 14.6:1 on paper */
-  --muted: #46546e;         /* 7.6:1 on card, 6.9:1 on paper */
-  --line: #e7e2d8;
-  --paper: #f7f4ee;         /* warm paper background */
-  --white: #ffffff;
-  --card: #ffffff;          /* white cards */
-  --nav-bg: rgba(247, 244, 238, 0.94);
-  --input-bg: #ffffff;
-  --bot-bg: #eef2f8;
-  --hero-muted: #c9d3e3;
-  --shadow: 0 1px 2px rgba(11, 27, 52, 0.06), 0 4px 14px rgba(11, 27, 52, 0.06);
-  --shadow-lg: 0 10px 30px rgba(11, 27, 52, 0.12);
-  /* shape + spacing (4pt grid) */
-  --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
-  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
-  --tabbar-h: 72px;
-  /* type */
-  --font-ui: var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
-  --font-display: var(--font-tajawal), var(--font-plex-arabic), "Tajawal", sans-serif;
-  color-scheme: light;
-}
-
+:root,
 [data-theme="dark"],
 html.theme-dark {
-  --navy: #0c1524;
-  --navy-700: #b7c8e6;
-  --navy-50: #1a2436;
-  --gold: #e3bc6a;
-  --gold-strong: #e3bc6a;
-  --gold-ink: #e8c77f;
-  --gold-soft: #3a2f1a;
-  --teal: #5fd0bb;
-  --teal-soft: #11302b;
-  --coral: #f29a74;
-  --coral-soft: #3a2118;
-  --ink: #e8eef7;
-  --muted: #a9b6c9;
-  --line: #2a3a52;
-  --paper: #070b12;
-  --white: #121a28;
-  --card: #121a28;
-  --nav-bg: rgba(8, 12, 20, 0.9);
-  --input-bg: #0e1624;
-  --bot-bg: #1a2436;
-  --hero-muted: #b7c5d8;
-  --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.45);
+  /* A tokens (RGB channels) */
+  --background: 6 9 19;          /* #060913 */
+  --surface: 11 16 48;           /* #0B1030 */
+  --foreground: 244 246 255;     /* #F4F6FF */
+  --muted-foreground: 195 202 228; /* #C3CAE4 */
+  --subtle-foreground: 174 183 219; /* #AEB7DB */
+  --primary: 124 107 255;        /* #7C6BFF */
+  --primary-fill: 91 73 240;     /* #5B49F0 — filled buttons (white text 5.7:1) */
+  --accent-violet: 181 123 255;  /* #B57BFF */
+  --accent-cyan: 61 220 245;     /* #3DDCF5 */
+  --cta: 246 196 83;             /* #F6C453 */
+  --cta-foreground: 26 18 6;     /* #1A1206 (11.4:1 on cta) */
+  --success: 94 234 181;         /* #5EEAB5 */
+  --rose: 255 143 177;           /* #FF8FB1 */
+  --live: 217 45 32;             /* #D92D20 — «مباشر الآن» (white 4.83:1) */
+  --glass-hi: 255 255 255 / .09;
+  --glass-lo: 255 255 255 / .04;
+  --glass-stroke: rgba(255, 255, 255, .13);
+  --glass-solid: 17 23 58;       /* #11173A — opaque glass fallback (lowend / no backdrop-filter) */
+  --shadow-glass: 0 10px 40px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .08);
+  --aurora-1: 124 107 255 / .42;
+  --aurora-2: 61 220 245 / .2;
+  --aurora-3: 181 123 255 / .2;
+  --stars: .32;
+
+  /* v1 semantic names → A (dark) */
+  --heading: #f4f6ff;
+  --navy: #1b2150;          /* strong surface (hero cards, step numbers); text on it is #fff */
+  --navy-700: #c9c2ff;      /* link / secondary ink (10.6:1 on bg) */
+  --navy-50: rgba(255, 255, 255, .07);
+  --gold: #f6c453;
+  --gold-strong: #ffd878;
+  --gold-ink: #f6c453;      /* gold TEXT on dark (11.4:1 on bg0) */
+  --gold-soft: rgba(246, 196, 83, .14);
+  --teal: #5eeab5;          /* success / progress */
+  --teal-soft: rgba(94, 234, 181, .12);
+  --coral: #ff8fb1;         /* warnings */
+  --coral-soft: rgba(255, 143, 177, .12);
+  --ink: #f4f6ff;
+  --muted: #c3cae4;
+  --subtle: #aeb7db;
+  --line: rgba(255, 255, 255, .13);
+  --paper: #060913;
+  --white: #11173a;
+  --card: #11173a;
+  --nav-bg: rgba(6, 9, 19, .72);
+  --input-bg: #0e1434;
+  --bot-bg: rgba(124, 107, 255, .16);
+  --hero-muted: #c3cae4;
+  --link: #3ddcf5;          /* cyan links (12.1:1 on bg0) */
+  --violet-ink: #d7b8ff;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  --shadow-lg: 0 16px 44px rgba(0, 0, 0, .45);
+  /* shape + spacing (4pt grid) */
+  --r-sm: 12px; --r-md: 16px; --r-lg: 22px; --r-xl: 28px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+  --tabbar-h: 76px;
+  /* type: Latin Sora 800 / Inter + Arabic Alexandria 800 / IBM Plex Sans Arabic (per-glyph fallback via unicode-range) */
+  --font-ui: var(--font-inter), var(--font-plex-arabic), "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-display: var(--font-sora), var(--font-alexandria), var(--font-plex-arabic), "Alexandria", sans-serif;
   color-scheme: dark;
+}
+
+[data-theme="light"],
+html.theme-light {
+  --background: 245 246 255;     /* #F5F6FF */
+  --surface: 255 255 255;
+  --foreground: 11 16 48;        /* #0B1030 */
+  --muted-foreground: 59 68 104; /* #3B4468 */
+  --subtle-foreground: 77 86 128; /* #4D5680 */
+  --primary: 91 73 240;          /* #5B49F0 */
+  --primary-fill: 91 73 240;
+  --accent-violet: 123 63 224;   /* #7B3FE0 */
+  --accent-cyan: 11 127 149;     /* #0B7F95 */
+  --cta: 246 196 83;
+  --cta-foreground: 26 18 6;
+  --success: 15 122 85;          /* #0F7A55 */
+  --rose: 184 50 94;             /* #B8325E */
+  --live: 217 45 32;
+  --glass-hi: 255 255 255 / .86;
+  --glass-lo: 255 255 255 / .7;
+  --glass-stroke: rgba(11, 16, 48, .1);
+  --glass-solid: 255 255 255;
+  --shadow-glass: 0 8px 28px rgba(27, 33, 80, .1), inset 0 1px 0 rgba(255, 255, 255, .9);
+  --aurora-1: 91 73 240 / .16;
+  --aurora-2: 11 127 149 / .1;
+  --aurora-3: 123 63 224 / .1;
+  --stars: 0;
+
+  --heading: #0b1030;
+  --navy: #1b2150;
+  --navy-700: #4331d6;      /* 6.9:1 on white */
+  --navy-50: #edeefb;
+  --gold: #f6c453;
+  --gold-strong: #e9b23a;
+  --gold-ink: #7a5000;      /* 6.4:1 on gold-soft */
+  --gold-soft: #fdf3da;
+  --teal: #0f7a55;
+  --teal-soft: #e1f5ec;
+  --coral: #b8325e;
+  --coral-soft: #fce8ef;
+  --ink: #0b1030;
+  --muted: #3b4468;
+  --subtle: #4d5680;
+  --line: rgba(11, 16, 48, .12);
+  --paper: #f5f6ff;
+  --white: #ffffff;
+  --card: #ffffff;
+  --nav-bg: rgba(245, 246, 255, .82);
+  --input-bg: #ffffff;
+  --bot-bg: #edeefb;
+  --hero-muted: #3b4468;
+  --link: #097386;          /* 5.1:1 on bg #F5F6FF, 5.5:1 on white */
+  --violet-ink: #7b3fe0;
+  --shadow: 0 1px 2px rgba(27, 33, 80, .06), 0 6px 18px rgba(27, 33, 80, .08);
+  --shadow-lg: 0 12px 32px rgba(27, 33, 80, .14);
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
@@ -174,8 +237,6 @@ button, input, select, textarea {
   background: var(--gold-soft);
   color: var(--gold-ink);
 }
-[data-theme="dark"] .role-badge,
-html.theme-dark .role-badge { color: var(--gold); }
 .role-badge.large { font-size: 14px; padding: 6px 14px; }
 .hero {
   background: var(--navy); color: white; border-radius: 28px; padding: 48px 36px;
@@ -188,8 +249,8 @@ html.theme-dark .role-badge { color: var(--gold); }
 .btn, .ghost-btn {
   border: 0; border-radius: 999px; padding: 12px 20px; cursor: pointer; font-weight: 700;
 }
-.btn { background: var(--gold); color: var(--navy); }
-.btn.dark { background: var(--navy); color: white; }
+.btn { background: linear-gradient(180deg, var(--gold-strong), var(--gold)); color: rgb(var(--cta-foreground)); }
+.btn.dark { background: rgb(var(--primary-fill)); color: #fff; }
 .btn.ok { background: #1f7a4d; color: white; }
 .btn.warn { background: #9a3412; color: white; }
 .ghost-btn { background: transparent; color: white; border: 1px solid rgba(255,255,255,.25); }
@@ -252,8 +313,7 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .teacher-nameplate {
   position: absolute;
-  left: 12px;
-  right: 12px;
+  inset-inline: 12px;
   bottom: 12px;
   margin: 0;
   padding: 8px 10px;
@@ -451,12 +511,12 @@ textarea { min-height: 120px; resize: vertical; }
 .lang-toggle-overlay {
   position: absolute;
   top: 14px;
-  right: 14px;
+  inset-inline-start: 14px;
   z-index: 4;
   box-shadow: 0 8px 24px rgba(16, 33, 61, 0.28);
 }
 .option-btn {
-  border: 1px solid var(--line); background: var(--card); border-radius: 16px; padding: 14px; cursor: pointer; text-align: right;
+  border: 1px solid var(--line); background: var(--card); border-radius: 16px; padding: 14px; cursor: pointer; text-align: start;
 }
 .option-btn.picked { background: var(--navy); color: #fff; }
 .quiz-dots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
@@ -468,7 +528,7 @@ textarea { min-height: 120px; resize: vertical; }
 .result-hero.pass { background: #1f7a4d; }
 .result-hero.fail { background: #9a3412; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.data-table th, .data-table td { border-bottom: 1px solid var(--line); padding: 8px; text-align: right; }
+.data-table th, .data-table td { border-bottom: 1px solid var(--line); padding: 8px; text-align: start; }
 .welcome-banner { background: var(--gold-soft); border-radius: 16px; padding: 16px; margin-top: 16px; }
 .question-image { max-width: 100%; border-radius: 12px; margin: 8px 0; }
 .activate-card { max-width: 520px; }
@@ -490,7 +550,7 @@ textarea { min-height: 120px; resize: vertical; }
   font-size: 1.45rem;
   line-height: 1.35;
   margin: 0 0 20px;
-  color: var(--navy);
+  color: var(--heading);
 }
 .login-title {
   display: flex;
@@ -566,7 +626,7 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-lesson-notes summary {
   cursor: pointer;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--heading);
   min-height: 44px;
   display: flex;
   align-items: center;
@@ -666,7 +726,7 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-board {
   position: relative;
   background: #f7f4ea;
-  color: var(--navy);
+  color: var(--heading);
   border-radius: 18px;
   padding: 16px;
   min-height: 360px;
@@ -787,7 +847,7 @@ textarea { min-height: 120px; resize: vertical; }
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  color: var(--navy);
+  color: var(--heading);
 }
 .studio-graph-head {
   display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
@@ -880,7 +940,7 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-chapter-btn small { font-weight: 600; opacity: .75; }
 .studio-chapter-btn.active {
   background: var(--gold);
-  color: var(--navy);
+  color: var(--heading);
   border-color: var(--gold);
 }
 .studio-fs-host:fullscreen,
@@ -962,7 +1022,7 @@ textarea { min-height: 120px; resize: vertical; }
   background: #fff;
   border: 1px solid #ead9b0;
 }
-.teacher-checklist li strong { color: var(--navy); }
+.teacher-checklist li strong { color: var(--heading); }
 .teacher-checklist-ar { font-weight: 700; color: #61708a; }
 .teacher-checklist li span { color: #3d4a5c; font-size: 14px; line-height: 1.45; }
 @media (max-width: 800px) {
@@ -971,7 +1031,7 @@ textarea { min-height: 120px; resize: vertical; }
 @media (max-width: 899px) {
   body:has(.studio-player) .chat-widget { display: none; }
   .studio-focus-toggle { display: inline-flex; }
-  .studio-shell { padding-left: 12px; padding-right: 12px; }
+  .studio-shell { padding-inline: 12px; }
   .studio-head h1 { font-size: 1.45rem; line-height: 1.25; }
   .studio-player .btn,
   .phase-chip,
@@ -1014,7 +1074,7 @@ textarea { min-height: 120px; resize: vertical; }
 .studio-quiz-card {
   width: min(560px, 100%);
   background: #fff;
-  color: var(--navy);
+  color: var(--heading);
   border-radius: 20px;
   padding: 20px 18px;
   box-shadow: 0 18px 48px rgba(11, 24, 46, 0.28);
@@ -1180,7 +1240,7 @@ a.voice-mic { text-decoration: none; }
   border: 0;
   cursor: pointer;
   background: var(--gold);
-  color: var(--navy);
+  color: var(--heading);
   border-radius: 999px;
   padding: 16px 22px;
   font-weight: 800;
@@ -1249,7 +1309,7 @@ a.voice-mic { text-decoration: none; }
 .theorem {
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--navy);
+  color: var(--heading);
   margin: 4px 0 8px;
 }
 .retake-banner {
@@ -1283,7 +1343,7 @@ a.voice-mic { text-decoration: none; }
   margin: 8px 0 12px;
 }
 .ghost-chip { background: transparent; }
-.solver-steps { padding-left: 20px; }
+.solver-steps { padding-inline-start: 20px; }
 .solver-steps li { margin-bottom: 16px; }
 .slot-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
 .slot-list li {
@@ -1320,7 +1380,7 @@ a.voice-mic { text-decoration: none; }
 .notif-badge {
   position: absolute;
   top: -4px;
-  right: -4px;
+  inset-inline-start: -4px;
   background: #9a3412;
   color: #fff;
   border-radius: 999px;
@@ -1334,7 +1394,7 @@ a.voice-mic { text-decoration: none; }
 }
 .notif-dropdown {
   position: absolute;
-  right: 0;
+  inset-inline-start: 0;
   top: 46px;
   width: min(360px, 86vw);
   background: #fff;
@@ -1395,7 +1455,7 @@ a.voice-mic { text-decoration: none; }
 .exam-clock {
   font-size: 28px;
   font-weight: 800;
-  color: var(--navy);
+  color: var(--heading);
   background: var(--gold-soft);
   border-radius: 16px;
   padding: 8px 16px;
@@ -1406,11 +1466,11 @@ a.voice-mic { text-decoration: none; }
 .formula-drawer {
   position: fixed;
   top: 0;
-  right: 0;
+  inset-inline-start: 0;
   width: min(420px, 100vw);
   height: 100vh;
   background: #fff;
-  border-left: 1px solid var(--line);
+  border-inline-end: 1px solid var(--line);
   z-index: 30;
   padding: 20px;
   overflow: auto;
@@ -1677,12 +1737,13 @@ a.voice-mic { text-decoration: none; }
   font-weight: 700;
   font-size: 12px;
   background: #f7f9fc;
-  color: var(--navy);
+  color: var(--heading);
   max-width: 100%;
   cursor: pointer;
 }
 .mm-curriculum-banner {
-  background: #eef3fa;
+  background: var(--navy-50);
+  color: var(--ink);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 10px 14px;
