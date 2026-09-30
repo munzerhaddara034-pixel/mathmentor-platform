@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
+import { Katex } from "@/components/studio/Katex";
 
 declare global {
   interface Window {
@@ -9,11 +8,11 @@ declare global {
   }
 }
 
+/**
+ * Legacy API kept for LessonNotes / QuizEngine. redesign-v2 renders it with KaTeX (Lebanese Word-Equation
+ * formatting via <Katex>) instead of loading MathJax 3 from a CDN on every page.
+ */
 export function MathTex({ tex, inline }: { tex?: string; inline?: boolean }) {
-  const cleaned = tex ? formatLebaneseEquation(tex) : tex;
-  useEffect(() => {
-    void window.MathJax?.typesetPromise?.();
-  }, [cleaned]);
-  if (!cleaned) return null;
-  return inline ? <span>{`\\(${cleaned}\\)`}</span> : <div className="math-block">{`\\[${cleaned}\\]`}</div>;
+  if (!tex) return null;
+  return inline ? <Katex tex={tex} className="mm-math" /> : <div className="math-block"><Katex tex={tex} display className="mm-math" /></div>;
 }

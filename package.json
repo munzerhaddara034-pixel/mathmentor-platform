@@ -24,6 +24,7 @@
     "@livekit/components-styles": "^1.2.0",
     "@netlify/blobs": "^11.1.0",
     "@octokit/rest": "^22.0.1",
+    "framer-motion": "^12.43.0",
     "katex": "^0.16.22",
     "livekit-client": "^2.22.3",
     "livekit-server-sdk": "^2.19.0",
