@@ -208,11 +208,8 @@ export function ExamSimulator({
       {paper.parts.map((part) => (
         <section key={part.id} className="card exam-part">
           <h3>
-            {part.roman}. {part.title}
+            {part.roman}. {isAr ? part.titleAr || part.title : part.title}
           </h3>
-          <p className="muted" dir="rtl">
-            {part.titleAr}
-          </p>
           {part.questions.map((question) => (
             <article key={question.id} className="exam-question mm-exam-q-grid">
               <div className="mm-exam-q-main">
@@ -220,14 +217,10 @@ export function ExamSimulator({
                   {fmt(t.question, { n: question.number })}
                   {question.title ? ` — ${question.title}` : ""}
                 </h4>
-                {question.prompt ? (
+                {/* Paper content is authored en + ar: show the locale's variant (fr uses en; SAT is en-only). */}
+                {(isAr && !isSat ? question.promptAr || question.prompt : question.prompt) ? (
                   <p>
-                    <MixedMathText text={question.prompt} />
-                  </p>
-                ) : null}
-                {question.promptAr && !isSat ? (
-                  <p className="muted" dir="rtl">
-                    <MixedMathText text={question.promptAr} />
+                    <MixedMathText text={(isAr && !isSat ? question.promptAr || question.prompt : question.prompt) ?? ""} />
                   </p>
                 ) : null}
                 {question.subs.map((sub) => {
@@ -236,17 +229,13 @@ export function ExamSimulator({
                   return (
                     <div key={sub.id} className="exam-sub">
                       <p>
-                        <strong>{sub.label}.</strong> <MixedMathText text={sub.prompt} />{" "}
+                        <strong>{sub.label}.</strong>{" "}
+                        <MixedMathText text={isAr && !isSat ? sub.promptAr || sub.prompt : sub.prompt} />{" "}
                         <span className="badge">
                           {fmt(t.pts, { n: sub.marks })}
                           {responseType === "spr" ? " · SPR" : isMcq ? " · MCQ" : ""}
                         </span>
                       </p>
-                      {sub.promptAr && !isSat ? (
-                        <p className="muted" dir="rtl">
-                          <MixedMathText text={sub.promptAr} />
-                        </p>
-                      ) : null}
                       {sub.latex ? <Katex tex={sub.latex} display /> : null}
                       <BaremeAside sub={sub} compact />
                       {isMcq && sub.choices ? (

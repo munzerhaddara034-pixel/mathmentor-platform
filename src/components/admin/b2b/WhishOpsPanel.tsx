@@ -131,7 +131,7 @@ export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
       <p className="muted">
         {rich(t.lead, {
           phone: <strong dir="ltr">{wallet.phone}</strong>,
-          name: <strong dir="auto">{wallet.nameAr}</strong>,
+          name: <strong dir="auto">{locale === "ar" ? wallet.nameAr : "Munzer Ahmad Haddara"}</strong>,
         })}
       </p>
 
