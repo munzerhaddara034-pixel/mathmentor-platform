@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 type Props = {
   value: string;
@@ -9,13 +9,49 @@ type Props = {
   minLength?: number;
 };
 
+/**
+ * Password input with an «إظهار / إخفاء» toggle.
+ *
+ * Layout: the input is always LTR (passwords are Latin), so its text and caret start at the
+ * physical LEFT edge. The toggle is pinned to the physical left too (the RTL page's inline end),
+ * and the input is padded on that same physical side (see `.mm-password` in auth.css). Physical
+ * properties are used on purpose: logical ones resolve differently for the RTL wrapper and the
+ * LTR input, which previously put the button on the left and the padding on the right, so the
+ * button covered the start of the text and swallowed taps meant for the input.
+ *
+ * The toggle is outside the <label> (a label must only contain its own control) and does not steal
+ * focus from the input, so the caret and the mobile keyboard stay put when it is pressed.
+ */
 export function PasswordField({ value, onChange, autoComplete, minLength }: Props) {
+  const id = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const selectionRef = useRef<{ start: number; end: number } | null>(null);
   const [visible, setVisible] = useState(false);
+
+  // Switching `type` can reset the caret in some browsers; restore it after the re-render.
+  useEffect(() => {
+    const input = inputRef.current;
+    const selection = selectionRef.current;
+    selectionRef.current = null;
+    if (!input || !selection || document.activeElement !== input) return;
+    input.setSelectionRange(selection.start, selection.end);
+  }, [visible]);
+
+  const toggle = () => {
+    const input = inputRef.current;
+    if (input && document.activeElement === input) {
+      selectionRef.current = { start: input.selectionStart ?? value.length, end: input.selectionEnd ?? value.length };
+    }
+    setVisible((v) => !v);
+  };
+
   return (
-    <label className="mm-field">
-      <span>كلمة المرور</span>
-      <span className="mm-password">
+    <div className="mm-field mm-password-field">
+      <label htmlFor={id}>كلمة المرور</label>
+      <div className="mm-password">
         <input
+          ref={inputRef}
+          id={id}
           type={visible ? "text" : "password"}
           dir="ltr"
           value={value}
@@ -23,11 +59,24 @@ export function PasswordField({ value, onChange, autoComplete, minLength }: Prop
           required
           minLength={minLength}
           autoComplete={autoComplete}
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
         />
-        <button type="button" onClick={() => setVisible((v) => !v)} aria-pressed={visible}>
+        <button
+          type="button"
+          onMouseDown={(event) => {
+            // Keep focus (and the on-screen keyboard) in the input when the toggle is pressed.
+            if (document.activeElement === inputRef.current) event.preventDefault();
+          }}
+          onClick={toggle}
+          aria-controls={id}
+          aria-pressed={visible}
+          aria-label={visible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+        >
           {visible ? "إخفاء" : "إظهار"}
         </button>
-      </span>
-    </label>
+      </div>
+    </div>
   );
 }
