@@ -1,6 +1,6 @@
 import { createId } from "../ids";
 import { readJsonFile, withStoreLock, writeJsonFile } from "../dataDir";
-import { DEMO_ACCOUNTS } from "./demoAccounts";
+import { isAdminEmail } from "./adminAllowlist";
 import { classifyDevice, deviceDisplayName, fingerprintHash, formatDeviceTimestamp, type DeviceClass, type DeviceFingerprint } from "./device";
 import { hashPassword, hashToken } from "./passwords";
 import { isSessionSharingExempt, type AuthRole } from "./paths";
@@ -117,24 +117,6 @@ function toPublic(user: AuthUser): PublicUser {
   };
 }
 
-async function seedAuth(): Promise<AuthStoreData> {
-  const now = new Date().toISOString();
-  const users: AuthUser[] = DEMO_ACCOUNTS.map((account) => ({
-    id: account.id,
-    email: account.email.toLowerCase(),
-    name: account.name,
-    phone: account.phone,
-    role: account.role,
-    passwordHash: hashPassword(account.password),
-    entitlementPlanId: account.entitlementPlanId,
-    subscriptionType: account.subscriptionType ?? planIdToSubscriptionType(account.entitlementPlanId),
-    liveCredits: account.liveCredits ?? liveCreditsForPlan(account.entitlementPlanId),
-    aiExpiresAt: account.aiExpiresAt ?? null,
-    createdAt: now,
-  }));
-  return { users, sessions: [], revokedTokens: [] };
-}
-
 function pruneRevoked(entries: RevokedSession[] | undefined): RevokedSession[] {
   const cutoff = Date.now() - REVOKED_TTL_MS;
   return (entries ?? [])
@@ -153,41 +135,11 @@ function normalizeAuthStore(parsed: Partial<AuthStoreData> | AuthStoreData): Aut
   };
 }
 
+/** No demo/seed accounts: an empty store stays empty until someone signs up. */
 async function readAuthStoreUnlocked(): Promise<AuthStoreData> {
   const parsed = await readJsonFile<Partial<AuthStoreData> | null>(AUTH_FILE, null, { persistFallback: false });
   const store = normalizeAuthStore(parsed ?? {});
-  if (store.users.length === 0) {
-    const seeded = await seedAuth();
-    await writeJsonFile(AUTH_FILE, seeded);
-    return seeded;
-  }
-  const migratedUsers = store.users.map(migrateUser);
-  const knownIds = new Set(migratedUsers.map((user) => user.id));
-  const extras = DEMO_ACCOUNTS.filter(
-    (account) => !knownIds.has(account.id) && !migratedUsers.some((user) => user.email === account.email.toLowerCase()),
-  );
-  if (extras.length) {
-    const now = new Date().toISOString();
-    for (const account of extras) {
-      migratedUsers.push({
-        id: account.id,
-        email: account.email.toLowerCase(),
-        name: account.name,
-        phone: account.phone,
-        role: account.role,
-        passwordHash: hashPassword(account.password),
-        entitlementPlanId: account.entitlementPlanId,
-        subscriptionType: account.subscriptionType ?? planIdToSubscriptionType(account.entitlementPlanId),
-        liveCredits: account.liveCredits ?? liveCreditsForPlan(account.entitlementPlanId),
-        aiExpiresAt: account.aiExpiresAt ?? null,
-        createdAt: now,
-      });
-    }
-    const next = { users: migratedUsers, sessions: store.sessions, revokedTokens: store.revokedTokens };
-    await writeJsonFile(AUTH_FILE, next);
-    return next;
-  }
-  return { users: migratedUsers, sessions: store.sessions, revokedTokens: store.revokedTokens };
+  return { users: store.users.map(migrateUser), sessions: store.sessions, revokedTokens: store.revokedTokens };
 }
 
 async function writeAuthStoreUnlocked(store: AuthStoreData) {
@@ -280,8 +232,8 @@ export async function adjustLiveCredits(userId: string, delta: number) {
 }
 
 /**
- * Mirror an account that authenticated against the SQLite profile DB (`/signup`, Render demo
- * accounts in `db.ts`) into this session store, so one exclusive-session cookie covers both.
+ * Mirror an account that authenticated against the profile DB (`/signup`, SQLite or Postgres)
+ * into this session store, so one exclusive-session cookie covers both.
  * Existing users (matched by email) are returned unchanged — no password or role overwrite.
  */
 export async function ensureUserForProfile(input: {
@@ -309,6 +261,22 @@ export async function ensureUserForProfile(input: {
     });
     store.users.push(created);
     return created;
+  });
+}
+
+/**
+ * ADMIN_EMAILS allowlist: an existing account whose email is listed is (re)granted the admin
+ * (staff: teacher + admin) role on login. Accounts that are not listed are never changed here.
+ */
+export async function ensureAdminRoleForAllowlistedEmail(userId: string): Promise<AuthUser | undefined> {
+  return mutateAuth((store) => {
+    const user = store.users.find((item) => item.id === userId);
+    if (!user) return undefined;
+    if (isAdminEmail(user.email) && user.role !== "admin") {
+      user.role = "admin";
+      Object.assign(user, migrateUser(user));
+    }
+    return user;
   });
 }
 

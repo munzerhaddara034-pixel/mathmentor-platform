@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { AuthCard, AuthNotice } from "@/components/auth/AuthCard";
 import { PasswordField } from "@/components/auth/PasswordField";
+import { PASSWORD_MIN_LENGTH, PASSWORD_RULE_AR } from "@/lib/auth/passwordPolicy";
 import { USER_ROLES, type UserRole } from "@/lib/auth/types";
 import "@/styles/auth.css";
 
@@ -68,7 +69,8 @@ export default function SignupPage() {
             autoComplete="email"
           />
         </label>
-        <PasswordField value={password} onChange={setPassword} autoComplete="new-password" minLength={6} />
+        <PasswordField value={password} onChange={setPassword} autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} />
+        <p className="mm-auth-hint">{PASSWORD_RULE_AR}</p>
         <label className="mm-field">
           <span>أنا</span>
           <select value={role} onChange={(event) => setRole(event.target.value as UserRole)}>

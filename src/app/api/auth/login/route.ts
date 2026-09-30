@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { findUserByEmail as findProfileByEmail } from "@/lib/auth/db";
 import { verifyPassword as verifyProfilePassword } from "@/lib/auth/password";
-import { ensureUserForProfile, findUserByEmail, asPublicUser, userAccess, type AuthUser } from "@/lib/auth/store";
+import {
+  ensureAdminRoleForAllowlistedEmail,
+  ensureUserForProfile,
+  findUserByEmail,
+  asPublicUser,
+  userAccess,
+  type AuthUser,
+} from "@/lib/auth/store";
 import { hashPassword, verifyPassword } from "@/lib/auth/passwords";
 import { startExclusiveSession } from "@/lib/auth/session";
 import { deviceClassLabel, deviceDisplayName, type DeviceFingerprint } from "@/lib/auth/device";
@@ -10,7 +17,7 @@ import { isSessionSharingExempt, isStaffRole } from "@/lib/auth/paths";
 export const runtime = "nodejs";
 
 /**
- * Accounts created through /signup (or the Render demo seed) live in the SQLite profile DB.
+ * Accounts created through /signup also live in the profile DB (SQLite or Postgres).
  * When the session store does not accept the credentials, try that DB and mirror the account.
  */
 async function authenticateViaProfile(email: string, password: string): Promise<AuthUser | null> {
@@ -53,8 +60,10 @@ export async function POST(request: Request) {
     );
   }
   const stored = await findUserByEmail(email);
-  const user =
+  const authenticated =
     stored && verifyPassword(password, stored.passwordHash) ? stored : await authenticateViaProfile(email, password);
+  // ADMIN_EMAILS allowlist: an existing account on the list is (re)granted the admin role at login.
+  const user = authenticated ? ((await ensureAdminRoleForAllowlistedEmail(authenticated.id)) ?? authenticated) : null;
   if (!user) {
     return NextResponse.json(
       {

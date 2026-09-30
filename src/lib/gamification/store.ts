@@ -65,59 +65,10 @@ function emptyProfile(userId: string, name: string): StudentGamification {
   };
 }
 
-function seedProfiles(): StudentGamification[] {
-  const month = monthKey();
-  return [
-    {
-      userId: "user-demo-student",
-      name: "Sara Nassar",
-      streakDays: 7,
-      lastActivityDate: todayBeirut(),
-      xp: 480,
-      monthlyXp: { [month]: 320 },
-      badges: ["calculus-master", "probability-pro", "brevet-champ", "streak-7", "first-solve"],
-      topicXp: { calculus: 120, probability: 80, brevet: 90 },
-    },
-    {
-      userId: "user-demo-ai",
-      name: "Nour Khalil",
-      streakDays: 3,
-      lastActivityDate: todayBeirut(),
-      xp: 210,
-      monthlyXp: { [month]: 140 },
-      badges: ["first-solve", "calculus-master"],
-      topicXp: { calculus: 70 },
-    },
-    {
-      userId: "user-demo-live",
-      name: "Hassan Mansour",
-      streakDays: 1,
-      lastActivityDate: todayBeirut(),
-      xp: 80,
-      monthlyXp: { [month]: 40 },
-      badges: [],
-      topicXp: {},
-    },
-    {
-      userId: "user-demo-pending",
-      name: "Karim Fares",
-      streakDays: 0,
-      lastActivityDate: "",
-      xp: 25,
-      monthlyXp: { [month]: 10 },
-      badges: [],
-      topicXp: {},
-    },
-  ];
-}
-
+/** No demo leaderboard rows: profiles are created from real student activity. */
 async function readGame(): Promise<GameStore> {
-  const data = await readJsonFile<GameStore>(FILE, { profiles: seedProfiles() });
-  if (!Array.isArray(data.profiles) || data.profiles.length === 0) {
-    const seeded = { profiles: seedProfiles() };
-    await writeJsonFile(FILE, seeded);
-    return seeded;
-  }
+  const data = await readJsonFile<GameStore>(FILE, { profiles: [] });
+  if (!Array.isArray(data.profiles)) return { profiles: [] };
   return data;
 }
 

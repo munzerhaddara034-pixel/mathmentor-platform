@@ -47,7 +47,7 @@ The pedagogical tutor itself already falls back Gemini → OpenAI → curriculum
 
 ## How to test without Whisper
 
-1. Sign in as teacher (`teacher@mathmentor.local` — [AUTH.md](./AUTH.md)).
+1. Sign in as teacher (`ADMIN_EMAILS` account — [AUTH.md](./AUTH.md)).
 2. Set curriculum in the nav **Curriculum** switcher (persists to cookie).
 3. Open **`/studio/voice-solver`**.
 4. Tap **تجربة بدون ميكروفون / Demo transcript**.

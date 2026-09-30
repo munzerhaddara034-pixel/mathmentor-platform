@@ -22,6 +22,7 @@
 .mm-auth-notice.info { background: var(--navy-50); color: var(--navy); }
 .mm-auth-notice.error { background: var(--coral-soft); color: var(--coral); }
 .mm-auth-notice p { margin: 0; }
+.mm-auth-hint { margin: -0.35rem 0 0; color: var(--muted); font-size: 0.85rem; }
 .mm-auth-foot { margin: 0; color: var(--muted); text-align: center; }
 .mm-auth-foot a { color: var(--navy); font-weight: 700; }
 @media (min-width: 640px) { .mm-auth { padding-top: 48px; } .mm-auth-card { padding: 34px 32px; } }

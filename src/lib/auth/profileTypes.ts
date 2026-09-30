@@ -41,13 +41,6 @@ export type ReminderRow = {
 
 export type ReminderInsert = ReminderRow & { created_at: string };
 
-export type ProfileSeed = {
-  users: ProfileUserRow[];
-  enrollments: EnrollmentInsert[];
-  progress: LessonProgressInsert[];
-  reminders: ReminderInsert[];
-};
-
 export interface ProfileRepo {
   findUserByEmail(email: string): Promise<ProfileUserRow | undefined>;
   findUserById(id: string): Promise<ProfileUserRow | undefined>;

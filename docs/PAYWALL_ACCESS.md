@@ -29,7 +29,7 @@ AI features **inside** a live room (pedagogical tutor via voice-to-board) still 
 
 ## Redeem → instant unlock
 
-1. Sign in (e.g. `pending@mathmentor.local`).
+1. Sign in with a student account that has no plan yet.
 2. Open `/redeem`, enter a code, submit.
 3. On success the client:
    - reads returned `aiAccess` / `liveAccess` / `subscriptionType` / `liveCredits`
@@ -39,18 +39,9 @@ AI features **inside** a live room (pedagogical tutor via voice-to-board) still 
 
 Helper: `src/lib/auth/clientSession.ts`.
 
-## Demo / teacher-testing codes
+## Codes
 
-Documented also in [AUTH.md](./AUTH.md). Seeded scratch cards:
-
-| Code | Plan | Notes |
-| --- | --- | --- |
-| `MUNZER-GOLD-9A` | all (AI) | Single-use |
-| `MUNZER-AI-3K` | ai | Single-use |
-| `MUNZER-LIVE-4C` | live | Single-use (+ credits) |
-| `MUNZER-BOTH-1X` | both | Single-use |
-| `MUNZER-HRS-2H` | live hours top-up | Billing store |
-| **`MUNZER-DEMO-TEACHER`** | ai | **Teacher testing only** — `reusable: true`, never sell to students |
+No demo or teacher-testing codes are seeded. Staff generate scratch cards and live-hour top-up codes from the teacher console (`/dashboard`); codes are never published in docs or on `/redeem`.
 
 ## Key files
 

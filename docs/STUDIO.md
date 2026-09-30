@@ -22,7 +22,7 @@ Open:
 | http://localhost:3000/lessons/interactive-explanation | Split explanation player |
 | http://localhost:3000/live | Live 1-on-1 booking |
 | http://localhost:3000/admin | AI logs + live session manager |
-| http://localhost:3000/login | Sign in (demo accounts: [AUTH.md](./AUTH.md)) |
+| http://localhost:3000/login | Sign in (accounts and staff rights: [AUTH.md](./AUTH.md)) |
 | http://localhost:3000/redeem | Promo/card unlock (signed in) |
 | http://localhost:3000/studio/player?lesson=leb-term-func-01 | Exact 3-scene seed |
 | http://localhost:3000/studio/player?job=… | Sync player for a HeyGen job |
@@ -96,7 +96,7 @@ A **Teacher Quality Checklist** sits on `/studio/script` and `/admin/video-gener
 
 ## Teacher timeline editor
 
-Open `/lessons/interactive?teacher=1` **while signed in as teacher or admin** (`teacher@mathmentor.local`). The mini-panel edits absolute `timeline.events`. **Apply live** updates the player without a reload. **Save** writes `sessionStorage` and `POST /api/studio/events`. Auth, single-session, noindex, and watermarks: [AUTH.md](./AUTH.md).
+Open `/lessons/interactive?teacher=1` **while signed in as teacher or admin** (an `ADMIN_EMAILS` staff account). The mini-panel edits absolute `timeline.events`. **Apply live** updates the player without a reload. **Save** writes `sessionStorage` and `POST /api/studio/events`. Auth, single-session, noindex, and watermarks: [AUTH.md](./AUTH.md).
 
 ## In-video quiz
 

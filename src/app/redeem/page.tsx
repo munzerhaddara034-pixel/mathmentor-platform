@@ -119,14 +119,7 @@ export default function RedeemPage() {
     <main className="shell" dir="rtl">
       <p className="eyebrow">تفعيل الاشتراك</p>
       <h1>أدخل كود البطاقة</h1>
-      <p className="muted">
-        اشترِ البطاقة من مكتب معتمد. للتجربة: MUNZER-GOLD-9A · MUNZER-AI-3K · MUNZER-LIVE-4C · MUNZER-BOTH-1X · شحن
-        ساعات: MUNZER-HRS-2H
-      </p>
-      <p className="muted" dir="ltr" lang="en">
-        Teacher testing only (reusable, not for students): <code>MUNZER-DEMO-TEACHER</code> → AI_TIER unlock without
-        consuming the card.
-      </p>
+      <p className="muted">اشترِ البطاقة من مكتب معتمد أو اطلب الكود من الأستاذ منذر حداره.</p>
       {need ? (
         <p className="studio-teacher-error" role="alert">
           {needKind === "ai"

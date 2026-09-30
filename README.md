@@ -54,15 +54,15 @@ npm start
 
 ---
 
-## الدخول والحسابات التجريبية / Auth & demo logins
+## الدخول والصلاحيات / Auth & staff access
 
 جلسة واحدة موحّدة: كعكة `mm_session` تحمل رمزاً معتماً مخزّناً على الخادم (`data/auth.json` محلياً، Netlify Blobs على Netlify) — جلسة هاتف واحدة + جلسة حاسوب واحدة لكل طالب، وحسابات الأستاذ/الإدارة لا تُطرد بل يصل تنبيه باسم الجهاز. ملفات الطلاب للوحة التحكم (الدورات، التقدّم، تذكير الامتحانات، ربط ولي الأمر) في SQLite (`data/auth.db`). الحسابات المنشأة من `/signup` تُسجَّل في الاثنين؛ حسابات SQLite القديمة تُنسخ تلقائياً إلى مخزن الجلسات عند أول دخول. التفاصيل: [docs/AUTH.md](./docs/AUTH.md).
 
-حسابات التجربة للتطوير المحلي تُزرع تلقائياً على الخادم عند أول تشغيل (`src/lib/auth/demoAccounts.ts` و`src/lib/auth/profileSeedAccounts.ts`). لا تُعرض كلمات المرور في واجهة الدخول ولا في هذا الملف العام. اطلب بيانات QA من الأستاذ منذر حداره أو من فريق التشغيل.
+لا توجد حسابات تجريبية مزروعة بعد الآن. كل حساب يُنشأ من `/signup` (طالب أو ولي أمر، وكلمة مرور من 10 أحرف على الأقل فيها حرف ورقم). صلاحيات الأستاذ/الإدارة تأتي من متغير البيئة `ADMIN_EMAILS` فقط: البريد المدرج يحصل على دور الإدارة عند التسجيل أو عند الدخول. زر «موافقة ونشر» في `/admin/team` محصور بـ `TEAM_APPROVER_EMAILS` (وإلا `ADMIN_EMAILS`). الحسابات التجريبية القديمة تُحذف تلقائياً مرة واحدة عند الإقلاع (`src/lib/auth/removeDemoAccounts.ts`).
 
-Local QA accounts are seeded server-side on first boot (see the files above). Passwords are intentionally not published here or on `/login`.
+No demo accounts are seeded any more. Staff (admin + teacher) rights come only from the `ADMIN_EMAILS` env allowlist (applied at signup and at login); see [docs/AUTH.md](./docs/AUTH.md) and `.env.example`. Signup does **not** verify email ownership yet, so the owner must register each allowlisted email before anyone else does.
 
-- تسجيل الدخول: [`/login`](http://localhost:3000/login) · حساب جديد (طالب أو ولي أمر فقط؛ حسابات الأستاذ تُنشأ من الإدارة): [`/signup`](http://localhost:3000/signup) · الملف: [`/profile`](http://localhost:3000/profile)
+- تسجيل الدخول: [`/login`](http://localhost:3000/login) · حساب جديد (طالب أو ولي أمر؛ صلاحية الإدارة لبريد `ADMIN_EMAILS` فقط): [`/signup`](http://localhost:3000/signup) · الملف: [`/profile`](http://localhost:3000/profile)
 - بطاقات التفعيل (Promo cards) تُصدر من لوحة الأستاذ `/dashboard` وتُفعَّل على `/redeem` (بعد الدخول). الأكواد لا تُنشر هنا.
 - الدروس (`/lessons/*`) والسبورة والحلّال خاصة وتتطلب اشتراكاً؛ `/watch/[id]` يبقى عاماً.
 - **الوضع الداكن / الفاتح:** من قائمة الحساب في الشريط العلوي. الاختيار يُحفظ في `localStorage` (`mm-theme`).
@@ -279,7 +279,7 @@ Pillow وffmpeg مطلوبان لتوليد المسودة البرمجية فق
 ## ملاحظات التجريب / Demo notes
 
 - المنصة تعمل بدون `OPENAI_API_KEY` (ردود محلية).
-- حسابات التجربة تُزرع على الخادم (انظر قسم الدخول أعلاه)؛ أكواد التفعيل تُطلب من الأستاذ وتُفعَّل من `/redeem`.
+- لا حسابات تجريبية: أنشئ حساباً من `/signup` (صلاحية الإدارة عبر `ADMIN_EMAILS`، انظر قسم الدخول أعلاه)؛ أكواد التفعيل تُطلب من الأستاذ وتُفعَّل من `/redeem`.
 - المحتوى المولَّد يبقى في طابور الأستاذ حتى الاعتماد.
 - مجلدات `legacy/` و`legacy-source/` أرشيف للكود السابق وليست جزءاً من تطبيق Next.
 

@@ -56,7 +56,18 @@ async function main() {
   const roundTrip = await readJsonFile<{ sessions: Array<{ id: string }> }>("auth.json", { sessions: [] });
   assert(roundTrip.sessions[0]?.id === "s1", "auth.json must survive a second simulated instance");
 
-  setPersistentStoreOverride(sharedMemoryBackend(new Map()));
+  // No seeded demo accounts any more: this check provisions its own student + teacher rows.
+  const accounts = new Map<string, unknown>();
+  const createdAt = new Date().toISOString();
+  accounts.set("auth.json", {
+    users: [
+      { id: "user-test-student", email: "student.test@example.invalid", name: "Student", role: "student", passwordHash: "x:y", createdAt },
+      { id: "user-test-teacher", email: "teacher.test@example.invalid", name: "Teacher", role: "teacher", passwordHash: "x:y", createdAt },
+    ],
+    sessions: [],
+    revokedTokens: [],
+  });
+  setPersistentStoreOverride(sharedMemoryBackend(accounts));
   const desktop = {
     userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
     screen: "1920x1080",
@@ -65,12 +76,12 @@ async function main() {
   };
 
   const studentFirst = "student-token-one";
-  await createExclusiveSession("user-demo-student", studentFirst, desktop.userAgent, {
+  await createExclusiveSession("user-test-student", studentFirst, desktop.userAgent, {
     ...desktop,
     deviceId: "desk-a",
   });
   const studentSecond = "student-token-two";
-  const kicked = await createExclusiveSession("user-demo-student", studentSecond, desktop.userAgent, {
+  const kicked = await createExclusiveSession("user-test-student", studentSecond, desktop.userAgent, {
     ...desktop,
     deviceId: "desk-b",
   });
@@ -81,12 +92,12 @@ async function main() {
   assert(await findSessionByToken(studentSecond), "new student session must be live");
 
   const teacherFirst = "teacher-token-one";
-  await createExclusiveSession("user-demo-teacher", teacherFirst, desktop.userAgent, {
+  await createExclusiveSession("user-test-teacher", teacherFirst, desktop.userAgent, {
     ...desktop,
     deviceId: "teacher-desk-a",
   });
   const teacherSecond = "teacher-token-two";
-  const staff = await createExclusiveSession("user-demo-teacher", teacherSecond, desktop.userAgent, {
+  const staff = await createExclusiveSession("user-test-teacher", teacherSecond, desktop.userAgent, {
     ...desktop,
     deviceId: "teacher-desk-b",
   });

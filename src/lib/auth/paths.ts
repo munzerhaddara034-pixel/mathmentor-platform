@@ -5,9 +5,6 @@ export type AuthRole = "student" | "teacher" | "parent" | "admin";
 
 export const STAFF_ROLES: AuthRole[] = ["teacher", "admin"];
 
-/** Prof. Munzer Haddara demo / production teacher login. */
-export const TEACHER_EMAIL = "teacher@mathmentor.local";
-
 export function isStaffRole(role: AuthRole | string | undefined) {
   return role === "teacher" || role === "admin";
 }
@@ -15,8 +12,7 @@ export function isStaffRole(role: AuthRole | string | undefined) {
 /** Teacher/admin accounts keep concurrent sessions; students still get same-class replacement. */
 export function isSessionSharingExempt(user?: { role?: string; email?: string } | null) {
   if (!user) return false;
-  if (isStaffRole(user.role)) return true;
-  return (user.email ?? "").trim().toLowerCase() === TEACHER_EMAIL;
+  return isStaffRole(user.role);
 }
 
 /** Marketing / auth surfaces — no login required. */

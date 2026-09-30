@@ -42,8 +42,8 @@ Plots are lightweight `y = f(x)` pins (`expression`, `xMin`, `xMax`) rendered wi
 
 ## How to test
 
-1. **Teacher:** sign in as `teacher@mathmentor.local` → open `/live/classroom/demo` → draw, pin equation, pin plot, use Voice to board (demo transcript; Whisper optional).
-2. **Student:** another browser as `student@mathmentor.local` or `live@mathmentor.local` → same `/live/classroom/demo` → board should update (LiveKit data if keys set; otherwise HTTP poll).
+1. **Teacher:** sign in with a staff account (`ADMIN_EMAILS`) → open `/live/classroom/demo` → draw, pin equation, pin plot, use Voice to board (demo transcript; Whisper optional).
+2. **Student:** another browser with a student account that has live access → same `/live/classroom/demo` → board should update (LiveKit data if keys set; otherwise HTTP poll).
 3. Confirm student cannot write until teacher clicks **Grant board**; AV stays locked until **Grant AV**.
 4. Without LiveKit env: UI shell still works (`demo: true`); sync uses poll + PUT.
 

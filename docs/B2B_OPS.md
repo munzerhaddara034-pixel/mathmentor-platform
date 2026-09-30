@@ -34,10 +34,10 @@ Source of truth: `src/lib/b2b/pricingStudy.ts` + bilingual UI table.
 - Modular TS under `src/lib/b2b/*` and `src/components/admin/b2b/*` — no `any`.
 - Skeleton loaders on async proposal / payment UI.
 
-## How to test (demo teacher)
+## How to test (staff account)
 
 1. Open the live / draft URL.
-2. Login: `teacher@mathmentor.local`.
+2. Login: a staff account (email in `ADMIN_EMAILS`).
 3. Nav → **الشراكات** or `/admin/b2b-manager`.
 4. Generate a school proposal → Print.
 5. Record a Whish Reference ID → Confirm → check notification bell + recent list.

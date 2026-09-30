@@ -30,7 +30,8 @@
 | `GITHUB_BRANCH` | اختياري | الفرع الأساسي (افتراضي `agent-hub-latest`) |
 | `OPENAI_API_KEY` | اختياري | Whisper + صور سامي |
 | `TEAM_GEMINI_MODEL` | اختياري | نموذج مفضّل (مع سلسلة بدائل تلقائية) |
-| `TEAM_APPROVER_EMAILS` | اختياري | حصر زر الموافقة بإيميلات محددة |
+| `ADMIN_EMAILS` | نعم | إيميلات الإدارة (دور admin عند التسجيل/الدخول)؛ الافتراضي الموثّق `munzerhaddara2@gmail.com` |
+| `TEAM_APPROVER_EMAILS` | اختياري | حصر زر الموافقة بإيميلات محددة (الافتراضي: `ADMIN_EMAILS`) |
 | `SAMI_IMAGE_GEN=off` / `SAMI_IMAGE_PROVIDER=openai` / `SAMI_IMAGE_MODEL` | اختياري | توليد الصور |
 | `PG_POOL_MAX` / `PG_IMPORT_LOCAL_FILES=0` | اختياري | حجم الـ pool / تعطيل الاستيراد |
 

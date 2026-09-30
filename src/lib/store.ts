@@ -38,15 +38,8 @@ function seed(): StoreData {
     studentChat: [],
     progress: [],
     customLessons: [],
-    scratchCards: [
-      { code: "MUNZER-GOLD-9A", planId: "all", used: false },
-      { code: "MUNZER-G12-7K", planId: "g11-12", used: false },
-      { code: "BREVET-29-MX", planId: "g7-9", used: false },
-      { code: "MUNZER-AI-3K", planId: "ai", used: false },
-      { code: "MUNZER-LIVE-4C", planId: "live", used: false },
-      { code: "MUNZER-BOTH-1X", planId: "both", used: false },
-      { code: "MUNZER-DEMO-TEACHER", planId: "ai", used: false, reusable: true, teacherTestingOnly: true, note: "Teacher testing only — reusable demo AI unlock (Prof. Munzer Haddara)" },
-    ],
+    // No demo/test cards: staff generate real codes from the teacher console.
+    scratchCards: [],
     quizAttempts: [],
     customQuestions: [],
     entitlements: [],
@@ -99,37 +92,7 @@ async function ensureStore(): Promise<StoreData> {
         liveCredits: fresh.liveCredits,
       };
     });
-    const codes = new Set((parsed.scratchCards ?? []).map((card) => card.code));
-    let cardsChanged = false;
-    for (const card of [
-      { code: "MUNZER-AI-3K", planId: "ai", used: false },
-      { code: "MUNZER-LIVE-4C", planId: "live", used: false },
-      { code: "MUNZER-BOTH-1X", planId: "both", used: false },
-      {
-        code: "MUNZER-DEMO-TEACHER",
-        planId: "ai",
-        used: false,
-        reusable: true,
-        teacherTestingOnly: true,
-        note: "Teacher testing only — reusable demo AI unlock (Prof. Munzer Haddara)",
-      },
-    ]) {
-      if (!codes.has(card.code)) {
-        parsed.scratchCards.push(card);
-        cardsChanged = true;
-      }
-    }
-    const demo = parsed.scratchCards.find((card) => card.code === "MUNZER-DEMO-TEACHER");
-    if (demo && (!demo.reusable || !demo.teacherTestingOnly)) {
-      demo.reusable = true;
-      demo.teacherTestingOnly = true;
-      demo.used = false;
-      demo.note = demo.note || "Teacher testing only — reusable demo AI unlock (Prof. Munzer Haddara)";
-      cardsChanged = true;
-    }
-    const next = withFeaturedLesson(parsed);
-    if (cardsChanged) await writeJsonFile(STORE_FILE, next);
-    return next;
+    return withFeaturedLesson(parsed);
   } catch {
     await writeJsonFile(STORE_FILE, initial);
     return initial;

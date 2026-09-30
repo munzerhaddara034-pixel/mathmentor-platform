@@ -31,7 +31,7 @@ async function main() {
   const constants = await import("../src/lib/team/constants");
   const types = await import("../src/lib/team/types");
 
-  const actor = { id: "user-demo-teacher", name: "Prof. Munzer Haddara", email: "teacher@mathmentor.local", role: "teacher" };
+  const actor = { id: "user-test-staff", name: "Prof. Munzer Haddara", email: "staff.test@example.invalid", role: "teacher" };
 
   test("§2.2 test 5: multi-topic team message → محمد alone", () => {
     const r = routing.routeHumanMessage("team", "بدنا نطلق دورة G12 SE الشهر الجاي: بدنا صفحة تسجيل، وبوستر، ونموذج امتحان تجريبي.");

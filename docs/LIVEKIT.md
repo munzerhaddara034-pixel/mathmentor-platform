@@ -39,7 +39,7 @@ Open `/live/classroom/demo` after signing in with a live-tier or staff account t
 
 ### Teacher / admin (الأستاذ)
 
-1. Sign in as `teacher@mathmentor.local` (or any `teacher` / `admin` role).
+1. Sign in as a staff account (`ADMIN_EMAILS`, or any `teacher` / `admin` role).
 2. From `/live`, `/dashboard`, or Admin → Live, click **انضم للحصة**.
 3. `POST /api/livekit/token` with `isTeacher: true` (the server **forces** this for staff and **rejects** it for students).
 4. Token grants: `roomJoin`, `canPublish: true`, `canSubscribe: true`, `canPublishData: true`, `roomAdmin: true`, `roomCreate: true`.
@@ -49,7 +49,7 @@ Staff may open any room id, including a student’s booking id (`live-…`) or `
 
 ### Student (طالب)
 
-1. Sign in with **LIVE_TIER** or **BOTH** (demo: `student@mathmentor.local` or `live@mathmentor.local`).
+1. Sign in with **LIVE_TIER** or **BOTH** (a student account that redeemed a live code).
 2. Book a slot on `/live` (uses one live credit). Confirmation and the calendar show **انضم للحصة**.
 3. The classroom URL is `/live/classroom/{bookingId}`.
 4. Token grants: `roomJoin`, `canSubscribe: true`, `canPublishData: true` (chat + raise-hand), `canPublish: false` until the teacher grants audio/video, `roomAdmin: false`.

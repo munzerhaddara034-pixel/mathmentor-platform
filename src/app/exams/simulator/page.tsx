@@ -17,7 +17,7 @@ export default async function ExamSimulatorPage({
   const live = await getLiveSession();
   const student = live.ok
     ? { name: live.user.name, phone: live.user.phone }
-    : { name: "Sara Nassar", phone: "76111111" };
+    : { name: "طالب", phone: "" };
 
   return (
     <main className="shell">
