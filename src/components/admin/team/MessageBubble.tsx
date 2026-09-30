@@ -1,6 +1,6 @@
 "use client";
 
-import type { TeamMessage, TeamProposal } from "@/lib/team/types";
+import { teamAuthorDisplayName, type TeamMessage, type TeamProposal } from "@/lib/team/types";
 import { AttachmentView } from "./AttachmentView";
 import { ProposalCard } from "./ProposalCard";
 import { RichText } from "./RichText";
@@ -21,12 +21,13 @@ function timeLabel(iso: string) {
 }
 
 export function MessageBubble({ message, proposal, referredByName, onDecided }: Props) {
+  const authorName = teamAuthorDisplayName(message);
   const side = message.authorKind === "human" ? "is-human" : message.authorKind === "system" ? "is-system" : "is-agent";
   return (
-    <article className={`team-row ${side}`} aria-label={`رسالة من ${message.authorName}`}>
+    <article className={`team-row ${side}`} aria-label={`رسالة من ${authorName}`}>
       <div className={`team-bubble ${side} team-author-${message.authorId}`}>
         <header className="team-bubble-head">
-          <span className="team-bubble-name">{message.authorName}</span>
+          <span className="team-bubble-name">{authorName}</span>
           {referredByName ? <span className="team-badge">إحالة من {referredByName}</span> : null}
           <time dateTime={message.createdAt}>{timeLabel(message.createdAt)}</time>
         </header>

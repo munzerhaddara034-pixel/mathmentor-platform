@@ -10,7 +10,8 @@ export const MAX_AGENT_REPLIES_PER_HUMAN = 3;
 const MENTION_RES: Record<TeamAgentId, RegExp> = {
   mohamed: /@\s?(?:محمد|mohamed|mohammad|muhammad)/i,
   sami: /@\s?(?:سامي|sami)/i,
-  developer: /@\s?(?:المطوّر|المطور|المبرمج|وكيل المطوّر|developer|dev)/i,
+  /** «حمزة» is the display name; @المبرمج / @المطوّر / @developer stay as aliases. */
+  developer: /@\s?(?:حمزة|حمزه|hamza|المطوّر|المطور|المبرمج|وكيل المطوّر|developer|dev)/i,
 };
 
 const DESIGN_RE =

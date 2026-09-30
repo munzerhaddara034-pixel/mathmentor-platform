@@ -99,17 +99,26 @@ export type TeamChannelMeta = {
 };
 
 export const TEAM_CHANNELS: TeamChannelMeta[] = [
-  { id: "team", labelAr: "الفريق كله", subtitleAr: "محمد · سامي · المبرمج", avatar: "👥" },
+  { id: "team", labelAr: "الفريق كله", subtitleAr: "محمد · سامي · حمزة", avatar: "👥" },
   { id: "mohamed", labelAr: "محمد", subtitleAr: "مدير المنصة · السكرتير · دكتور الرياضيات", avatar: "م" },
   { id: "sami", labelAr: "سامي", subtitleAr: "تصميم الويب · الصور · الميديا", avatar: "س" },
-  { id: "developer", labelAr: "المبرمج", subtitleAr: "وكيل المطوّر · Diff ثم موافقة", avatar: "</>" },
+  { id: "developer", labelAr: "حمزة", subtitleAr: "المبرمج · وكيل المطوّر · Diff ثم موافقة", avatar: "</>" },
 ];
 
 export const TEAM_AGENT_NAMES_AR: Record<TeamAgentId, string> = {
   mohamed: "محمد",
   sami: "سامي",
-  developer: "المبرمج",
+  developer: "حمزة",
 };
+
+/**
+ * Display name for a message author. Agent messages use the CURRENT agent name
+ * (e.g. «حمزة» for "developer") so rows stored under an older name still read right.
+ */
+export function teamAuthorDisplayName(message: Pick<TeamMessage, "authorKind" | "authorId" | "authorName">): string {
+  if (message.authorKind === "agent" && isTeamAgentId(message.authorId)) return TEAM_AGENT_NAMES_AR[message.authorId];
+  return message.authorName;
+}
 
 export type TeamThreadResponse = {
   ok: true;

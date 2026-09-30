@@ -96,7 +96,7 @@ export async function mohamedDataContext(pendingProposals: TeamProposal[]): Prom
   } catch {
     lines.push("- تعذّر قراءة بيانات Agent Hub الآن — اكتب «لا توجد بيانات» للأقسام المعنية.");
   }
-  lines.push("### Diff المطوّر بانتظار موافقة منذر (من /admin/team)");
+  lines.push("### Diff حمزة (المطوّر) بانتظار موافقة منذر (من /admin/team)");
   lines.push(
     pendingProposals.length
       ? pendingProposals.map((p) => `- ${p.commitMessage} → ${p.targetBranch} (${p.files.length} ملف)`).join("\n")

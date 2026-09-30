@@ -12,7 +12,7 @@ export default async function AdminTeamPage() {
       <p className="eyebrow">فريق العمل · الأستاذ منذر حداره / MathMentor</p>
       <h1>دردشة الفريق</h1>
       <p className="muted">
-        محمد · سامي · المبرمج — كل Commit يحتاج ضغطك على «موافقة ونشر». <Link href="/admin/agent-hub">Agent Hub</Link> ·{" "}
+        محمد · سامي · حمزة — كل Commit يحتاج ضغطك على «موافقة ونشر». <Link href="/admin/agent-hub">Agent Hub</Link> ·{" "}
         <Link href="/admin">الإدارة</Link>
       </p>
       <TeamChat staffName={live.user.name} />

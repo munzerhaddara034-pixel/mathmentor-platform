@@ -29,6 +29,7 @@ async function main() {
   const approval = await import("../src/lib/team/approval");
   const store = await import("../src/lib/team/store");
   const constants = await import("../src/lib/team/constants");
+  const types = await import("../src/lib/team/types");
 
   const actor = { id: "user-demo-teacher", name: "Prof. Munzer Haddara", email: "teacher@mathmentor.local", role: "teacher" };
 
@@ -49,6 +50,20 @@ async function main() {
     assert.deepEqual(routing.routeHumanMessage("team", "بدي بانر لإنستغرام").responders, ["sami"]);
     assert.deepEqual(routing.routeHumanMessage("team", "في خطأ بناء بـ tsc").responders, ["developer"]);
     assert.deepEqual(routing.routeHumanMessage("sami", "@محمد شو رأيك").responders, ["sami"]);
+  });
+  test("developer agent is «حمزة»: @حمزة routes to developer, @المبرمج stays an alias", () => {
+    assert.deepEqual(routing.routeHumanMessage("team", "@حمزة زبّط زر الحجز").responders, ["developer"]);
+    assert.deepEqual(routing.routeHumanMessage("team", "@المبرمج زبّط زر الحجز").responders, ["developer"]);
+    assert.deepEqual(routing.routeHumanMessage("team", "@سامي و @حمزة شوفو هيدا").responders, ["sami", "developer"]);
+    assert.deepEqual(routing.detectMentions("@حمزة"), ["developer"]);
+    assert.deepEqual(routing.detectMentions("@المبرمج"), ["developer"]);
+    const refs = routing.parseReferrals("@حمزة: Diff لزر الحجز بصفحة /courses/g12-se", "mohamed", ["mohamed"]);
+    assert.deepEqual(refs.map((r) => r.agent), ["developer"]);
+    assert.equal(types.TEAM_AGENT_NAMES_AR.developer, "حمزة");
+    assert.equal(
+      types.teamAuthorDisplayName({ authorKind: "agent", authorId: "developer", authorName: "المبرمج" }),
+      "حمزة",
+    );
   });
   test("§2.3 referrals: one per agent, never self, never already-answered", () => {
     const reply = "خطة الإطلاق…\n@سامي: بوستر 1080×1350 للدورة، عربي، مقترحان.\n@المطوّر: Diff لصفحة تسجيل /courses/g12-se حسب المواصفات.\n@سامي: شي تاني";
@@ -187,7 +202,7 @@ async function main() {
       channel: "developer",
       authorKind: "agent",
       authorId: "developer",
-      authorName: "المبرمج",
+      authorName: "حمزة",
       text: "Diff",
       attachments: [],
       createdAt: now,

@@ -6,6 +6,7 @@ import { routeHumanMessage } from "@/lib/team/routing";
 import {
   TEAM_AGENT_NAMES_AR,
   TEAM_CHANNELS,
+  teamAuthorDisplayName,
   type TeamChannelId,
   type TeamMessage,
   type TeamProposal,
@@ -21,10 +22,10 @@ type Thread = { messages: TeamMessage[]; proposals: Record<string, TeamProposal>
 const EMPTY: Thread = { messages: [], proposals: {}, loaded: false };
 
 const PLACEHOLDERS: Record<TeamChannelId, string> = {
-  team: "اكتب للفريق… (@محمد، @سامي، @المطوّر)",
+  team: "اكتب للفريق… (@محمد، @سامي، @حمزة)",
   mohamed: "اكتب لمحمد: موعد، موجز، حل رياضيات، نموذج امتحان…",
   sami: "اكتب لسامي: بانر، بوستر، واجهة، فيديو…",
-  developer: "اكتب للمبرمج: التعديل المطلوب — يقترح Diff ثم ينتظر موافقتك",
+  developer: "اكتب لحمزة (المبرمج): التعديل المطلوب — يقترح Diff ثم ينتظر موافقتك",
 };
 
 function indexProposals(list: TeamProposal[]): Record<string, TeamProposal> {
@@ -70,7 +71,7 @@ export function TeamChat({ staffName }: { staffName: string }) {
   }, [thread.messages.length, sending]);
 
   const referredNames = useMemo(() => {
-    const byId = new Map(thread.messages.map((message) => [message.id, message.authorName]));
+    const byId = new Map(thread.messages.map((message) => [message.id, teamAuthorDisplayName(message)]));
     return (message: TeamMessage) => (message.referredById ? byId.get(message.referredById) : undefined);
   }, [thread.messages]);
 
