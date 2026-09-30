@@ -1,0 +1,21 @@
+/* Interactive lesson player: Arabic chrome around an LTR (EN/FR) board + video. */
+.studio-avatar-column { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.studio-avatar-column > * { min-width: 0; }
+.studio-chapter-row { overflow-x: auto; scrollbar-width: thin; }
+.studio-avatar-frame video, .studio-avatar-frame img { max-width: 100%; }
+.studio-player[dir="rtl"] .studio-head-actions { justify-content: flex-start; }
+.studio-head-actions .btn { min-height: 44px; }
+.studio-lang-seg {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px; border-radius: 999px;
+  background: var(--card); border: 1px solid var(--line);
+}
+.studio-lang-seg-label { font-size: 13px; font-weight: 700; color: var(--muted); padding-inline: 8px 4px; }
+.studio-lang-seg button {
+  border: 0; background: transparent; border-radius: 999px; padding: 8px 14px; min-height: 36px;
+  font: inherit; font-size: 14px; font-weight: 700; color: var(--navy); cursor: pointer;
+}
+.studio-lang-seg button.on { background: var(--navy); color: #fff; }
+.studio-caption[dir="ltr"] { text-align: left; }
+.studio-controls { align-items: center; }
+.studio-seek { direction: ltr; }
+.studio-intro { margin: 0 0 12px; color: var(--muted); line-height: 1.8; max-width: 720px; }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { DerivedCanvasState } from "@/lib/studio/timeline";
-import type { LessonLocale } from "@/lib/studio/i18n";
+import type { LessonLanguage, LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI } from "@/lib/studio/i18n";
 import { FunctionGraph } from "./FunctionGraph";
 import { DesmosGraph } from "./DesmosGraph";
@@ -13,32 +13,42 @@ import { hasDesmosKey } from "@/lib/studio/desmos";
 type Props = {
   state: DerivedCanvasState;
   language: LessonLocale;
+  /** Board chrome language (header / waiting); board content stays in `language`. */
+  uiLanguage?: LessonLanguage;
   currentTime: number;
   watermarkName?: string;
   watermarkPhone?: string;
 };
 
-export function MathCanvas({ state, language, currentTime, watermarkName, watermarkPhone }: Props) {
+export function MathCanvas({ state, language, uiLanguage, currentTime, watermarkName, watermarkPhone }: Props) {
+  const ui = uiLanguage ?? language;
+  const uiDir = ui === "ar" ? "rtl" : undefined;
   const boardRef = useRef<HTMLDivElement>(null);
   const graphProgress =
     state.graphStartedAt == null ? 1 : Math.max(0.2, Math.min(1, (currentTime - state.graphStartedAt) / 1.8));
 
   useEffect(() => {
-    boardRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    // Scroll inside the board only; scrollIntoView would also scroll the page (jumps on phones).
+    const board = boardRef.current;
+    if (board && board.scrollHeight > board.clientHeight) board.scrollTo({ top: board.scrollHeight, behavior: "smooth" });
   }, [state.steps.length, state.equations.length, state.graph]);
 
   return (
     <section
       className="studio-canvas-panel"
-      aria-label={pickText(STUDIO_UI.canvas, language)}
+      aria-label={pickText(STUDIO_UI.canvas, ui)}
       onPointerDown={(event) => event.stopPropagation()}
     >
-      <p className="eyebrow">{pickText(STUDIO_UI.canvas, language)}</p>
-      <h2>{pickText(STUDIO_UI.canvasSub, language)}</h2>
+      <p className="eyebrow" dir={uiDir}>
+        {pickText(STUDIO_UI.canvas, ui)}
+      </p>
+      <h2 dir={uiDir}>{pickText(STUDIO_UI.canvasSub, ui)}</h2>
       <div ref={boardRef} className="studio-board">
         <IdentityWatermark name={watermarkName ?? "طالب المنصة"} phone={watermarkPhone ?? "76532421"} variant="light" />
         {state.equations.length === 0 && !state.graph && state.steps.length === 0 && state.examTips.length === 0 ? (
-          <p className="muted">{pickText(STUDIO_UI.waiting, language)}</p>
+          <p className="muted" dir={uiDir}>
+            {pickText(STUDIO_UI.waiting, ui)}
+          </p>
         ) : null}
 
         {state.examTips.length ? (

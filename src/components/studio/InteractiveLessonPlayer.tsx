@@ -2,27 +2,27 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LessonPhase, LessonTimeline, CanvasAction } from "@/lib/studio/timeline";
-import type { LessonLocale } from "@/lib/studio/i18n";
+import type { LessonLanguage, LessonLocale } from "@/lib/studio/i18n";
 import { pickText, STUDIO_UI, toLessonLocale } from "@/lib/studio/i18n";
 import {
   canvasStateAt,
   chaptersForTimeline,
   DEMO_ROLE_STORAGE_KEY,
-  eventsStorageKey,
-  formatClock,
   segmentAt,
   TEACHER_MODE_STORAGE_KEY,
-  validateTimelineEvents,
 } from "@/lib/studio/timeline";
 import { blockingQuizAt, firstUnresolvedQuiz } from "@/lib/studio/quiz";
 import type { VideoClockSource } from "./AvatarPlayer";
 import { AvatarPlayer } from "./AvatarPlayer";
 import { ChapterScrubBar } from "./ChapterScrubBar";
+import { ContentLanguageToggle } from "./ContentLanguageToggle";
 import { MathCanvas } from "./MathCanvas";
+import { MixedMathText } from "./MixedMathText";
+import { PlayerControls } from "./PlayerControls";
 import { QuizOverlay } from "./QuizOverlay";
 import { TeacherTimelineEditor } from "./TeacherTimelineEditor";
-
-const SPEEDS = [0.75, 1, 1.25, 1.5];
+import { useFullscreenHosts, useSavedTimelineEvents, useViewerIdentity } from "./usePlayerRemote";
+import "@/styles/player.css";
 
 function pickVoice(language: LessonLocale) {
   const voices = window.speechSynthesis.getVoices();
@@ -57,14 +57,19 @@ export function InteractiveLessonPlayer({
   teacherMode: teacherModeProp,
   canTeach = false,
   viewer,
+  chromeLanguage = "ar",
 }: {
   timeline: LessonTimeline;
+  /** Content language: voice, board, captions (EN default for the Lebanese Terminale lessons). */
   initialLanguage?: LessonLocale;
+  /** Player chrome language. Arabic by default (the site is Arabic/RTL first). */
+  chromeLanguage?: LessonLanguage;
   teacherMode?: boolean;
   canTeach?: boolean;
   viewer?: { name: string; phone: string };
 }) {
   const [timeline, setTimeline] = useState(initialTimeline);
+  const ui = chromeLanguage;
   const [uiLanguage, setUiLanguage] = useState<LessonLocale>(
     initialLanguage ?? toLessonLocale(initialTimeline.defaultLanguage ?? initialTimeline.language),
   );
@@ -77,8 +82,7 @@ export function InteractiveLessonPlayer({
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [boardFocus, setBoardFocus] = useState(false);
   const [teacherMode, setTeacherMode] = useState(Boolean(teacherModeProp && canTeach));
-  const [identity, setIdentity] = useState(viewer ?? { name: "طالب المنصة", phone: "76532421" });
-  const [staffUnlock, setStaffUnlock] = useState(canTeach);
+  const { identity, staffUnlock } = useViewerIdentity(initialTimeline.id, viewer, canTeach);
   const [resolvedQuizzes, setResolvedQuizzes] = useState<string[]>([]);
   const lastTick = useRef<number | null>(null);
   const spokenKey = useRef<string | null>(null);
@@ -87,7 +91,8 @@ export function InteractiveLessonPlayer({
   const videoClockRef = useRef(Boolean(initialTimeline.media?.videoUrl || initialTimeline.media?.audioUrl));
   const canvasHostRef = useRef<HTMLDivElement>(null);
   const videoHostRef = useRef<HTMLDivElement>(null);
-  const [fullscreenTarget, setFullscreenTarget] = useState<"board" | "video" | null>(null);
+  const { fullscreenTarget, toggleFullscreen } = useFullscreenHosts(canvasHostRef, videoHostRef);
+  const applySavedEvents = useRef((events: CanvasAction[]) => setTimeline((current) => ({ ...current, events })));
   timeRef.current = currentTime;
 
   const videoUrl = videoFailed ? undefined : timeline.media?.videoUrl;
@@ -124,71 +129,12 @@ export function InteractiveLessonPlayer({
     else setTeacherMode(readTeacherUnlock() && (canTeach || staffUnlock));
   }, [teacherModeProp, canTeach, staffUnlock]);
 
-  useEffect(() => {
-    if (viewer) setIdentity(viewer);
-  }, [viewer]);
+  // After the reset effect above, so saved teacher events win over the initial timeline.
+  useSavedTimelineEvents(initialTimeline.id, applySavedEvents);
 
-  useEffect(() => {
-    void fetch("/api/gamification/activity", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ kind: "lesson", lessonId: initialTimeline.id, topic: "calculus" }),
-    }).catch(() => undefined);
-  }, [initialTimeline.id]);
 
-  useEffect(() => {
-    let cancelled = false;
-    void fetch("/api/auth/session", { credentials: "same-origin" })
-      .then((response) => response.json())
-      .then((payload: { ok?: boolean; user?: { name?: string; phone?: string }; canTeach?: boolean; reason?: string }) => {
-        if (cancelled) return;
-        if (payload.ok && payload.user) {
-          setIdentity({
-            name: payload.user.name || "طالب المنصة",
-            phone: payload.user.phone || "76532421",
-          });
-          if (payload.canTeach) setStaffUnlock(true);
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    const applyEvents = (events: CanvasAction[]) => {
-      if (cancelled) return;
-      setTimeline((current) => ({ ...current, events }));
-    };
-    try {
-      const raw = window.sessionStorage.getItem(eventsStorageKey(initialTimeline.id));
-      if (raw) {
-        const parsed = validateTimelineEvents(JSON.parse(raw) as unknown);
-        if (parsed.ok) {
-          applyEvents(parsed.events);
-          return () => {
-            cancelled = true;
-          };
-        }
-      }
-    } catch {
-      /* ignore */
-    }
-    void fetch(`/api/studio/events?lessonId=${encodeURIComponent(initialTimeline.id)}`)
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload: { events?: unknown; saved?: boolean } | null) => {
-        if (!payload?.saved || !payload.events) return;
-        const parsed = validateTimelineEvents(payload.events);
-        if (parsed.ok) applyEvents(parsed.events);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [initialTimeline.id]);
+
 
   useEffect(() => {
     if (!playing || clockMaster) {
@@ -284,8 +230,8 @@ export function InteractiveLessonPlayer({
     }
   }, [blockingQuiz, currentTime, playing, seek]);
 
-  const toggleLanguage = () => {
-    setUiLanguage((current) => (current === "en" ? "fr" : "en"));
+  const changeLanguage = (next: LessonLocale) => {
+    setUiLanguage(next);
     spokenKey.current = null;
     if (playing && "speechSynthesis" in window) window.speechSynthesis.cancel();
   };
@@ -322,83 +268,65 @@ export function InteractiveLessonPlayer({
     window.history.replaceState({}, "", url);
   };
 
-  const toggleFullscreen = (target: "board" | "video") => {
-    const node = target === "board" ? canvasHostRef.current : videoHostRef.current;
-    if (!node) return;
-    const video = node.querySelector("video") as (HTMLVideoElement & { webkitEnterFullscreen?: () => void }) | null;
-    const active = document.fullscreenElement;
-    if (active === node) {
-      void document.exitFullscreen().catch(() => undefined);
-      return;
-    }
-    if (typeof node.requestFullscreen !== "function" && target === "video" && video?.webkitEnterFullscreen) {
-      video.webkitEnterFullscreen();
-      return;
-    }
-    void node.requestFullscreen?.().catch(() => {
-      if (target === "video" && video?.webkitEnterFullscreen) video.webkitEnterFullscreen();
-    });
-  };
 
-  useEffect(() => {
-    const onFs = () => {
-      const active = document.fullscreenElement;
-      if (active === canvasHostRef.current) setFullscreenTarget("board");
-      else if (active === videoHostRef.current) setFullscreenTarget("video");
-      else setFullscreenTarget(null);
-    };
-    document.addEventListener("fullscreenchange", onFs);
-    return () => document.removeEventListener("fullscreenchange", onFs);
-  }, []);
 
   const applyEventsLive = (events: CanvasAction[]) => {
     setTimeline((current) => ({ ...current, events }));
     setResolvedQuizzes([]);
   };
 
-  const progressPct = (currentTime / timeline.durationSec) * 100;
-  const phaseLabel = (phase: LessonPhase, label?: { en: string; fr?: string }) =>
-    label ? pickText(label, uiLanguage) : pickText(STUDIO_UI.phases[phase], uiLanguage);
+  const phaseLabel = (phase: LessonPhase, label?: { en: string; fr?: string; ar?: string }) => {
+    if (ui === "ar") return label?.ar ?? pickText(STUDIO_UI.phases[phase], ui);
+    return label ? pickText(label, uiLanguage) : pickText(STUDIO_UI.phases[phase], uiLanguage);
+  };
+  const instructorLabel = ui === "ar" ? "الأستاذ منذر حداره" : instructor;
+  const rtl = ui === "ar";
 
   return (
-    <div className="studio-player" dir="ltr" lang={uiLanguage}>
+    <div className="studio-player" dir={rtl ? "rtl" : "ltr"} lang={ui}>
       <header className="studio-head">
         <div>
-          <p className="eyebrow">{pickText(STUDIO_UI.eyebrow, uiLanguage)}</p>
-          <h1>{pickText(timeline.title, uiLanguage)}</h1>
+          <p className="eyebrow">{pickText(STUDIO_UI.eyebrow, ui)}</p>
+          <h1 dir="auto" lang={uiLanguage}>
+            <MixedMathText text={pickText(timeline.title, uiLanguage)} />
+          </h1>
           <p className="muted">
-            {instructor}
-            {timeline.grade ? ` · ${timeline.grade}` : ""}
-            {timeline.topic ? ` · ${timeline.topic}` : ""}
-            {videoUrl ? ` · ${pickText(STUDIO_UI.syncClock, uiLanguage)}` : ""}
+            {instructorLabel}
+            {timeline.grade ? (
+              <>
+                {" · "}
+                <bdi dir="ltr">{timeline.grade}</bdi>
+              </>
+            ) : null}
+            {timeline.topic ? (
+              <>
+                {" · "}
+                <bdi dir="ltr">{timeline.topic}</bdi>
+              </>
+            ) : null}
+            {videoUrl && staffUnlock ? ` · ${pickText(STUDIO_UI.syncClock, ui)}` : ""}
           </p>
         </div>
         <div className="studio-head-actions">
+          <ContentLanguageToggle value={uiLanguage} uiLanguage={ui} onChange={changeLanguage} />
           <button
             className="btn studio-focus-toggle"
             type="button"
             onClick={() => setBoardFocus((value) => !value)}
           >
-            {boardFocus ? pickText(STUDIO_UI.focusVideo, uiLanguage) : pickText(STUDIO_UI.focusBoard, uiLanguage)}
+            {boardFocus ? pickText(STUDIO_UI.focusVideo, ui) : pickText(STUDIO_UI.focusBoard, ui)}
           </button>
           <button className="btn" type="button" onClick={() => toggleFullscreen("board")}>
-            {fullscreenTarget === "board"
-              ? pickText(STUDIO_UI.exitFullscreen, uiLanguage)
-              : pickText(STUDIO_UI.fullscreenBoard, uiLanguage)}
+            {fullscreenTarget === "board" ? pickText(STUDIO_UI.exitFullscreen, ui) : pickText(STUDIO_UI.fullscreenBoard, ui)}
           </button>
           <button className="btn" type="button" onClick={() => toggleFullscreen("video")}>
-            {fullscreenTarget === "video"
-              ? pickText(STUDIO_UI.exitFullscreen, uiLanguage)
-              : pickText(STUDIO_UI.fullscreenVideo, uiLanguage)}
+            {fullscreenTarget === "video" ? pickText(STUDIO_UI.exitFullscreen, ui) : pickText(STUDIO_UI.fullscreenVideo, ui)}
           </button>
           {staffUnlock ? (
             <button className="btn" type="button" onClick={() => setTeacherUnlock(!teacherMode)}>
-              {teacherMode ? pickText(STUDIO_UI.teacherLock, uiLanguage) : pickText(STUDIO_UI.teacherUnlock, uiLanguage)}
+              {teacherMode ? pickText(STUDIO_UI.teacherLock, ui) : pickText(STUDIO_UI.teacherUnlock, ui)}
             </button>
           ) : null}
-          <button className="btn dark studio-lang-toggle" type="button" onClick={toggleLanguage}>
-            {uiLanguage === "en" ? STUDIO_UI.switchToFrench : STUDIO_UI.switchToEnglish}
-          </button>
         </div>
       </header>
 
@@ -418,11 +346,12 @@ export function InteractiveLessonPlayer({
         ))}
       </div>
 
-      <div className={`studio-split ${boardFocus ? "board-focus" : ""}`}>
+      <div className={`studio-split ${boardFocus ? "board-focus" : ""}`} dir="ltr" lang={uiLanguage}>
         <div ref={canvasHostRef} className="studio-fs-host studio-canvas-host">
           <MathCanvas
             state={canvas}
             language={uiLanguage}
+            uiLanguage={ui}
             currentTime={canvasClock}
             watermarkName={identity.name}
             watermarkPhone={identity.phone}
@@ -431,6 +360,8 @@ export function InteractiveLessonPlayer({
         <div ref={videoHostRef} className="studio-fs-host studio-avatar-column">
           <AvatarPlayer
             language={uiLanguage}
+            uiLanguage={ui}
+            showHints={staffUnlock}
             speaking={speaking}
             frozen={frozen}
             playing={playing && !blockingQuiz}
@@ -468,6 +399,7 @@ export function InteractiveLessonPlayer({
             durationSec={timeline.durationSec}
             currentTime={currentTime}
             language={uiLanguage}
+            uiLanguage={ui}
             onSeek={seek}
           />
         </div>
@@ -478,6 +410,7 @@ export function InteractiveLessonPlayer({
           key={blockingQuiz.id}
           quiz={blockingQuiz}
           language={uiLanguage}
+          uiLanguage={ui}
           onResolved={() => {
             setResolvedQuizzes((ids) => (ids.includes(blockingQuiz.id) ? ids : [...ids, blockingQuiz.id]));
             setPlaying(true);
@@ -485,64 +418,33 @@ export function InteractiveLessonPlayer({
         />
       ) : null}
 
-      <div className="studio-caption" aria-live="polite">
-        <p>{segment ? pickText(segment.narration, uiLanguage) : ""}</p>
+      <div className="studio-caption" aria-live="polite" dir="ltr" lang={uiLanguage}>
+        <p>{segment ? <MixedMathText text={pickText(segment.narration, uiLanguage)} /> : ""}</p>
       </div>
 
-      <div className="studio-controls">
-        <button
-          className="btn dark"
-          type="button"
-          onClick={() => {
-            if (blockingQuiz) return;
-            if (currentTime >= timeline.durationSec) {
-              seek(0);
-              setPlaying(true);
-              return;
-            }
-            setPlaying((value) => !value);
-          }}
-        >
-          {playing ? pickText(STUDIO_UI.pause, uiLanguage) : pickText(STUDIO_UI.play, uiLanguage)}
-        </button>
-        <button
-          className="btn"
-          type="button"
-          onClick={() => {
-            setPlaying(false);
-            setResolvedQuizzes([]);
+      <PlayerControls
+        ui={ui}
+        playing={playing}
+        currentTime={currentTime}
+        durationSec={timeline.durationSec}
+        speed={speed}
+        onPlayPause={() => {
+          if (blockingQuiz) return;
+          if (currentTime >= timeline.durationSec) {
             seek(0);
-          }}
-        >
-          {pickText(STUDIO_UI.restart, uiLanguage)}
-        </button>
-        <label className="studio-speed">
-          {pickText(STUDIO_UI.speed, uiLanguage)}
-          <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
-            {SPEEDS.map((value) => (
-              <option key={value} value={value}>
-                {value}×
-              </option>
-            ))}
-          </select>
-        </label>
-        <span className="muted">
-          {formatClock(currentTime)} / {formatClock(timeline.durationSec)}
-        </span>
-        <input
-          className="studio-seek"
-          type="range"
-          min={0}
-          max={timeline.durationSec}
-          step={0.1}
-          value={currentTime}
-          aria-label={pickText(STUDIO_UI.seek, uiLanguage)}
-          onChange={(event) => seek(Number(event.target.value))}
-        />
-      </div>
-      <div className="progress-track" aria-hidden>
-        <span style={{ width: `${progressPct}%` }} />
-      </div>
+            setPlaying(true);
+            return;
+          }
+          setPlaying((value) => !value);
+        }}
+        onRestart={() => {
+          setPlaying(false);
+          setResolvedQuizzes([]);
+          seek(0);
+        }}
+        onSpeed={setSpeed}
+        onSeek={seek}
+      />
 
       {teacherMode ? (
         <TeacherTimelineEditor
