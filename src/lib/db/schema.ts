@@ -138,6 +138,13 @@ export const SCHEMA_MIGRATIONS: SchemaMigration[] = [
         FOR EACH ROW EXECUTE FUNCTION mm_audit_log_append_only();
     `,
   },
+  {
+    id: "006_profile_locale",
+    description: "UI locale (en / ar / fr) on profile users — redesign-v2 global platform",
+    sql: `
+      ALTER TABLE mm_profile_users ADD COLUMN IF NOT EXISTS locale TEXT;
+    `,
+  },
 ];
 
 export const MIGRATIONS_TABLE_SQL = `

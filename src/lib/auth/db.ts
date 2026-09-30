@@ -9,6 +9,7 @@ import { pgProfileRepo } from "./profilePg";
 import { sqliteProfileRepo } from "./profileSqlite";
 import type { EnrollmentRow, LessonProgressRow, ProfileRepo, ProfileUserRow, ReminderRow } from "./profileTypes";
 import { isUserRole, type SessionUser, type UserRole } from "./types";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 
 function repo(): ProfileRepo {
   return isPostgresEnabled() ? pgProfileRepo : sqliteProfileRepo;
@@ -48,13 +49,13 @@ export async function createUser(input: {
   const store = repo();
   const email = input.email.trim().toLowerCase();
   if (await findUserByEmail(email)) {
-    return { ok: false as const, error: "هذا البريد مسجّل مسبقاً" };
+    return { ok: false as const, code: "email_taken" as const, error: "هذا البريد مسجّل مسبقاً" };
   }
   let linkedStudentId: string | null = null;
   if (input.role === "parent" && input.linkedStudentEmail) {
     const linked = await findUserByEmail(input.linkedStudentEmail);
     if (!linked || linked.user.role !== "student") {
-      return { ok: false as const, error: "لم نجد طالباً بهذا البريد لربطه" };
+      return { ok: false as const, code: "linked_student_missing" as const, error: "لم نجد طالباً بهذا البريد لربطه" };
     }
     linkedStudentId = linked.user.id;
   }
@@ -81,7 +82,7 @@ export async function createUser(input: {
     }
   }
   const user = await findUserById(id);
-  if (!user) return { ok: false as const, error: "تعذر إنشاء الحساب" };
+  if (!user) return { ok: false as const, code: "create_failed" as const, error: "تعذر إنشاء الحساب" };
   return { ok: true as const, user };
 }
 
@@ -107,4 +108,15 @@ export async function asProgressEntries(userId: string) {
     score: row.percent,
     passedQuiz: row.passed_quiz === 1,
   }));
+}
+
+/** Saved UI locale for the profile with this email; null when unset, invalid or no profile row. */
+export async function getProfileLocale(email: string): Promise<Locale | null> {
+  const value = await repo().getLocaleByEmail(email.trim().toLowerCase());
+  return isLocale(value) ? value : null;
+}
+
+/** Saves the UI locale on the profile row; returns false when the account has no profile row. */
+export async function setProfileLocale(email: string, locale: Locale): Promise<boolean> {
+  return repo().setLocaleByEmail(email.trim().toLowerCase(), locale);
 }

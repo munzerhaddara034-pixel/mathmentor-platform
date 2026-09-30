@@ -1,0 +1,18 @@
+/* Settings (redesign-v2, all roles). */
+.v2-settings { display: grid; gap: 16px; padding-top: 16px; padding-bottom: 32px; max-width: 720px; }
+.v2-settings-head h1 { margin: 0; color: var(--heading); font-size: clamp(1.5rem, 5vw, 2rem); }
+.v2-settings-head p { margin: 4px 0 0; }
+.v2-settings-card { padding: 18px; display: grid; gap: 10px; }
+.v2-settings-card h2 { margin: 0; font-size: 18px; color: var(--heading); }
+.v2-lang-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+.v2-lang-option {
+  display: flex; align-items: center; gap: 12px; min-block-size: 52px; padding: 10px 14px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--navy-50); cursor: pointer; font-weight: 600; color: var(--ink);
+}
+.v2-lang-option input { inline-size: 18px; block-size: 18px; accent-color: rgb(var(--primary-fill)); margin: 0; }
+.v2-lang-option span { flex: 1; }
+.v2-lang-option small { color: var(--muted); font-size: 12px; }
+.v2-lang-option.is-selected { border-color: rgb(var(--primary)); background: rgb(var(--primary) / .14); }
+.v2-lang-option:focus-within { outline: 2px solid rgb(var(--primary)); outline-offset: 2px; }
+.v2-lang-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+.v2-lang-actions p { margin: 0; color: var(--muted); }

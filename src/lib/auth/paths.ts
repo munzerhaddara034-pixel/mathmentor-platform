@@ -57,6 +57,7 @@ const PRIVATE_PREFIXES = [
   "/exams",
   "/wallet",
   "/profile",
+  "/settings",
   "/teacher",
 ];
 

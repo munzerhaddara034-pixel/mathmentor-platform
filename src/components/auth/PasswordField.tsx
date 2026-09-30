@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { useI18n } from "@/components/i18n/I18nProvider";
 
 type Props = {
   value: string;
@@ -37,6 +38,8 @@ export function PasswordField({ value, onChange, autoComplete, minLength }: Prop
     input.setSelectionRange(selection.start, selection.end);
   }, [visible]);
 
+  const { m } = useI18n();
+  const a = m.auth;
   const toggle = () => {
     const input = inputRef.current;
     if (input && document.activeElement === input) {
@@ -47,7 +50,7 @@ export function PasswordField({ value, onChange, autoComplete, minLength }: Prop
 
   return (
     <div className="mm-field mm-password-field">
-      <label htmlFor={id}>كلمة المرور</label>
+      <label htmlFor={id}>{a.password}</label>
       <div className="mm-password">
         <input
           ref={inputRef}
@@ -72,9 +75,9 @@ export function PasswordField({ value, onChange, autoComplete, minLength }: Prop
           onClick={toggle}
           aria-controls={id}
           aria-pressed={visible}
-          aria-label={visible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+          aria-label={visible ? a.hidePassword : a.showPassword}
         >
-          {visible ? "إخفاء" : "إظهار"}
+          {visible ? a.hide : a.show}
         </button>
       </div>
     </div>

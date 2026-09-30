@@ -62,6 +62,9 @@ function openDb() {
       created_at TEXT NOT NULL
     );
   `);
+  // redesign-v2 (global platform): additive `locale` column on existing local DBs.
+  const columns = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+  if (!columns.some((column) => column.name === "locale")) db.exec("ALTER TABLE users ADD COLUMN locale TEXT");
   globalForAuth.mmAuthDb = db;
   return db;
 }
@@ -111,5 +114,13 @@ export const sqliteProfileRepo: ProfileRepo = {
          FROM exam_reminders WHERE user_id = ? OR user_id IS NULL ORDER BY due_at ASC`,
       )
       .all(userId) as ReminderRow[];
+  },
+  async getLocaleByEmail(email) {
+    const row = openDb().prepare("SELECT locale FROM users WHERE email = ?").get(email) as { locale: string | null } | undefined;
+    return row?.locale ?? null;
+  },
+  async setLocaleByEmail(email, locale) {
+    const result = openDb().prepare("UPDATE users SET locale = ? WHERE email = ?").run(locale, email);
+    return Number(result.changes) > 0;
   },
 };

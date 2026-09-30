@@ -50,4 +50,8 @@ export interface ProfileRepo {
   listEnrollments(userId: string): Promise<EnrollmentRow[]>;
   listLessonProgress(userId: string): Promise<LessonProgressRow[]>;
   listReminders(userId: string): Promise<ReminderRow[]>;
+  /** UI locale saved on the profile row (null when unset or no row). */
+  getLocaleByEmail(email: string): Promise<string | null>;
+  /** Returns false when no profile row exists for that email (nothing written). */
+  setLocaleByEmail(email: string, locale: string): Promise<boolean>;
 }

@@ -51,4 +51,12 @@ export const pgProfileRepo: ProfileRepo = {
       [userId],
     );
   },
+  async getLocaleByEmail(email) {
+    const rows = await q<{ locale: string | null }>("SELECT locale FROM mm_profile_users WHERE email = $1", [email]);
+    return rows[0]?.locale ?? null;
+  },
+  async setLocaleByEmail(email, locale) {
+    const rows = await q<{ id: string }>("UPDATE mm_profile_users SET locale = $1 WHERE email = $2 RETURNING id", [locale, email]);
+    return rows.length > 0;
+  },
 };

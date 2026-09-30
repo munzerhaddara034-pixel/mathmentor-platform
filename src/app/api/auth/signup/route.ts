@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createUser } from "@/lib/auth/db";
+import { isLocale } from "@/lib/i18n/config";
+import { createUser, setProfileLocale } from "@/lib/auth/db";
 import { checkSignupPassword } from "@/lib/auth/passwordPolicy";
 import { hashPassword } from "@/lib/auth/passwords";
 import { sendVerificationEmail } from "@/lib/auth/sendVerification";
@@ -32,6 +33,17 @@ function verificationResponse(emailSent: boolean) {
   });
 }
 
+/** Keep the language picked before signing up (mm-locale cookie) on the new profile. Best effort. */
+async function rememberLocale(request: Request, email: string) {
+  const chosen = request.headers.get("cookie")?.match(/(?:^|;\s*)mm-locale=(en|ar|fr)(?:;|$)/)?.[1];
+  if (!isLocale(chosen)) return;
+  try {
+    await setProfileLocale(email, chosen);
+  } catch (error) {
+    console.warn("signup: could not save profile locale", error instanceof Error ? error.message : error);
+  }
+}
+
 async function sendLink(userId: string, requestUrl: string) {
   try {
     return (await sendVerificationEmail(userId, requestUrl, { force: true })).sent;
@@ -46,7 +58,7 @@ export async function POST(request: Request) {
   if (!ipLimit.ok) {
     const limited = tooManyRequestsBody(ipLimit.retryAfterSec);
     return NextResponse.json(
-      { ...limited, error: limited.errorAr, errorEn: limited.error },
+      { ...limited, code: "rate_limited", error: limited.errorAr, errorEn: limited.error },
       { status: 429, headers: { "Retry-After": String(ipLimit.retryAfterSec) } },
     );
   }
@@ -61,28 +73,31 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return NextResponse.json({ error: "طلب غير صالح" }, { status: 400 });
+    return NextResponse.json({ code: "invalid_request", error: "طلب غير صالح" }, { status: 400 });
   }
   const email = body.email?.trim().toLowerCase() ?? "";
   const name = body.name?.trim() ?? "";
   const password = body.password ?? "";
   const role = body.role ?? "student";
   if (!email || !name || !password) {
-    return NextResponse.json({ error: "الاسم والبريد وكلمة المرور مطلوبة" }, { status: 400 });
+    return NextResponse.json({ code: "missing_fields", error: "الاسم والبريد وكلمة المرور مطلوبة" }, { status: 400 });
   }
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "أدخل بريداً إلكترونياً صالحاً" }, { status: 400 });
+    return NextResponse.json({ code: "invalid_email", error: "أدخل بريداً إلكترونياً صالحاً" }, { status: 400 });
   }
   const passwordCheck = checkSignupPassword(password);
   if (!passwordCheck.ok) {
-    return NextResponse.json({ error: passwordCheck.errorAr, errorEn: passwordCheck.error }, { status: 400 });
+    return NextResponse.json(
+      { code: passwordCheck.code, error: passwordCheck.errorAr, errorEn: passwordCheck.error },
+      { status: 400 },
+    );
   }
   if (!isUserRole(role)) {
-    return NextResponse.json({ error: "اختر دوراً صالحاً" }, { status: 400 });
+    return NextResponse.json({ code: "invalid_role", error: "اختر دوراً صالحاً" }, { status: 400 });
   }
   if (!SELF_SIGNUP_ROLES.includes(role)) {
     return NextResponse.json(
-      { error: "حسابات الأستاذ والإدارة تُنشأ من الإدارة فقط. سجّل كطالب أو ولي أمر." },
+      { code: "staff_only", error: "حسابات الأستاذ والإدارة تُنشأ من الإدارة فقط. سجّل كطالب أو ولي أمر." },
       { status: 403 },
     );
   }
@@ -90,12 +105,12 @@ export async function POST(request: Request) {
   const existing = await findUserByEmail(email);
   if (existing) {
     if (isEmailVerified(existing)) {
-      return NextResponse.json({ error: "هذا البريد مسجّل مسبقاً" }, { status: 400 });
+      return NextResponse.json({ code: "email_taken", error: "هذا البريد مسجّل مسبقاً" }, { status: 400 });
     }
     // Never-verified account (possibly a squatter): the new signup replaces it; only the inbox
     // owner receives the link, and the link only works together with the new password.
     const replaced = await replacePendingSignup(existing.id, { name, passwordHash: hashPassword(password), role });
-    if (!replaced) return NextResponse.json({ error: "هذا البريد مسجّل مسبقاً" }, { status: 400 });
+    if (!replaced) return NextResponse.json({ code: "email_taken", error: "هذا البريد مسجّل مسبقاً" }, { status: 400 });
     // Profile row may be missing if the first attempt failed validation; "already exists" is fine.
     await createUser({
       email,
@@ -105,6 +120,7 @@ export async function POST(request: Request) {
       track: body.track || (role === "student" ? "grade-12" : null),
       linkedStudentEmail: body.linkedStudentEmail,
     }).catch(() => undefined);
+    await rememberLocale(request, email);
     return verificationResponse(await sendLink(replaced.id, request.url));
   }
 
@@ -131,8 +147,9 @@ export async function POST(request: Request) {
       linkedStudentEmail: body.linkedStudentEmail,
     });
     if (!created.ok) {
-      return NextResponse.json({ error: created.error }, { status: 400 });
+      return NextResponse.json({ code: created.code, error: created.error }, { status: 400 });
     }
+    await rememberLocale(request, email);
   } catch (error) {
     console.warn("signup: profile DB unavailable, continuing with session store only", error);
   }

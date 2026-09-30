@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { findUserByEmail as findProfileByEmail } from "@/lib/auth/db";
+import { findUserByEmail as findProfileByEmail, getProfileLocale } from "@/lib/auth/db";
+import { localeCookie } from "@/lib/i18n/cookie";
 import { verifyPassword as verifyProfilePassword } from "@/lib/auth/password";
 import {
   ensureAdminRoleForAllowlistedEmail,
@@ -42,7 +43,7 @@ async function authenticateViaProfile(email: string, password: string): Promise<
 }
 
 function limited(retryAfterSec: number) {
-  return NextResponse.json(tooManyRequestsBody(retryAfterSec), {
+  return NextResponse.json({ ...tooManyRequestsBody(retryAfterSec), code: "rate_limited" }, {
     status: 429,
     headers: { "Retry-After": String(retryAfterSec) },
   });
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     body = (await request.json()) as typeof body;
   } catch {
     return NextResponse.json(
-      { error: "Invalid JSON.", errorAr: "JSON غير صالح." },
+      { code: "invalid_request", error: "Invalid JSON.", errorAr: "JSON غير صالح." },
       { status: 400 },
     );
   }
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
   const password = body.password ?? "";
   if (!email || !password) {
     return NextResponse.json(
-      { error: "Email and password are required.", errorAr: "البريد وكلمة المرور مطلوبان." },
+      { code: "missing_fields", error: "Email and password are required.", errorAr: "البريد وكلمة المرور مطلوبان." },
       { status: 400 },
     );
   }
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
         {
           ok: false,
           needsVerification: true,
+          code: expired ? "verify_expired" : "verify_required",
           resent,
           error: expired
             ? "This confirmation link expired. We sent a new one if possible — check your inbox."
@@ -128,6 +130,7 @@ export async function POST(request: Request) {
     authRateLimits.loginEmailFailures.hit(emailKey);
     return NextResponse.json(
       {
+        code: "wrong_credentials",
         error: "Wrong email or password.",
         errorAr: "البريد أو كلمة المرور غير صحيحة.",
       },
@@ -175,8 +178,16 @@ export async function POST(request: Request) {
     : started.replaced
       ? `أغلق هذا الدخول جلسة ${label.ar} السابقة. يُسمح بجلسة هاتف واحدة وجلسة حاسوب واحدة معاً.`
       : "تم الدخول. يُسمح بجلسة هاتف واحدة وجلسة حاسوب واحدة في الوقت نفسه.";
-  return NextResponse.json({
+  // The locale saved on the profile wins over this device's cookie.
+  let profileLocale: Awaited<ReturnType<typeof getProfileLocale>> = null;
+  try {
+    profileLocale = await getProfileLocale(user.email);
+  } catch {
+    profileLocale = null;
+  }
+  const response = NextResponse.json({
     ok: true,
+    locale: profileLocale,
     user: publicUser,
     redirectTo,
     deviceClass: started.deviceClass,
@@ -186,4 +197,6 @@ export async function POST(request: Request) {
     notice,
     noticeAr,
   });
+  if (profileLocale) response.cookies.set(localeCookie(profileLocale));
+  return response;
 }
