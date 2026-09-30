@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { permissionErrorFromUnknown } from "@/lib/media/permissionCopy";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { agentMessages } from "@/lib/i18n/ns/agent";
+import { pickLang } from "@/lib/i18n/pick";
 
 export type AgentVoiceClip = {
   blob: Blob;
@@ -46,6 +49,8 @@ function formatTimer(totalSec: number): string {
  * Brand: Prof. Munzer Haddara / الأستاذ منذر حداره.
  */
 export function AgentVoiceRecorder({ disabled, onRecorded }: Props) {
+  const { locale } = useI18n();
+  const t = agentMessages[locale].recorder;
   const [supported, setSupported] = useState(true);
   const [recording, setRecording] = useState(false);
   const [elapsedSec, setElapsedSec] = useState(0);
@@ -144,11 +149,11 @@ export function AgentVoiceRecorder({ disabled, onRecorded }: Props) {
             ? String((error as { name: unknown }).name)
             : "";
       if (name === "NotAllowedError" || /permission|denied|not allowed/i.test(copy.error)) {
-        setPermissionErrorAr("يرجى منح إذن الميكروفون للمتابعة");
+        setPermissionErrorAr(t.grantMic);
       } else {
-        setPermissionErrorAr(copy.errorAr);
+        setPermissionErrorAr(pickLang(locale, copy.error, copy.errorAr, copy.errorFr));
       }
-      setPermissionHintAr(copy.hintAr);
+      setPermissionHintAr(pickLang(locale, copy.hint, copy.hintAr, copy.hintFr));
       releaseStream();
     }
   };
@@ -177,10 +182,10 @@ export function AgentVoiceRecorder({ disabled, onRecorded }: Props) {
   };
 
   return (
-    <div className="agent-voice-recorder" dir="rtl" lang="ar">
+    <div className="agent-voice-recorder">
       {!supported ? (
         <p className="agent-voice-error" role="alert">
-          هذا المتصفح لا يدعم تسجيل الصوت. استخدم Chrome أو Firefox.
+          {t.unsupported}
         </p>
       ) : null}
       {permissionErrorAr ? (
@@ -197,7 +202,7 @@ export function AgentVoiceRecorder({ disabled, onRecorded }: Props) {
           disabled={disabled || !supported}
           onClick={() => void start()}
         >
-          تسجيل صوتي مباشر
+          {t.record}
         </button>
       ) : (
         <div className="agent-voice-recording" role="status" aria-live="polite">
@@ -205,10 +210,10 @@ export function AgentVoiceRecorder({ disabled, onRecorded }: Props) {
           <span className="agent-voice-timer">{formatTimer(elapsedSec)}</span>
           <div className="agent-voice-rec-actions">
             <button type="button" className="btn" onClick={stopAndSend}>
-              إيقاف وإرسال
+              {t.stopSend}
             </button>
             <button type="button" className="btn ghost-btn" onClick={cancel}>
-              إلغاء
+              {t.cancel}
             </button>
           </div>
         </div>

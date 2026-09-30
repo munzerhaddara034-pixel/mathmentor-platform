@@ -1,4 +1,5 @@
 import type { AgentIntentKind } from "@/lib/agent/types";
+import type { AgentMessages } from "@/lib/i18n/ns/agent";
 
 export type AgentSectionId =
   | "agent-campaign-studio"
@@ -12,49 +13,50 @@ export type AgentSectionId =
 
 export type AgentSectionTarget = {
   sectionId: AgentSectionId;
-  jumpLabelAr: string;
+  /** Key into `agentMessages[locale].jump` (the button label is translated in the UI). */
+  jumpKey: keyof AgentMessages["jump"];
 };
 
 const INTENT_SECTION_MAP: Record<AgentIntentKind, AgentSectionTarget | null> = {
   generate_video: {
     sectionId: "agent-campaign-studio",
-    jumpLabelAr: "عرض نتيجة الحملة",
+    jumpKey: "campaign",
   },
   school_report: {
     sectionId: "agent-school-dispatcher",
-    jumpLabelAr: "عرض التقرير المدرسي",
+    jumpKey: "schoolReport",
   },
   platform_health: {
     sectionId: "agent-platform-health",
-    jumpLabelAr: "عرض صحة المنصّة",
+    jumpKey: "health",
   },
   broadcast_message: {
     sectionId: "agent-recent-voice",
-    jumpLabelAr: "عرض المهام الصوتية",
+    jumpKey: "voiceTasks",
   },
   schedule_appointment: {
     sectionId: "agent-secretary-schedule",
-    jumpLabelAr: "عرض جدول سكرتير محمد",
+    jumpKey: "schedule",
   },
   add_reminder: {
     sectionId: "agent-secretary-schedule",
-    jumpLabelAr: "عرض مهام محمد والتذكيرات",
+    jumpKey: "reminders",
   },
   daily_briefing: {
     sectionId: "agent-secretary-schedule",
-    jumpLabelAr: "عرض موجز محمد اليومي",
+    jumpKey: "briefing",
   },
   code_evolution_request: {
     sectionId: "agent-staged-approvals",
-    jumpLabelAr: "عرض مسودّة تطوير الكود",
+    jumpKey: "codeDraft",
   },
   school_outreach_request: {
     sectionId: "agent-staged-approvals",
-    jumpLabelAr: "عرض مسودّة تواصل المدارس",
+    jumpKey: "outreachDraft",
   },
   general_task: {
     sectionId: "agent-recent-voice",
-    jumpLabelAr: "عرض المهام الصوتية",
+    jumpKey: "voiceTasks",
   },
 };
 

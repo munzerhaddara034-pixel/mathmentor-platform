@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { agentMessages } from "@/lib/i18n/ns/agent";
 
 const CALLBACK_URL =
   "https://mathmentor-platform.onrender.com/api/agent/whatsapp-voice";
@@ -50,6 +53,8 @@ async function copyText(value: string): Promise<boolean> {
  * Brand: Prof. Munzer Haddara / الأستاذ منذر حداره.
  */
 export function WhatsAppSetupAssistant() {
+  const { locale } = useI18n();
+  const t = agentMessages[locale].whatsapp;
   const [copiedKey, setCopiedKey] = useState<CopyKey | null>(null);
   const [ping, setPing] = useState<PingState>({ kind: "idle" });
   const copyTimerRef = useRef<number | null>(null);
@@ -88,40 +93,35 @@ export function WhatsAppSetupAssistant() {
       if (res.status === 200 && trimmed === SELF_PING_CHALLENGE) {
         setPing({
           kind: "ok",
-          message: "✅ رابط المنصة جاهز ومعتمد بنسبة 100% لاستقبال واتساب Meta",
+          message: t.pingOk,
         });
         return;
       }
-      const snippet = trimmed.slice(0, 280) || "(empty body)";
+      const snippet = trimmed.slice(0, 280) || t.emptyBody;
       setPing({
         kind: "error",
-        message: `فشل الفحص · HTTP ${res.status} · ${snippet}`,
+        message: fmt(t.pingFailed, { status: res.status, body: snippet }),
       });
     } catch (error) {
       setPing({
         kind: "error",
-        message: error instanceof Error ? error.message : "self-ping failed",
+        message: error instanceof Error ? error.message : t.pingError,
       });
     }
-  }, []);
+  }, [t]);
 
   return (
     <section
       id="agent-whatsapp-setup"
       className="card agent-panel agent-whatsapp-setup"
-      dir="rtl"
-      lang="ar"
     >
-      <h2>WhatsApp Cloud API Setup Assistant · مساعد إعداد واتساب Cloud API</h2>
-      <p className="muted">
-        انسخ بيانات التحقق والصقها في لوحة مطوري Meta لربط webhook أكاديمية منذر حداره /
-        Prof. Munzer Haddara.
-      </p>
+      <h2>{t.title}</h2>
+      <p className="muted">{t.lead}</p>
 
       <div className="agent-wa-creds">
         <div className="agent-wa-cred-row">
           <div className="agent-wa-cred-meta">
-            <span className="agent-wa-cred-label">Callback URL · رابط الاستدعاء</span>
+            <span className="agent-wa-cred-label">{t.callback}</span>
             <code className="agent-wa-cred-value" dir="ltr">
               {CALLBACK_URL}
             </code>
@@ -131,13 +131,13 @@ export function WhatsAppSetupAssistant() {
             className="btn agent-wa-copy-btn"
             onClick={() => void onCopy("callback", CALLBACK_URL)}
           >
-            {copiedKey === "callback" ? "تم النسخ" : "نسخ"}
+            {copiedKey === "callback" ? t.copied : t.copy}
           </button>
         </div>
 
         <div className="agent-wa-cred-row">
           <div className="agent-wa-cred-meta">
-            <span className="agent-wa-cred-label">Verify Token · رمز التحقق</span>
+            <span className="agent-wa-cred-label">{t.token}</span>
             <code className="agent-wa-cred-value" dir="ltr">
               {VERIFY_TOKEN}
             </code>
@@ -147,7 +147,7 @@ export function WhatsAppSetupAssistant() {
             className="btn agent-wa-copy-btn"
             onClick={() => void onCopy("token", VERIFY_TOKEN)}
           >
-            {copiedKey === "token" ? "تم النسخ" : "نسخ"}
+            {copiedKey === "token" ? t.copied : t.copy}
           </button>
         </div>
       </div>
@@ -159,7 +159,7 @@ export function WhatsAppSetupAssistant() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          فتح لوحة مطوري Meta مباشرة
+          {t.openMeta}
         </a>
         <button
           type="button"
@@ -167,7 +167,7 @@ export function WhatsAppSetupAssistant() {
           disabled={ping.kind === "loading"}
           onClick={() => void runSelfPing()}
         >
-          {ping.kind === "loading" ? "…" : "فحص جهوزية الرابط (Test Self-Ping)"}
+          {ping.kind === "loading" ? "…" : t.selfPing}
         </button>
       </div>
 
@@ -178,7 +178,7 @@ export function WhatsAppSetupAssistant() {
           }
           role="status"
           aria-live="polite"
-          dir={ping.kind === "ok" ? "rtl" : "auto"}
+          dir="auto"
         >
           {ping.message}
         </p>

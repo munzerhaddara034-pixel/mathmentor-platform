@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { agentMessages } from "@/lib/i18n/ns/agent";
 import { AgentVoiceRecorder, type AgentVoiceClip } from "./AgentVoiceRecorder";
 import { WhatsAppSetupAssistant } from "./WhatsAppSetupAssistant";
 import {
@@ -129,6 +132,9 @@ type ResultStrip = {
   target: AgentSectionTarget;
 };
 
+const AUDIENCES = ["brevet", "terminale_gs", "terminale_ls", "parents", "schools", "general"] as const;
+
+/** Demo partner schools (data: names stay as registered). */
 const PARTNER_SCHOOLS = [
   { name: "مدرسة الأهلية النموذجية", code: "AHLIA", students: 120 },
   { name: "ثانوية الشريك التجريبية", code: "DEMO-LS", students: 85 },
@@ -151,6 +157,8 @@ function reportSummaryText(row: SchoolReportRow | VoiceSchoolReportPayload | nul
 }
 
 export function AgentHub() {
+  const { locale } = useI18n();
+  const t = agentMessages[locale];
   const [overview, setOverview] = useState<Overview | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [log, setLog] = useState("");
@@ -223,7 +231,7 @@ export function AgentHub() {
 
   async function runVoice(opts?: { file?: File | null; clip?: AgentVoiceClip | null; live?: boolean }) {
     setBusy("voice");
-    setLog(opts?.live || opts?.clip ? "جاري تفريغ الصوت وتحليل الأمر..." : "");
+    setLog(opts?.live || opts?.clip ? t.voice.analysing : "");
     setRelatedIds([]);
     setJumpTarget(null);
     setResultStrip(null);
@@ -274,11 +282,11 @@ export function AgentHub() {
 
       const confirmation =
         json.confirmationAr || json.whatsappReply || json.errorAr || json.error || "";
-      const intentLine = intentKind ? `النية: ${intentKind}` : "";
+      const intentLine = intentKind ? fmt(t.voice.intent, { v: intentKind }) : "";
       const transcriptLine = json.task?.whisperTranscript
-        ? `التفريغ: ${json.task.whisperTranscript.slice(0, 220)}`
+        ? fmt(t.voice.transcript, { v: json.task.whisperTranscript.slice(0, 220) })
         : "";
-      const relatedLine = ids.length ? `المعرّفات: ${ids.join(", ")}` : "";
+      const relatedLine = ids.length ? fmt(t.voice.ids, { v: ids.join(", ") }) : "";
 
       setLog(
         [confirmation, intentLine, transcriptLine, relatedLine].filter(Boolean).join("\n") ||
@@ -324,14 +332,14 @@ export function AgentHub() {
       }
 
       if (succeeded && sectionTarget) {
-        const excerptAr = (confirmation || "تم التنفيذ بنجاح.").slice(0, 220);
+        const excerptAr = (confirmation || t.voice.done).slice(0, 220);
         setResultStrip({ excerptAr, target: sectionTarget });
         setFlashTick((n) => n + 1);
         // Direct schedule — do not rely only on the flashTick effect (React refresh races).
         scheduleScrollAndFlashSection(sectionTarget.sectionId, { delayMs: 280 });
       }
     } catch (error) {
-      setLog(error instanceof Error ? error.message : "voice failed");
+      setLog(error instanceof Error ? error.message : t.voice.failed);
       setRelatedIds([]);
       setJumpTarget(null);
       setResultStrip(null);
@@ -359,10 +367,10 @@ export function AgentHub() {
       });
       const json = (await res.json()) as { campaign?: Campaign; notice?: string; error?: string };
       if (json.campaign) setCampaignPreview(json.campaign);
-      setLog(json.notice || json.error || "Campaign queued");
+      setLog(json.notice || json.error || t.campaign.queued);
       await refresh();
     } catch (error) {
-      setLog(error instanceof Error ? error.message : "campaign failed");
+      setLog(error instanceof Error ? error.message : t.campaign.failed);
     } finally {
       setBusy(null);
     }
@@ -398,7 +406,7 @@ export function AgentHub() {
       if (summary) setSchoolReportPanel(summary);
       await refresh();
     } catch (error) {
-      setLog(error instanceof Error ? error.message : "report failed");
+      setLog(error instanceof Error ? error.message : t.schools.reportFailed);
     } finally {
       setBusy(null);
     }
@@ -422,10 +430,10 @@ export function AgentHub() {
         digest?: { whatsapp?: { bodyAr?: string } };
         error?: string;
       };
-      setLog(json.whatsappAr || json.digest?.whatsapp?.bodyAr || json.error || "digest ok");
+      setLog(json.whatsappAr || json.digest?.whatsapp?.bodyAr || json.error || t.schools.digestOk);
       await refresh();
     } catch (error) {
-      setLog(error instanceof Error ? error.message : "digest failed");
+      setLog(error instanceof Error ? error.message : t.schools.digestFailed);
     } finally {
       setBusy(null);
     }
@@ -443,12 +451,12 @@ export function AgentHub() {
       const json = (await res.json()) as { ok?: boolean; error?: string; approval?: ApprovalRow };
       setLog(
         json.ok
-          ? `تمت ${action === "approve" ? "الموافقة والنشر" : "الرفض"}: ${json.approval?.titleAr || id}`
-          : json.error || "approval failed",
+          ? fmt(action === "approve" ? t.approvals.approved : t.approvals.rejected, { title: json.approval?.titleAr || id })
+          : json.error || t.approvals.failed,
       );
       await refresh({ preserveLog: true });
     } catch (error) {
-      setLog(error instanceof Error ? error.message : "approval failed");
+      setLog(error instanceof Error ? error.message : t.approvals.failed);
     } finally {
       setBusy(null);
     }
@@ -469,10 +477,10 @@ export function AgentHub() {
         briefAr?: string;
         outbound?: { status?: string };
       };
-      setLog(json.briefAr || json.error || "weekly brief ok");
+      setLog(json.briefAr || json.error || t.evolution.briefOk);
       await refresh({ preserveLog: true });
     } catch (error) {
-      setLog(error instanceof Error ? error.message : "brief failed");
+      setLog(error instanceof Error ? error.message : t.evolution.briefFailed);
     } finally {
       setBusy(null);
     }
@@ -488,7 +496,7 @@ export function AgentHub() {
         className={`card agent-panel agent-log${jumpTarget ? " agent-log-sticky" : ""}`}
         aria-live="polite"
       >
-        <h2>Output</h2>
+        <h2>{t.output}</h2>
         <pre dir="auto">{log}</pre>
         {relatedIds.length ? (
           <p className="agent-related-ids muted" dir="ltr">
@@ -500,20 +508,16 @@ export function AgentHub() {
             <button
               type="button"
               className="btn agent-result-primary-btn"
-              dir="rtl"
-              lang="ar"
               onClick={() => revealSection(jumpTarget)}
             >
-              «عرض النتيجة المنفذة»
+              {t.voice.showResult}
             </button>
             <button
               type="button"
               className="btn ghost-btn agent-jump-btn"
-              dir="rtl"
-              lang="ar"
               onClick={() => revealSection(jumpTarget)}
             >
-              «{jumpTarget.jumpLabelAr}»
+              {t.jump[jumpTarget.jumpKey]}
             </button>
           </div>
         ) : null}
@@ -525,10 +529,8 @@ export function AgentHub() {
       <WhatsAppSetupAssistant />
 
       <section className="card agent-panel">
-        <h2>Voice Memo Simulator · محاكي المذكرة الصوتية</h2>
-        <p className="muted" dir="rtl" lang="ar">
-          سجّل أو ارفع مذكرة، أو شغّل نصاً تجريبياً عبر مسار واتساب → Whisper → نية → تنفيذ.
-        </p>
+        <h2>{t.voice.title}</h2>
+        <p className="muted">{t.voice.lead}</p>
         <textarea
           className="agent-textarea"
           dir="rtl"
@@ -536,12 +538,12 @@ export function AgentHub() {
           rows={3}
           value={transcript}
           onChange={(e) => setTranscript(e.target.value)}
-          aria-label="Demo transcript"
+          aria-label={t.voice.transcriptLabel}
         />
         <div className="agent-actions">
           <AgentVoiceRecorder disabled={busy === "voice"} onRecorded={onLiveClip} />
           <label className="btn ghost-btn">
-            رفع صوت
+            {t.voice.upload}
             <input
               type="file"
               accept="audio/*,video/webm"
@@ -550,15 +552,13 @@ export function AgentHub() {
             />
           </label>
           <button type="button" className="btn" disabled={busy === "voice"} onClick={() => void runVoice()}>
-            {busy === "voice" ? "…" : "تشغيل التجريبي"}
+            {busy === "voice" ? "…" : t.voice.runDemo}
           </button>
         </div>
         {busy === "voice" ? (
           <div className="agent-voice-busy" aria-busy="true">
-            <SkeletonBlock lines={2} label="جاري تفريغ الصوت وتحليل الأمر..." />
-            <p className="muted" dir="rtl" lang="ar">
-              جاري تفريغ الصوت وتحليل الأمر...
-            </p>
+            <SkeletonBlock lines={2} label={t.voice.analysing} />
+            <p className="muted">{t.voice.analysing}</p>
           </div>
         ) : null}
       </section>
@@ -567,16 +567,16 @@ export function AgentHub() {
         <section
           className="card agent-panel agent-result-strip"
           aria-live="polite"
-          dir="rtl"
-          lang="ar"
         >
-          <p className="agent-result-excerpt">{resultStrip.excerptAr}</p>
+          <p className="agent-result-excerpt" dir="auto">
+            {resultStrip.excerptAr}
+          </p>
           <button
             type="button"
             className="btn agent-result-primary-btn"
             onClick={() => revealSection(resultStrip.target)}
           >
-            «عرض النتيجة المنفذة»
+            {t.voice.showResult}
           </button>
         </section>
       ) : null}
@@ -584,33 +584,32 @@ export function AgentHub() {
       {outputCard}
 
       <section id="agent-campaign-studio" className="card agent-panel">
-        <h2>Campaign Studio · استوديو الحملات</h2>
+        <h2>{t.campaign.title}</h2>
         <label className="agent-label">
-          Audience
+          {t.campaign.audience}
           <select value={audience} onChange={(e) => setAudience(e.target.value)}>
-            <option value="brevet">Brevet</option>
-            <option value="terminale_gs">Terminale GS</option>
-            <option value="terminale_ls">Terminale LS</option>
-            <option value="parents">Parents</option>
-            <option value="schools">Schools</option>
-            <option value="general">General</option>
+            {AUDIENCES.map((id) => (
+              <option key={id} value={id}>
+                {t.campaign.audiences[id]}
+              </option>
+            ))}
           </select>
         </label>
         <button type="button" className="btn" disabled={busy === "campaign"} onClick={() => void runCampaign()}>
-          {busy === "campaign" ? "…" : "Script + HeyGen one-click"}
+          {busy === "campaign" ? "…" : t.campaign.run}
         </button>
         {campaignPreview ? (
           <div className="agent-preview">
             <p>
               <strong>{campaignPreview.title}</strong> · {campaignPreview.videoStatus}
-              {campaignPreview.demo ? " · demo" : ""}
+              {campaignPreview.demo ? ` · ${t.campaign.demo}` : ""}
             </p>
             <p dir="rtl" lang="ar">
               {campaignPreview.scripts.ar}
             </p>
             <p dir="ltr">{campaignPreview.scripts.en}</p>
             <p className="muted">
-              HeyGen: {campaignPreview.heygenVideoId || "—"} · Social:{" "}
+              HeyGen: {campaignPreview.heygenVideoId || "—"} · {t.campaign.social}:{" "}
               {campaignPreview.socialLogs.map((s) => `${s.channel}:${s.status}`).join(" · ")}
             </p>
           </div>
@@ -618,7 +617,7 @@ export function AgentHub() {
       </section>
 
       <section id="agent-school-dispatcher" className="card agent-panel">
-        <h2>School Dispatcher · موفّد المدارس</h2>
+        <h2>{t.schools.title}</h2>
         <ul className="agent-school-list">
           {PARTNER_SCHOOLS.map((s) => (
             <li key={s.code}>
@@ -626,17 +625,15 @@ export function AgentHub() {
                 {s.name}
               </button>
               <span className="muted">
-                {s.code} · {s.students} students
+                {s.code} · {fmt(t.schools.students, { n: s.students })}
               </span>
             </li>
           ))}
         </ul>
-        <p className="muted" dir="rtl" lang="ar">
-          Whish فقط: 96170772968 باسم منذر أحمد حداره — لا تُخترع أرقام دفع موازية.
-        </p>
+        <p className="muted">{fmt(t.schools.whishOnly, { phone: "96170772968" })}</p>
         <div className="agent-actions">
           <button type="button" className="btn" disabled={busy === "report"} onClick={() => void runSchoolReport()}>
-            {busy === "report" ? "…" : `تقرير: ${schoolName}`}
+            {busy === "report" ? "…" : fmt(t.schools.report, { name: schoolName })}
           </button>
           <button
             type="button"
@@ -644,13 +641,13 @@ export function AgentHub() {
             disabled={busy === "parent"}
             onClick={() => void runParentDigest()}
           >
-            ملخّص أهل واتساب
+            {t.schools.parentDigest}
           </button>
         </div>
         {schoolReportPanel ? (
-          <div className="agent-preview agent-school-report-panel" dir="rtl" lang="ar">
-            <strong>ملخّص التقرير الأخير</strong>
-            <pre>{schoolReportPanel}</pre>
+          <div className="agent-preview agent-school-report-panel">
+            <strong>{t.schools.lastReport}</strong>
+            <pre dir="auto">{schoolReportPanel}</pre>
           </div>
         ) : null}
         {overview?.schoolReports?.length ? (
@@ -671,19 +668,16 @@ export function AgentHub() {
       />
 
       <section id="agent-staged-approvals" className="card agent-panel">
-        <h2>Staged Approvals · الموافقات المرحلية</h2>
-        <p className="muted" dir="rtl" lang="ar">
-          كل فيديو/تقرير/توصية يُحفظ كـ AWAITING_APPROVAL ويُرسل معاينة واتساب إلى 96176532421.
-          لن يُنشر للعامة دون «موافق / اعتمد / انشر».
-        </p>
+        <h2>{t.approvals.title}</h2>
+        <p className="muted">{fmt(t.approvals.lead, { phone: "96176532421" })}</p>
         {overview?.approvals?.filter((a) => a.state === "AWAITING_APPROVAL" || a.state === "DRAFTED").length ? (
           <table className="agent-table">
             <thead>
               <tr>
-                <th>العنوان</th>
-                <th>النوع</th>
-                <th>الحالة</th>
-                <th>إجراء</th>
+                <th>{t.approvals.colTitle}</th>
+                <th>{t.approvals.colKind}</th>
+                <th>{t.approvals.colState}</th>
+                <th>{t.approvals.colAction}</th>
               </tr>
             </thead>
             <tbody>
@@ -692,7 +686,7 @@ export function AgentHub() {
                 .slice(0, 10)
                 .map((a) => (
                   <tr key={a.id}>
-                    <td dir="rtl" lang="ar">
+                    <td dir="auto">
                       <strong>{a.titleAr}</strong>
                       <div className="muted" style={{ fontSize: "0.8em" }}>
                         {a.id}
@@ -708,7 +702,7 @@ export function AgentHub() {
                           disabled={busy === `appr-${a.id}`}
                           onClick={() => void actApproval(a.id, "approve")}
                         >
-                          موافقة / نشر
+                          {t.approvals.approve}
                         </button>
                         <button
                           type="button"
@@ -716,7 +710,7 @@ export function AgentHub() {
                           disabled={busy === `appr-${a.id}`}
                           onClick={() => void actApproval(a.id, "reject")}
                         >
-                          رفض
+                          {t.approvals.reject}
                         </button>
                       </div>
                     </td>
@@ -725,69 +719,77 @@ export function AgentHub() {
             </tbody>
           </table>
         ) : (
-          <p className="muted" dir="rtl" lang="ar">
-            لا مسودّات بانتظار الموافقة — أنشئ حملة أو تقريراً أو موجزاً أسبوعياً.
-          </p>
+          <p className="muted">{t.approvals.none}</p>
         )}
       </section>
 
       <section id="agent-self-evolution" className="card agent-panel">
-        <h2>Self-Evolution Metrics · مقاييس التطور الذاتي</h2>
-        <p className="muted" dir="rtl" lang="ar">
-          موجز تنفيذي كل أحد 00:00 بتوقيت بيروت عبر واتساب مع ٣ توصيات لموافقة بنقرة.
-        </p>
+        <h2>{t.evolution.title}</h2>
+        <p className="muted">{t.evolution.lead}</p>
         {overview?.evolution?.scores ? (
           <>
             <ul className="agent-keys">
-              <li>Overall: <strong>{overview.evolution.scores.overall ?? "—"}</strong>/100</li>
-              <li>Voice conversion: {overview.evolution.scores.voiceConversion ?? "—"}</li>
-              <li>Approvals: {overview.evolution.scores.approvalThroughput ?? "—"}</li>
-              <li>Pedagogy: {overview.evolution.scores.pedagogyHealth ?? "—"}</li>
-              <li>Pending: {overview.evolution.pendingApprovals ?? 0}</li>
-              <li>Deployed opts: {overview.evolution.optimizationsApplied ?? 0}</li>
+              <li>
+                {t.evolution.overall}: <strong>{overview.evolution.scores.overall ?? "—"}</strong>/100
+              </li>
+              <li>
+                {t.evolution.voiceConversion}: {overview.evolution.scores.voiceConversion ?? "—"}
+              </li>
+              <li>
+                {t.evolution.approvals}: {overview.evolution.scores.approvalThroughput ?? "—"}
+              </li>
+              <li>
+                {t.evolution.pedagogy}: {overview.evolution.scores.pedagogyHealth ?? "—"}
+              </li>
+              <li>
+                {t.evolution.pending}: {overview.evolution.pendingApprovals ?? 0}
+              </li>
+              <li>
+                {t.evolution.deployed}: {overview.evolution.optimizationsApplied ?? 0}
+              </li>
             </ul>
             {overview.evolution.failedTopics?.length ? (
-              <p className="muted" dir="rtl" lang="ar">
-                مواضيع فشل:{" "}
-                {overview.evolution.failedTopics.map((t) => `${t.topicAr}(${t.count})`).join(" · ")}
+              <p className="muted">
+                {t.evolution.failedTopics}{" "}
+                {overview.evolution.failedTopics.map((topic) => `${topic.topicAr}(${topic.count})`).join(" · ")}
               </p>
             ) : null}
             {overview.evolution.recommendations?.length ? (
               <ul>
                 {overview.evolution.recommendations.slice(0, 3).map((r) => (
-                  <li key={r.titleAr} dir="rtl" lang="ar">
-                    {r.titleAr} · أثر {r.impactScore}
+                  <li key={r.titleAr} dir="auto">
+                    {r.titleAr} · {fmt(t.evolution.impact, { n: r.impactScore })}
                   </li>
                 ))}
               </ul>
             ) : null}
           </>
         ) : (
-          <p className="muted">No evolution snapshot yet — run weekly brief.</p>
+          <p className="muted">{t.evolution.none}</p>
         )}
         <button type="button" className="btn" disabled={busy === "brief"} onClick={() => void runWeeklyBrief()}>
-          {busy === "brief" ? "…" : "Weekly Brief الآن + واتساب"}
+          {busy === "brief" ? "…" : t.evolution.runBrief}
         </button>
       </section>
 
       <section id="agent-platform-health" className="card agent-panel">
-        <h2>Platform Health · صحة المنصّة</h2>
+        <h2>{t.health.title}</h2>
         {health ? (
           <>
             <p>
-              Status: <strong>{health.apiStatus}</strong> · avg latency {health.avgLatencyMs} ms
+              {fmt(t.health.status, { status: health.apiStatus, ms: health.avgLatencyMs })}
             </p>
             <ul className="agent-keys">
-              <li>OpenAI: {health.keysPresent.openai ? "✓" : "demo"}</li>
-              <li>HeyGen: {health.keysPresent.heygen ? "✓" : "demo"}</li>
-              <li>Gemini: {health.keysPresent.gemini ? "✓" : "demo"}</li>
-              <li>WhatsApp: {health.keysPresent.whatsapp ? "✓" : "outbox"}</li>
+              <li>OpenAI: {health.keysPresent.openai ? "✓" : t.health.demo}</li>
+              <li>HeyGen: {health.keysPresent.heygen ? "✓" : t.health.demo}</li>
+              <li>Gemini: {health.keysPresent.gemini ? "✓" : t.health.demo}</li>
+              <li>WhatsApp: {health.keysPresent.whatsapp ? "✓" : t.health.outbox}</li>
             </ul>
             <table className="agent-table">
               <thead>
                 <tr>
-                  <th>Endpoint</th>
-                  <th>Code</th>
+                  <th>{t.health.endpoint}</th>
+                  <th>{t.health.code}</th>
                   <th>ms</th>
                 </tr>
               </thead>
@@ -808,7 +810,7 @@ export function AgentHub() {
             </ul>
           </>
         ) : (
-          <p className="muted">Loading health…</p>
+          <SkeletonBlock lines={3} label={t.health.loading} />
         )}
         <button
           type="button"
@@ -832,7 +834,7 @@ export function AgentHub() {
                   const wa = json.outboundWhatsApp;
                   setLog(
                     [
-                      json.whatsappReply || "تم فحص الصحة.",
+                      json.whatsappReply || t.health.checked,
                       wa
                         ? `WhatsApp: ${wa.status || "—"}${wa.provider ? ` · ${wa.provider}` : ""}${wa.to ? ` · ${wa.to}` : ""}`
                         : "",
@@ -843,40 +845,39 @@ export function AgentHub() {
                   await refresh({ preserveLog: true });
                 }
               } catch (error) {
-                setLog(error instanceof Error ? error.message : "health notify failed");
+                setLog(error instanceof Error ? error.message : t.health.failed);
               } finally {
                 setBusy(null);
               }
             })();
           }}
         >
-          Refresh + واتساب
+          {t.health.refresh}
         </button>
       </section>
 
       {showRecentVoice ? (
         <section id="agent-recent-voice" className="card agent-panel">
-          <h2>Recent voice tasks</h2>
+          <h2>{t.recent.title}</h2>
           {overview?.voiceTasks?.length ? (
             <ul>
-              {overview.voiceTasks.slice(0, 6).map((t) => (
-                <li key={t.id}>
-                  <strong>{t.intent.kind}</strong> · {t.status} · {t.whisperTranscript.slice(0, 80)}
-                  {t.outboundWhatsApp ? (
+              {overview.voiceTasks.slice(0, 6).map((task) => (
+                <li key={task.id}>
+                  <strong>{task.intent.kind}</strong> · {task.status} ·{" "}
+                  <span dir="auto">{task.whisperTranscript.slice(0, 80)}</span>
+                  {task.outboundWhatsApp ? (
                     <div className="muted" style={{ fontSize: "0.85em", marginTop: 4 }}>
-                      WhatsApp outbound: <strong>{t.outboundWhatsApp.status}</strong>
-                      {t.outboundWhatsApp.provider ? ` · ${t.outboundWhatsApp.provider}` : ""}
-                      {t.outboundWhatsApp.to ? ` · to ${t.outboundWhatsApp.to}` : ""}
-                      {t.outboundWhatsApp.error ? ` · ${t.outboundWhatsApp.error}` : ""}
+                      {t.recent.outbound} <strong>{task.outboundWhatsApp.status}</strong>
+                      {task.outboundWhatsApp.provider ? ` · ${task.outboundWhatsApp.provider}` : ""}
+                      {task.outboundWhatsApp.to ? ` · ${fmt(t.recent.to, { v: task.outboundWhatsApp.to })}` : ""}
+                      {task.outboundWhatsApp.error ? ` · ${task.outboundWhatsApp.error}` : ""}
                     </div>
                   ) : null}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="muted" dir="rtl" lang="ar">
-              لا مهام صوتية بعد — شغّل محاكي المذكرة لتظهر هنا.
-            </p>
+            <p className="muted">{t.recent.none}</p>
           )}
         </section>
       ) : null}

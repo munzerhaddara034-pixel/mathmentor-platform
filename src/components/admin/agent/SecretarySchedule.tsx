@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AGENT_ROLES_AR } from "@/lib/agent/persona";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { INTL_LOCALE, type Locale } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import { agentMessages, type AgentMessages } from "@/lib/i18n/ns/agent";
 
 export type SecretaryAppointmentRow = {
   id: string;
@@ -38,9 +41,9 @@ function beirutDayKey(iso: string): string {
   }
 }
 
-function formatBeirut(iso: string): string {
+function formatBeirut(iso: string, locale: Locale): string {
   try {
-    return new Date(iso).toLocaleString("ar-LB", {
+    return new Date(iso).toLocaleString(INTL_LOCALE[locale], {
       timeZone: "Asia/Beirut",
       weekday: "short",
       month: "short",
@@ -54,17 +57,16 @@ function formatBeirut(iso: string): string {
   }
 }
 
-function priorityLabel(p: string): string {
-  if (p === "high") return "عالية";
-  if (p === "low") return "منخفضة";
-  return "متوسطة";
+type SecretaryCopy = AgentMessages["secretary"];
+
+function priorityLabel(p: string, t: SecretaryCopy): string {
+  if (p === "high") return t.priority.high;
+  if (p === "low") return t.priority.low;
+  return t.priority.medium;
 }
 
-function statusLabelAppt(s: string): string {
-  if (s === "scheduled") return "مجدول";
-  if (s === "pending") return "قيد الانتظار";
-  if (s === "completed") return "مكتمل";
-  if (s === "cancelled") return "ملغى";
+function statusLabelAppt(s: string, t: SecretaryCopy): string {
+  if (s === "scheduled" || s === "pending" || s === "completed" || s === "cancelled") return t.status[s];
   return s;
 }
 
@@ -74,6 +76,8 @@ type Props = {
 };
 
 export function SecretarySchedule({ appointments = [], reminders = [] }: Props) {
+  const { locale } = useI18n();
+  const t = agentMessages[locale].secretary;
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("today");
   const [kindFilter, setKindFilter] = useState<KindFilter>("all");
 
@@ -108,23 +112,17 @@ export function SecretarySchedule({ appointments = [], reminders = [] }: Props) 
 
   return (
     <section id="agent-secretary-schedule" className="card agent-panel agent-secretary">
-      <h2 dir="rtl" lang="ar">
-        سكرتير محمد · جدول المواعيد والمهام اليومية · Secretary Schedule
-      </h2>
-      <p className="muted" dir="rtl" lang="ar">
-        محمد: {AGENT_ROLES_AR.join(" · ")}.
-      </p>
-      <p className="muted" dir="rtl" lang="ar">
-        محمد يفهم العامية اللبنانية والفصحى — يتواصل مع المساعد التشغيلي من قبل الأستاذ منذر ويتابع المواعيد والتذكيرات من واتساب / الصوت — توقيت آسيا/بيروت.
-      </p>
+      <h2>{t.title}</h2>
+      <p className="muted">{fmt(t.rolesLine, { roles: t.roles.join(" · ") })}</p>
+      <p className="muted">{t.lead}</p>
 
-      <div className="agent-secretary-filters" role="toolbar" aria-label="تصفية الجدول">
-        <div className="agent-actions" dir="rtl" lang="ar">
+      <div className="agent-secretary-filters" role="toolbar" aria-label={t.filterLabel}>
+        <div className="agent-actions">
           {(
             [
-              ["today", "اليوم"],
-              ["upcoming", "قادم"],
-              ["all", "الكل"],
+              ["today", t.today],
+              ["upcoming", t.upcoming],
+              ["all", t.all],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -138,12 +136,12 @@ export function SecretarySchedule({ appointments = [], reminders = [] }: Props) 
             </button>
           ))}
         </div>
-        <div className="agent-actions" dir="rtl" lang="ar">
+        <div className="agent-actions">
           {(
             [
-              ["all", "الكل"],
-              ["appointments", "مواعيد"],
-              ["reminders", "تذكيرات"],
+              ["all", t.all],
+              ["appointments", t.appointments],
+              ["reminders", t.reminders],
             ] as const
           ).map(([id, label]) => (
             <button
@@ -161,25 +159,21 @@ export function SecretarySchedule({ appointments = [], reminders = [] }: Props) 
 
       {showAppts ? (
         <div className="agent-secretary-block">
-          <h3 dir="rtl" lang="ar">
-            🗓️ مواعيد محمد ({pendingAppts.length})
-          </h3>
+          <h3>{fmt(t.apptTitle, { n: pendingAppts.length })}</h3>
           {pendingAppts.length ? (
             <ul className="agent-secretary-list">
               {pendingAppts.map((a) => (
                 <li key={a.id} className="agent-secretary-card">
                   <div className="agent-secretary-card-head">
-                    <strong dir="rtl" lang="ar">
-                      {a.title}
-                    </strong>
-                    <span className="agent-secretary-badge">{statusLabelAppt(a.status)}</span>
+                    <strong dir="auto">{a.title}</strong>
+                    <span className="agent-secretary-badge">{statusLabelAppt(a.status, t)}</span>
                   </div>
-                  <p className="muted" dir="rtl" lang="ar">
-                    {formatBeirut(a.dateTime)}
+                  <p className="muted">
+                    {formatBeirut(a.dateTime, locale)}
                     {a.contactPerson ? ` · ${a.contactPerson}` : ""}
                   </p>
                   {a.notes ? (
-                    <p className="muted" dir="rtl" lang="ar">
+                    <p className="muted" dir="auto">
                       {a.notes}
                     </p>
                   ) : null}
@@ -191,33 +185,25 @@ export function SecretarySchedule({ appointments = [], reminders = [] }: Props) 
               ))}
             </ul>
           ) : (
-            <p className="muted" dir="rtl" lang="ar">
-              لا مواعيد في هذا الفلتر — جرّب واتساب: «سجّل موعد غداً الساعة ١٠ مع الأستاذ أحمد».
-            </p>
+            <p className="muted">{t.noAppts}</p>
           )}
         </div>
       ) : null}
 
       {showRems ? (
         <div className="agent-secretary-block">
-          <h3 dir="rtl" lang="ar">
-            ✅ تذكيرات محمد ({openReminders.length})
-          </h3>
+          <h3>{fmt(t.remTitle, { n: openReminders.length })}</h3>
           {openReminders.length ? (
             <ul className="agent-secretary-list">
               {openReminders.map((r) => (
                 <li key={r.id} className="agent-secretary-card">
                   <div className="agent-secretary-card-head">
-                    <strong dir="rtl" lang="ar">
-                      {r.task}
-                    </strong>
+                    <strong dir="auto">{r.task}</strong>
                     <span className={`agent-secretary-badge agent-priority-${r.priority}`}>
-                      {priorityLabel(r.priority)}
+                      {priorityLabel(r.priority, t)}
                     </span>
                   </div>
-                  <p className="muted" dir="rtl" lang="ar">
-                    قبل {formatBeirut(r.dueDate)}
-                  </p>
+                  <p className="muted">{fmt(t.before, { when: formatBeirut(r.dueDate, locale) })}</p>
                   <p className="agent-related-ids muted" dir="ltr">
                     {r.id}
                     {r.source ? ` · ${r.source}` : ""}
@@ -226,9 +212,7 @@ export function SecretarySchedule({ appointments = [], reminders = [] }: Props) 
               ))}
             </ul>
           ) : (
-            <p className="muted" dir="rtl" lang="ar">
-              لا تذكيرات مفتوحة — جرّب: «ذكّرني غداً بمراجعة امتحان الباريم».
-            </p>
+            <p className="muted">{t.noRems}</p>
           )}
         </div>
       ) : null}
