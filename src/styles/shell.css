@@ -187,3 +187,5 @@ body.mm-sheet-open { overflow: hidden; }
 .mm-math { unicode-bidi: isolate; }
 
 .mm-sheet-assistant { display: flex; align-items: center; gap: 10px; width: 100%; margin: 4px 0 8px; justify-content: center; }
+.chat-panel form input { flex: 1 1 auto; min-width: 0; width: auto; }
+.chat-panel form .btn { flex: 0 0 auto; }
