@@ -1,13 +1,17 @@
-import { SolverResultView } from "@/components/solver/SolverResultView";
+import { notFound } from "next/navigation";
+import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
+import { SolverResultActions } from "@/components/solver/SolverResultActions";
+import { SolverThread } from "@/components/solver/SolverThread";
 import { PageWatermark } from "@/components/studio/IdentityWatermark";
+import { TutorOrb } from "@/components/v2/TutorOrb";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
+import { getI18n } from "@/lib/i18n/server";
 import { getMathQuery } from "@/lib/solver";
-import { getHeyGenJob } from "@/lib/studio/heygenJobs";
 import { attachDemoMedia } from "@/lib/solver/assemble";
 import { DEMO_AVATAR_VIDEO } from "@/lib/studio/heygenClient";
-import { notFound } from "next/navigation";
-import Link from "next/link";
+import { getHeyGenJob } from "@/lib/studio/heygenJobs";
+import "@/styles/solver.css";
 
 export const dynamic = "force-dynamic";
 
@@ -18,20 +22,27 @@ export default async function SolverResultPage({ params }: { params: Promise<{ i
   const live = await getLiveSession();
   const staff = live.ok && isStaffRole(live.user.role);
   if (live.ok && !staff && query.userId !== live.user.id) notFound();
+  const { m, locale } = await getI18n();
   const job = query.heygenJobId ? await getHeyGenJob(query.heygenJobId) : undefined;
   const timeline = attachDemoMedia(query.timeline, job?.videoUrl || query.videoUrl || DEMO_AVATAR_VIDEO, job?.id);
-  const viewer = live.ok ? { name: live.user.name, phone: live.user.phone } : { name: "طالب المنصة", phone: "76532421" };
+  const viewer = live.ok ? { name: live.user.name, phone: live.user.phone } : { name: m.result.watermarkGuest, phone: "76532421" };
 
   return (
-    <main className="shell studio-shell relative-watermark">
+    <main className="shell mm-solver v2-solver relative-watermark">
       <PageWatermark name={viewer.name} phone={viewer.phone} />
-      <p className="eyebrow">الحل · الأستاذ منذر حداره</p>
-      <p className="muted">
-        <Link href="/math-solver">مسألة جديدة</Link>
-        {" · "}
-        <Link href={`/lessons/interactive-explanation?id=${query.id}`}>شاهد الشرح على السبورة</Link>
-      </p>
-      <SolverResultView initial={{ ...query, timeline }} viewer={viewer} canTeach={Boolean(staff)} />
+      <header className="v2-solver-head">
+        <TutorOrb size={44} />
+        <div>
+          <h1>{m.solver.title}</h1>
+          <p className="v2-muted v2-small">{m.solver.subtitle}</p>
+        </div>
+      </header>
+      <SolverThread query={query} m={m} locale={locale} />
+      <SolverResultActions
+        initial={{ id: query.id, rating: query.rating, needsRetake: query.needsRetake, videoStatus: query.videoStatus, heygenJobId: query.heygenJobId, track: query.track }}
+        canTeach={Boolean(staff)}
+      />
+      {!query.needsRetake ? <InteractiveLessonPlayer timeline={timeline} viewer={viewer} canTeach={Boolean(staff)} /> : null}
     </main>
   );
 }
