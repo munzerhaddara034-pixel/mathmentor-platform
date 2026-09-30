@@ -38,7 +38,8 @@ export function DemoLocalAvPreview({ enabled, muted, cameraOff }: Props) {
       }
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: { facingMode: "user" },
+        // Same low-data capture as the LiveKit room (360p, 15 fps).
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 360 }, frameRate: { ideal: 15, max: 20 } },
       });
       streamRef.current = stream;
       stream.getAudioTracks().forEach((track) => {

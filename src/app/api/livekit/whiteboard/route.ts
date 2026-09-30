@@ -1,53 +1,103 @@
 import { NextResponse } from "next/server";
-import { apiSession } from "@/lib/auth/guards";
-import { isStaffRole } from "@/lib/auth/paths";
 import { livekitEnv } from "@/lib/livekit/config";
-import { assertClassroomAccess, sanitizeRoomName } from "@/lib/livekit/rooms";
-import { getClassroomRoom, patchClassroomRoom } from "@/lib/livekit/store";
-import type { WhiteboardEquation, WhiteboardPlot, WhiteboardStroke } from "@/lib/livekit/protocol";
+import { classroomGuard, sanitizeRoomName } from "@/lib/livekit/rooms";
+import { boardDelta, parseSince, roomEtag, sinceFromEtag, type BoardOp } from "@/lib/livekit/roomState";
+import { appendBoardOp, getClassroomRoom } from "@/lib/livekit/store";
+import { sanitizeStroke } from "@/lib/livekit/strokeCodec";
+import type { WhiteboardEquation, WhiteboardPlot } from "@/lib/livekit/protocol";
 
 export const runtime = "nodejs";
 
+const NO_STORE = { "Cache-Control": "private, no-cache" };
+
+/**
+ * GET ?room=…&since=<version> → 304 when unchanged, else only newer items (`full:false`)
+ * or the whole board (`full:true`, first load / after a clear). ETag/If-None-Match also work.
+ */
 export async function GET(request: Request) {
-  const guard = await apiSession();
+  const url = new URL(request.url);
+  const room = sanitizeRoomName(url.searchParams.get("room") || "");
+  const guard = await classroomGuard(room, (actor) => actor.staff);
   if (guard.error) return guard.error;
-  const room = sanitizeRoomName(new URL(request.url).searchParams.get("room") || "");
-  const staff = isStaffRole(guard.live.user.role);
-  const access = await assertClassroomAccess(guard.live.user, room, staff);
-  if (!access.ok) {
-    return NextResponse.json({ error: access.error, errorAr: access.errorAr }, { status: access.status });
+  try {
+    const state = await getClassroomRoom(room);
+    const etag = roomEtag(state);
+    const since = parseSince(url.searchParams.get("since")) ?? sinceFromEtag(request.headers.get("if-none-match"));
+    const delta = boardDelta(state, since);
+    if (!delta) {
+      return new NextResponse(null, { status: 304, headers: { ETag: etag, ...NO_STORE } });
+    }
+    return NextResponse.json({ ok: true, room, demo: !livekitEnv().configured, delta }, { headers: { ETag: etag, ...NO_STORE } });
+  } catch (error) {
+    console.error("[mathmentor] whiteboard read failed", error instanceof Error ? error.message : error);
+    return NextResponse.json({ ok: false, error: "Board unavailable.", errorAr: "تعذّر تحميل السبورة." }, { status: 503 });
   }
-  const state = await getClassroomRoom(room);
-  return NextResponse.json({ ok: true, room, state, demo: !livekitEnv().configured });
 }
 
-export async function PUT(request: Request) {
-  const guard = await apiSession();
-  if (guard.error) return guard.error;
-  const body = (await request.json()) as {
-    room?: string;
-    strokes?: WhiteboardStroke[];
-    equations?: WhiteboardEquation[];
-    plots?: WhiteboardPlot[];
-  };
+type OpBody = {
+  room?: string;
+  op?: { kind?: string; stroke?: unknown; equation?: unknown; plot?: unknown };
+};
+
+function isString(value: unknown, max: number): value is string {
+  return typeof value === "string" && value.length > 0 && value.length <= max;
+}
+
+function parseOp(body: OpBody, authorId: string): BoardOp | null {
+  const op = body.op;
+  if (!op || typeof op.kind !== "string") return null;
+  if (op.kind === "clear") return { kind: "clear" };
+  if (op.kind === "stroke") {
+    const stroke = sanitizeStroke(op.stroke, authorId);
+    return stroke ? { kind: "stroke", stroke } : null;
+  }
+  if (op.kind === "equation" && typeof op.equation === "object" && op.equation !== null) {
+    const raw = op.equation as Partial<WhiteboardEquation>;
+    if (!isString(raw.id, 80) || !isString(raw.latex, 2000)) return null;
+    return { kind: "equation", equation: { id: raw.id, latex: raw.latex, authorId, createdAt: new Date().toISOString() } };
+  }
+  if (op.kind === "plot" && typeof op.plot === "object" && op.plot !== null) {
+    const raw = op.plot as Partial<WhiteboardPlot>;
+    if (!isString(raw.id, 80) || !isString(raw.expression, 200)) return null;
+    const xMin = typeof raw.xMin === "number" && Number.isFinite(raw.xMin) ? raw.xMin : -5;
+    const xMax = typeof raw.xMax === "number" && Number.isFinite(raw.xMax) ? raw.xMax : 5;
+    return { kind: "plot", plot: { id: raw.id, expression: raw.expression, xMin, xMax, authorId, createdAt: new Date().toISOString() } };
+  }
+  return null;
+}
+
+/** POST { room, op } — append one stroke/equation/plot, or clear (teacher only). */
+export async function POST(request: Request) {
+  let body: OpBody;
+  try {
+    body = (await request.json()) as OpBody;
+  } catch {
+    return NextResponse.json({ ok: false, error: "Invalid JSON.", errorAr: "طلب غير صالح." }, { status: 400 });
+  }
   const room = sanitizeRoomName(body.room || "");
-  const staff = isStaffRole(guard.live.user.role);
-  const access = await assertClassroomAccess(guard.live.user, room, staff);
-  if (!access.ok) {
-    return NextResponse.json({ error: access.error, errorAr: access.errorAr }, { status: access.status });
+  const guard = await classroomGuard(room, (actor) => actor.staff);
+  if (guard.error) return guard.error;
+  const { actor, access } = guard;
+  try {
+    const current = await getClassroomRoom(room);
+    const canWrite = access.isTeacher || current.writers.includes(actor.identity);
+    if (!canWrite || current.ended) {
+      return NextResponse.json(
+        { ok: false, error: "Whiteboard write is not granted.", errorAr: "الكتابة على السبورة غير مسموحة." },
+        { status: 403 },
+      );
+    }
+    const op = parseOp(body, actor.identity);
+    if (!op) {
+      return NextResponse.json({ ok: false, error: "Invalid board item.", errorAr: "عنصر غير صالح للسبورة." }, { status: 400 });
+    }
+    if (op.kind === "clear" && !access.isTeacher) {
+      return NextResponse.json({ ok: false, error: "Only the teacher can clear the board.", errorAr: "مسح السبورة للأستاذ فقط." }, { status: 403 });
+    }
+    const state = await appendBoardOp(room, op);
+    return NextResponse.json({ ok: true, version: state.version }, { headers: { ETag: roomEtag(state), ...NO_STORE } });
+  } catch (error) {
+    console.error("[mathmentor] whiteboard write failed", error instanceof Error ? error.message : error);
+    return NextResponse.json({ ok: false, error: "Could not save to the board.", errorAr: "تعذّر الحفظ على السبورة." }, { status: 503 });
   }
-  const current = await getClassroomRoom(room);
-  const canWrite = access.isTeacher || current.writers.includes(guard.live.user.id);
-  if (!canWrite) {
-    return NextResponse.json(
-      { error: "Whiteboard write is not granted.", errorAr: "الكتابة على السبورة غير مسموحة." },
-      { status: 403 },
-    );
-  }
-  const state = await patchClassroomRoom(room, {
-    strokes: Array.isArray(body.strokes) ? body.strokes.slice(-200) : current.strokes,
-    equations: Array.isArray(body.equations) ? body.equations.slice(-80) : current.equations,
-    plots: Array.isArray(body.plots) ? body.plots.slice(-40) : current.plots,
-  });
-  return NextResponse.json({ ok: true, state });
 }

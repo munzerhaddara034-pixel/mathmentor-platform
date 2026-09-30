@@ -34,7 +34,7 @@ function stopTracks(stream: MediaStream | null): void {
  * Force the browser permission prompt via getUserMedia, then release tracks
  * so LiveKit can publish its own. Falls back to per-kind probes on partial denial.
  */
-async function primeBrowserMediaPermission(): Promise<{
+async function primeBrowserMediaPermission(wantVideo = true): Promise<{
   audioGranted: boolean;
   videoGranted: boolean;
   primeError?: unknown;
@@ -45,6 +45,17 @@ async function primeBrowserMediaPermission(): Promise<{
       videoGranted: false,
       primeError: new Error("getUserMedia is not available in this browser."),
     };
+  }
+
+  if (!wantVideo) {
+    // Audio-first («صوت فقط»): never open the camera, so no permission prompt for it.
+    try {
+      const audioOnly = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      stopTracks(audioOnly);
+      return { audioGranted: true, videoGranted: false };
+    } catch (audioError) {
+      return { audioGranted: false, videoGranted: false, primeError: audioError };
+    }
   }
 
   try {
@@ -86,8 +97,10 @@ function logAv(event: string, detail: Record<string, string | boolean | number>)
  */
 export async function enableLocalParticipantAv(
   localParticipant: LocalParticipant,
+  options: { camera?: boolean } = {},
 ): Promise<LocalAvEnableResult> {
-  const prime = await primeBrowserMediaPermission();
+  const wantCamera = options.camera !== false;
+  const prime = await primeBrowserMediaPermission(wantCamera);
   logAv("prime", {
     audioGranted: prime.audioGranted,
     videoGranted: prime.videoGranted,
@@ -95,9 +108,20 @@ export async function enableLocalParticipantAv(
   });
 
   if (!prime.audioGranted && !prime.videoGranted) {
-    const failure = permissionErrorFromUnknown(prime.primeError ?? new Error("Permission denied."), "both");
-    logAv("prime-blocked", { kind: "both" });
-    return { micOk: false, camOk: false, failure, failureKind: "both" };
+    const kind = wantCamera ? "both" : "microphone";
+    const failure = permissionErrorFromUnknown(prime.primeError ?? new Error("Permission denied."), kind);
+    logAv("prime-blocked", { kind });
+    return { micOk: false, camOk: false, failure, failureKind: kind };
+  }
+
+  if (!wantCamera) {
+    try {
+      await localParticipant.setMicrophoneEnabled(true);
+      logAv("enable", { micOk: true, camOk: false, audioOnly: true });
+      return { micOk: true, camOk: false };
+    } catch (error) {
+      return { micOk: false, camOk: false, failure: permissionErrorFromUnknown(error, "microphone"), failureKind: "microphone" };
+    }
   }
 
   let micOk = false;

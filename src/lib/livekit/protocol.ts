@@ -1,4 +1,5 @@
 /** In-room LiveKit data-channel messages (topic `mathmentor`). */
+import type { StrokeChunkMessage } from "./strokeCodec";
 
 export const LIVEKIT_DATA_TOPIC = "mathmentor";
 
@@ -39,6 +40,7 @@ export type ClassroomChatLine = {
 
 export type ClassroomDataMessage =
   | { kind: "whiteboard.stroke"; stroke: WhiteboardStroke }
+  | StrokeChunkMessage
   | { kind: "whiteboard.equation"; equation: WhiteboardEquation }
   | { kind: "whiteboard.plot"; plot: WhiteboardPlot }
   | { kind: "whiteboard.clear" }
@@ -73,7 +75,8 @@ export type ClassroomTokenPayload = {
   grants: ClassroomGrants;
   error?: string;
   errorAr?: string;
-  docs?: string;
+  /** Guest joined through a signed booking link (no account). */
+  guest?: boolean;
 };
 
 export type WhiteboardBoardState = {
@@ -84,4 +87,17 @@ export type WhiteboardBoardState = {
   avAllowed?: string[];
   ended?: boolean;
   updatedAt?: string;
+};
+
+/** GET /api/livekit/whiteboard?since=<version> payload (full snapshot or only newer items). */
+export type WhiteboardBoardDelta = {
+  full: boolean;
+  version: number;
+  strokes: WhiteboardStroke[];
+  equations: WhiteboardEquation[];
+  plots: WhiteboardPlot[];
+  writers: string[];
+  avAllowed: string[];
+  ended: boolean;
+  updatedAt: string;
 };

@@ -42,7 +42,6 @@ export async function mintClassroomToken(input: {
     canWriteBoard: input.isTeacher || input.canWriteBoard,
     canPublishAv: input.isTeacher || input.canPublishAv,
     grants,
-    docs: "/docs/LIVEKIT.md",
   };
 
   if (!env.configured) {

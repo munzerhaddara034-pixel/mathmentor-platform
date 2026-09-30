@@ -1,21 +1,13 @@
-import { AuthClientGuard } from "@/components/auth/AuthClientGuard";
-import { requireAuth } from "@/lib/auth/guards";
 import { privateRobotsMetadata } from "@/lib/auth/metadata";
 
 export const metadata = privateRobotsMetadata;
 export const dynamic = "force-dynamic";
 
 /**
- * LiveKit room join: auth only (Whish guests receive a join link after payment).
- * Booking stays public on /live. AI-tier features inside the room (pedagogical tutor /
- * voice-to-board via /api/ai/pedagogical-tutor) still enforce userHasAiAccess (staff exempt).
+ * Classroom access is decided per room in the page (account session or signed guest link),
+ * because guests who paid via Whish have no account. AI features inside the room still
+ * enforce userHasAiAccess on their own API routes.
  */
-export default async function LiveClassroomLayout({ children }: { children: React.ReactNode }) {
-  await requireAuth("/live");
-  return (
-    <>
-      <AuthClientGuard mode="auth" />
-      {children}
-    </>
-  );
+export default function LiveClassroomLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }

@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Katex } from "@/components/studio/Katex";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import type { WhiteboardEquation, WhiteboardPlot, WhiteboardStroke } from "@/lib/livekit/protocol";
+import { compactStroke, roundPoint, shouldSample } from "@/lib/livekit/strokeCodec";
 import { LiveBoardPlot } from "./LiveBoardPlot";
 
 const COLORS = [
@@ -15,6 +16,8 @@ const COLORS = [
 
 type Props = {
   canWrite: boolean;
+  /** Clearing wipes everyone's work — teacher only. */
+  canClear: boolean;
   strokes: WhiteboardStroke[];
   equations: WhiteboardEquation[];
   plots: WhiteboardPlot[];
@@ -29,10 +32,10 @@ function relativePoint(event: React.PointerEvent<HTMLCanvasElement>) {
   const rect = event.currentTarget.getBoundingClientRect();
   const w = rect.width || 1;
   const h = rect.height || 1;
-  return {
-    x: Math.min(1, Math.max(0, (event.clientX - rect.left) / w)),
-    y: Math.min(1, Math.max(0, (event.clientY - rect.top) / h)),
-  };
+  return roundPoint({
+    x: (event.clientX - rect.left) / w,
+    y: (event.clientY - rect.top) / h,
+  });
 }
 
 function paint(canvas: HTMLCanvasElement, strokes: WhiteboardStroke[]) {
@@ -57,6 +60,7 @@ function paint(canvas: HTMLCanvasElement, strokes: WhiteboardStroke[]) {
 
 export function MathWhiteboard({
   canWrite,
+  canClear,
   strokes,
   equations,
   plots,
@@ -107,7 +111,9 @@ export function MathWhiteboard({
   const pointerMove = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const draft = draftRef.current;
     if (!draft || !canWrite) return;
-    draft.points.push(relativePoint(event));
+    const next = relativePoint(event);
+    if (!shouldSample(draft.points[draft.points.length - 1], next)) return;
+    draft.points.push(next);
     const canvas = canvasRef.current;
     if (canvas) paint(canvas, [...strokes, draft]);
   };
@@ -115,7 +121,9 @@ export function MathWhiteboard({
   const pointerUp = () => {
     const draft = draftRef.current;
     draftRef.current = null;
-    if (draft && draft.points.length > 1) onStroke(draft);
+    if (!draft || draft.points.length < 2) return;
+    const compact = compactStroke(draft);
+    if (compact.points.length > 1) onStroke(compact);
   };
 
   const addEquation = () => {
@@ -164,7 +172,7 @@ export function MathWhiteboard({
               onClick={() => setColor(item.value)}
             />
           ))}
-          <button className="btn" type="button" disabled={!canWrite} onClick={onClear}>
+          <button className="btn" type="button" disabled={!canWrite || !canClear} onClick={onClear}>
             مسح السبورة / Clear
           </button>
         </div>

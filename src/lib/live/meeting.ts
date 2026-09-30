@@ -4,27 +4,12 @@ export type MeetingProvider = "zoom" | "meet-stub" | "meet-template" | "livekit"
 
 export type MeetingLink = {
   url: string;
-  provider: MeetingProvider;
-  stub: boolean;
+  provider: Exclude<MeetingProvider, "meet-stub">;
 };
 
 function slugFromId(id: string) {
   const compact = id.replace(/[^a-z0-9]/gi, "").toLowerCase().padEnd(10, "m");
   return `${compact.slice(0, 3)}-${compact.slice(3, 7)}-${compact.slice(7, 10)}`;
-}
-
-function numericId(id: string) {
-  let n = 0;
-  for (const ch of id) n = (n * 33 + ch.charCodeAt(0)) >>> 0;
-  return String(800_000_000 + (n % 100_000_000));
-}
-
-export function meetStubUrl(id: string) {
-  return `https://meet.google.com/${slugFromId(id)}`;
-}
-
-export function zoomStubUrl(id: string) {
-  return `https://zoom.us/j/${numericId(id)}`;
 }
 
 async function createZoomMeeting(input: {
@@ -73,12 +58,16 @@ async function createZoomMeeting(input: {
   return meetJson.join_url;
 }
 
+/**
+ * External meeting link (Google Meet template or a real Zoom meeting) — or `null`.
+ * Never invents a Meet/Zoom URL: without a provider the booking uses the in-app classroom.
+ */
 export async function createMeetingLink(input: {
   id?: string;
   topic: string;
   startsAt: string;
   durationMinutes: number;
-}): Promise<MeetingLink> {
+}): Promise<MeetingLink | null> {
   const id = input.id || createId("meet");
   const template = process.env.GOOGLE_MEET_LINK_TEMPLATE?.trim();
   if (template) {
@@ -86,7 +75,6 @@ export async function createMeetingLink(input: {
     return {
       url: template.replace(/\{id\}/g, id).replace(/\{code\}/g, code),
       provider: "meet-template",
-      stub: false,
     };
   }
 
@@ -96,14 +84,11 @@ export async function createMeetingLink(input: {
   if (zoomAccount && zoomId && zoomSecret) {
     try {
       const url = await createZoomMeeting(input);
-      return { url, provider: "zoom", stub: false };
-    } catch {
-      return { url: zoomStubUrl(id), provider: "zoom", stub: true };
+      return { url, provider: "zoom" };
+    } catch (error) {
+      console.warn("[mathmentor] Zoom meeting creation failed", error instanceof Error ? error.message : error);
+      return null;
     }
   }
-  if (zoomAccount) {
-    return { url: zoomStubUrl(id), provider: "zoom", stub: true };
-  }
-
-  return { url: meetStubUrl(id), provider: "meet-stub", stub: true };
+  return null;
 }

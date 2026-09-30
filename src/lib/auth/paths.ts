@@ -84,6 +84,8 @@ export function isPublicPath(pathname: string) {
   if (path.startsWith("/api/bot")) return true;
   if (path.startsWith("/api/whish/")) return true;
   if (path === "/api/live/slots" || path === "/api/live/book") return true;
+  // Guest join links (signed, verified in the route) and the classroom API (own guard).
+  if (path === "/live/join") return true;
   if (PUBLIC_PREFIXES.some((prefix) => path.startsWith(prefix))) return true;
   if (/\.(?:js|css|png|jpg|jpeg|gif|webp|svg|ico|mp4|woff2?|txt|map)$/i.test(path)) return true;
   return false;

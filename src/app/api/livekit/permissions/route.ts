@@ -4,7 +4,7 @@ import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
 import { livekitEnv, livekitHttpUrl } from "@/lib/livekit/config";
 import { sanitizeRoomName } from "@/lib/livekit/rooms";
-import { getClassroomRoom, patchClassroomRoom, toggleId } from "@/lib/livekit/store";
+import { grantInRoom } from "@/lib/livekit/store";
 
 export const runtime = "nodejs";
 
@@ -33,53 +33,43 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = (await request.json()) as {
-    room?: string;
-    identity?: string;
-    canPublishAv?: boolean;
-    canWriteBoard?: boolean;
-  };
+  let body: { room?: string; identity?: string; canPublishAv?: boolean; canWriteBoard?: boolean };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON.", errorAr: "طلب غير صالح." }, { status: 400 });
+  }
   const room = sanitizeRoomName(body.room || "");
   const identity = body.identity?.trim();
   if (!identity) {
-    return NextResponse.json({ error: "identity required." }, { status: 400 });
+    return NextResponse.json({ error: "identity required.", errorAr: "المعرّف مطلوب." }, { status: 400 });
   }
 
-  const current = await getClassroomRoom(room);
-  const next = await patchClassroomRoom(room, {
-    writers:
-      typeof body.canWriteBoard === "boolean"
-        ? toggleId(current.writers, identity, body.canWriteBoard)
-        : current.writers,
-    avAllowed:
-      typeof body.canPublishAv === "boolean"
-        ? toggleId(current.avAllowed, identity, body.canPublishAv)
-        : current.avAllowed,
-  });
-
-  let livekit = { applied: false as boolean | "skipped" };
-  if (typeof body.canPublishAv === "boolean") {
-    try {
-      const result = await applyLivekitPermission(room, identity, body.canPublishAv);
-      livekit = { applied: result.applied };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "LiveKit updateParticipant failed.";
-      return NextResponse.json(
-        {
-          ok: true,
-          room: next,
-          livekitError: message,
-          demo: !livekitEnv().configured,
-        },
-        { status: 200 },
-      );
+  try {
+    const next = await grantInRoom(room, {
+      identity,
+      canWriteBoard: typeof body.canWriteBoard === "boolean" ? body.canWriteBoard : undefined,
+      canPublishAv: typeof body.canPublishAv === "boolean" ? body.canPublishAv : undefined,
+    });
+    let livekit: { applied: boolean; error?: string } = { applied: false };
+    if (typeof body.canPublishAv === "boolean") {
+      try {
+        livekit = await applyLivekitPermission(room, identity, body.canPublishAv);
+      } catch (error) {
+        // Participant may not be connected yet: the stored grant applies on their next token.
+        livekit = { applied: false, error: error instanceof Error ? error.message : "updateParticipant failed." };
+      }
     }
+    return NextResponse.json({
+      ok: true,
+      writers: next.writers,
+      avAllowed: next.avAllowed,
+      version: next.version,
+      livekit,
+      demo: !livekitEnv().configured,
+    });
+  } catch (error) {
+    console.error("[mathmentor] classroom grant failed", error instanceof Error ? error.message : error);
+    return NextResponse.json({ ok: false, error: "Could not save the permission.", errorAr: "تعذّر حفظ الصلاحية." }, { status: 503 });
   }
-
-  return NextResponse.json({
-    ok: true,
-    room: next,
-    livekit,
-    demo: !livekitEnv().configured,
-  });
 }

@@ -1,31 +1,22 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { INSTRUCTOR_EN } from "@/lib/pedagogy/lebanese";
-import type {
-  ClassroomChatLine,
-  ClassroomDataMessage,
-  ClassroomTokenPayload,
-  WhiteboardBoardState,
-  WhiteboardEquation,
-  WhiteboardPlot,
-  WhiteboardStroke,
-} from "@/lib/livekit/protocol";
-import { boardFromState, mergeBoardSnapshot, type BoardSnapshot } from "@/lib/livekit/boardMerge";
+import Link from "next/link";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { ClassroomChatLine, ClassroomDataMessage } from "@/lib/livekit/protocol";
 import { ApiErrorBanner } from "@/components/ui/Skeleton";
 import { mediaPermissionCopy } from "@/lib/media/permissionCopy";
 import { ClassroomStage, type ClassroomStageState, type RosterEntry } from "./ClassroomStage";
 import { ClassroomTokenSkeleton } from "./ClassroomTokenSkeleton";
 import { DemoLocalAvPreview } from "./DemoLocalAvPreview";
 import { MediaPermissionBanner } from "./MediaPermissionBanner";
+import { useClassroomBoard } from "./useClassroomBoard";
+import { useClassroomToken, type ClassroomUser } from "./useClassroomToken";
 
 const LiveKitClassroom = dynamic(
   () => import("./LiveConnectedRoom").then((mod) => mod.LiveKitClassroom),
   { ssr: false },
 );
-
-type ClassroomUser = { id: string; name: string; role: string };
 
 type Props = {
   roomId: string;
@@ -33,237 +24,49 @@ type Props = {
   staff: boolean;
 };
 
-type TokenApiResponse = ClassroomTokenPayload & {
-  error?: string;
-  errorAr?: string;
-};
+type ActionError = { error?: string; errorAr?: string };
 
-type BoardApiResponse = {
-  state?: WhiteboardBoardState & { updatedAt?: string };
-  error?: string;
-  errorAr?: string;
-};
+function toggleList(list: string[], identity: string, allowed: boolean) {
+  const next = list.filter((id) => id !== identity);
+  if (allowed) next.push(identity);
+  return next;
+}
 
-function emptySession(roomId: string, user: ClassroomUser, staff: boolean): ClassroomTokenPayload {
-  return {
-    ok: false,
-    demo: true,
-    token: null,
-    serverUrl: null,
-    roomName: roomId,
-    identity: user.id,
-    name: user.name,
-    isTeacher: staff,
-    canWriteBoard: staff,
-    canPublishAv: staff,
-    grants: {
-      room: roomId,
-      roomJoin: true,
-      roomCreate: staff,
-      roomAdmin: staff,
-      canPublish: staff,
-      canSubscribe: true,
-      canPublishData: true,
-      canUpdateOwnMetadata: true,
-    },
-  };
+function AccessDenied({ error, errorAr }: ActionError) {
+  return (
+    <main className="shell live-classroom-page mm-mobile-stack" dir="rtl">
+      <ApiErrorBanner error={error} errorAr={errorAr} className="live-token-error" />
+      <p>
+        <Link className="btn dark" href="/live">
+          العودة إلى الحجز / Back to booking
+        </Link>
+      </p>
+    </main>
+  );
 }
 
 export function LiveClassroomComponent({ roomId, user, staff }: Props) {
-  const [session, setSession] = useState<ClassroomTokenPayload>(() => emptySession(roomId, user, staff));
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<{ error?: string; errorAr?: string }>({});
-  const [strokes, setStrokes] = useState<WhiteboardStroke[]>([]);
-  const [equations, setEquations] = useState<WhiteboardEquation[]>([]);
-  const [plots, setPlots] = useState<WhiteboardPlot[]>([]);
-  const [writers, setWriters] = useState<string[]>(staff ? [user.id] : []);
-  const [avAllowed, setAvAllowed] = useState<string[]>(staff ? [user.id] : []);
+  const { session, loading, allowed, live, reload } = useClassroomToken(roomId, user, staff);
+  const sendRef = useRef<(message: ClassroomDataMessage) => void>(() => undefined);
+  const send = useCallback((message: ClassroomDataMessage) => sendRef.current(message), []);
+  const boardApi = useClassroomBoard({ roomId, live, ready: !loading && allowed, send });
+  const { board, patchBoard, applyBoardMessage } = boardApi;
+
   const [hands, setHands] = useState<Record<string, string>>({});
   const [handRaised, setHandRaised] = useState(false);
   const [chatLines, setChatLines] = useState<ClassroomChatLine[]>([]);
   const [chatText, setChatText] = useState("");
-  const [ended, setEnded] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [cameraOff, setCameraOff] = useState(false);
-  const [syncHint, setSyncHint] = useState<"livekit" | "poll" | "local">("local");
-  const sendRef = useRef<(message: ClassroomDataMessage) => void>(() => undefined);
-  const boardUpdatedAtRef = useRef<string | undefined>(undefined);
-  const strokesRef = useRef(strokes);
-  const equationsRef = useRef(equations);
-  const plotsRef = useRef(plots);
-  const writersRef = useRef(writers);
-  const avAllowedRef = useRef(avAllowed);
-  const endedRef = useRef(ended);
-
-  strokesRef.current = strokes;
-  equationsRef.current = equations;
-  plotsRef.current = plots;
-  writersRef.current = writers;
-  avAllowedRef.current = avAllowed;
-  endedRef.current = ended;
-
-  const applySnapshot = useCallback((snapshot: BoardSnapshot) => {
-    setStrokes(snapshot.strokes);
-    setEquations(snapshot.equations);
-    setPlots(snapshot.plots);
-    setWriters(snapshot.writers);
-    setAvAllowed(snapshot.avAllowed);
-    setEnded(snapshot.ended);
-    if (snapshot.updatedAt) boardUpdatedAtRef.current = snapshot.updatedAt;
-  }, []);
-
-  const persistBoard = useCallback(
-    (nextStrokes: WhiteboardStroke[], nextEquations: WhiteboardEquation[], nextPlots: WhiteboardPlot[]) => {
-      void fetch("/api/livekit/whiteboard", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({
-          room: roomId,
-          strokes: nextStrokes,
-          equations: nextEquations,
-          plots: nextPlots,
-        }),
-      }).then(async (response) => {
-        if (!response.ok) return;
-        const payload = (await response.json()) as BoardApiResponse;
-        if (payload.state?.updatedAt) boardUpdatedAtRef.current = payload.state.updatedAt;
-      });
-    },
-    [roomId],
-  );
-
-  const pullBoard = useCallback(async () => {
-    const boardRes = await fetch(`/api/livekit/whiteboard?room=${encodeURIComponent(roomId)}`, {
-      credentials: "same-origin",
-    });
-    if (!boardRes.ok) return;
-    const board = (await boardRes.json()) as BoardApiResponse;
-    if (!board.state) return;
-    const remote = boardFromState(board.state, board.state.updatedAt);
-    const local: BoardSnapshot = {
-      strokes: strokesRef.current,
-      equations: equationsRef.current,
-      plots: plotsRef.current,
-      writers: writersRef.current,
-      avAllowed: avAllowedRef.current,
-      ended: endedRef.current,
-      updatedAt: boardUpdatedAtRef.current,
-    };
-    if (remote.updatedAt && remote.updatedAt === local.updatedAt) return;
-    applySnapshot(mergeBoardSnapshot(local, remote));
-  }, [applySnapshot, roomId]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      setLoading(true);
-      setFetchError({});
-      try {
-        const tokenRes = await fetch("/api/livekit/token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "same-origin",
-          body: JSON.stringify({
-            identity: user.name,
-            isTeacher: staff,
-            room: roomId,
-            sessionId: roomId,
-          }),
-        });
-        const payload = (await tokenRes.json()) as TokenApiResponse;
-        if (!cancelled && payload.roomName) {
-          setSession({
-            ...emptySession(roomId, user, staff),
-            ...payload,
-            grants: payload.grants ?? emptySession(roomId, user, staff).grants,
-          });
-          if (payload.error || payload.errorAr) {
-            setFetchError({ error: payload.error, errorAr: payload.errorAr });
-          }
-        } else if (!cancelled) {
-          setSession({
-            ...emptySession(roomId, user, staff),
-            error: payload.error,
-            errorAr: payload.errorAr,
-          });
-          setFetchError({
-            error: payload.error ?? "Could not issue a LiveKit token.",
-            errorAr: payload.errorAr ?? "تعذّر إصدار رمز LiveKit.",
-          });
-        }
-        const boardRes = await fetch(`/api/livekit/whiteboard?room=${encodeURIComponent(roomId)}`, {
-          credentials: "same-origin",
-        });
-        if (boardRes.ok) {
-          const board = (await boardRes.json()) as BoardApiResponse;
-          if (!cancelled && board.state) {
-            applySnapshot(boardFromState(board.state, board.state.updatedAt));
-          }
-        }
-      } catch {
-        if (!cancelled) {
-          const error = "Could not reach the LiveKit token service.";
-          const errorAr = "تعذّر الوصول إلى خدمة الرموز.";
-          setSession({
-            ...emptySession(roomId, user, staff),
-            error,
-            errorAr,
-          });
-          setFetchError({ error, errorAr });
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [applySnapshot, roomId, staff, user]);
-
-  const live = Boolean(session.ok && session.token && session.serverUrl && !session.demo);
-
-  useEffect(() => {
-    if (loading) return;
-    setSyncHint(live ? "livekit" : "poll");
-    const intervalMs = live ? 8000 : 1500;
-    const timer = window.setInterval(() => {
-      void pullBoard();
-    }, intervalMs);
-    return () => window.clearInterval(timer);
-  }, [live, loading, pullBoard]);
+  const [cameraOff, setCameraOff] = useState(true);
+  const [actionError, setActionError] = useState<ActionError>({});
 
   const applyRemote = useCallback(
     (message: ClassroomDataMessage) => {
-      if (message.kind === "whiteboard.stroke") {
-        setStrokes((current) =>
-          current.some((item) => item.id === message.stroke.id) ? current : [...current, message.stroke],
-        );
-      } else if (message.kind === "whiteboard.equation") {
-        setEquations((current) =>
-          current.some((item) => item.id === message.equation.id) ? current : [...current, message.equation],
-        );
-      } else if (message.kind === "whiteboard.plot") {
-        setPlots((current) =>
-          current.some((item) => item.id === message.plot.id) ? current : [...current, message.plot],
-        );
-      } else if (message.kind === "whiteboard.clear") {
-        setStrokes([]);
-        setEquations([]);
-        setPlots([]);
-      } else if (message.kind === "whiteboard.grant") {
-        setWriters((current) => {
-          const next = current.filter((id) => id !== message.identity);
-          if (message.allowed) next.push(message.identity);
-          return next;
-        });
+      if (applyBoardMessage(message)) return;
+      if (message.kind === "whiteboard.grant") {
+        patchBoard((current) => ({ writers: toggleList(current.writers, message.identity, message.allowed) }));
       } else if (message.kind === "av.grant") {
-        setAvAllowed((current) => {
-          const next = current.filter((id) => id !== message.identity);
-          if (message.allowed) next.push(message.identity);
-          return next;
-        });
+        patchBoard((current) => ({ avAllowed: toggleList(current.avAllowed, message.identity, message.allowed) }));
       } else if (message.kind === "hand") {
         setHands((current) => {
           const next = { ...current };
@@ -275,103 +78,81 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
       } else if (message.kind === "chat") {
         setChatLines((current) => [...current, message.line]);
       } else if (message.kind === "class.end") {
-        setEnded(true);
+        patchBoard({ ended: true });
       }
     },
-    [user.id],
+    [applyBoardMessage, patchBoard, user.id],
   );
 
   const broadcast = useCallback(
     (message: ClassroomDataMessage) => {
-      sendRef.current(message);
+      send(message);
       applyRemote(message);
     },
-    [applyRemote],
+    [applyRemote, send],
   );
-
-  const canWrite = session.isTeacher || writers.includes(user.id) || session.canWriteBoard;
-
-  const onStroke = useCallback(
-    (stroke: WhiteboardStroke) => {
-      setStrokes((current) => {
-        const next = [...current, stroke];
-        persistBoard(next, equationsRef.current, plotsRef.current);
-        return next;
-      });
-      sendRef.current({ kind: "whiteboard.stroke", stroke });
-    },
-    [persistBoard],
-  );
-
-  const onEquation = useCallback(
-    (equation: WhiteboardEquation) => {
-      setEquations((current) => {
-        const next = [...current, equation];
-        persistBoard(strokesRef.current, next, plotsRef.current);
-        return next;
-      });
-      sendRef.current({ kind: "whiteboard.equation", equation });
-    },
-    [persistBoard],
-  );
-
-  const onPlot = useCallback(
-    (plot: WhiteboardPlot) => {
-      setPlots((current) => {
-        const next = [...current, plot];
-        persistBoard(strokesRef.current, equationsRef.current, next);
-        return next;
-      });
-      sendRef.current({ kind: "whiteboard.plot", plot });
-    },
-    [persistBoard],
-  );
-
-  const onClear = useCallback(() => {
-    setStrokes([]);
-    setEquations([]);
-    setPlots([]);
-    persistBoard([], [], []);
-    sendRef.current({ kind: "whiteboard.clear" });
-  }, [persistBoard]);
 
   const grant = useCallback(
     async (identity: string, patch: { canWriteBoard?: boolean; canPublishAv?: boolean }) => {
-      await fetch("/api/livekit/permissions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ room: roomId, identity, ...patch }),
-      });
-      if (typeof patch.canWriteBoard === "boolean") {
-        broadcast({ kind: "whiteboard.grant", identity, allowed: patch.canWriteBoard });
-      }
-      if (typeof patch.canPublishAv === "boolean") {
-        broadcast({ kind: "av.grant", identity, allowed: patch.canPublishAv });
+      try {
+        const response = await fetch("/api/livekit/permissions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ room: roomId, identity, ...patch }),
+        });
+        if (!response.ok) {
+          const payload = (await response.json().catch(() => ({}))) as ActionError;
+          setActionError({ error: payload.error ?? "Permission not saved.", errorAr: payload.errorAr ?? "لم تُحفظ الصلاحية." });
+          return;
+        }
+        setActionError({});
+        if (typeof patch.canWriteBoard === "boolean") broadcast({ kind: "whiteboard.grant", identity, allowed: patch.canWriteBoard });
+        if (typeof patch.canPublishAv === "boolean") broadcast({ kind: "av.grant", identity, allowed: patch.canPublishAv });
+      } catch {
+        setActionError({ error: "Permission not saved.", errorAr: "تعذّر حفظ الصلاحية — تحقّق من الاتصال." });
       }
     },
     [broadcast, roomId],
   );
 
-  const onEndClass = useCallback(async () => {
-    await fetch("/api/livekit/end", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({ room: roomId }),
-    });
-    broadcast({ kind: "class.end" });
+  const endClass = useCallback(async () => {
+    try {
+      const response = await fetch("/api/livekit/end", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ room: roomId }),
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => ({}))) as ActionError;
+        setActionError({ error: payload.error ?? "Could not end the class.", errorAr: payload.errorAr ?? "تعذّر إنهاء الحصة." });
+        return;
+      }
+      broadcast({ kind: "class.end" });
+    } catch {
+      setActionError({ error: "Could not end the class.", errorAr: "تعذّر إنهاء الحصة — تحقّق من الاتصال." });
+    }
   }, [broadcast, roomId]);
 
+  /** Teacher «ابدأ من جديد»: a fresh token request reopens the room server-side. */
+  const restartClass = useCallback(async () => {
+    await reload();
+    await boardApi.pullBoard();
+  }, [boardApi, reload]);
+
+  const canWrite = session.isTeacher || board.writers.includes(user.id);
+
   const stage: ClassroomStageState = {
-    strokes,
-    equations,
-    plots,
-    onStroke,
-    onEquation,
-    onPlot,
-    onClear,
+    strokes: board.strokes,
+    equations: board.equations,
+    plots: board.plots,
+    onStroke: boardApi.addStroke,
+    onEquation: boardApi.addEquation,
+    onPlot: boardApi.addPlot,
+    onClear: boardApi.clearBoard,
     canWrite,
+    canClear: session.isTeacher,
     hands,
     handRaised,
     onRaiseHand: () => {
@@ -385,66 +166,50 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
     onSendChat: () => {
       const text = chatText.trim();
       if (!text) return;
-      const line: ClassroomChatLine = {
-        id: `ch-${Date.now().toString(36)}`,
-        identity: user.id,
-        name: user.name,
-        text,
-        at: new Date().toISOString(),
-      };
       setChatText("");
-      broadcast({ kind: "chat", line });
+      broadcast({ kind: "chat", line: { id: `ch-${Date.now().toString(36)}`, identity: user.id, name: user.name, text, at: new Date().toISOString() } });
     },
-    writers,
-    avAllowed,
-    onGrantWrite: (identity, allowed) => void grant(identity, { canWriteBoard: allowed }),
-    onGrantAv: (identity, allowed) => void grant(identity, { canPublishAv: allowed }),
-    onEndClass: () => void onEndClass(),
-    ended,
+    writers: board.writers,
+    avAllowed: board.avAllowed,
+    onGrantWrite: (identity, allowedWrite) => void grant(identity, { canWriteBoard: allowedWrite }),
+    onGrantAv: (identity, allowedAv) => void grant(identity, { canPublishAv: allowedAv }),
+    onEndClass: () => void endClass(),
+    onRestartClass: () => void restartClass(),
+    ended: board.ended,
     muted,
     cameraOff,
     onToggleMute: () => setMuted((value) => !value),
     onToggleCamera: () => setCameraOff((value) => !value),
   };
 
-  const demoRoster: RosterEntry[] = useMemo(() => {
-    if (staff) {
-      return [{ identity: user.id, name: user.name, isLocal: true }];
-    }
-    return [
-      { identity: "teacher-host", name: INSTRUCTOR_EN },
-      { identity: user.id, name: user.name, isLocal: true },
-    ];
-  }, [staff, user.id, user.name]);
+  const demoRoster: RosterEntry[] = useMemo(() => [{ identity: user.id, name: user.name, isLocal: true }], [user.id, user.name]);
 
-  if (loading) {
-    return <ClassroomTokenSkeleton />;
-  }
+  if (loading || (allowed && !boardApi.loaded)) return <ClassroomTokenSkeleton />;
+  if (!allowed) return <AccessDenied error={session.error} errorAr={session.errorAr} />;
 
   const demoAvAllowed = Boolean(session.isTeacher || session.canPublishAv);
+  const errors = actionError.error ? actionError : boardApi.boardError;
 
   return (
     <main className="live-classroom-page mm-mobile-stack">
-      <ApiErrorBanner error={fetchError.error} errorAr={fetchError.errorAr} className="live-token-error" />
-      <p className="muted live-sync-hint" role="status">
-        {syncHint === "livekit"
-          ? "مزامنة السبورة عبر LiveKit data · Whiteboard sync: LiveKit data channel"
-          : "مزامنة السبورة عبر HTTP (وضع تجريبي بدون LiveKit) · Whiteboard sync: HTTP poll"}
-        {" · "}
-        <a href="/docs/LIVE_SYNC.md">docs/LIVE_SYNC.md</a>
+      <ApiErrorBanner error={errors.error} errorAr={errors.errorAr} className="live-token-error" />
+      <p className="muted live-sync-hint" role="status" dir="rtl">
+        {live
+          ? "مزامنة السبورة عبر قناة LiveKit (بيانات خفيفة) · Whiteboard: LiveKit data"
+          : "وضع تجريبي: مزامنة السبورة كل ٤ ثوانٍ عبر HTTP · Demo mode: HTTP sync every 4 s"}
       </p>
       {!live ? (
         <MediaPermissionBanner
           tone="info"
           error={
             demoAvAllowed
-              ? "Demo / shell mode: no LiveKit Cloud connection. Local camera/mic preview only (not broadcast)."
-              : "Demo / shell mode: camera & microphone are not connected to LiveKit. Ask the teacher or configure LIVEKIT_* env."
+              ? "Demo mode: no LiveKit connection. Local camera/mic preview only (not broadcast)."
+              : "Demo mode: camera & microphone are not connected yet."
           }
           errorAr={
             demoAvAllowed
-              ? "وضع تجريبي: لا اتصال LiveKit Cloud. معاينة محلية للكاميرا/الميكروفون فقط (بدون بث)."
-              : "وضع تجريبي: الكاميرا والميكروفون غير متصلين بـ LiveKit. اطلب من الأستاذ أو اضبط مفاتيح LIVEKIT_*."
+              ? "وضع تجريبي: لا اتصال فيديو بعد. معاينة محلية للكاميرا/الميكروفون فقط (بدون بث)."
+              : "وضع تجريبي: الصوت والصورة غير متصلين بعد. السبورة تعمل ويراها الجميع."
           }
           hint={mediaPermissionCopy("both").hint}
           hintAr={mediaPermissionCopy("both").hintAr}
@@ -454,10 +219,12 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
         <LiveKitClassroom
           session={session}
           userId={user.id}
+          avAllowed={board.avAllowed}
           onRemote={applyRemote}
-          onSend={(send) => {
-            sendRef.current = send;
+          onSend={(nextSend) => {
+            sendRef.current = nextSend;
           }}
+          onReconnected={() => void boardApi.pullBoard()}
           stage={stage}
         />
       ) : (
@@ -466,11 +233,8 @@ export function LiveClassroomComponent({ roomId, user, staff }: Props) {
           userId={user.id}
           stage={stage}
           roster={demoRoster}
-          video={
-            demoAvAllowed ? (
-              <DemoLocalAvPreview enabled muted={muted} cameraOff={cameraOff} />
-            ) : undefined
-          }
+          rosterNotice="وضع تجريبي: لا تظهر قائمة الحضور الحقيقية ولا تصل الدردشة للآخرين قبل ربط LiveKit. السبورة مشتركة."
+          video={demoAvAllowed ? <DemoLocalAvPreview enabled muted={muted} cameraOff={cameraOff} /> : undefined}
         />
       )}
     </main>

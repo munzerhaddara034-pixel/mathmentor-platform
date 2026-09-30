@@ -1,20 +1,24 @@
+import { redirect } from "next/navigation";
+import { AuthClientGuard } from "@/components/auth/AuthClientGuard";
 import { LiveClassroomComponent } from "@/components/live/LiveClassroomComponent";
-import { getLiveSession } from "@/lib/auth/session";
-import { isStaffRole } from "@/lib/auth/paths";
-import { sanitizeRoomName } from "@/lib/livekit/rooms";
+import { loginUrl } from "@/lib/auth/paths";
+import { classroomPath, resolveClassroomActor, sanitizeRoomName } from "@/lib/livekit/rooms";
 
 export const dynamic = "force-dynamic";
 
 export default async function LiveClassroomPage({ params }: { params: Promise<{ roomId: string }> }) {
   const { roomId } = await params;
-  const live = await getLiveSession();
-  if (!live.ok) return null;
   const room = sanitizeRoomName(decodeURIComponent(roomId));
+  const actor = await resolveClassroomActor();
+  if (!actor) redirect(loginUrl(classroomPath(room)));
   return (
-    <LiveClassroomComponent
-      roomId={room}
-      user={{ id: live.user.id, name: live.user.name, role: live.user.role }}
-      staff={isStaffRole(live.user.role)}
-    />
+    <>
+      {actor.kind === "user" ? <AuthClientGuard mode="auth" /> : null}
+      <LiveClassroomComponent
+        roomId={room}
+        user={{ id: actor.identity, name: actor.name, role: actor.kind === "user" ? actor.user.role : "guest" }}
+        staff={actor.staff}
+      />
+    </>
   );
 }

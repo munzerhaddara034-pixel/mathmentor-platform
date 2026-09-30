@@ -11,24 +11,33 @@ import {
   useConnectionState,
   useDataChannel,
   useLocalParticipant,
+  useLocalParticipantPermissions,
   useParticipants,
   useRoomContext,
   useTracks,
 } from "@livekit/components-react";
-import { ConnectionState, MediaDeviceFailure, Track } from "livekit-client";
+import { ConnectionState, MediaDeviceFailure, RoomEvent, Track } from "livekit-client";
 import "@livekit/components-styles";
 import type { ClassroomDataMessage, ClassroomTokenPayload } from "@/lib/livekit/protocol";
 import { LIVEKIT_DATA_TOPIC } from "@/lib/livekit/protocol";
+import { LOW_DATA_ROOM_OPTIONS, LOW_DATA_SCREEN_CAPTURE, LOW_DATA_SCREEN_PUBLISH } from "@/lib/livekit/lowData";
 import { enableLocalParticipantAv } from "@/lib/media/enableLocalAv";
 import { mediaPermissionCopy, permissionErrorFromUnknown } from "@/lib/media/permissionCopy";
+import { AudioOnlyToggle } from "./AudioOnlyToggle";
 import { ClassroomStage, type ClassroomStageState } from "./ClassroomStage";
 import { MediaPermissionBanner } from "./MediaPermissionBanner";
+import { NetworkQualityBadge } from "./NetworkQualityBadge";
+import { useAudioOnly } from "./useAudioOnly";
 
 type Props = {
   session: ClassroomTokenPayload;
   userId: string;
+  /** Live AV grants from the room store (teacher toggles). */
+  avAllowed: string[];
   onRemote: (message: ClassroomDataMessage) => void;
   onSend: (send: (message: ClassroomDataMessage) => void) => void;
+  /** Called after (re)connecting so the board can catch up with one `since` request. */
+  onReconnected: () => void;
   stage: ClassroomStageState;
 };
 
@@ -44,6 +53,7 @@ const encoder = new TextEncoder();
 
 const ENABLE_LABEL = "تفعيل الكاميرا والميكروفون";
 const OVERLAY_CTA = "اضغط لتفعيل الكاميرا والصوت";
+const OVERLAY_CTA_AUDIO = "اضغط لتفعيل الصوت";
 const CONNECTING_LABEL = "جاري الاتصال…";
 
 function kindFromMediaDevice(kind?: MediaDeviceKind): "microphone" | "camera" | "both" {
@@ -83,8 +93,10 @@ function partialFailureBanner(
 function ConnectedShell({
   session,
   userId,
+  avAllowed,
   onRemote,
   onSend,
+  onReconnected,
   stage,
   mediaBanner,
   onEnableAv,
@@ -115,14 +127,32 @@ function ConnectedShell({
   });
 
   const [enabling, setEnabling] = useState(false);
+  const { audioOnly, setAudioOnly } = useAudioOnly(room);
+  const enableLabel = audioOnly ? "تفعيل الميكروفون (صوت فقط)" : ENABLE_LABEL;
+  const permissions = useLocalParticipantPermissions();
 
   useEffect(() => {
     onSend((message) => {
-      void send(encoder.encode(JSON.stringify(message)), { reliable: true });
+      void send(encoder.encode(JSON.stringify(message)), { reliable: true }).catch(() => undefined);
     });
   }, [onSend, send]);
 
-  const canPublish = session.isTeacher || session.canPublishAv;
+  // Board catch-up only on (re)connect — no interval polling while LiveKit is connected.
+  useEffect(() => {
+    const onConnected = () => onReconnected();
+    room.on(RoomEvent.Reconnected, onConnected);
+    room.on(RoomEvent.Connected, onConnected);
+    return () => {
+      room.off(RoomEvent.Reconnected, onConnected);
+      room.off(RoomEvent.Connected, onConnected);
+    };
+  }, [onReconnected, room]);
+
+  // Publish rights follow the server live: LiveKit permission updates (teacher grant/revoke)
+  // win; before the first update we fall back to the token grant + room-store list.
+  const canPublish =
+    session.isTeacher ||
+    (permissions ? permissions.canPublish : session.canPublishAv || avAllowed.includes(userId));
   const roomConnected = connectionState === ConnectionState.Connected;
   const avLive = isMicrophoneEnabled || isCameraEnabled;
   const needsEnableNudge = canPublish && !avLive && !mediaBanner && roomConnected && !enabling;
@@ -152,8 +182,8 @@ function ConnectedShell({
     setEnabling(true);
     void (async () => {
       try {
-        const result = await enableLocalParticipantAv(localParticipant);
-        if (result.micOk && result.camOk) {
+        const result = await enableLocalParticipantAv(localParticipant, { camera: !audioOnly });
+        if (result.micOk && (result.camOk || audioOnly)) {
           onEnableFailure(null);
           return;
         }
@@ -168,7 +198,7 @@ function ConnectedShell({
         setEnabling(false);
       }
     })();
-  }, [canPublish, localParticipant, onEnableAv, onEnableFailure, roomConnected]);
+  }, [audioOnly, canPublish, localParticipant, onEnableAv, onEnableFailure, roomConnected]);
 
   const showAvOverlay = canPublish && !avLive && roomConnected;
   const showConnectingOverlay = canPublish && !roomConnected;
@@ -189,13 +219,13 @@ function ConnectedShell({
           className="live-av-overlay-cta"
           onClick={enableAv}
           disabled={enabling}
-          aria-label={OVERLAY_CTA}
+          aria-label={audioOnly ? OVERLAY_CTA_AUDIO : OVERLAY_CTA}
         >
           <span className="live-av-overlay-cta-label" dir="rtl" lang="ar">
-            {enabling ? CONNECTING_LABEL : OVERLAY_CTA}
+            {enabling ? CONNECTING_LABEL : audioOnly ? OVERLAY_CTA_AUDIO : OVERLAY_CTA}
           </span>
           <span className="live-av-overlay-cta-sub" dir="ltr">
-            Enable camera &amp; mic
+            {audioOnly ? "Enable mic (audio only)" : "Enable camera & mic"}
           </span>
         </button>
       ) : null}
@@ -221,7 +251,7 @@ function ConnectedShell({
           errorAr={mediaBanner.errorAr}
           hint={mediaBanner.hint}
           hintAr={mediaBanner.hintAr}
-          retryLabel={ENABLE_LABEL}
+          retryLabel={enableLabel}
           onRetry={enableAv}
         />
       ) : null}
@@ -232,7 +262,7 @@ function ConnectedShell({
           errorAr="الكاميرا والميكروفون مطفآن. اضغط على الفيديو أو الزر أدناه (قد يطلب المتصفح الإذن)."
           hint={mediaPermissionCopy("both").hint}
           hintAr={mediaPermissionCopy("both").hintAr}
-          retryLabel={ENABLE_LABEL}
+          retryLabel={enableLabel}
           onRetry={enableAv}
         />
       ) : null}
@@ -242,18 +272,33 @@ function ConnectedShell({
         stage={stage}
         roster={roster}
         video={videoPane}
+        mediaExtras={
+          <div className="live-media-extras">
+            <NetworkQualityBadge participant={localParticipant} />
+            <AudioOnlyToggle audioOnly={audioOnly} onChange={setAudioOnly} />
+          </div>
+        }
         avControls={
           canPublish ? (
             <div className="live-av-toggles">
               <TrackToggle source={Track.Source.Microphone}>صوت / Mic</TrackToggle>
-              <TrackToggle source={Track.Source.Camera}>كاميرا / Camera</TrackToggle>
+              {audioOnly ? null : <TrackToggle source={Track.Source.Camera}>كاميرا / Camera</TrackToggle>}
+              {session.isTeacher ? (
+                <TrackToggle
+                  source={Track.Source.ScreenShare}
+                  captureOptions={LOW_DATA_SCREEN_CAPTURE}
+                  publishOptions={LOW_DATA_SCREEN_PUBLISH}
+                >
+                  مشاركة الشاشة / Share screen
+                </TrackToggle>
+              ) : null}
               <button
                 className="btn dark live-av-enable-btn"
                 type="button"
                 onClick={enableAv}
                 disabled={enabling || !roomConnected}
               >
-                {!roomConnected ? CONNECTING_LABEL : enabling ? "…" : ENABLE_LABEL}
+                {!roomConnected ? CONNECTING_LABEL : enabling ? "…" : enableLabel}
               </button>
             </div>
           ) : (
@@ -304,6 +349,7 @@ export function LiveKitClassroom(props: Props) {
       serverUrl={url}
       token={token}
       connect
+      options={LOW_DATA_ROOM_OPTIONS}
       audio={false}
       video={false}
       onMediaDeviceFailure={applyFailure}
