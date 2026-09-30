@@ -1,5 +1,9 @@
 "use client";
 
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { billingMessages } from "@/lib/i18n/ns/billing";
+
 export type WhishCheckoutTransfer = {
   phone: string;
   nameAr: string;
@@ -34,51 +38,39 @@ export function WhishCheckout({
   display,
   displayAr,
   transfer,
-  title = "Pay via Whish Money",
-  titleAr = "الدفع عبر Whish Money",
+  title,
+  titleAr,
   showTransferredButton = false,
   transferredBusy = false,
   transferredDisabled = false,
   onTransferred,
-  transferredLabel = "لقد حوّلت / I've transferred",
+  transferredLabel,
   claimed = false,
   className = "",
 }: WhishCheckoutProps) {
-  const amountEn = display || `$${amount} ${currency}`;
-  const amountAr = displayAr || `$${amount} ${currency}`;
+  const { locale } = useI18n();
+  const t = billingMessages[locale].checkout;
+  const isAr = locale === "ar";
+  const amountText = (isAr ? displayAr : display) || `$${amount} ${currency}`;
+  const heading = (isAr ? titleAr : title) || fmt(t.payVia, { method: "Whish Money" });
+  const name = isAr ? transfer.nameAr : transfer.nameEn;
 
   return (
     <div className={`card whish-checkout ${className}`.trim()} style={{ marginTop: 12 }}>
-      <p className="eyebrow">Whish Money · منذر أحمد حداره</p>
-      <h3 style={{ marginTop: 4 }}>{titleAr}</h3>
-      <p className="muted">{title}</p>
-      <p dir="rtl" style={{ fontSize: "1.1rem", marginTop: 8 }}>
-        <strong>المبلغ: {amountAr}</strong>
+      <p className="eyebrow">Whish Money · {name}</p>
+      <h3 style={{ marginTop: 4 }}>{heading}</h3>
+      <p style={{ fontSize: "1.1rem", marginTop: 8 }}>
+        <strong>{fmt(t.amount, { amount: amountText })}</strong>
       </p>
       <p>
-        <strong>Amount: {amountEn}</strong>
+        <strong>{t.transferTo}</strong> <span dir="ltr">{transfer.phone}</span> — <strong>{name}</strong>
       </p>
-      <p dir="rtl">
-        <strong>حوّل عبر Whish إلى:</strong> {transfer.phone} — <strong>{transfer.nameAr}</strong>
-      </p>
-      <p>
-        <strong>Transfer via Whish to:</strong> {transfer.phone} — {transfer.nameEn}
-      </p>
-      <ul className="muted" dir="rtl" style={{ paddingInlineStart: 18 }}>
-        {transfer.linesAr.map((line) => (
-          <li key={`ar-${line}`}>{line}</li>
-        ))}
-      </ul>
       <ul className="muted" style={{ paddingInlineStart: 18 }}>
-        {transfer.linesEn.map((line) => (
-          <li key={`en-${line}`}>{line}</li>
+        {(isAr ? transfer.linesAr : transfer.linesEn).map((line) => (
+          <li key={line}>{line}</li>
         ))}
       </ul>
-      {claimed ? (
-        <p className="success" dir="rtl">
-          تم تسجيل التحويل — بانتظار تأكيد الأستاذ.
-        </p>
-      ) : null}
+      {claimed ? <p className="success">{t.claimed}</p> : null}
       {showTransferredButton && onTransferred ? (
         <button
           className="btn dark"
@@ -87,7 +79,7 @@ export function WhishCheckout({
           onClick={onTransferred}
           style={{ marginTop: 8 }}
         >
-          {transferredBusy ? "…" : transferredLabel}
+          {transferredBusy ? "…" : (transferredLabel ?? t.transferred)}
         </button>
       ) : null}
     </div>

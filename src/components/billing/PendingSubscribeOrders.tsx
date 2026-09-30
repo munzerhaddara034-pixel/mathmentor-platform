@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { billingMessages } from "@/lib/i18n/ns/billing";
+import { rich } from "@/lib/i18n/rich";
 
 type Order = {
   id: string;
@@ -18,6 +22,9 @@ type Order = {
 
 /** Teacher-facing pending Whish subscription orders (embed on /live). */
 export function PendingSubscribeOrders({ staff }: { staff: boolean }) {
+  const { locale } = useI18n();
+  const t = billingMessages[locale].pendingOrders;
+  const p = billingMessages[locale].plans;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -34,12 +41,12 @@ export function PendingSubscribeOrders({ staff }: { staff: boolean }) {
       const res = await fetch("/api/billing/orders?pending=1", { credentials: "include" });
       const json = (await res.json().catch(() => ({}))) as { orders?: Order[]; error?: string };
       if (!res.ok) {
-        setError(json.error || "Failed to load subscription orders.");
+        setError(json.error || t.loadFailed);
         return;
       }
       setOrders(json.orders || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load.");
+      setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
       setLoading(false);
     }
@@ -67,13 +74,13 @@ export function PendingSubscribeOrders({ staff }: { staff: boolean }) {
         messageAr?: string;
       };
       if (!res.ok || !json.ok) {
-        setError(json.error || "Confirm failed.");
+        setError(json.error || p.confirmFailed);
         return;
       }
-      setMessage(json.messageAr || json.message || "Confirmed.");
+      setMessage((locale === "ar" ? json.messageAr || json.message : json.message || json.messageAr) || p.confirmed);
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Confirm failed.");
+      setError(err instanceof Error ? err.message : p.confirmFailed);
     } finally {
       setBusy(false);
     }
@@ -83,31 +90,29 @@ export function PendingSubscribeOrders({ staff }: { staff: boolean }) {
 
   return (
     <div className="card" style={{ marginBottom: 16 }}>
-      <h3>اشتراكات Whish بانتظار التأكيد / Pending Whish subscriptions</h3>
-      <p className="muted">
-        Confirm after you see the Whish transfer. Activates plan + live credits. Full list also on{" "}
-        <a href="/subscribe">/subscribe</a>.
-      </p>
-      {loading ? <SkeletonBlock lines={2} label="Loading subscription orders" /> : null}
-      {busy ? <SkeletonBlock lines={1} label="Confirming" /> : null}
+      <h3>{t.title}</h3>
+      <p className="muted">{rich(t.lead, { link: <a href="/subscribe">/subscribe</a> })}</p>
+      {loading ? <SkeletonBlock lines={2} label={t.loading} /> : null}
+      {busy ? <SkeletonBlock lines={1} label={t.confirming} /> : null}
       <ApiErrorBanner error={error} />
       {message ? <p className="success">{message}</p> : null}
       {!loading && orders.length === 0 ? (
-        <p className="muted">No pending subscription orders.</p>
+        <p className="muted">{t.none}</p>
       ) : null}
       {orders.map((order) => (
         <div key={order.id} style={{ marginTop: 12, display: "grid", gap: 8 }}>
           <p>
-            <strong>{order.planNameAr}</strong> · {order.studentName} · ${order.amount} · {order.period}
+            <strong>{locale === "ar" ? order.planNameAr : order.planName}</strong> · {order.studentName} · $
+            {order.amount} · {order.period === "monthly" ? p.monthly : order.period === "term" ? p.term : order.period}
                 {order.paymentMethod ? ` · ${order.paymentMethod}` : ""}
                 {order.pricingRegion ? ` · ${order.pricingRegion}` : ""}
             {order.status === "transfer_claimed" || order.studentMarkedPaidAt
-              ? " · student marked transferred"
-              : " · awaiting transfer"}
+              ? p.studentMarked
+              : t.awaiting}
           </p>
-          <p className="muted">Order: {order.id}</p>
+          <p className="muted">{fmt(p.order, { id: order.id })}</p>
           <button className="btn dark" type="button" disabled={busy} onClick={() => void confirm(order.id)}>
-            تأكيد الدفع وتفعيل / Confirm &amp; activate
+            {p.confirm}
           </button>
         </div>
       ))}

@@ -2,6 +2,9 @@
 
 import type { PaymentMethod } from "@/lib/pricing/plans";
 import { paymentMethodLabel } from "@/lib/pricing/transfers";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { billingMessages } from "@/lib/i18n/ns/billing";
 
 export type ManualTransferCheckoutProps = {
   method: PaymentMethod;
@@ -25,7 +28,10 @@ export type ManualTransferCheckoutProps = {
   className?: string;
 };
 
-/** Manual transfer instructions for Whish / Western Union / OMT. */
+/**
+ * Manual transfer instructions for Whish / Western Union / OMT. Shows the locale's variant only:
+ * ar → Arabic fields, en/fr → English fields (instruction lines are authored in ar + en).
+ */
 export function ManualTransferCheckout({
   method,
   amount,
@@ -43,52 +49,42 @@ export function ManualTransferCheckout({
   transferredBusy = false,
   transferredDisabled = false,
   onTransferred,
-  transferredLabel = "لقد حوّلت / I've transferred",
+  transferredLabel,
   claimed = false,
   className = "",
 }: ManualTransferCheckoutProps) {
+  const { locale } = useI18n();
+  const t = billingMessages[locale].checkout;
+  const isAr = locale === "ar";
   const labels = paymentMethodLabel(method);
-  const amountEn = display || `$${amount} ${currency}`;
-  const amountAr = displayAr || `$${amount} ${currency}`;
-  const headingEn = title || `Pay via ${labels.en}`;
-  const headingAr = titleAr || `الدفع عبر ${labels.ar}`;
+  const amountText = (isAr ? displayAr : display) || `$${amount} ${currency}`;
+  const heading = (isAr ? titleAr : title) || fmt(t.payVia, { method: isAr ? labels.ar : labels.en });
+  const lines = isAr ? linesAr : linesEn;
 
   return (
     <div className={`card whish-checkout ${className}`.trim()} style={{ marginTop: 12 }}>
       <p className="eyebrow">
-        {labels.en} · منذر أحمد حداره
+        {labels.en} · {isAr ? beneficiaryAr : beneficiaryEn}
       </p>
-      <h3 style={{ marginTop: 4 }}>{headingAr}</h3>
-      <p className="muted">{headingEn}</p>
-      <p dir="rtl" style={{ fontSize: "1.1rem", marginTop: 8 }}>
-        <strong>المبلغ: {amountAr}</strong>
-      </p>
-      <p>
-        <strong>Amount: {amountEn}</strong>
-      </p>
-      <p dir="rtl">
-        <strong>المستفيد:</strong> {beneficiaryAr}
-        {phone ? <> — {phone}</> : null}
+      <h3 style={{ marginTop: 4 }}>{heading}</h3>
+      <p style={{ fontSize: "1.1rem", marginTop: 8 }}>
+        <strong>{fmt(t.amount, { amount: amountText })}</strong>
       </p>
       <p>
-        <strong>Beneficiary:</strong> {beneficiaryEn}
-        {phone ? <> — {phone}</> : null}
+        <strong>{t.beneficiary}</strong> {isAr ? beneficiaryAr : beneficiaryEn}
+        {phone ? (
+          <>
+            {" "}
+            — <span dir="ltr">{phone}</span>
+          </>
+        ) : null}
       </p>
-      <ul className="muted" dir="rtl" style={{ paddingInlineStart: 18 }}>
-        {linesAr.map((line) => (
-          <li key={`ar-${line}`}>{line}</li>
-        ))}
-      </ul>
       <ul className="muted" style={{ paddingInlineStart: 18 }}>
-        {linesEn.map((line) => (
-          <li key={`en-${line}`}>{line}</li>
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
         ))}
       </ul>
-      {claimed ? (
-        <p className="success" dir="rtl">
-          تم تسجيل التحويل — بانتظار تأكيد الأستاذ منذر حداره.
-        </p>
-      ) : null}
+      {claimed ? <p className="success">{t.claimed}</p> : null}
       {showTransferredButton && onTransferred ? (
         <button
           className="btn dark"
@@ -97,7 +93,7 @@ export function ManualTransferCheckout({
           onClick={onTransferred}
           style={{ marginTop: 8 }}
         >
-          {transferredBusy ? "…" : transferredLabel}
+          {transferredBusy ? "…" : (transferredLabel ?? t.transferred)}
         </button>
       ) : null}
     </div>

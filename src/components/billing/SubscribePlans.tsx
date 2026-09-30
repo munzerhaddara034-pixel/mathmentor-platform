@@ -5,6 +5,11 @@ import Link from "next/link";
 import { ManualTransferCheckout } from "@/components/billing/ManualTransferCheckout";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
 import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { billingMessages } from "@/lib/i18n/ns/billing";
+import { pickLang } from "@/lib/i18n/pick";
+import { rich } from "@/lib/i18n/rich";
 import {
   PRICING_REGIONS,
   formatPrivateHourBand,
@@ -53,6 +58,9 @@ type Props = {
 
 export function SubscribePlans({ contactPhone, contactNote }: Props) {
   const { curriculumId, curriculum, ready: curriculumReady } = useCurriculum();
+  const { locale } = useI18n();
+  const t = billingMessages[locale].plans;
+  const isAr = locale === "ar";
   const [region, setRegion] = useState<PricingRegion>("lebanon");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("whish");
   const [authenticated, setAuthenticated] = useState(false);
@@ -105,7 +113,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load.");
+      setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
       setLoading(false);
     }
@@ -153,7 +161,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         paymentMethod?: PaymentMethod;
       };
       if (!res.ok || !json.ok || !json.order || !json.instructions) {
-        setError(json.error || "Could not start payment.");
+        setError(json.error || t.startFailed);
         setErrorAr(json.errorAr);
         return;
       }
@@ -163,10 +171,10 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
       if (json.paymentMethod && isPaymentMethod(json.paymentMethod)) {
         setPaymentMethod(json.paymentMethod);
       }
-      setMessage(json.messageAr || json.message);
+      setMessage(pickLang(locale, json.message, json.messageAr) || undefined);
       await loadSessionAndOrders();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed.");
+      setError(err instanceof Error ? err.message : t.requestFailed);
     } finally {
       setBusy(false);
     }
@@ -192,15 +200,15 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         messageAr?: string;
       };
       if (!res.ok || !json.ok) {
-        setError(json.error || "Could not mark transfer.");
+        setError(json.error || t.markFailed);
         setErrorAr(json.errorAr);
         return;
       }
       if (json.order) setActiveOrder(json.order);
-      setMessage(json.messageAr || json.message);
+      setMessage(pickLang(locale, json.message, json.messageAr) || undefined);
       await loadSessionAndOrders();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Mark failed.");
+      setError(err instanceof Error ? err.message : t.markFailed);
     } finally {
       setBusy(false);
     }
@@ -226,15 +234,15 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         messageAr?: string;
       };
       if (!res.ok || !json.ok) {
-        setError(json.error || "Confirm failed.");
+        setError(json.error || t.confirmFailed);
         setErrorAr(json.errorAr);
         return;
       }
-      setMessage(json.messageAr || json.message);
+      setMessage(pickLang(locale, json.message, json.messageAr) || undefined);
       if (activeOrder?.id === orderId) setActiveOrder(json.order || null);
       await loadSessionAndOrders();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Confirm failed.");
+      setError(err instanceof Error ? err.message : t.confirmFailed);
     } finally {
       setBusy(false);
     }
@@ -248,22 +256,22 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
   return (
     <div className="mm-mobile-stack">
       <div className="card" style={{ marginBottom: 16 }}>
-        <p className="eyebrow">Prof. Munzer Haddara · الأستاذ منذر حداره</p>
-        <p dir="rtl">
-          اختر منطقتك حسب المنهج. لبنان: Whish إلى <strong>96170772968</strong> باسم{" "}
-          <strong>منذر أحمد حداره</strong>. الخليج والدولي: Western Union أو OMT أيضاً.
+        <p className="eyebrow">{t.eyebrow}</p>
+        <p>
+          {rich(t.intro, {
+            phone: <strong dir="ltr">96170772968</strong>,
+            name: <strong>{isAr ? "منذر أحمد حداره" : "Munzer Ahmad Haddara"}</strong>,
+          })}
         </p>
         <p className="muted">
-          Prices follow your curriculum region ({curriculum.labelEn} / {curriculum.labelAr}). Lebanon defaults to
-          Whish (<strong>96170772968</strong>). GCC, International, and US Admissions can also use Western Union or OMT.
-          Cards show USD bands; checkout charges the band midpoint (<code>defaultChargeUSD</code>).
-          {contactPhone ? ` Support: ${contactPhone} (not payment).` : ""}
+          {fmt(t.introNote, { curriculum: isAr ? curriculum.labelAr : curriculum.labelEn })}
+          {contactPhone ? fmt(t.support, { phone: contactPhone }) : ""}
         </p>
         {contactNote ? <p className="muted">{contactNote}</p> : null}
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <p className="eyebrow">Region · المنطقة</p>
+        <p className="eyebrow">{t.region}</p>
         <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
           {PRICING_REGIONS.map((id) => {
             const pack = getRegionalPricing(id);
@@ -274,24 +282,21 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
                 className={region === id ? "btn dark" : "btn"}
                 onClick={() => changeRegion(id)}
               >
-                {pack.selectorAr} / {pack.selectorEn}
+                {isAr ? pack.selectorAr : pack.selectorEn}
               </button>
             );
           })}
         </div>
         <p className="muted" style={{ marginTop: 8 }}>
-          Linked to curriculum switcher · مرتبط بمبدّل المنهج ({curriculum.shortEn} / {curriculum.shortAr})
+          {fmt(t.linked, { curriculum: isAr ? curriculum.shortAr : curriculum.shortEn })}
         </p>
-        {pricing.notesAr ? (
-          <p dir="rtl" style={{ marginTop: 8 }}>
-            {pricing.notesAr}
-          </p>
+        {(isAr ? pricing.notesAr : pricing.notesEn) ? (
+          <p style={{ marginTop: 8 }}>{isAr ? pricing.notesAr : pricing.notesEn}</p>
         ) : null}
-        {pricing.notesEn ? <p className="muted">{pricing.notesEn}</p> : null}
       </div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <p className="eyebrow">Payment method · طريقة الدفع</p>
+        <p className="eyebrow">{t.method}</p>
         <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
           {(["whish", "western_union", "omt"] as const).map((method) => {
             const label = paymentMethodLabel(method);
@@ -302,21 +307,21 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
                 className={paymentMethod === method ? "btn dark" : "btn"}
                 onClick={() => setPaymentMethod(method)}
               >
-                {label.ar}
+                {isAr ? label.ar : label.en}
               </button>
             );
           })}
         </div>
       </div>
 
-      {loading ? <SkeletonBlock lines={4} label="Loading subscribe" /> : null}
-      {busy ? <SkeletonBlock lines={2} label="Updating payment" /> : null}
+      {loading ? <SkeletonBlock lines={4} label={t.loading} /> : null}
+      {busy ? <SkeletonBlock lines={2} label={t.updating} /> : null}
       <ApiErrorBanner error={error} errorAr={errorAr} />
       {message ? <p className="success">{message}</p> : null}
 
       {!authenticated ? (
         <p className="muted">
-          <Link href="/login?next=%2Fsubscribe">Sign in</Link> to start a subscription payment.
+          {rich(t.signInLead, { link: <Link href="/login?next=%2Fsubscribe">{t.signIn}</Link> })}
         </p>
       ) : null}
 
@@ -327,8 +332,8 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
           currency={activeOrder.currency || "USD"}
           display={price?.display}
           displayAr={price?.displayAr}
-          title={`${activeOrder.planName} · ${activeOrder.period}`}
-          titleAr={`${activeOrder.planNameAr} · ${activeOrder.period === "monthly" ? "شهري" : "فصل"}`}
+          title={`${activeOrder.planName} · ${activeOrder.period === "monthly" ? t.monthly : t.term}`}
+          titleAr={`${activeOrder.planNameAr} · ${activeOrder.period === "monthly" ? t.monthly : t.term}`}
           beneficiaryAr={instructions.beneficiaryAr}
           beneficiaryEn={instructions.beneficiaryEn}
           phone={instructions.phone}
@@ -343,7 +348,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
 
       {(staff || pendingOrders.length > 0) && pendingOrders.length > 0 ? (
         <div className="card" style={{ marginTop: 16, marginBottom: 16 }}>
-          <h3>بانتظار التحويل (اشتراكات) / Pending subscription transfers</h3>
+          <h3>{t.pending}</h3>
           {pendingOrders.map((order) => {
             const method =
               order.paymentMethod && isPaymentMethod(order.paymentMethod) ? order.paymentMethod : "whish";
@@ -355,14 +360,12 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
             return (
               <div key={order.id} style={{ marginTop: 12, display: "grid", gap: 8 }}>
                 <p>
-                  <strong>{order.planNameAr}</strong> · {order.studentName} · ${order.amount} · {order.period} ·{" "}
-                  {label.ar}
-                  {regionLabel ? ` · ${regionLabel.labelAr}` : ""}
-                  {order.status === "transfer_claimed" || order.studentMarkedPaidAt
-                    ? " · student marked transferred"
-                    : " · pending"}
+                  <strong>{isAr ? order.planNameAr : order.planName}</strong> · {order.studentName} · $
+                  {order.amount} · {order.period === "monthly" ? t.monthly : t.term} · {isAr ? label.ar : label.en}
+                  {regionLabel ? ` · ${isAr ? regionLabel.labelAr : regionLabel.labelEn}` : ""}
+                  {order.status === "transfer_claimed" || order.studentMarkedPaidAt ? t.studentMarked : t.pendingState}
                 </p>
-                <p className="muted">Order: {order.id}</p>
+                <p className="muted">{fmt(t.order, { id: order.id })}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {!staff && order.status !== "transfer_claimed" ? (
                     <button
@@ -371,7 +374,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
                       disabled={busy}
                       onClick={() => void markTransferred(order.id)}
                     >
-                      لقد حوّلت / I&apos;ve transferred
+                      {t.transferred}
                     </button>
                   ) : null}
                   {staff ? (
@@ -381,7 +384,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
                       disabled={busy}
                       onClick={() => void teacherConfirm(order.id)}
                     >
-                      تأكيد الدفع وتفعيل الباقة / Confirm &amp; activate
+                      {t.confirm}
                     </button>
                   ) : null}
                 </div>
@@ -394,42 +397,38 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
       <div className="grid two">
         {pricing.plans.map((plan) => (
           <article className="card" key={plan.id}>
-            {(plan.badgeAr || plan.badgeEn) ? (
-              <span className="badge">{plan.badgeAr || plan.badgeEn}</span>
+            {(isAr ? plan.badgeAr || plan.badgeEn : plan.badgeEn || plan.badgeAr) ? (
+              <span className="badge">{isAr ? plan.badgeAr || plan.badgeEn : plan.badgeEn || plan.badgeAr}</span>
             ) : null}
-            <span className="badge">{plan.nameEn}</span>
-            <h2>{plan.nameAr}</h2>
+            <h2>{isAr ? plan.nameAr : plan.nameEn}</h2>
             <p style={{ fontSize: 28, margin: "8px 0" }}>
               {planShowsPriceBand(plan)
                 ? formatUsdBand(plan.usdMonthlyMin, plan.usdMonthlyMax)
                 : `$${plan.defaultChargeUSD}`}
-              <span className="muted"> / month</span>
+              <span className="muted">{t.perMonth}</span>
             </p>
             {planShowsPriceBand(plan) ? (
               <p className="muted">
-                Checkout default · ${plan.defaultChargeUSD}/mo (band midpoint)
+                {fmt(t.checkoutDefault, { n: plan.defaultChargeUSD })}
               </p>
             ) : null}
             {plan.sarMonthlyMin != null && plan.sarMonthlyMax != null ? (
               <p className="muted">
-                ≈ {plan.sarMonthlyMin === plan.sarMonthlyMax
-                  ? `${plan.sarMonthlyMin}`
-                  : `${plan.sarMonthlyMin}–${plan.sarMonthlyMax}`}{" "}
-                SAR / month
+                {fmt(t.sar, {
+                  v:
+                    plan.sarMonthlyMin === plan.sarMonthlyMax
+                      ? `${plan.sarMonthlyMin}`
+                      : `${plan.sarMonthlyMin}–${plan.sarMonthlyMax}`,
+                })}
               </p>
             ) : null}
             <p className="muted">
-              ${plan.usdTerm} per term
-              {planShowsPriceBand(plan) ? " (at default)" : ""} · {formatRegionalPrice(plan, "monthly")}
+              {fmt(t.perTerm, { n: plan.usdTerm })}
+              {planShowsPriceBand(plan) ? t.atDefault : ""} · {formatRegionalPrice(plan, "monthly")}
             </p>
-            <ul dir="rtl" style={{ paddingInlineStart: 18 }}>
-              {plan.featuresAr.map((feature) => (
-                <li key={`ar-${plan.id}-${feature}`}>{feature}</li>
-              ))}
-            </ul>
-            <ul className="muted" style={{ paddingInlineStart: 18 }}>
-              {plan.featuresEn.map((feature) => (
-                <li key={`en-${plan.id}-${feature}`}>{feature}</li>
+            <ul style={{ paddingInlineStart: 18 }}>
+              {(isAr ? plan.featuresAr : plan.featuresEn).map((feature) => (
+                <li key={`${plan.id}-${feature}`}>{feature}</li>
               ))}
             </ul>
             <div className="row" style={{ flexWrap: "wrap", gap: 8, marginTop: 12 }}>
@@ -439,7 +438,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
                 disabled={busy || !authenticated}
                 onClick={() => void startPayment(plan, "monthly")}
               >
-                ادفع شهري · ${plan.defaultChargeUSD}
+                {fmt(t.payMonthly, { n: plan.defaultChargeUSD })}
               </button>
               <button
                 className="btn dark"
@@ -447,12 +446,12 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
                 disabled={busy || !authenticated}
                 onClick={() => void startPayment(plan, "term")}
               >
-                ادفع فصل · ${plan.usdTerm}
+                {fmt(t.payTerm, { n: plan.usdTerm })}
               </button>
             </div>
             {!authenticated ? (
               <p className="muted" style={{ marginTop: 8 }}>
-                <Link href="/login?next=%2Fsubscribe">سجّل الدخول</Link> لبدء الدفع.
+                {rich(t.signInLead, { link: <Link href="/login?next=%2Fsubscribe">{t.signIn}</Link> })}
               </p>
             ) : null}
           </article>
@@ -460,31 +459,28 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>
-        <h3>ساعة تدريس خاصة · Private tutoring hour</h3>
-        <p dir="rtl">
-          <strong>{formatPrivateHourBand(pricing)}</strong> / ساعة — مع الأستاذ منذر حداره ({pricing.labelAr})
+        <h3>{t.privateTitle}</h3>
+        <p>
+          {rich(t.privateLine, {
+            band: <strong>{formatPrivateHourBand(pricing)}</strong>,
+            region: isAr ? pricing.labelAr : pricing.labelEn,
+          })}
           {pricing.privateTutoringHourMinUsd !== pricing.privateTutoringHourMaxUsd
-            ? ` · الافتراضي $${pricing.privateTutoringHourUsd}`
+            ? fmt(t.privateDefault, { n: pricing.privateTutoringHourUsd })
             : ""}
         </p>
-        <p className="muted">
-          <strong>{formatPrivateHourBand(pricing)}</strong> / hour with Prof. Munzer Haddara ({pricing.labelEn})
-          {pricing.privateTutoringHourMinUsd !== pricing.privateTutoringHourMaxUsd
-            ? ` · default $${pricing.privateTutoringHourUsd}`
-            : ""}
-          . Book from <Link href="/live">/live</Link> after agreeing the slot.
-        </p>
+        <p className="muted">{rich(t.privateBook, { link: <Link href="/live">/live</Link> })}</p>
       </div>
 
       <div className="row" style={{ marginTop: 24 }}>
         <Link className="btn" href="/redeem">
-          تفعيل بطاقة كشط
+          {t.redeem}
         </Link>
         <Link className="btn" href="/live">
-          حجز حصة مباشرة
+          {t.book}
         </Link>
         <Link className="btn" href="/classroom">
-          Start a classroom video
+          {t.classroom}
         </Link>
       </div>
     </div>

@@ -1,6 +1,9 @@
 import { readStore } from "@/lib/store";
 import { SubscribePlans } from "@/components/billing/SubscribePlans";
 import { whishTransferPhone, whishTransferNameAr } from "@/lib/whish/client";
+import { billingMessages } from "@/lib/i18n/ns/billing";
+import { rich } from "@/lib/i18n/rich";
+import { getI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -9,20 +12,19 @@ export default async function SubscribePage() {
   const settings = store.settings;
   const phone = whishTransferPhone();
   const nameAr = whishTransferNameAr();
+  const { locale } = await getI18n();
+  const t = billingMessages[locale].page;
 
   return (
     <main className="shell mm-mobile-stack">
-      <p className="eyebrow">Subscription · Multi-region pricing</p>
-      <h1>رسوم الاشتراك · Whish / Western Union / OMT</h1>
-      <p className="muted" dir="rtl">
-        أسعار حسب المنطقة (لبنان / الخليج / دولي) مرتبطة بالمنهج. التحويل اليدوي عبر Whish إلى{" "}
-        <strong>{phone}</strong> باسم <strong>{nameAr}</strong>، أو Western Union / OMT للمستفيد نفسه. واتساب للدعم فقط
-        وليس للدفع. بعد تأكيد الأستاذ منذر حداره يُفعَّل الاشتراك.
-      </p>
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
       <p className="muted">
-        Regional prices (Lebanon / GCC / International) follow the curriculum switcher. Pay by manual transfer via Whish
-        to <strong>{phone}</strong> ({nameAr} / Munzer Ahmad Haddara), or Western Union / OMT to the same beneficiary.
-        Academy WhatsApp ({settings.phone}) is support-only. Redeem cards on /redeem remain optional after confirmation.
+        {rich(t.lead, {
+          phone: <strong dir="ltr">{phone}</strong>,
+          name: <strong>{locale === "ar" ? nameAr : "Munzer Ahmad Haddara"}</strong>,
+          support: <span dir="ltr">{settings.phone}</span>,
+        })}
       </p>
       <SubscribePlans contactPhone={settings.phone} contactNote={settings.contactNote} />
     </main>
