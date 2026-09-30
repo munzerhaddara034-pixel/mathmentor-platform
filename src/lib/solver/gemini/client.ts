@@ -54,6 +54,10 @@ export function geminiKey(): string {
   return process.env.GEMINI_API_KEY?.trim() || process.env.GOOGLE_API_KEY?.trim() || "";
 }
 
+/** Models that answered "quota exhausted for the day" / "not found": skipped without a call for a while. */
+const cooldownUntil = new Map<string, number>();
+const COOLDOWN_MS = 15 * 60_000;
+
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /** Transient = worth retrying the same model. A hard quota of 0 (free tier on Pro) is not. */
@@ -114,11 +118,17 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     (model) => options.tier !== "strong" || !isLiteModel(model),
   );
   const started = Date.now();
-  const maxRetries = options.tier === "strong" ? 2 : 1;
+  // Strong tier: retry a transient 503/429 twice with backoff before falling back.
+  // Fast tier: fall back immediately (a 503 already costs ~8 s; middle school targets < 15 s).
+  const maxRetries = options.tier === "strong" ? 2 : 0;
   let retriedModels = 0;
   let lastError = "Gemini request failed.";
 
   for (const model of models) {
+    if ((cooldownUntil.get(model) ?? 0) > Date.now()) {
+      calls.push({ model, status: 0, ms: 0, promptTokens: 0, outputTokens: 0, costUsd: 0, note: "cooldown" });
+      continue;
+    }
     const retries = retriedModels < 2 ? maxRetries : 0;
     let usedRetry = false;
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -130,7 +140,10 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
           const kind = classify(status, body);
           calls.push({ model, status, ms, promptTokens: 0, outputTokens: 0, costUsd: 0, note: kind });
           lastError = `Gemini ${model} ${status}`;
-          if (kind === "skip") break;
+          if (kind === "skip") {
+            if (status === 429 || status === 404) cooldownUntil.set(model, Date.now() + COOLDOWN_MS);
+            break;
+          }
           if (attempt < retries) {
             usedRetry = true;
             await sleep(Math.min(retryDelayMs(body, attempt), Math.max(0, left - 2000)));

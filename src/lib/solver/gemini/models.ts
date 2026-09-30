@@ -14,10 +14,17 @@ const STRONG_DEFAULT = [
   "gemini-flash-latest",
   "gemini-3.7-flash",
   "gemini-3.6-flash",
+  "gemini-3-flash-preview",
   "gemini-3.5-flash",
 ] as const;
 
-const FAST_DEFAULT = ["gemini-flash-latest", "gemini-3.6-flash", "gemini-3.7-flash", "gemini-flash-lite-latest"] as const;
+const FAST_DEFAULT = [
+  "gemini-flash-latest",
+  "gemini-3.6-flash",
+  "gemini-3-flash-preview",
+  "gemini-3.7-flash",
+  "gemini-flash-lite-latest",
+] as const;
 
 function envList(name: string): string[] | undefined {
   const raw = process.env[name]?.trim();
