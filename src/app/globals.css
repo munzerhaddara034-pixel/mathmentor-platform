@@ -255,6 +255,9 @@ button, input, select, textarea {
 .btn.warn { background: #9a3412; color: white; }
 .ghost-btn { background: transparent; color: white; border: 1px solid rgba(255,255,255,.25); }
 .grid { display: grid; gap: 16px; margin-top: 24px; }
+/* Grid items and selects may shrink below their longest <option> (prevents 390px overflow). */
+.grid > * { min-width: 0; }
+select { max-width: 100%; }
 @media (min-width: 800px) {
   .grid.two { grid-template-columns: 1fr 1fr; }
   .grid.three { grid-template-columns: 1fr 1fr 1fr; }
