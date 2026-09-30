@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Cairo } from "next/font/google";
+import { IBM_Plex_Sans_Arabic, Tajawal } from "next/font/google";
 import "./globals.css";
 import { cookies } from "next/headers";
 import { Nav } from "@/components/Nav";
@@ -10,10 +10,20 @@ import { PwaRegister } from "@/components/PwaRegister";
 import { CurriculumProvider } from "@/components/curriculum/CurriculumProvider";
 import { getSession } from "@/lib/auth/server";
 
-const cairo = Cairo({
+/** Body / UI: IBM Plex Sans Arabic (clear at small sizes, matching Latin). */
+const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
   display: "swap",
-  weight: ["500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plex-arabic",
+});
+
+/** Headings: Tajawal. */
+const tajawal = Tajawal({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  weight: ["700", "800"],
+  variable: "--font-tajawal",
 });
 
 export const metadata: Metadata = {
@@ -54,10 +64,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang="ar"
       dir="rtl"
       data-theme={theme}
-      className={theme === "dark" ? "theme-dark" : "theme-light"}
+      className={`${theme === "dark" ? "theme-dark" : "theme-light"} ${plexArabic.variable} ${tajawal.variable}`}
       suppressHydrationWarning
     >
-      <body className={cairo.className}>
+      <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <CurriculumProvider>
           <MathGridCanvas />
