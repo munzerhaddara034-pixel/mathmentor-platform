@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
+import { useNs } from "@/components/i18n/useNs";
+import { fmt } from "@/lib/i18n/format";
+import { b2bMessages } from "@/lib/i18n/ns/b2b";
 
 type Curriculum = "Lebanese" | "International";
 
@@ -22,6 +25,7 @@ type ProposalPayload = {
 };
 
 export function SchoolProposalGenerator() {
+  const t = useNs(b2bMessages).proposal;
   const [schoolName, setSchoolName] = useState("");
   const [studentCount, setStudentCount] = useState(30);
   const [curriculum, setCurriculum] = useState<Curriculum>("Lebanese");
@@ -48,13 +52,13 @@ export function SchoolProposalGenerator() {
         errorAr?: string;
       };
       if (!res.ok || !json.ok || !json.proposal) {
-        setError(json.error || "Proposal generation failed.");
+        setError(json.error || t.failed);
         setErrorAr(json.errorAr);
         return;
       }
       setProposal(json.proposal);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Proposal generation failed.");
+      setError(err instanceof Error ? err.message : t.failed);
     } finally {
       setLoading(false);
     }
@@ -66,24 +70,21 @@ export function SchoolProposalGenerator() {
 
   return (
     <section className="card b2b-section mm-mobile-stack" aria-labelledby="b2b-proposal-title">
-      <h2 id="b2b-proposal-title">مولّد عرض المدارس / School proposal</h2>
-      <p className="muted" dir="rtl" lang="ar">
-        عرض رسمي قابل للطباعة — خصومات، ميزات تفاعلية، دور المنصة في نجاح الامتحان، وتسعير B2B. العلامة: الأستاذ منذر
-        حداره فقط.
-      </p>
+      <h2 id="b2b-proposal-title">{t.title}</h2>
+      <p className="muted">{t.lead}</p>
 
       <div className="b2b-form-grid no-print">
         <label>
-          اسم المدرسة / School name
+          {t.school}
           <input
             value={schoolName}
             onChange={(e) => setSchoolName(e.target.value)}
-            placeholder="مثال: ثانوية الأهلية"
+            placeholder={t.schoolPlaceholder}
             dir="auto"
           />
         </label>
         <label>
-          عدد طلاب الشهادة / Certificate students
+          {t.students}
           <input
             type="number"
             min={1}
@@ -93,42 +94,46 @@ export function SchoolProposalGenerator() {
           />
         </label>
         <label>
-          المنهج / Curriculum
+          {t.curriculum}
           <select
             value={curriculum}
             onChange={(e) => setCurriculum(e.target.value as Curriculum)}
           >
-            <option value="Lebanese">Lebanese · لبناني</option>
-            <option value="International">International · دولي</option>
+            <option value="Lebanese">{t.lebanese}</option>
+            <option value="International">{t.international}</option>
           </select>
         </label>
         <div className="row" style={{ alignItems: "end" }}>
           <button type="button" className="btn" onClick={() => void generate()} disabled={loading || !schoolName.trim()}>
-            توليد العرض
+            {t.generate}
           </button>
           {proposal ? (
             <button type="button" className="ghost-btn" onClick={printProposal}>
-              طباعة / Print
+              {t.print}
             </button>
           ) : null}
         </div>
       </div>
 
-      {loading ? <SkeletonBlock lines={5} label="Generating proposal" /> : null}
+      {loading ? <SkeletonBlock lines={5} label={t.loading} /> : null}
       <ApiErrorBanner error={error} errorAr={errorAr} />
 
       {proposal ? (
         <div className="b2b-proposal-print print-sheet">
           <p className="muted no-print">
-            المصدر: {proposal.source === "gemini" ? "Gemini" : "قالب عربي قوي"} · عرض B2B ≈ $
-            {proposal.quote.monthlyTotal}/شهر ({proposal.quote.students} × ${proposal.quote.perStudent})
+            {fmt(t.source, {
+              source: proposal.source === "gemini" ? "Gemini" : t.sourceTemplate,
+              total: proposal.quote.monthlyTotal,
+              students: proposal.quote.students,
+              per: proposal.quote.perStudent,
+            })}
           </p>
           <div
             className="paper b2b-proposal-paper"
             dangerouslySetInnerHTML={{ __html: proposal.bodyHtml }}
           />
           <details className="no-print" style={{ marginTop: 12 }}>
-            <summary>النص الخام (AR)</summary>
+            <summary>{t.raw}</summary>
             <pre className="b2b-pre" dir="rtl" lang="ar">
               {proposal.bodyAr}
             </pre>

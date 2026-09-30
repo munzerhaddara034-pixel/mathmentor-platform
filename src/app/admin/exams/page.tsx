@@ -2,12 +2,17 @@ import { requireStaff } from "@/lib/auth/guards";
 import { listExamAttempts, listGeneratedSets } from "@/lib/exams/store";
 import { paperById } from "@/lib/exams/papers";
 import Link from "next/link";
+import { INTL_LOCALE, type Locale } from "@/lib/i18n/config";
+import { fmt } from "@/lib/i18n/format";
+import { adminToolsMessages } from "@/lib/i18n/ns/adminTools";
+import { rich } from "@/lib/i18n/rich";
+import { getI18n } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-function formatBeirut(iso: string) {
+function formatBeirut(iso: string, locale: Locale) {
   try {
-    return new Intl.DateTimeFormat("en-GB", {
+    return new Intl.DateTimeFormat(INTL_LOCALE[locale], {
       timeZone: "Asia/Beirut",
       year: "numeric",
       month: "short",
@@ -25,29 +30,34 @@ export default async function AdminExamsPage() {
   await requireStaff("/admin/exams");
   const attempts = await listExamAttempts();
   const generated = await listGeneratedSets();
+  const { locale } = await getI18n();
+  const t = adminToolsMessages[locale].exams;
   return (
-    <main className="shell" dir="ltr">
-      <p className="eyebrow">Teacher review</p>
-      <h1>Exam simulations submitted</h1>
+    <main className="shell">
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
       <p className="muted">
-        <Link href="/dashboard">Dashboard</Link> · <Link href="/exams">Simulator hub</Link> ·{" "}
-        <Link href="/exams?track=sat">SAT Math papers</Link>
+        <Link href="/dashboard">{t.dashboard}</Link> · <Link href="/exams">{t.hub}</Link> ·{" "}
+        <Link href="/exams?track=sat">{t.sat}</Link>
       </p>
       <p className="muted">
-        Studio note: SAT <strong>Generate similar</strong> and <strong>generate-from-official</strong> (
-        <code>official-sat-style-N</code>) sets are listed below. Original content only — College Board PDFs are
-        linked externally; we never store CB exam item text.
+        {rich(t.note, {
+          similar: <strong>{t.similar}</strong>,
+          official: <strong>{t.official}</strong>,
+          code: <code dir="ltr">official-sat-style-N</code>,
+        })}
       </p>
 
-      <h2>Submitted attempts</h2>
+      <h2>{t.attempts}</h2>
+      {attempts.length === 0 ? <p className="muted">{t.noAttempts}</p> : null}
       <table className="data-table">
         <thead>
           <tr>
-            <th>Student</th>
-            <th>Paper</th>
-            <th>Score</th>
-            <th>When (Asia/Beirut)</th>
-            <th>PDF</th>
+            <th>{t.student}</th>
+            <th>{t.paper}</th>
+            <th>{t.score}</th>
+            <th>{t.when}</th>
+            <th>{t.pdf}</th>
           </tr>
         </thead>
         <tbody>
@@ -56,34 +66,36 @@ export default async function AdminExamsPage() {
               <td>
                 {attempt.studentName}
                 <br />
-                <span className="muted">{attempt.studentPhone}</span>
+                <span className="muted" dir="ltr">
+                  {attempt.studentPhone}
+                </span>
               </td>
               <td>{paperById(attempt.paperId)?.title ?? attempt.paperId}</td>
               <td>
                 {attempt.grading.totalAwarded}/{attempt.grading.totalMax} ({attempt.grading.percent}%)
               </td>
-              <td>{formatBeirut(attempt.createdAt)}</td>
+              <td>{formatBeirut(attempt.createdAt, locale)}</td>
               <td>
-                <a href={`/api/exams/attempts/${attempt.id}/report`}>PDF</a>
+                <a href={`/api/exams/attempts/${attempt.id}/report`}>{t.pdf}</a>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h2 style={{ marginTop: 32 }}>Generated similar sets (على نسقه)</h2>
+      <h2 style={{ marginTop: 32 }}>{t.generated}</h2>
       {generated.length === 0 ? (
-        <p className="muted">No generated sets yet. Students generate from the SAT simulator.</p>
+        <p className="muted">{t.noGenerated}</p>
       ) : (
         <table className="data-table">
           <thead>
             <tr>
-              <th>Set</th>
-              <th>Paper</th>
-              <th>Source Q</th>
-              <th>Items</th>
-              <th>Engine</th>
-              <th>When (Asia/Beirut)</th>
+              <th>{t.set}</th>
+              <th>{t.paper}</th>
+              <th>{t.sourceQ}</th>
+              <th>{t.items}</th>
+              <th>{t.engine}</th>
+              <th>{t.when}</th>
             </tr>
           </thead>
           <tbody>
@@ -92,13 +104,13 @@ export default async function AdminExamsPage() {
                 <td>
                   <code>{set.id}</code>
                   <br />
-                  <span className="muted">user {set.userId}</span>
+                  <span className="muted">{fmt(t.user, { id: set.userId })}</span>
                 </td>
                 <td>{paperById(set.paperId)?.title ?? set.paperId}</td>
-                <td>{set.sourceQuestionId ?? "— (whole paper)"}</td>
+                <td>{set.sourceQuestionId ?? t.wholePaper}</td>
                 <td>{set.questions.length}</td>
                 <td>{set.source}</td>
-                <td>{formatBeirut(set.createdAt)}</td>
+                <td>{formatBeirut(set.createdAt, locale)}</td>
               </tr>
             ))}
           </tbody>

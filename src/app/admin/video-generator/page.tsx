@@ -4,6 +4,10 @@ import { officialExamFourPhaseLesson } from "@/lib/studio/seedLesson";
 import { pickText } from "@/lib/studio/i18n";
 import { TeacherQualityChecklist } from "@/components/studio/TeacherQualityChecklist";
 import Link from "next/link";
+import { useNs } from "@/components/i18n/useNs";
+import { SkeletonBlock } from "@/components/ui/Skeleton";
+import { adminToolsMessages } from "@/lib/i18n/ns/adminTools";
+import { rich } from "@/lib/i18n/rich";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type JobStatus = "queued" | "processing" | "completed" | "failed";
@@ -52,6 +56,8 @@ function statusClass(status: JobStatus) {
 }
 
 export default function AdminVideoGeneratorPage() {
+  const t = useNs(adminToolsMessages).video;
+  const [loadingJobs, setLoadingJobs] = useState(true);
   const [script, setScript] = useState(DEFAULT_SCRIPT);
   const [notes, setNotes] = useState(DEFAULT_NOTES);
   const [mathExamples, setMathExamples] = useState(DEFAULT_MATH);
@@ -73,15 +79,25 @@ export default function AdminVideoGeneratorPage() {
   }, [adminToken]);
 
   const refreshJobs = useCallback(async () => {
-    const response = await fetch("/api/heygen/jobs", { headers });
-    const payload = (await response.json()) as { jobs?: HeyGenJob[]; notice?: string; error?: string };
-    if (!response.ok) {
-      setError(payload.error ?? "Could not load jobs.");
-      return;
+    try {
+      const response = await fetch("/api/heygen/jobs", { headers });
+      const payload = (await response.json().catch(() => ({}))) as {
+        jobs?: HeyGenJob[];
+        notice?: string;
+        error?: string;
+      };
+      if (!response.ok) {
+        setError(payload.error ?? t.loadFailed);
+        return;
+      }
+      setJobs(payload.jobs ?? []);
+      if (payload.notice) setNotice(payload.notice);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.network);
+    } finally {
+      setLoadingJobs(false);
     }
-    setJobs(payload.jobs ?? []);
-    if (payload.notice) setNotice(payload.notice);
-  }, [headers]);
+  }, [headers, t]);
 
   useEffect(() => {
     void refreshJobs();
@@ -93,10 +109,14 @@ export default function AdminVideoGeneratorPage() {
     const timer = window.setInterval(() => {
       void (async () => {
         for (const job of pending) {
-          const response = await fetch(`/api/heygen/status?jobId=${encodeURIComponent(job.id)}`);
-          const payload = (await response.json()) as { job?: HeyGenJob };
-          if (payload.job) {
-            setJobs((current) => current.map((item) => (item.id === payload.job!.id ? { ...item, ...payload.job! } : item)));
+          try {
+            const response = await fetch(`/api/heygen/status?jobId=${encodeURIComponent(job.id)}`);
+            const payload = (await response.json().catch(() => ({}))) as { job?: HeyGenJob };
+            if (payload.job) {
+              setJobs((current) => current.map((item) => (item.id === payload.job!.id ? { ...item, ...payload.job! } : item)));
+            }
+          } catch {
+            // transient polling failure — the next tick retries
           }
         }
       })();
@@ -129,19 +149,17 @@ export default function AdminVideoGeneratorPage() {
         demoMode?: boolean;
       };
       if (!response.ok || !payload.job) {
-        setError(payload.error ?? "Generate failed.");
+        setError(payload.error ?? t.generateFailed);
         return;
       }
       setActiveId(payload.job.id);
       setNotice(
         payload.notice ??
-          (payload.demoMode
-            ? "Demo mode: no HEYGEN_API_KEY. Polling will complete a local placeholder video."
-            : "HeyGen job created."),
+          (payload.demoMode ? t.demoNotice : t.created),
       );
       setJobs((current) => [payload.job!, ...current.filter((job) => job.id !== payload.job!.id)]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Network error");
+      setError(err instanceof Error ? err.message : t.network);
     } finally {
       setBusy(false);
     }
@@ -150,31 +168,33 @@ export default function AdminVideoGeneratorPage() {
   const active = jobs.find((job) => job.id === activeId) ?? jobs[0];
 
   return (
-    <main className="shell" dir="ltr">
-      <p className="eyebrow">Admin · منصة الأستاذ منذر حداره</p>
-      <h1>HeyGen video generator</h1>
+    <main className="shell">
+      <p className="eyebrow">{t.eyebrow}</p>
+      <h1>{t.title}</h1>
       <p className="muted">
-        Write the lesson in{" "}
-        <Link href="/studio/script">/studio/script</Link>, generate a talking-avatar video here, wait for webhook or
-        status polling, then open the sync player. Seeded lesson: <code>leb-term-func-01</code> (full Terminale study).
-        Instructor: Prof. Munzer Haddara / الأستاذ منذر حداره. Teacher voice dictation:{" "}
-        <Link href="/studio/voice-solver">/studio/voice-solver</Link>.
+        {rich(t.lead, {
+          script: <Link href="/studio/script">/studio/script</Link>,
+          lesson: <code dir="ltr">leb-term-func-01</code>,
+          voice: <Link href="/studio/voice-solver">/studio/voice-solver</Link>,
+        })}
       </p>
 
       <TeacherQualityChecklist />
 
       <section className="card" style={{ marginTop: 18, background: "#fff8e8" }}>
-        <p className="eyebrow">Auth</p>
+        <p className="eyebrow">{t.auth}</p>
         <p>
-          Sign in as <strong>teacher or admin</strong> to generate. Optional{" "}
-          <code>HEYGEN_ADMIN_TOKEN</code> is a bearer override for scripts. The HeyGen API key stays server-side only.
+          {rich(t.authLead, {
+            role: <strong>{t.authRole}</strong>,
+            token: <code dir="ltr">HEYGEN_ADMIN_TOKEN</code>,
+          })}
         </p>
         <label>
-          Optional admin token
+          {t.tokenLabel}
           <input
             value={adminToken}
             onChange={(event) => setAdminToken(event.target.value)}
-            placeholder="HEYGEN_ADMIN_TOKEN (optional)"
+            placeholder={t.tokenPlaceholder}
             autoComplete="off"
           />
         </label>
@@ -184,19 +204,19 @@ export default function AdminVideoGeneratorPage() {
       <section className="card" style={{ marginTop: 20 }}>
         <div className="grid two">
           <label>
-            Lesson id / timeline
+            {t.lessonId}
             <input value={lessonId} onChange={(event) => setLessonId(event.target.value)} />
           </label>
           <label>
-            Voice language
+            {t.voiceLanguage}
             <select value={language} onChange={(event) => setLanguage(event.target.value as "en" | "fr" | "ar")}>
-              <option value="en">English (en-US)</option>
-              <option value="fr">Français (fr-FR)</option>
-              <option value="ar">العربية (ar-SA, if the HeyGen voice supports it)</option>
+              <option value="en">{t.langEn}</option>
+              <option value="fr">{t.langFr}</option>
+              <option value="ar">{t.langAr}</option>
             </select>
           </label>
           <label>
-            Speech speed (HeyGen 0.5–1.5)
+            {t.speed}
             <select value={speed} onChange={(event) => setSpeed(Number(event.target.value))}>
               {[0.75, 1, 1.15, 1.25, 1.5].map((value) => (
                 <option key={value} value={value}>
@@ -207,19 +227,19 @@ export default function AdminVideoGeneratorPage() {
           </label>
         </div>
         <label>
-          Lesson script / narration
+          {t.scriptLabel}
           <textarea value={script} onChange={(event) => setScript(event.target.value)} style={{ minHeight: 180 }} />
         </label>
         <label>
-          Ideas / pedagogical notes
+          {t.notes}
           <textarea value={notes} onChange={(event) => setNotes(event.target.value)} />
         </label>
         <label>
-          Math examples (LaTeX or plain)
+          {t.math}
           <textarea value={mathExamples} onChange={(event) => setMathExamples(event.target.value)} />
         </label>
         <label>
-          Timeline JSON (optional — linked to the job)
+          {t.timeline}
           <textarea
             value={timelineJson}
             onChange={(event) => setTimelineJson(event.target.value)}
@@ -228,30 +248,31 @@ export default function AdminVideoGeneratorPage() {
         </label>
         <div className="row">
           <button className="btn dark" type="button" disabled={busy || !script.trim()} onClick={() => void generate()}>
-            {busy ? "Generating…" : "Generate Video"}
+            {busy ? t.generating : t.generate}
           </button>
           <Link className="btn" href="/studio/script">
-            Script studio
+            {t.scriptStudio}
           </Link>
           <Link className="btn" href="/lessons/interactive">
-            Student sync player
+            {t.player}
           </Link>
         </div>
         {error ? <p className="error">{error}</p> : null}
       </section>
 
       <section className="card" style={{ marginTop: 20 }}>
-        <h2>Jobs</h2>
-        <p className="muted">Status: queued → processing → completed / failed. Completed jobs enable the lesson for students.</p>
-        {jobs.length === 0 ? <p className="muted">No jobs yet.</p> : null}
+        <h2>{t.jobs}</h2>
+        <p className="muted">{t.jobsLead}</p>
+        {loadingJobs ? <SkeletonBlock lines={2} label={t.loadingJobs} /> : null}
+        {!loadingJobs && jobs.length === 0 ? <p className="muted">{t.noJobs}</p> : null}
         <div className="heygen-jobs">
           {jobs.map((job) => (
             <article key={job.id} className={`heygen-job ${job.id === active?.id ? "active" : ""}`}>
               <header>
                 <strong>{job.title}</strong>
                 <span className={statusClass(job.status)}>{job.status}</span>
-                {job.studentEnabled ? <span className="badge approved">students on</span> : null}
-                {job.demo ? <span className="badge">demo</span> : null}
+                {job.studentEnabled ? <span className="badge approved">{t.studentsOn}</span> : null}
+                {job.demo ? <span className="badge">{t.demo}</span> : null}
               </header>
               <p className="muted">
                 {job.lessonId} · {job.language} · {job.speed}× · {job.id}
@@ -260,11 +281,11 @@ export default function AdminVideoGeneratorPage() {
               <p>{job.message}</p>
               <div className="row">
                 <Link className="btn dark" href={job.playerPath ?? `/studio/player?job=${encodeURIComponent(job.id)}`}>
-                  Open sync player
+                  {t.openPlayer}
                 </Link>
                 {job.videoUrl ? (
                   <a className="btn" href={job.videoUrl} target="_blank" rel="noreferrer">
-                    Video URL
+                    {t.videoUrl}
                   </a>
                 ) : null}
               </div>

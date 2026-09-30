@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
 import { PRICING_STUDY } from "@/lib/b2b/pricingStudy";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { INTL_LOCALE } from "@/lib/i18n/config";
+import { rich } from "@/lib/i18n/rich";
+import { b2bMessages } from "@/lib/i18n/ns/b2b";
 
 type PaymentRow = {
   id: string;
@@ -17,9 +21,12 @@ type PaymentRow = {
   recordedByName: string;
 };
 
+/** Preset labels are stored on the payment record, so they stay bilingual (ar / en) like the plan data. */
 const PLAN_PRESETS = [
   ...PRICING_STUDY.map((row) => ({
     label: `${row.nameAr} / ${row.nameEn}`,
+    nameAr: row.nameAr,
+    nameEn: row.nameEn,
     amount:
       row.usd.monthlyMin ??
       row.usd.perStudentMonthlyMin ??
@@ -27,12 +34,14 @@ const PLAN_PRESETS = [
       row.usd.schoolYear ??
       10,
   })),
-  { label: "مخصص / Custom", amount: 0 },
+  { label: "مخصص / Custom", nameAr: "", nameEn: "", amount: 0 },
 ];
 
 type WalletProps = { phone: string; nameAr: string };
 
 export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
+  const { locale } = useI18n();
+  const t = b2bMessages[locale].whish;
   const [referenceId, setReferenceId] = useState("");
   const [note, setNote] = useState("");
   const [planIndex, setPlanIndex] = useState(0);
@@ -54,16 +63,16 @@ export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
         error?: string;
       };
       if (!res.ok) {
-        setError(json.error || "Failed to load payments.");
+        setError(json.error || t.loadFailed);
         return;
       }
       setPayments(json.payments || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load.");
+      setError(err instanceof Error ? err.message : t.loadFailed);
     } finally {
       setListLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -101,16 +110,16 @@ export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
         message?: string;
       };
       if (!res.ok || !json.ok) {
-        setError(json.error || "Confirm failed.");
+        setError(json.error || t.confirmFailed);
         setErrorAr(json.errorAr);
         return;
       }
-      setMessage(json.messageAr || json.message || "Saved.");
+      setMessage((locale === "ar" ? json.messageAr || json.message : json.message || json.messageAr) || t.saved);
       setReferenceId("");
       setNote("");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Confirm failed.");
+      setError(err instanceof Error ? err.message : t.confirmFailed);
     } finally {
       setLoading(false);
     }
@@ -118,34 +127,36 @@ export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
 
   return (
     <section className="card b2b-section mm-mobile-stack no-print" aria-labelledby="b2b-whish-title">
-      <h2 id="b2b-whish-title">عمليات Whish / Whish payment ops</h2>
-      <p className="muted" dir="rtl" lang="ar">
-        المحفظة: <strong dir="ltr">{wallet.phone}</strong> باسم <strong>{wallet.nameAr}</strong>. الدفع عبر Whish فقط —
-        بعد التأكيد يُحفظ السجل ويُشعر المشرف لتفعيل الحساب وإصدار بطاقة الاشتراك.
+      <h2 id="b2b-whish-title">{t.title}</h2>
+      <p className="muted">
+        {rich(t.lead, {
+          phone: <strong dir="ltr">{wallet.phone}</strong>,
+          name: <strong dir="auto">{wallet.nameAr}</strong>,
+        })}
       </p>
 
       <div className="b2b-form-grid">
         <label>
-          Reference ID / رقم المرجع
+          {t.reference}
           <input
             value={referenceId}
             onChange={(e) => setReferenceId(e.target.value)}
-            placeholder="Whish reference"
+            placeholder={t.referencePlaceholder}
             dir="ltr"
           />
         </label>
         <label>
-          الباقة / Plan
+          {t.plan}
           <select value={planIndex} onChange={(e) => onPlanChange(Number(e.target.value))}>
             {PLAN_PRESETS.map((preset, index) => (
               <option key={preset.label} value={index}>
-                {preset.label}
+                {preset.nameEn ? (locale === "ar" ? preset.nameAr : preset.nameEn) : t.custom}
               </option>
             ))}
           </select>
         </label>
         <label>
-          المبلغ USD / Amount
+          {t.amount}
           <input
             type="number"
             min={1}
@@ -155,12 +166,12 @@ export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
           />
         </label>
         <label>
-          ملاحظة اختيارية / Optional note
+          {t.note}
           <input value={note} onChange={(e) => setNote(e.target.value)} dir="auto" />
         </label>
         {planIndex === PLAN_PRESETS.length - 1 ? (
           <label>
-            اسم الباقة المخصص / Custom plan label
+            {t.customLabel}
             <input value={planLabel} onChange={(e) => setPlanLabel(e.target.value)} dir="auto" />
           </label>
         ) : null}
@@ -171,12 +182,12 @@ export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
             disabled={loading || !referenceId.trim() || !(amountUsd > 0)}
             onClick={() => void confirm()}
           >
-            تأكيد التحويل / Confirm
+            {t.confirm}
           </button>
         </div>
       </div>
 
-      {loading ? <SkeletonBlock lines={2} label="Saving Whish payment" /> : null}
+      {loading ? <SkeletonBlock lines={2} label={t.saving} /> : null}
       <ApiErrorBanner error={error} errorAr={errorAr} />
       {message ? (
         <p className="success" role="status">
@@ -184,20 +195,20 @@ export function WhishOpsPanel({ wallet }: { wallet: WalletProps }) {
         </p>
       ) : null}
 
-      <h3 style={{ marginTop: 20 }}>آخر الدفعات / Recent</h3>
-      {listLoading ? <SkeletonBlock lines={3} label="Loading payments" /> : null}
+      <h3 style={{ marginTop: 20 }}>{t.recent}</h3>
+      {listLoading ? <SkeletonBlock lines={3} label={t.loadingList} /> : null}
       {!listLoading && payments.length === 0 ? (
-        <p className="muted">No Whish ops payments yet.</p>
+        <p className="muted">{t.none}</p>
       ) : null}
       <ul className="b2b-payment-list">
         {payments.map((payment) => (
           <li key={payment.id}>
-            <strong>{payment.planLabel}</strong> · ${payment.amountUsd} · ref{" "}
+            <strong dir="auto">{payment.planLabel}</strong> · ${payment.amountUsd} · {t.ref}{" "}
             <code>{payment.referenceId}</code>
             <br />
             <span className="muted">
-              {payment.status} · {payment.recordedByName} · {new Date(payment.createdAt).toLocaleString("en-GB", { timeZone: "Asia/Beirut" })}{" "}
-              Asia/Beirut
+              {payment.status} · {payment.recordedByName} ·{" "}
+              {new Date(payment.createdAt).toLocaleString(INTL_LOCALE[locale], { timeZone: "Asia/Beirut" })} {t.tz}
               {payment.note ? ` · ${payment.note}` : ""}
             </span>
           </li>
