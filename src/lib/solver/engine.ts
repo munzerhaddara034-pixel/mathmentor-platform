@@ -6,7 +6,8 @@ import { hasHeyGenKey } from "@/lib/studio/heygen";
 import { newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygenJobs";
 import { attachDemoMedia } from "./assemble";
 import { demoSolve, type SolveRequest } from "./demoSolver";
-import { demoFallback, hasGeminiKey, openaiSolverKey, solveWithGemini, solveWithOpenAI } from "./llm";
+import { demoFallback, hasGeminiKey, openaiSolverKey, solveWithOpenAI } from "./llm";
+import { solveAndVerify } from "./pipeline";
 import { looksLikeMath, retakeSolution } from "./retake";
 import { saveMathQuery } from "./store";
 import { scheduleSolutionVerification } from "./verify";
@@ -17,6 +18,10 @@ export type EngineInput = SolveRequest & {
   imageBase64?: string;
   mimeType?: string;
   imageUrl?: string;
+  /** Solver curriculum chosen in the form ("auto" = detect). */
+  curriculum?: string;
+  /** Platform curriculum (lebanese, ib, cambridge, ap, sat, saudi-gcc). */
+  platformCurriculum?: string;
 };
 
 export async function persistUploadedImage(file: File) {
@@ -46,7 +51,13 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
 
   if (hasGeminiKey() && (typed || input.imageBase64)) {
     try {
-      return await solveWithGemini({ ...request, imageBase64: input.imageBase64, mimeType: input.mimeType });
+      return await solveAndVerify({
+        ...request,
+        imageBase64: input.imageBase64,
+        mimeType: input.mimeType,
+        curriculum: input.curriculum,
+        platformCurriculum: input.platformCurriculum,
+      });
     } catch (error) {
       if (input.imageBase64 && !typedIsMath) {
         return retakeSolution({
@@ -87,6 +98,12 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
       "No GEMINI_API_KEY / OPENAI_API_KEY — deterministic Lebanese curriculum demo solver.";
   }
   return solution;
+}
+
+function syncedAudit(solution: MathSolution): MathQueryRecord["auditStatus"] {
+  const verification = solution.solverMeta?.verification;
+  if (verification?.mode !== "sync" || verification.status === "unverified") return "pending";
+  return verification.status;
 }
 
 export async function recordSolution(user: PublicUser, input: EngineInput, solution: MathSolution): Promise<MathQueryRecord> {
@@ -144,7 +161,11 @@ export async function recordSolution(user: PublicUser, input: EngineInput, solut
     needsRetake: solution.needsRetake,
     retakeMessageEn: solution.retakeMessageEn,
     retakeMessageAr: solution.retakeMessageAr,
-    auditStatus: "pending",
+    curriculum: solution.curriculum,
+    needsReview: solution.needsReview,
+    solverMeta: solution.solverMeta,
+    auditStatus: syncedAudit(solution),
+    auditNote: solution.solverMeta?.verification?.mode === "sync" ? solution.solverMeta.verification.noteAr : undefined,
     videoStatus,
     heygenJobId,
     videoUrl,

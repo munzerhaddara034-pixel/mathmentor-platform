@@ -54,6 +54,9 @@ export function SolverResultView({
 
   const given = query.given;
   const arabic = query.language === "ar";
+  const french = query.language === "fr";
+  const primaryExplanation = (step: MathQueryRecord["steps"][number]) =>
+    (arabic ? step.explanationAr : french ? step.explanationFr : step.explanationEn) || step.explanationEn;
 
   return (
     <div className="solver-result">
@@ -108,10 +111,10 @@ export function SolverResultView({
                   {step.theoremAr ? ` · ${step.theoremAr}` : ""}
                 </p>
                 <Katex tex={step.latex} display />
-                <p>{arabic ? step.explanationAr || step.explanationEn : step.explanationEn}</p>
-                {!arabic && step.explanationFr ? <p className="muted">{step.explanationFr}</p> : null}
+                <p>{primaryExplanation(step)}</p>
+                {!arabic && !french && step.explanationFr ? <p className="muted">{step.explanationFr}</p> : null}
                 {step.boxed ? <p className="solver-boxed-flag">Boxed Final Answer · إجابة مؤطّرة</p> : null}
-                {!arabic && step.explanationAr ? (
+                {!arabic && step.explanationAr && step.explanationAr !== primaryExplanation(step) ? (
                   <p className="muted" dir="rtl" lang="ar">
                     {step.explanationAr}
                   </p>
@@ -123,6 +126,11 @@ export function SolverResultView({
 
         <section className="final-box">
           <span className="muted">c) Final Answer Box · الناتج النهائي</span>
+          {query.needsReview ? (
+            <p className="solver-review-flag" role="status">
+              ⚠️ يحتاج مراجعة · Needs review — Dr. Mohamed could not fully confirm this answer; your teacher will check it.
+            </p>
+          ) : null}
           <Katex tex={query.finalAnswerLatex || query.finalAnswer} display />
           <p>{query.finalAnswer}</p>
         </section>

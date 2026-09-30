@@ -14,8 +14,13 @@ function asLanguage(value: FormDataEntryValue | string | null): LessonLanguage |
 
 function asTrack(value: FormDataEntryValue | string | null): CertificateTrack | undefined {
   const text = typeof value === "string" ? value : "";
-  const allowed: CertificateTrack[] = ["brevet", "ls", "se", "gs", "lh", "eb7", "eb8", "s1", "sat"];
+  const allowed: CertificateTrack[] = ["brevet", "ls", "se", "gs", "lh", "eb7", "eb8", "s1", "sat", "university"];
   return allowed.includes(text as CertificateTrack) ? (text as CertificateTrack) : undefined;
+}
+
+function asText(value: FormDataEntryValue | string | null | undefined, max = 40): string | undefined {
+  const text = typeof value === "string" ? value.trim().slice(0, max) : "";
+  return text || undefined;
 }
 
 export async function GET() {
@@ -40,6 +45,8 @@ export async function POST(request: Request) {
   let imageName: string | undefined;
   let imageBase64: string | undefined;
   let mimeType: string | undefined;
+  let curriculum: string | undefined;
+  let platformCurriculum: string | undefined;
 
   if (contentType.includes("multipart/form-data")) {
     const form = await request.formData();
@@ -47,6 +54,8 @@ export async function POST(request: Request) {
     latex = String(form.get("latex") ?? "").trim();
     language = asLanguage(form.get("language"));
     track = asTrack(form.get("track"));
+    curriculum = asText(form.get("curriculum"));
+    platformCurriculum = asText(form.get("platformCurriculum"));
     const file = form.get("image");
     if (file instanceof File && file.size > 0) {
       const saved = await persistUploadedImage(file);
@@ -66,6 +75,8 @@ export async function POST(request: Request) {
       imageBase64?: string;
       mimeType?: string;
       imageName?: string;
+      curriculum?: string;
+      platformCurriculum?: string;
     };
     try {
       json = (await request.json()) as typeof json;
@@ -79,6 +90,8 @@ export async function POST(request: Request) {
     imageBase64 = json.imageBase64;
     mimeType = json.mimeType;
     imageName = json.imageName;
+    curriculum = asText(json.curriculum);
+    platformCurriculum = asText(json.platformCurriculum);
   }
 
   if (!question && !latex && !imageBase64) {
@@ -97,6 +110,8 @@ export async function POST(request: Request) {
     mimeType,
     imageName,
     imageUrl,
+    curriculum,
+    platformCurriculum,
   });
   const record = await recordSolution(
     user,
@@ -133,6 +148,8 @@ export async function POST(request: Request) {
     retakeMessageAr: record.retakeMessageAr,
     given: record.given,
     topicTag: record.topicTag,
+    curriculum: record.curriculum,
+    needsReview: record.needsReview,
     playerPath: `/lessons/interactive-explanation?id=${encodeURIComponent(record.id)}`,
     resultPath: `/math-solver/result/${encodeURIComponent(record.id)}`,
   });

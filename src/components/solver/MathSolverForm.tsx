@@ -18,7 +18,19 @@ type SolveMathResponse = {
   errorAr?: string;
 };
 
-const SOLVER_TRACKS: CertificateTrack[] = ["brevet", "ls", "gs", "se", "sat", "lh", "eb7", "eb8", "s1"];
+const SOLVER_TRACKS: CertificateTrack[] = ["brevet", "ls", "gs", "se", "sat", "lh", "eb7", "eb8", "s1", "university"];
+
+/** Exam systems whose answer-writing style the solver reproduces ("auto" = detect from the question). */
+const CURRICULUM_OPTIONS: Array<{ id: string; label: string }> = [
+  { id: "auto", label: "Auto-detect" },
+  { id: "lebanese", label: "Lebanese official (Brevet / GS / LS / SE / LH)" },
+  { id: "french_bac", label: "French Bac" },
+  { id: "ib", label: "IB (AA / AI, SL / HL)" },
+  { id: "ap", label: "AP Calculus AB / BC" },
+  { id: "sat_act", label: "SAT / ACT" },
+  { id: "cambridge", label: "IGCSE / A Level" },
+  { id: "university", label: "University" },
+];
 
 function asSolverTrack(value: string | undefined): CertificateTrack | undefined {
   if (!value) return undefined;
@@ -27,13 +39,15 @@ function asSolverTrack(value: string | undefined): CertificateTrack | undefined 
 
 export function MathSolverForm() {
   const router = useRouter();
-  const { solverTrack, curriculum, ready } = useCurriculum();
+  const { solverTrack, curriculumId, ready } = useCurriculum();
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const [question, setQuestion] = useState("");
   const [latex, setLatex] = useState("");
   const [advanced, setAdvanced] = useState(false);
-  const [language, setLanguage] = useState<LessonLanguage>("ar");
+  // Solutions default to English; Arabic / French only when the student picks them.
+  const [language, setLanguage] = useState<LessonLanguage>("en");
+  const [solverCurriculum, setSolverCurriculum] = useState("auto");
   const [track, setTrack] = useState<CertificateTrack>("brevet");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -45,10 +59,7 @@ export function MathSolverForm() {
     if (!ready) return;
     const mapped = asSolverTrack(solverTrack);
     if (mapped) setTrack(mapped);
-    if (curriculum.defaultLanguage === "ar" || curriculum.defaultLanguage === "en") {
-      setLanguage(curriculum.defaultLanguage);
-    }
-  }, [ready, solverTrack, curriculum.defaultLanguage]);
+  }, [ready, solverTrack]);
 
   const pickFile = (next: File | null) => {
     setFile(next);
@@ -66,6 +77,8 @@ export function MathSolverForm() {
       form.set("latex", latex);
       form.set("language", language);
       form.set("track", track);
+      form.set("curriculum", solverCurriculum);
+      form.set("platformCurriculum", curriculumId);
       if (file) form.set("image", file);
       const response = await fetch("/api/solve-math", { method: "POST", body: form, credentials: "same-origin" });
       const payload = (await response.json()) as SolveMathResponse;
@@ -153,8 +166,8 @@ export function MathSolverForm() {
         <label className="mm-field">
           <span>لغة الحل</span>
           <select value={language} onChange={(event) => setLanguage(event.target.value as LessonLanguage)}>
-            <option value="ar">العربية</option>
             <option value="en">English</option>
+            <option value="ar">العربية</option>
             <option value="fr">Français</option>
           </select>
         </label>
@@ -167,6 +180,17 @@ export function MathSolverForm() {
             <option value="se">Terminale SE</option>
             <option value="sat">SAT</option>
             <option value="lh">LH</option>
+            <option value="university">University / جامعي</option>
+          </select>
+        </label>
+        <label className="mm-field">
+          <span>المنهج / Curriculum</span>
+          <select value={solverCurriculum} onChange={(event) => setSolverCurriculum(event.target.value)} dir="ltr">
+            {CURRICULUM_OPTIONS.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
       </div>

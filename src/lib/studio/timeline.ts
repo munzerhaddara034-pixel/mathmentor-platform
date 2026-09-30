@@ -64,6 +64,7 @@ export const certificateTrackSchema = z.enum([
   "eb8",
   "s1",
   "sat",
+  "university",
 ]);
 export type CertificateTrack = z.infer<typeof certificateTrackSchema>;
 
