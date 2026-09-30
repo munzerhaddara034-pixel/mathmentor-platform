@@ -20,14 +20,14 @@ export const DEMO_ACCOUNTS = [
     role: "student" as const,
     email: "student@mathmentor.lb",
     password: "student123",
-    name: "سارة حدارة",
+    name: "سارة حداره",
     track: "grade-12",
   },
   {
     role: "teacher" as const,
     email: "teacher@mathmentor.lb",
     password: "teacher123",
-    name: "الأستاذ منذر حدارة",
+    name: "الأستاذ منذر حداره",
     track: null,
   },
   {
