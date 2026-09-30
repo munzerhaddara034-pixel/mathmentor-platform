@@ -10,14 +10,20 @@ import { copyForLang, getVideoLessonPack, notesForPack, scenesForPack } from "@/
 import { watermarkText } from "@/lib/videoSecurity";
 import type { ProgressEntry, StoreData } from "@/lib/types";
 import Link from "next/link";
+import { useI18n } from "@/components/i18n/I18nProvider";
+import { fmt } from "@/lib/i18n/format";
+import { classroomMessages } from "@/lib/i18n/ns/classroom";
+import { pickTitle } from "@/lib/i18n/pick";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 export default function ClassroomLessonPage() {
   const params = useParams<{ id: string }>();
+  const { locale } = useI18n();
+  const t = classroomMessages[locale].lesson;
   const [custom, setCustom] = useState<AcademyLesson[]>([]);
   const [progress, setProgress] = useState<ProgressEntry[]>([]);
-  const [studentName, setStudentName] = useState("Academy student");
+  const [studentName, setStudentName] = useState<string>(t.defaultName);
   const [phone, setPhone] = useState("76532421");
   const [saved, setSaved] = useState(false);
   const [lang, setLang] = useState<LessonLang>(DEFAULT_LESSON_LANG);
@@ -48,19 +54,19 @@ export default function ClassroomLessonPage() {
   if (!lesson) {
     return (
       <main className="shell mm-mobile-stack">
-        <p>Lesson not found.</p>
-        <Link href="/classroom">Back to classroom</Link>
+        <p>{t.notFound}</p>
+        <Link href="/classroom">{t.back}</Link>
       </main>
     );
   }
 
   if (!unlocked) {
     return (
-      <main className="shell mm-mobile-stack" dir="rtl">
-        <h1>الدرس مقفل</h1>
-        <p className="muted">يجب اجتياز اختبار الدرس السابق بنسبة {PASS_SCORE}% على الأقل.</p>
+      <main className="shell mm-mobile-stack">
+        <h1>{t.lockedTitle}</h1>
+        <p className="muted">{fmt(t.lockedLead, { n: PASS_SCORE })}</p>
         <Link className="btn dark" href="/classroom">
-          العودة للفهرس
+          {t.backIndex}
         </Link>
       </main>
     );
@@ -84,10 +90,10 @@ export default function ClassroomLessonPage() {
   return (
     <main className="shell protected-lesson mm-mobile-stack" dir={pageDir} onContextMenu={(event) => event.preventDefault()}>
       <p className="eyebrow">
-        {pack ? copy?.trackLabel : lesson.gradeLabel} · {pack ? copy?.title : lesson.arabicTitle}
+        {pack ? copy?.trackLabel : lesson.gradeLabel} · {pack ? copy?.title : pickTitle(locale, lesson)}
       </p>
       <h1>
-        {pack ? copy?.title : `الفصل ${lesson.chapter} · ${lesson.arabicTitle}`}
+        {pack ? copy?.title : fmt(t.chapterTitle, { n: lesson.chapter, title: pickTitle(locale, lesson) })}
       </h1>
       <p className="muted">{lesson.idea}</p>
       <div className="grid two">
@@ -127,7 +133,7 @@ export default function ClassroomLessonPage() {
         ) : null}
         {hasPilotNotes ? (
           <Link className="btn" href="/practice/take?bank=g12-ls-functions&mode=contest">
-            مسابقة الدوال
+            {t.functionsContest}
           </Link>
         ) : null}
         <button className="btn ok" type="button" onClick={() => void complete()}>
