@@ -154,3 +154,30 @@ body.mm-sheet-open { overflow: hidden; }
 @media (min-width: 960px) {
   .site-footer { padding-inline-start: 20px; padding-inline-end: 96px; }
 }
+
+/* ---- Shared redesign primitives (used across home, dashboard, lessons, auth, solver) ---- */
+.mm-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md, 18px); box-shadow: var(--shadow); }
+.mm-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+  background: var(--gold-soft); color: var(--gold-ink); font-size: 13px; font-weight: 700;
+}
+.mm-chip.on-dark { background: rgba(224, 168, 62, .16); color: #f3cf86; }
+.mm-btn-lg {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; padding: 14px 22px; font-size: 16px; border-radius: 14px; text-decoration: none;
+}
+.mm-tile-icon { width: 46px; height: 46px; flex: 0 0 46px; border-radius: 12px; display: grid; place-items: center; }
+.tone-navy { background: var(--navy-50); color: var(--navy); }
+.tone-gold { background: var(--gold-soft); color: var(--gold-ink); }
+.tone-teal { background: var(--teal-soft); color: var(--teal); }
+.tone-coral { background: var(--coral-soft); color: var(--coral); }
+.mm-link { color: var(--navy); font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.mm-dash-h2 { font-size: 19px; color: var(--navy); margin: 0 0 12px; }
+.mm-field { display: grid; gap: 6px; font-weight: 600; color: var(--ink); font-size: 15px; }
+.mm-field input, .mm-field select, .mm-field textarea {
+  width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--card);
+  padding: 10px 14px; font: inherit; font-weight: 500; color: var(--ink);
+}
+.mm-field input:focus-visible, .mm-field select:focus-visible, .mm-field textarea:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+.mm-field input[dir="ltr"] { text-align: left; }
+.mm-math { unicode-bidi: isolate; }

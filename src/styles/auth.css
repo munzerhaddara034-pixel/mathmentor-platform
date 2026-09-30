@@ -11,13 +11,6 @@
 .mm-auth-card h1 { font-size: 26px; color: var(--navy); margin: 0 0 6px; }
 .mm-auth-lead { color: var(--muted); margin: 0 0 18px; line-height: 1.7; }
 .mm-auth-form { display: grid; gap: 14px; margin: 8px 0 16px; }
-.mm-field { display: grid; gap: 6px; font-weight: 600; color: var(--ink); font-size: 15px; }
-.mm-field input, .mm-field select {
-  width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--card);
-  padding: 10px 14px; font: inherit; font-weight: 500; color: var(--ink);
-}
-.mm-field input:focus-visible, .mm-field select:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
-.mm-field input[dir="ltr"] { text-align: left; }
 .mm-password { position: relative; display: block; }
 .mm-password input { padding-inline-end: 72px; }
 .mm-password button {

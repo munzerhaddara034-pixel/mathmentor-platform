@@ -1,14 +1,5 @@
 /* Home page (mobile-first). Tokens live in app/globals.css :root. */
 .mm-home { padding-top: 8px; padding-bottom: 32px; }
-.mm-chip {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
-  background: var(--gold-soft); color: var(--gold-ink); font-size: 13px; font-weight: 700;
-}
-.mm-chip.on-dark { background: rgba(224, 168, 62, .16); color: #f3cf86; }
-.mm-btn-lg {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 52px; padding: 14px 22px; font-size: 16px; border-radius: 14px; text-decoration: none;
-}
 .mm-hero { display: grid; gap: 20px; padding: 16px 0 8px; }
 .mm-hero h1 { font-size: clamp(2rem, 8vw, 3.6rem); line-height: 1.2; margin: 14px 0 12px; color: var(--navy); }
 .mm-hero-accent { color: var(--gold-ink); }
@@ -40,21 +31,12 @@
 
 .mm-section { margin-top: 36px; }
 .mm-section-title { font-size: clamp(1.4rem, 5vw, 2rem); color: var(--navy); margin: 0 0 16px; }
-.mm-card {
-  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md, 18px);
-  box-shadow: var(--shadow);
-}
 .mm-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mm-tile { display: grid; align-content: start; gap: 8px; padding: 16px; color: var(--ink); text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
 .mm-tile:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 .mm-tile h3 { margin: 4px 0 0; font-size: 18px; color: var(--navy); }
 .mm-tile p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
 .mm-tile-go { display: none; align-items: center; gap: 6px; color: var(--navy); font-weight: 700; font-size: 14px; margin-top: 4px; }
-.mm-tile-icon { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; }
-.tone-navy { background: var(--navy-50); color: var(--navy); }
-.tone-gold { background: var(--gold-soft); color: var(--gold-ink); }
-.tone-teal { background: var(--teal-soft); color: var(--teal); }
-.tone-coral { background: var(--coral-soft); color: var(--coral); }
 
 .mm-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .mm-steps li { display: flex; gap: 14px; align-items: flex-start; padding: 16px; }

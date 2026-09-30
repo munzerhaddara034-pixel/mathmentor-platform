@@ -2,10 +2,6 @@
 .mm-lessons-head h1 { margin: 4px 0 8px; color: var(--navy); font-size: clamp(1.7rem, 6vw, 2.4rem); }
 .mm-lessons-head .muted { margin: 0; line-height: 1.8; max-width: 680px; }
 .mm-lessons-head .eyebrow { margin: 0; }
-.mm-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md, 18px); box-shadow: var(--shadow); }
-.mm-tile-icon { width: 46px; height: 46px; flex: 0 0 46px; border-radius: 12px; display: grid; place-items: center; }
-.tone-gold { background: var(--gold-soft); color: var(--gold-ink); }
-.mm-dash-h2 { font-size: 19px; color: var(--navy); margin: 0 0 12px; }
 .mm-lessons-feature { display: flex; align-items: center; gap: 14px; padding: 16px 18px; color: var(--ink); text-decoration: none; }
 .mm-lessons-feature > span:nth-child(2) { display: grid; gap: 4px; flex: 1; min-width: 0; }
 .mm-lessons-feature strong { color: var(--navy); font-size: 17px; }

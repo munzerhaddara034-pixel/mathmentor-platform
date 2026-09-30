@@ -7,13 +7,6 @@
 .mm-dash-h2, .mm-widget-head h2 { font-size: 19px; color: var(--navy); margin: 0 0 12px; }
 .mm-widget-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .mm-widget { padding: 18px; min-width: 0; }
-.mm-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md, 18px); box-shadow: var(--shadow); }
-.mm-link { color: var(--navy); font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
-.mm-tile-icon { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; display: grid; place-items: center; }
-.tone-navy { background: var(--navy-50); color: var(--navy); }
-.tone-gold { background: var(--gold-soft); color: var(--gold-ink); }
-.tone-teal { background: var(--teal-soft); color: var(--teal); }
-.tone-coral { background: var(--coral-soft); color: var(--coral); }
 
 /* States */
 .mm-widget-skeleton { display: grid; gap: 10px; }
