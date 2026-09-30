@@ -11,13 +11,20 @@ export type SolveRequest = {
   imageName?: string;
 };
 
+/** Sample chips: `tex` is rendered with KaTeX (Word-Equation style), `question` is what the engine receives. */
 export const SAMPLE_QUESTIONS = [
-  { id: "quad", label: "x² − 5x + 6 = 0", question: "Solve x^2 - 5x + 6 = 0", track: "brevet" as const },
-  { id: "lim", label: "lim (3x²+1)/(x²−2)", question: "Compute lim x->inf (3x^2 + 1)/(x^2 - 2)", track: "ls" as const },
-  { id: "exp", label: "f(x)=(x−1)e^x", question: "Let f(x)=(x-1)e^x. Find f'(x) and the minimum.", track: "ls" as const },
-  { id: "sys", label: "2x+y=8, x−y=1", question: "Solve the system 2x + y = 8 and x - y = 1", track: "brevet" as const },
-  { id: "pyth", label: "Triangle 3-4-5", question: "A right triangle has legs 3 and 4. Find the hypotenuse.", track: "brevet" as const },
-  { id: "sat", label: "SAT: 2x+3=11", question: "If 2x + 3 = 11, what is the value of x?", track: "sat" as const },
+  { id: "quad", label: "x² − 5x + 6 = 0", tex: "x^{2}-5x+6=0", question: "Solve x^2 - 5x + 6 = 0", track: "brevet" as const },
+  {
+    id: "lim",
+    label: "lim (3x²+1)/(x²−2)",
+    tex: "\\lim_{x\\to+\\infty}\\frac{3x^{2}+1}{x^{2}-2}",
+    question: "Compute lim x->inf (3x^2 + 1)/(x^2 - 2)",
+    track: "ls" as const,
+  },
+  { id: "exp", label: "f(x)=(x−1)e^x", tex: "f(x)=(x-1)e^{x}", question: "Let f(x)=(x-1)e^x. Find f'(x) and the minimum.", track: "ls" as const },
+  { id: "sys", label: "2x+y=8, x−y=1", tex: "2x+y=8,\\;x-y=1", question: "Solve the system 2x + y = 8 and x - y = 1", track: "brevet" as const },
+  { id: "pyth", label: "Triangle 3-4-5", tex: "3^{2}+4^{2}=c^{2}", question: "A right triangle has legs 3 and 4. Find the hypotenuse.", track: "brevet" as const },
+  { id: "sat", label: "SAT: 2x+3=11", tex: "2x+3=11", question: "If 2x + 3 = 11, what is the value of x?", track: "sat" as const },
 ];
 
 function normalize(text: string) {

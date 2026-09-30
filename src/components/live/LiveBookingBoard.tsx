@@ -43,7 +43,7 @@ const WEEKDAYS = [
 function formatWhen(iso: string) {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleString("en-GB", {
+  return date.toLocaleString("ar-LB-u-nu-latn", {
     timeZone: "Asia/Beirut",
     weekday: "short",
     month: "short",
@@ -478,20 +478,22 @@ export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {
 
       <div className="grid two">
         <section className="card">
-          <h2>Open slots</h2>
-          {slots.length === 0 ? <p className="muted">No open slots.</p> : null}
+          <h2>المواعيد المتاحة</h2>
+          {slots.length === 0 ? <p className="muted">لا مواعيد متاحة حالياً. عُد لاحقاً أو راسلنا عبر المساعد.</p> : null}
           <ul className="slot-list">
             {slots.slice(0, staff ? 40 : 12).map((slot) => (
               <li key={slot.id}>
                 <div>
                   <strong>{formatWhen(slot.startsAt)}</strong>
                   <p className="muted">
-                    {slot.durationMinutes} min · {slot.note || "Munzer Ahmad Haddara"} · Asia/Beirut
-                    {checkoutPrice?.configured ? ` · ${checkoutPrice.display}` : ` · $${checkoutTier === "member" ? memberAmount : externalAmount}`}
+                    <bdi dir="ltr">{slot.durationMinutes}</bdi> دقيقة · {slot.note || "منذر أحمد حداره"} · بتوقيت بيروت ·{" "}
+                    <bdi dir="ltr">
+                      {checkoutPrice?.configured ? checkoutPrice.display : `$${checkoutTier === "member" ? memberAmount : externalAmount}`}
+                    </bdi>
                   </p>
                 </div>
                 <button className="btn dark" type="button" disabled={!canBook || busy} onClick={() => void book(slot.id)}>
-                  Book · ${checkoutTier === "member" ? memberAmount : externalAmount}
+                  احجز · <bdi dir="ltr">${checkoutTier === "member" ? memberAmount : externalAmount}</bdi>
                 </button>
               </li>
             ))}

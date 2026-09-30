@@ -171,34 +171,34 @@ export function PedagogicalTutorPanel() {
 
   return (
     <section className="card mm-tutor-panel mm-mobile-stack" style={{ marginTop: 20 }}>
-      <p className="eyebrow">Pedagogical tutor · المعلّم البيداغوجي</p>
-      <h2>
-        {terminology.derivative.en} / {terminology.limits.en}
-      </h2>
-      <p className="muted" dir="rtl" lang="ar">
-        {terminology.derivative.ar} · {terminology.limits.ar} — منهج {curriculum.labelAr}
+      <p className="eyebrow">المعلّم الذكي</p>
+      <h2>تعلّم الحل خطوة بخطوة</h2>
+      <p className="muted">
+        منهج {curriculum.labelAr} · {terminology.derivative.ar} · {terminology.limits.ar}
       </p>
       <p className="muted">
-        Direct = full justified solution. Socratic = progressive hints (no full answer until you ask). Voice hook:{" "}
-        <code>POST /api/voice-math</code>. Image: send <code>imageBase64</code> (Gemini Vision when keyed).
+        «مباشر»: حل كامل مع التبرير. «سقراطي»: تلميحات متدرّجة لتصل إلى الحل بنفسك، ولا يظهر الجواب النهائي إلا إذا
+        طلبته.
       </p>
 
-      <label>
-        Problem / المسألة
+      <label className="mm-field">
+        <span>المسألة</span>
         <textarea
+          dir="auto"
           rows={3}
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder={curriculum.samples[0]?.samplePromptEn ?? "Enter a problem…"}
+          placeholder="اكتب المسألة هنا"
         />
       </label>
-      <label>
-        LaTeX
+      <label className="mm-field">
+        <span>
+          صيغة <bdi dir="ltr">LaTeX</bdi> (اختياري)
+        </span>
         <input
           dir="ltr"
           value={latex}
           onChange={(event) => setLatex(formatLebaneseEquation(event.target.value))}
-          placeholder={curriculum.samples[0]?.sampleLatex ?? "\\frac{a}{b}"}
         />
       </label>
       {latex ? (
@@ -208,18 +208,18 @@ export function PedagogicalTutorPanel() {
       ) : null}
 
       <div className="grid two">
-        <label>
-          Mode
+        <label className="mm-field">
+          <span>الأسلوب</span>
           <select value={mode} onChange={(event) => setMode(event.target.value as TutorMode)}>
-            <option value="direct">Direct · مباشر</option>
-            <option value="socratic">Socratic · سقراطي</option>
+            <option value="direct">مباشر</option>
+            <option value="socratic">سقراطي (تلميحات)</option>
           </select>
         </label>
-        <label>
-          Language
+        <label className="mm-field">
+          <span>لغة الشرح</span>
           <select value={language} onChange={(event) => setLanguage(event.target.value as "ar" | "en")}>
-            <option value="en">English</option>
             <option value="ar">العربية</option>
+            <option value="en">English</option>
           </select>
         </label>
       </div>
@@ -231,7 +231,7 @@ export function PedagogicalTutorPanel() {
             checked={revealAnswer}
             onChange={(event) => setRevealAnswer(event.target.checked)}
           />
-          Reveal final answer / اكشف الجواب النهائي
+          اكشف الجواب النهائي
         </label>
       ) : null}
 
@@ -239,30 +239,30 @@ export function PedagogicalTutorPanel() {
       {error && /AI_TIER|اشتراك الذكاء|subscription required/i.test(error + errorAr) ? (
         <p className="muted">
           <Link className="btn" href="/redeem?need=ai&next=%2Fmath-solver">
-            Redeem AI access / تفعيل الذكاء
+            فعّل اشتراك الحلّال
           </Link>
         </p>
       ) : null}
       {busy ? (
-        <SkeletonBlock lines={4} label={retrying ? "Retrying… / إعادة المحاولة…" : "Tutoring…"} />
+        <SkeletonBlock lines={4} label={retrying ? "إعادة المحاولة…" : "جارٍ التحضير…"} />
       ) : null}
       {retrying ? (
         <p className="muted" style={{ marginTop: 4 }}>
-          Retrying… / إعادة المحاولة…
+          إعادة المحاولة…
         </p>
       ) : null}
 
       <button className="btn dark" type="button" disabled={busy || !ready} onClick={() => void submit()}>
-        {busy ? (retrying ? "Retrying…" : "…") : "Ask Prof. Munzer tutor / اسأل معلّم الأستاذ منذر"}
+        {busy ? (retrying ? "إعادة المحاولة…" : "جارٍ التحضير…") : "اسأل المعلّم الذكي"}
       </button>
 
       {result ? (
         <div className="mm-tutor-result" style={{ marginTop: 16 }}>
           <p>
-            <strong>Objective:</strong> {result.curriculumObjective}
+            <strong>الهدف:</strong> <span dir="auto">{result.curriculumObjective}</span>
           </p>
           <p>
-            <strong>Prerequisite:</strong> {result.prerequisiteConcept}
+            <strong>المتطلّب السابق:</strong> <span dir="auto">{result.prerequisiteConcept}</span>
           </p>
           {result.source === "demo" || result.warning || result.warningAr ? (
             <div className="mm-tutor-soft-notice" role="status">
@@ -307,7 +307,7 @@ export function PedagogicalTutorPanel() {
           </ol>
           {result.hints.length > 0 ? (
             <div>
-              <h3>Hints</h3>
+              <h3>تلميحات</h3>
               <ul>
                 {result.hints.map((hint) => (
                   <li key={hint.level}>
@@ -323,7 +323,7 @@ export function PedagogicalTutorPanel() {
             </div>
           ) : null}
           <div className="mm-tutor-final">
-            <h3>Final answer</h3>
+            <h3>الجواب النهائي</h3>
             <p>{result.finalAnswer}</p>
             {result.finalAnswerLatex ? <Katex tex={result.finalAnswerLatex} display /> : null}
           </div>

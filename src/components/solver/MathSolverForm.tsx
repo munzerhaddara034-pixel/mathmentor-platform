@@ -8,6 +8,7 @@ import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
 import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
+import { Icon } from "@/components/ui/Icon";
 
 type SolveMathResponse = {
   ok?: boolean;
@@ -26,12 +27,13 @@ function asSolverTrack(value: string | undefined): CertificateTrack | undefined 
 
 export function MathSolverForm() {
   const router = useRouter();
-  const { solverTrack, terminology, curriculum, ready } = useCurriculum();
+  const { solverTrack, curriculum, ready } = useCurriculum();
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
-  const [question, setQuestion] = useState("Solve x^2 - 5x + 6 = 0");
-  const [latex, setLatex] = useState("x^2-5x+6=0");
-  const [language, setLanguage] = useState<LessonLanguage>("en");
+  const [question, setQuestion] = useState("");
+  const [latex, setLatex] = useState("");
+  const [advanced, setAdvanced] = useState(false);
+  const [language, setLanguage] = useState<LessonLanguage>("ar");
   const [track, setTrack] = useState<CertificateTrack>("brevet");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -68,67 +70,97 @@ export function MathSolverForm() {
       const response = await fetch("/api/solve-math", { method: "POST", body: form, credentials: "same-origin" });
       const payload = (await response.json()) as SolveMathResponse;
       if (!response.ok || !payload.ok || !payload.id) {
-        setError(payload.error ?? "Could not solve.");
-        setErrorAr(payload.errorAr ?? "تعذّر الحل.");
+        setError("");
+        setErrorAr(payload.errorAr ?? "تعذّر حل المسألة الآن. حاول مجدداً بعد قليل.");
         setBusy(false);
         return;
       }
       router.push(payload.resultPath || `/math-solver/result/${payload.id}`);
     } catch {
-      setError("Network error.");
-      setErrorAr("خطأ في الشبكة.");
+      setError("");
+      setErrorAr("تعذّر الاتصال. تحقّق من الإنترنت وحاول مجدداً.");
       setBusy(false);
     }
   };
 
+  const empty = !question.trim() && !latex.trim() && !file;
+
   return (
     <div className="solver-form mm-mobile-stack">
-      <p className="muted">
-        Terminology: <strong>{terminology.derivative.en}</strong> /{" "}
-        <span dir="rtl">{terminology.derivative.ar}</span> · <strong>{terminology.limits.en}</strong> /{" "}
-        <span dir="rtl">{terminology.limits.ar}</span>
-      </p>
-      <div className="row sample-chips">
-        {SAMPLE_QUESTIONS.map((sample) => (
-          <button
-            key={sample.id}
-            type="button"
-            className="chip"
-            onClick={() => {
-              setQuestion(sample.question);
-              setLatex(formatLebaneseEquation(sample.question.replace(/Solve |Compute |Let /g, "")));
-              setTrack(sample.track);
-            }}
-          >
-            {sample.label}
+      <div className="mm-solver-photo">
+        <button type="button" className="btn dark mm-btn-lg" onClick={() => cameraRef.current?.click()}>
+          <Icon name="camera" size={20} /> صوّر المسألة
+        </button>
+        <button type="button" className="ghost-btn ink mm-btn-lg" onClick={() => fileRef.current?.click()}>
+          ارفع صورة
+        </button>
+        {file ? (
+          <button type="button" className="ghost-btn ink" onClick={() => pickFile(null)}>
+            إزالة الصورة
           </button>
-        ))}
+        ) : null}
       </div>
-      <label>
-        Question / السؤال
-        <textarea value={question} onChange={(event) => setQuestion(event.target.value)} rows={4} />
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={(event) => pickFile(event.target.files?.[0] ?? null)} />
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={(event) => pickFile(event.target.files?.[0] ?? null)}
+      />
+      {preview ? <img className="question-image" src={preview} alt="صورة المسألة" /> : null}
+
+      <label className="mm-field">
+        <span>أو اكتب المسألة</span>
+        <textarea
+          value={question}
+          onChange={(event) => setQuestion(event.target.value)}
+          rows={4}
+          dir="auto"
+          placeholder="اكتب نص المسألة هنا…"
+        />
       </label>
-      <label>
-        LaTeX (optional)
-        <input value={latex} onChange={(event) => setLatex(formatLebaneseEquation(event.target.value))} dir="ltr" />
-      </label>
+
+      <div className="mm-solver-samples">
+        <span className="muted">أمثلة سريعة:</span>
+        <div className="row sample-chips">
+          {SAMPLE_QUESTIONS.map((sample) => (
+            <button
+              key={sample.id}
+              type="button"
+              className="chip"
+              aria-label={sample.label}
+              onClick={() => {
+                setQuestion(sample.question);
+                setLatex(formatLebaneseEquation(sample.tex));
+                setTrack(sample.track);
+              }}
+            >
+              <Katex tex={sample.tex} />
+            </button>
+          ))}
+        </div>
+      </div>
+
       {latex ? (
         <p className="latex-preview">
           <Katex tex={latex} display />
         </p>
       ) : null}
+
       <div className="grid two">
-        <label>
-          Language
+        <label className="mm-field">
+          <span>لغة الحل</span>
           <select value={language} onChange={(event) => setLanguage(event.target.value as LessonLanguage)}>
+            <option value="ar">العربية</option>
             <option value="en">English</option>
             <option value="fr">Français</option>
-            <option value="ar">العربية</option>
           </select>
         </label>
-        <label>
-          Track
-          <select value={track} onChange={(event) => setTrack(event.target.value as CertificateTrack)}>
+        <label className="mm-field">
+          <span>المسار</span>
+          <select value={track} onChange={(event) => setTrack(event.target.value as CertificateTrack)} dir="ltr">
             <option value="brevet">Brevet</option>
             <option value="ls">Terminale LS</option>
             <option value="gs">Terminale GS</option>
@@ -138,49 +170,29 @@ export function MathSolverForm() {
           </select>
         </label>
       </div>
-      <div className="row" style={{ marginTop: 8 }}>
-        <button type="button" className="btn" onClick={() => fileRef.current?.click()}>
-          Upload image
-        </button>
-        <button type="button" className="btn" onClick={() => cameraRef.current?.click()}>
-          Camera
-        </button>
-        {file ? (
-          <button type="button" className="ghost" onClick={() => pickFile(null)}>
-            Clear photo
-          </button>
-        ) : null}
-      </div>
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        hidden
-        onChange={(event) => pickFile(event.target.files?.[0] ?? null)}
-      />
-      <input
-        ref={cameraRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        hidden
-        onChange={(event) => pickFile(event.target.files?.[0] ?? null)}
-      />
-      {preview ? <img className="question-image" src={preview} alt="Uploaded problem" /> : null}
-      <p className="muted">
-        Without <code>GEMINI_API_KEY</code> the demo solver still follows the official sequence (domain, limits with{" "}
-        <code>y=b</code>/<code>x=a</code>, variation table, boxed answers) on Brevet/Terminale patterns: quadratics,
-        limits, <code>(x-1)e^x</code>, systems, Pythagoras. Unclear photos return <code>needsRetake</code> — the engine
-        will not invent a problem.
+
+      <details className="mm-solver-advanced" open={advanced} onToggle={(event) => setAdvanced(event.currentTarget.open)}>
+        <summary>متقدّم: كتابة المعادلة بصيغة LaTeX</summary>
+        <label className="mm-field">
+          <span>
+            صيغة <bdi dir="ltr">LaTeX</bdi> (اختياري)
+          </span>
+          <input value={latex} onChange={(event) => setLatex(formatLebaneseEquation(event.target.value))} dir="ltr" />
+        </label>
+      </details>
+
+      <p className="muted mm-solver-note">
+        يتبع الحل تسلسل الامتحان الرسمي: مجال التعريف، النهايات، جدول التغيّرات، ثم الجواب النهائي في إطار. إذا كانت
+        الصورة غير واضحة سنطلب منك إعادة التصوير بدل تخمين المسألة.
       </p>
       <ApiErrorBanner error={error} errorAr={errorAr} />
       {busy ? (
         <div className="solver-submit-skeleton" aria-busy="true" style={{ marginTop: 12 }}>
-          <SkeletonBlock lines={3} label="Solving math…" />
+          <SkeletonBlock lines={3} label="جارٍ الحل…" />
         </div>
       ) : null}
-      <button className="btn dark" type="button" disabled={busy} onClick={() => void submit()}>
-        {busy ? "Solving…" : "Solve with Prof. Munzer AI / الأستاذ منذر حداره"}
+      <button className="btn dark mm-btn-lg" type="button" disabled={busy || empty} onClick={() => void submit()}>
+        {busy ? "جارٍ الحل…" : "حلّ المسألة"}
       </button>
     </div>
   );
