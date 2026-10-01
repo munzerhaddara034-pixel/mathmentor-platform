@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { Icon } from "@/components/ui/Icon";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
 import { MotionProvider } from "@/components/v2/motion/MotionProvider";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
@@ -143,7 +144,7 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
           {busy ? (
             <m.div key="typing" className="v2-thinking" {...fade} role="status" aria-live="polite">
               <p className="v2-ai-head">
-                <TutorOrb mini state="thinking" /> {t.tutor.thinking}
+                <TutorOrb mini state="thinking" /> {t.tutor.thinking} <AiTutorBadge label={t.persona.ai} />
               </p>
               <span className="v2-bub ai v2-typing" aria-hidden="true">
                 <i />

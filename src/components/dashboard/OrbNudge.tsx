@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { OpenAssistantButton } from "@/components/dashboard/OpenAssistantButton";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
 import type { DashboardCourse, DashboardReminder } from "@/lib/auth/dashboard";
 import type { Locale } from "@/lib/i18n/config";
@@ -29,9 +30,11 @@ function buildNudge(reminder: DashboardReminder | undefined, courses: DashboardC
 export function OrbNudge({ reminder, courses, m, locale }: { reminder?: DashboardReminder; courses: DashboardCourse[]; m: Messages; locale: Locale }) {
   const nudge = buildNudge(reminder, courses, m, locale);
   return (
-    <section className="v2-nudge glass" aria-label={m.persona.name}>
+    <section className="v2-nudge glass" aria-label={m.persona.label}>
       <div className="v2-nudge-copy">
-        <p className="v2-nudge-who">{m.persona.name}</p>
+        <p className="v2-nudge-who v2-persona-line">
+          {m.persona.name} <AiTutorBadge label={m.persona.ai} />
+        </p>
         <p className="v2-nudge-text">{nudge.text}</p>
       </div>
       <TutorOrb size={64} className="v2-nudge-orb" />

@@ -8,7 +8,7 @@ export const fr: Messages = {
       "La plateforme de maths de Munzer Haddara (MathMentor) : un tuteur IA qui explique pas à pas, des leçons au tableau et des cours particuliers en direct — Brevet et Terminale libanais, IB, Cambridge, SAT et AP.",
   },
   brand: { name: "Munzer Haddara", sub: "MathMentor", aria: "Munzer Haddara · MathMentor" },
-  persona: { name: "Professeur Munzer", teacher: "Prof. Munzer Haddara" },
+  persona: { name: "Professeur Munzer", teacher: "Prof. Munzer Haddara", ai: "Tuteur IA", label: "Professeur Munzer · tuteur IA" },
   common: {
     notifications: "Notifications",
     markAllRead: "Tout marquer comme lu",
@@ -92,8 +92,8 @@ export const fr: Messages = {
     links: "Liens de pied de page",
   },
   assistant: {
-    name: "Assistant du Professeur Munzer",
-    greeting: "Bonjour ! Je suis l'assistant du Professeur Munzer. Posez une question sur un cours, un exercice ou l'abonnement.",
+    name: "Professeur Munzer",
+    greeting: "Bonjour ! Je suis le Professeur Munzer, le tuteur IA de MathMentor. Posez une question sur un cours, un exercice ou l’abonnement.",
     fallback: "Impossible de répondre pour le moment. Réessayez bientôt ou contactez le Prof. Munzer Haddara sur WhatsApp.",
     close: "Fermer l'assistant",
     typing: "Réponse en cours…",
@@ -329,6 +329,7 @@ export const fr: Messages = {
     greeting:
       "Bonjour ! Photographiez votre exercice ou tapez-le. Je le résous pas à pas dans l’ordre de l’examen officiel : ensemble de définition, limites, tableau de variation, puis la réponse encadrée.",
     retakeNote: "Si la photo n’est pas nette, je vous demanderai de la reprendre au lieu de deviner.",
+    aiNote: "Je suis un tuteur IA fondé sur la méthode du Prof. Munzer Haddara, pas le professeur lui-même. Je peux me tromper ; les réponses que je ne peux pas confirmer entièrement sont marquées « À vérifier ».",
     samples: "Exemples rapides",
     sampleUse: "Utiliser cet exemple",
     photo: "Prendre une photo",

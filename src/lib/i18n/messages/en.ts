@@ -10,7 +10,7 @@ export const en = {
       "Munzer Haddara's math platform (MathMentor): an AI tutor that explains step by step, whiteboard lessons and live 1:1 sessions — Lebanese Brevet & Terminale, IB, Cambridge, SAT and AP.",
   },
   brand: { name: "Munzer Haddara", sub: "MathMentor", aria: "Munzer Haddara · MathMentor" },
-  persona: { name: "Professor Munzer", teacher: "Prof. Munzer Haddara" },
+  persona: { name: "Professor Munzer", teacher: "Prof. Munzer Haddara", ai: "AI tutor", label: "Professor Munzer · AI tutor" },
   common: {
     notifications: "Notifications",
     markAllRead: "Mark all as read",
@@ -94,8 +94,8 @@ export const en = {
     links: "Footer links",
   },
   assistant: {
-    name: "Professor Munzer's assistant",
-    greeting: "Hi! I'm Professor Munzer's assistant. Ask about a lesson, an exercise, or how to subscribe.",
+    name: "Professor Munzer",
+    greeting: "Hi! I'm Professor Munzer, MathMentor's AI tutor. Ask about a lesson, an exercise, or how to subscribe.",
     fallback: "I can't reply right now. Try again shortly, or contact Prof. Munzer Haddara on WhatsApp.",
     close: "Close the assistant",
     typing: "Replying…",
@@ -331,6 +331,7 @@ export const en = {
     greeting:
       "Hi! Snap your problem from the notebook or type it. I'll solve it step by step in the order of the official exam: domain, limits, variation table, then the boxed answer.",
     retakeNote: "If the photo isn't clear I'll ask you to retake it instead of guessing.",
+    aiNote: "I'm an AI tutor built on Prof. Munzer Haddara's method, not the teacher himself. I can make mistakes; answers I can't fully confirm are marked “Needs review”.",
     samples: "Quick examples",
     sampleUse: "Use this example",
     photo: "Take a photo",

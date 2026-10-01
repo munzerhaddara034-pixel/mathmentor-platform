@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { MathServer } from "@/components/ui/MathServer";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
 import type { Messages } from "@/lib/i18n/messages/en";
 import { AskBar } from "./AskBar";
@@ -26,8 +27,11 @@ export function HomeHeroV2({ m, signedIn }: { m: Messages; signedIn: boolean }) 
         ))}
       </div>
       <div className="v2-hero-copy">
-        <span className="v2-chip">
-          <span className="v2-dot" aria-hidden="true" /> {m.tutor.ready}
+        <span className="v2-persona-line">
+          <span className="v2-chip">
+            <span className="v2-dot" aria-hidden="true" /> {m.tutor.ready}
+          </span>
+          <AiTutorBadge label={m.persona.ai} />
         </span>
         <h1 id="v2-hero-title">
           {t.heroTitleA}

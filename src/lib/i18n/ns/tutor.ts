@@ -3,7 +3,6 @@ import type { Widen } from "../widen";
 
 /** PedagogicalTutorPanel chrome (the tutor's own answer stays in the explanation language the student picks). */
 const en = {
-  eyebrow: "Professor Munzer · AI tutor",
   title: "Learn the solution step by step",
   curriculumLine: "{curriculum} curriculum · {derivative} · {limits}",
   modesHelp: "Direct: a full solution with justification. Socratic: graded hints so you reach the solution yourself; the final answer only shows if you ask for it.",
@@ -36,7 +35,6 @@ const en = {
 export type TutorMessages = Widen<typeof en>;
 
 const ar: TutorMessages = {
-  eyebrow: "أستاذ منذر · المعلّم الذكي",
   title: "تعلّم الحل خطوة بخطوة",
   curriculumLine: "منهج {curriculum} · {derivative} · {limits}",
   modesHelp: "«مباشر»: حل كامل مع التبرير. «سقراطي»: تلميحات متدرّجة لتصل إلى الحل بنفسك، ولا يظهر الجواب النهائي إلا إذا طلبته.",
@@ -67,7 +65,6 @@ const ar: TutorMessages = {
 };
 
 const fr: TutorMessages = {
-  eyebrow: "Professeur Munzer · tuteur IA",
   title: "Apprendre la solution pas à pas",
   curriculumLine: "Programme {curriculum} · {derivative} · {limits}",
   modesHelp: "Direct : une solution complète et justifiée. Socratique : des indices progressifs pour trouver la solution vous-même ; la réponse finale n’apparaît que si vous la demandez.",

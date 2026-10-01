@@ -1,6 +1,7 @@
 import { MathServer } from "@/components/ui/MathServer";
 import { MixedMathServer } from "@/components/ui/MixedMathServer";
 import { FunctionGraph } from "@/components/v2/FunctionGraph";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
 import { Reveal } from "@/components/v2/motion/Reveal";
 import type { Locale } from "@/lib/i18n/config";
@@ -57,7 +58,7 @@ export function SolverThread({ query, m, locale }: { query: MathQueryRecord; m: 
 
       <Reveal index={index++} className="v2-thread-ai">
         <p className="v2-ai-head">
-          <TutorOrb mini /> {r.read}
+          <TutorOrb mini /> {r.read} <AiTutorBadge label={m.persona.ai} />
         </p>
         <div className="v2-bub ai">
           {query.given ? <MathServer tex={query.given.latex} display /> : <MixedMathServer as="p" text={query.question} />}

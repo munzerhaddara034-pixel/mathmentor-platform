@@ -3,6 +3,7 @@ import { PedagogicalTutorPanel } from "@/components/curriculum/PedagogicalTutorP
 import { SolverCurriculumBanner } from "@/components/curriculum/SolverCurriculumBanner";
 import { SolverChat, type SolverSample } from "@/components/solver/SolverChat";
 import { MathServer } from "@/components/ui/MathServer";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
 import { getSession } from "@/lib/auth/server";
 import { rich } from "@/lib/i18n/rich";
@@ -24,7 +25,10 @@ export default async function MathSolverPage({ searchParams }: { searchParams: P
       <header className="v2-solver-head">
         <TutorOrb size={44} />
         <div>
-          <h1>{s.title}</h1>
+          <div className="v2-persona-line">
+            <h1>{s.title}</h1>
+            <AiTutorBadge label={m.persona.ai} />
+          </div>
           <p className="v2-muted v2-small">
             <span className="v2-dot" aria-hidden="true" /> {s.subtitle}
           </p>
@@ -32,11 +36,12 @@ export default async function MathSolverPage({ searchParams }: { searchParams: P
       </header>
       <SolverCurriculumBanner />
       <p className="v2-ai-head">
-        <TutorOrb mini /> {m.persona.name}
+        <TutorOrb mini /> {m.persona.name} <AiTutorBadge label={m.persona.ai} />
       </p>
       <div className="v2-bub ai">
         <p>{s.greeting}</p>
         <p className="v2-muted v2-small">{s.retakeNote}</p>
+        <p className="v2-muted v2-small">{s.aiNote}</p>
       </div>
       <SolverChat samples={samples} initialQuestion={initialQuestion} focusPhoto={params.photo === "1"} />
       <PedagogicalTutorPanel />

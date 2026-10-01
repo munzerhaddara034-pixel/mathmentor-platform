@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { MathServer } from "@/components/ui/MathServer";
 import { FunctionGraph } from "@/components/v2/FunctionGraph";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
 import { rich } from "@/lib/i18n/rich";
 import type { Messages } from "@/lib/i18n/messages/en";
@@ -29,7 +30,7 @@ export function DemoConversation({ m }: { m: Messages }) {
           <span className="v2-example-tag">{m.common.example}</span>
           <p className="v2-bub me">{rich(t.demoQuestion, { f: <MathServer tex={EXAMPLE.tex} /> })}</p>
           <p className="v2-ai-head">
-            <TutorOrb mini /> {m.persona.name}
+            <TutorOrb mini /> {m.persona.name} <AiTutorBadge label={m.persona.ai} />
           </p>
           <div className="v2-bub ai">
             <p>{rich(t.demoAnswerA, { d: <MathServer tex="f'(x)=e^{x}+(x-1)e^{x}=x\,e^{x}" /> })}</p>

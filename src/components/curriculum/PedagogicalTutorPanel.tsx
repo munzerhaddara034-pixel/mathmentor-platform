@@ -8,6 +8,7 @@ import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import type { PedagogicalTutorResult, TutorMode } from "@/lib/curriculum/tutorTypes";
 import { useCurriculum } from "./CurriculumProvider";
 import { useI18n } from "@/components/i18n/I18nProvider";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { fmt } from "@/lib/i18n/format";
 import { tutorMessages, type TutorMessages } from "@/lib/i18n/ns/tutor";
 import { rich } from "@/lib/i18n/rich";
@@ -39,7 +40,7 @@ function friendlyHardFailure(
 
 export function PedagogicalTutorPanel() {
   const { curriculumId, curriculum, terminology, ready } = useCurriculum();
-  const { locale } = useI18n();
+  const { locale, m } = useI18n();
   const t = tutorMessages[locale];
   const term = (entry: { en: string; ar: string }) => (locale === "ar" ? entry.ar : entry.en);
   const [text, setText] = useState("");
@@ -169,7 +170,9 @@ export function PedagogicalTutorPanel() {
 
   return (
     <section className="card mm-tutor-panel mm-mobile-stack" style={{ marginTop: 20 }}>
-      <p className="eyebrow">{t.eyebrow}</p>
+      <p className="eyebrow v2-persona-line">
+        {m.persona.name} <AiTutorBadge label={m.persona.ai} />
+      </p>
       <h2>{t.title}</h2>
       <p className="muted">
         {fmt(t.curriculumLine, {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { useI18n } from "@/components/i18n/I18nProvider";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 
 type BotReply = { reply?: string };
 
@@ -50,9 +51,12 @@ export function ChatWidget() {
   return (
     <div className={`chat-widget${open ? " is-open" : ""}`}>
       {open ? (
-        <div className="chat-panel" role="dialog" aria-label={a.name}>
+        <div className="chat-panel" role="dialog" aria-label={m.persona.label}>
           <header>
-            <strong>{a.name}</strong>
+            <span className="v2-persona-line">
+              <strong>{a.name}</strong>
+              <AiTutorBadge label={m.persona.ai} onDark />
+            </span>
             <button type="button" onClick={() => setOpen(false)} aria-label={a.close}>
               ×
             </button>
@@ -89,8 +93,8 @@ export function ChatWidget() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        aria-label={a.name}
-        title={a.name}
+        aria-label={m.persona.label}
+        title={m.persona.label}
       >
         <Icon name={open ? "close" : "chat"} />
       </button>

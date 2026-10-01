@@ -3,6 +3,7 @@ import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPl
 import { SolverResultActions } from "@/components/solver/SolverResultActions";
 import { SolverThread } from "@/components/solver/SolverThread";
 import { PageWatermark } from "@/components/studio/IdentityWatermark";
+import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
@@ -33,7 +34,10 @@ export default async function SolverResultPage({ params }: { params: Promise<{ i
       <header className="v2-solver-head">
         <TutorOrb size={44} />
         <div>
-          <h1>{m.solver.title}</h1>
+          <div className="v2-persona-line">
+            <h1>{m.solver.title}</h1>
+            <AiTutorBadge label={m.persona.ai} />
+          </div>
           <p className="v2-muted v2-small">{m.solver.subtitle}</p>
         </div>
       </header>
