@@ -46,7 +46,8 @@ export function PedagogicalTutorPanel() {
   const [text, setText] = useState("");
   const [latex, setLatex] = useState("");
   const [mode, setMode] = useState<TutorMode>("direct");
-  const [language, setLanguage] = useState<"ar" | "en">(curriculum.defaultLanguage);
+  // English by default (same rule as the solver); Arabic on request.
+  const [language, setLanguage] = useState<"ar" | "en">("en");
   const [revealAnswer, setRevealAnswer] = useState(false);
   const [busy, setBusy] = useState(false);
   const [retrying, setRetrying] = useState(false);
@@ -220,8 +221,8 @@ export function PedagogicalTutorPanel() {
         <label className="mm-field">
           <span>{t.explanationLanguage}</span>
           <select value={language} onChange={(event) => setLanguage(event.target.value as "ar" | "en")}>
-            <option value="ar">العربية</option>
-            <option value="en">English</option>
+            <option value="en" lang="en">English</option>
+            <option value="ar" lang="ar">العربية</option>
           </select>
         </label>
       </div>
