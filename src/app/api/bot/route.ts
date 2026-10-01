@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { executeCodeEvolution } from "@/lib/agent/codeEvolutionAgent";
 import { canRunCodeEvolution, looksLikeCodeChange } from "@/lib/agent/codeEvolutionGate";
 import { generate, type GeminiPart } from "@/lib/solver/gemini/client";
+import { TUTOR_PERSONA_EN } from "@/lib/tutor/persona";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,40 @@ type BotJsonBody = {
   audioUrl?: unknown;
   mediaUrl?: unknown;
   url?: unknown;
+  /** Site language of the chat widget (en default); only picks the canned replies. */
+  locale?: unknown;
 };
+
+type ReplyLocale = "en" | "ar" | "fr";
+
+/** Canned widget replies, in the visitor's site language. Persona: Professor Munzer, disclosed as an AI tutor. */
+const CANNED: Record<ReplyLocale, { noKey: string; failed: string }> = {
+  en: {
+    noKey: "Hi! I'm Professor Munzer, MathMentor's AI tutor. AI replies aren't switched on yet — please try again soon.",
+    failed: "I got your message but can't reply right now. Please try again shortly.",
+  },
+  ar: {
+    noKey: "أهلاً بك! أنا أستاذ منذر، المعلّم بالذكاء الاصطناعي في MathMentor. الردود الذكية غير مفعّلة بعد — جرّب مجدداً قريباً.",
+    failed: "وصلتني رسالتك لكن لا أستطيع الرد الآن. جرّب مجدداً بعد قليل.",
+  },
+  fr: {
+    noKey: "Bonjour ! Je suis le Professeur Munzer, le tuteur IA de MathMentor. Les réponses IA ne sont pas encore activées — réessayez bientôt.",
+    failed: "J’ai bien reçu votre message, mais je ne peux pas répondre pour le moment. Réessayez dans un instant.",
+  },
+};
+
+function replyLocale(value: unknown): ReplyLocale {
+  return value === "ar" || value === "fr" ? value : "en";
+}
+
+/** Student/visitor chat prompt: the AI-tutor persona plus the widget's scope. */
+function chatPrompt(message: string): string {
+  return `${TUTOR_PERSONA_EN}
+In this chat widget you also answer short questions about MathMentor (lessons, exercises, subscriptions, live sessions with the real teacher). Be professional, brief and warm. Never invent prices, dates or promises; point to the relevant page or to Prof. Munzer Haddara's WhatsApp instead.
+Reply in the language the message is written in (English if unclear).
+
+Message: """${message}"""`;
+}
 
 function firstString(...values: unknown[]): string {
   for (const value of values) {
@@ -45,6 +79,7 @@ export async function POST(request: Request) {
     let message = "";
     let base64Audio = "";
     let mimeType = "audio/ogg";
+    let locale: ReplyLocale = "en";
 
     // 1. استخراج البيانات سواء كانت JSON أو FormData
     if (contentType.includes("multipart/form-data")) {
@@ -59,6 +94,7 @@ export async function POST(request: Request) {
     } else {
       const body = (await request.json().catch(() => ({}))) as BotJsonBody;
       message = firstString(body.message, body.text, body.query);
+      locale = replyLocale(body.locale);
 
       // استخراج الصوت إذا وجد بصيغة base64 أو رابط
       const inlineAudio = firstString(body.audio, body.base64, body.voice);
@@ -91,7 +127,7 @@ export async function POST(request: Request) {
       try {
         message = await geminiReply([
           {
-            text: "أنت المساعد الذكي محمد للأستاذ منذر حداره في منصة MathMentor. استمع للتسجيل الصوتي بدقة وفرّغه نصياً كما قيل تماماً دون أي زيادات أو مقدمات.",
+            text: "You are MathMentor's speech-to-text transcriber. Listen carefully and transcribe the recording exactly as spoken (any language, including Lebanese Arabic), with no additions or preamble.",
           },
           { inline_data: { mime_type: mimeType.split(";")[0], data: base64Audio } },
         ]);
@@ -117,22 +153,18 @@ export async function POST(request: Request) {
     // 4. استجابة الذكاء الاصطناعي العامة في حال لم يكن طلباً برمجياً
     if (!apiKey) {
       return NextResponse.json({
-        reply: "🤝 محمد: أهلاً بك! تم استلام رسالتك، ومفتاح الذكاء الاصطناعي قيد التفعيل.",
+        reply: CANNED[locale].noKey,
         source: "system",
       });
     }
 
     let aiText = "";
     try {
-      aiText = await geminiReply([
-        {
-          text: `أنت محمد، السكرتير الذكي والمساعد التنفيذي للأستاذ منذر حداره لمنصة MathMentor للرياضيات. أجب باحترافية واختصار وود:\n\nرسالة الأستاذ أو المستخدم: "${message}"`,
-        },
-      ]);
+      aiText = await geminiReply([{ text: chatPrompt(message) }]);
     } catch (err) {
       console.error("Gemini chat error:", err instanceof Error ? err.message : "unknown");
     }
-    const finalReply = aiText || "🤝 أهلاً بك يا أستاذ منذر، استلمت رسالتك وجارٍ متابعتها.";
+    const finalReply = aiText || CANNED[locale].failed;
 
     return NextResponse.json({ reply: finalReply, source: "gemini" });
   } catch (error) {

@@ -171,7 +171,7 @@ export async function recordSolution(user: PublicUser, input: EngineInput, solut
     heygenJobId,
     videoUrl,
   });
-  // محمد (مدقّق الحلول): background second check; failures fall back to the current "pending" audit.
+  // AI verification pass (مدقّق الحلول): background second check; failures fall back to the current "pending" audit.
   scheduleSolutionVerification(record);
   return record;
 }

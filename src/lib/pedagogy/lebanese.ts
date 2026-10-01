@@ -6,7 +6,7 @@
  * Never Al-Tarah / الطارة.
  */
 
-import { AGENT_PERSONA_AR, AGENT_PERSONA_EN } from "@/lib/agent/persona";
+import { TUTOR_PERSONA_AR, TUTOR_PERSONA_EN } from "@/lib/tutor/persona";
 
 export const INSTRUCTOR_EN = "Prof. Munzer Haddara";
 export const INSTRUCTOR_AR = "الأستاذ منذر حداره";
@@ -210,7 +210,7 @@ Equation formatting (Lebanese official booklet / Word Insert Equation):
 - Limits under the symbol: \\lim\\limits_{x \\to a}. Integral bounds above and below: \\int\\limits_{a}^{b}.`;
 
 /** Shared exam-methodology block injected into every AI system prompt. */
-export const OFFICIAL_METHODOLOGY_PROMPT = `You are ${INSTRUCTOR_EN} (${INSTRUCTOR_AR}), expert mathematics teacher for the Lebanese Official Curriculum: Brevet (Grade 9), Terminale LS/GS/SE/LH, IB, and SAT.
+export const OFFICIAL_METHODOLOGY_PROMPT = `You are an AI assistant applying the method of ${INSTRUCTOR_EN} (${INSTRUCTOR_AR}), expert mathematics teacher for the Lebanese Official Curriculum: Brevet (Grade 9), Terminale LS/GS/SE/LH, IB, and SAT. You are not the teacher himself; never claim to be.
 
 Never use the name ${FORBIDDEN_NAME_EN} or ${FORBIDDEN_NAME_AR}. The academy is ${ACADEMY_LINE}.
 
@@ -220,13 +220,13 @@ ${METHODOLOGY_BODY}`;
 export const SOLVER_TRACKS = ["brevet", "ls", "se", "gs", "lh", "sat", "university"] as const;
 
 /**
- * Student solver prompt. The «محمد» doctor persona comes first; the per-curriculum style block and
+ * Student solver prompt. The «أستاذ منذر» AI-tutor persona (doctor-level rigour, never the human teacher) comes first; the per-curriculum style block and
  * the solution language are appended per request (see src/lib/solver/prompt.ts).
  */
-export const SOLVER_SYSTEM_PROMPT = `${AGENT_PERSONA_EN}
-${AGENT_PERSONA_AR}
+export const SOLVER_SYSTEM_PROMPT = `${TUTOR_PERSONA_EN}
+${TUTOR_PERSONA_AR}
 
-For this task you are the student-facing solver of ${ACADEMY_LINE} (${INSTRUCTOR_LINE}). Never use the name ${FORBIDDEN_NAME_EN} or ${FORBIDDEN_NAME_AR}.
+For this task you are the student-facing solver of ${ACADEMY_LINE} (method of ${INSTRUCTOR_LINE}); you are its AI tutor, not the teacher. Never use the name ${FORBIDDEN_NAME_EN} or ${FORBIDDEN_NAME_AR}.
 Levels you serve: middle school (Brevet, Grades 7–9), secondary (Lebanese Terminale GS/LS/SE/LH, French Bac, IB, AP, SAT/ACT, IGCSE/A Level) and university (rigorous proofs).
 
 Default methodology (Lebanese official exams). When the CURRICULUM STYLE block below differs, follow the CURRICULUM STYLE block:

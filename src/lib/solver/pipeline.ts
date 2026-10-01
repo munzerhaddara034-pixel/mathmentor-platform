@@ -1,5 +1,5 @@
 /**
- * Solve → deterministic CAS check → (strong tier) one repair pass → synchronous «محمد» verification.
+ * Solve → deterministic CAS check → (strong tier) one repair pass → synchronous AI verification pass.
  * Middle school / SAT stay on the fast path (CAS only; the verifier runs in the background).
  */
 import { NEEDS_REVIEW_AR } from "@/lib/agent/persona";
@@ -43,8 +43,9 @@ function applyVerdict(solution: MathSolution, verdict: SolutionVerdict, report: 
   if (verdict.status === "needs_fix" && corrected) {
     const latex = formatLebaneseEquation(verdict.correctedFinalAnswerLatex || solution.finalAnswerLatex);
     solution.steps.push({
-      title: "Correction — Dr. Mohamed (verifier)",
-      titleAr: "تصحيح محمد (مدقّق الحلول)",
+      title: "Correction — Professor Munzer (AI tutor), second check",
+      titleFr: "Correction — Professeur Munzer (tuteur IA), seconde vérification",
+      titleAr: "تصحيح — أستاذ منذر (معلّم بالذكاء الاصطناعي)، تحقّق ثانٍ",
       examVerbEn: "Check",
       latex,
       explanationEn: verdict.issues.join(" ") || verdict.noteAr,
@@ -55,7 +56,7 @@ function applyVerdict(solution: MathSolution, verdict: SolutionVerdict, report: 
     solution.finalAnswerLatex = latex;
     if (verdict.correctedFinalAnswer) solution.finalAnswer = verdict.correctedFinalAnswer;
     solution.needsReview = true;
-    solution.warning = `${NEEDS_REVIEW_AR} — corrected by Dr. Mohamed (verifier) before delivery.`;
+    solution.warning = `${NEEDS_REVIEW_AR} — corrected by the AI second check before delivery.`;
     return { status: "needs_fix", noteAr: verdict.noteAr, mode: "sync", applied: true };
   }
   solution.needsReview = true;

@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { apiRequireAiAccess } from "@/lib/auth/guards";
 import { extractJson } from "@/lib/solver/llm";
 import { generate, geminiKey } from "@/lib/solver/gemini/client";
+import { TUTOR_PERSONA_EN } from "@/lib/tutor/persona";
 
 export const runtime = "nodejs";
 
@@ -15,14 +16,14 @@ type SolveBody = { problem?: unknown; question?: unknown; text?: unknown };
 const MAX_PROBLEM_CHARS = 4000;
 
 function prompt(problem: string): string {
-  return `أنت محمد، دكتور الرياضيات لمنصة MathMentor (الأستاذ منذر حداره).
-حلّ المسألة التالية حلاً مفصلاً دقيقاً خطوة بخطوة، مع LaTeX بصيغة KaTeX (\\frac بدل الكسر المائل، x^{2})، وتحقق من الجواب بالتعويض.
-اكتب بالإنجليزية ما لم تكن المسألة مكتوبة بالعربية أو الفرنسية.
-المسألة:
+  return `${TUTOR_PERSONA_EN}
+Solve the following problem in full, step by step and with doctor-level rigour, using KaTeX LaTeX (\\frac instead of slash fractions, x^{2}), and check the answer by substitution.
+Write in English unless the problem is written in Arabic or French (then answer in that language).
+Problem:
 """
 ${problem}
 """
-أعد JSON فقط: { "summary": string, "steps": string[], "finalAnswer": string }`;
+Return JSON only: { "summary": string, "steps": string[], "finalAnswer": string }`;
 }
 
 export async function POST(req: NextRequest) {

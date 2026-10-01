@@ -1,10 +1,11 @@
 /**
- * محمد as مدقّق الحلول — a second, independent Gemini pass over AI solutions.
+ * Independent verification pass (مدقّق الحلول) of the Professor Munzer AI tutor — a second Gemini pass over AI solutions.
  * University / Bac: runs synchronously before the student sees the answer (see pipeline.ts).
  * Middle school: runs in the background and only updates the admin audit log.
  */
 import { z } from "zod";
-import { AGENT_PERSONA_AR, NEEDS_REVIEW_AR, SOLUTION_VERIFIER_RULES_AR } from "@/lib/agent/persona";
+import { NEEDS_REVIEW_AR, SOLUTION_VERIFIER_RULES_AR } from "@/lib/agent/persona";
+import { TUTOR_VERIFIER_PERSONA_EN } from "@/lib/tutor/persona";
 import { generate, type CallRecord } from "./gemini/client";
 import type { ModelTier } from "./gemini/models";
 import { extractJson, geminiApiKey } from "./llm";
@@ -45,7 +46,7 @@ function buildPrompt(record: VerifiableSolution, options: VerifyOptions): string
     .map((step, index) => `${index + 1}. ${step.title}: ${step.latex}${step.explanationEn ? ` — ${step.explanationEn}` : ""}`)
     .join("\n");
   return [
-    AGENT_PERSONA_AR,
+    TUTOR_VERIFIER_PERSONA_EN,
     ...SOLUTION_VERIFIER_RULES_AR,
     "Check EVERY sub-question: is each one answered, is each boxed result equal to what the steps derived, are theorems stated with hypotheses, is uniqueness proved on the whole domain?",
     "Never claim you multiplied or substituted unless you show the numbers in issues.",
@@ -89,7 +90,7 @@ export async function verifySolution(record: VerifiableSolution, options: Verify
     const result = called.verdict;
     const issues = (result.issues ?? []).map((item) => item.slice(0, 300)).slice(0, 8);
     if (result.verdict === "correct" && issues.length === 0) {
-      return { status: "verified", noteAr: `✅ محمد: تم التحقق — ${result.noteAr ?? "الحل صحيح"}`.slice(0, 500), issues, calls };
+      return { status: "verified", noteAr: `✅ المدقّق الآلي: تم التحقق — ${result.noteAr ?? "الحل صحيح"}`.slice(0, 500), issues, calls };
     }
     if (result.verdict === "incorrect") {
       const fix = result.correctedFinalAnswer ? ` · التصحيح المقترح: ${result.correctedFinalAnswer}` : "";
@@ -102,7 +103,7 @@ export async function verifySolution(record: VerifiableSolution, options: Verify
         calls,
       };
     }
-    return { status: "unverified", noteAr: `⚠️ ${NEEDS_REVIEW_AR} — محمد غير متأكد: ${result.noteAr ?? issues[0] ?? ""}`.slice(0, 500), issues, calls };
+    return { status: "unverified", noteAr: `⚠️ ${NEEDS_REVIEW_AR} — المدقّق الآلي غير متأكد: ${result.noteAr ?? issues[0] ?? ""}`.slice(0, 500), issues, calls };
   } catch (error) {
     const reason = error instanceof Error ? error.message : "unknown";
     return { status: "unverified", noteAr: `⚠️ ${NEEDS_REVIEW_AR} — تعذّر التحقق (${reason.slice(0, 120)}).`, issues: [], calls };
@@ -115,7 +116,7 @@ async function notifyMunzer(record: MathQueryRecord, verdict: SolutionVerdict): 
     kind: "solver_issue",
     title: "Solution needs review",
     titleAr: `حل ${NEEDS_REVIEW_AR}`,
-    body: `Mohamed flagged an AI solution: ${record.question.slice(0, 120)}`,
+    body: `The AI verifier flagged a Professor Munzer (AI tutor) solution: ${record.question.slice(0, 120)}`,
     bodyAr: verdict.noteAr,
     href: "/admin",
     relatedId: record.id,

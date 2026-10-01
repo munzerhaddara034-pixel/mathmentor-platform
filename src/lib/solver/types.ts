@@ -4,7 +4,7 @@ import type { CallRecord } from "./gemini/client";
 
 export type SolverSource = "gemini" | "openai" | "demo";
 
-/** Outcome of «محمد» + CAS verification as applied to the answer the student sees. */
+/** Outcome of the AI verification pass + CAS check as applied to the answer the student sees. */
 export type SolverVerification = {
   status: "verified" | "needs_fix" | "unverified";
   noteAr: string;

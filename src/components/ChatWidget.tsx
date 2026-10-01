@@ -10,7 +10,7 @@ type BotReply = { reply?: string };
 export const OPEN_ASSISTANT_EVENT = "mm:open-assistant";
 
 export function ChatWidget() {
-  const { m } = useI18n();
+  const { m, locale } = useI18n();
   const a = m.assistant;
   const FALLBACK_REPLY = a.fallback;
   const [open, setOpen] = useState(false);
@@ -36,7 +36,7 @@ export function ChatWidget() {
       const response = await fetch("/api/bot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, locale }),
       });
       const data = (await response.json()) as BotReply;
       setLog((rows) => [...rows, { role: "bot", text: response.ok && data.reply ? data.reply : FALLBACK_REPLY }]);
