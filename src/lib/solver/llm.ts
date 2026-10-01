@@ -1,9 +1,16 @@
 import { z } from "zod";
 import { SOLVER_SYSTEM_PROMPT } from "@/lib/pedagogy/lebanese";
+import type { LessonLanguage } from "@/lib/studio/timeline";
 import { assembleSolution, type GraphSpec } from "./assemble";
+import { detectCurriculum, type CurriculumDecision } from "./curriculum/index";
 import { demoSolve, type SolveRequest } from "./demoSolver";
+import { generate, GeminiError, type CallRecord, type GeminiPart } from "./gemini/client";
+import { tierForLevel, type ModelTier } from "./gemini/models";
+import { buildSolverPrompt } from "./prompt";
 import { retakeSolution } from "./retake";
 import type { MathSolution, SolverStep, StudyKind } from "./types";
+
+export { geminiModels } from "./gemini/models";
 
 const geminiStepSchema = z.object({
   title: z.string(),
@@ -15,8 +22,9 @@ const geminiStepSchema = z.object({
   theoremEn: z.string().optional(),
   theoremFr: z.string().optional(),
   theoremAr: z.string().optional(),
-  explanationEn: z.string(),
-  explanationFr: z.string(),
+  // Only the solution language is required now (English by default).
+  explanationEn: z.string().optional(),
+  explanationFr: z.string().optional(),
   explanationAr: z.string().optional(),
   boxed: z.boolean().optional(),
 });
@@ -28,7 +36,7 @@ const geminiJsonSchema = z.object({
   summary: z.string().optional(),
   examTip: z
     .object({
-      en: z.string(),
+      en: z.string().default(""),
       fr: z.string().optional(),
       ar: z.string().optional(),
     })
@@ -52,12 +60,14 @@ const geminiJsonSchema = z.object({
   given: z
     .object({
       latex: z.string(),
-      aimEn: z.string(),
+      aimEn: z.string().default(""),
       aimFr: z.string().optional(),
-      aimAr: z.string(),
+      aimAr: z.string().default(""),
     })
     .optional(),
   steps: z.array(geminiStepSchema).optional(),
+  /** Machine-checkable claims for the CAS pass (validated leniently in cas/claims.ts). */
+  checks: z.array(z.unknown()).optional().catch(undefined),
   graph: z
     .object({
       fn: z.string(),
@@ -94,13 +104,6 @@ export function hasGeminiKey() {
 
 const SYSTEM = SOLVER_SYSTEM_PROMPT;
 
-export function geminiModels() {
-  const pinned = process.env.GEMINI_MODEL?.trim();
-  return pinned
-    ? [pinned]
-    : ["gemini-flash-latest", "gemini-3.6-flash", "gemini-flash-lite-latest", "gemini-3.5-flash"];
-}
-
 function solutionFromLlm(
   parsed: z.infer<typeof geminiJsonSchema>,
   request: SolveRequest & { imageBase64?: string; imageName?: string },
@@ -119,21 +122,30 @@ function solutionFromLlm(
     return retake;
   }
 
-  const steps: SolverStep[] = (parsed.steps ?? []).map((step) => ({
-    title: step.title,
-    titleFr: step.titleFr,
+  const language: LessonLanguage = request.language ?? "en";
+  const steps: SolverStep[] = (parsed.steps ?? []).map((step) => {
+    const primary =
+      (language === "fr" ? step.explanationFr : language === "ar" ? step.explanationAr : step.explanationEn) ||
+      step.explanationEn ||
+      step.explanationFr ||
+      step.explanationAr ||
+      "";
+    return {
+      title: step.title,
+      titleFr: step.titleFr,
       titleAr: step.titleAr,
       examVerbEn: step.examVerbEn,
       examVerbFr: step.examVerbFr,
       latex: step.latex,
-    theoremEn: step.theoremEn,
-    theoremFr: step.theoremFr,
-    theoremAr: step.theoremAr,
-    explanationEn: step.explanationEn,
-    explanationFr: step.explanationFr,
-      explanationAr: step.explanationAr,
+      theoremEn: step.theoremEn,
+      theoremFr: step.theoremFr,
+      theoremAr: step.theoremAr,
+      explanationEn: step.explanationEn || primary,
+      explanationFr: step.explanationFr || (language === "fr" ? primary : ""),
+      explanationAr: step.explanationAr || (language === "ar" ? primary : undefined),
       boxed: step.boxed,
-  }));
+    };
+  });
 
   const graph: GraphSpec | undefined = parsed.graph
     ? {
@@ -155,12 +167,12 @@ function solutionFromLlm(
     topic: parsed.topic || "AI solution",
     topicTag: parsed.topicTag,
     track: (parsed.track as MathSolution["track"]) || request.track || "ls",
-    language: request.language,
+    language,
     source,
     recognizedFromImage: request.imageBase64 ? request.imageName : undefined,
     given: parsed.given,
     examTip: parsed.examTip
-      ? { en: parsed.examTip.en, fr: parsed.examTip.fr || parsed.examTip.en, ar: parsed.examTip.ar }
+      ? { en: parsed.examTip.en, fr: parsed.examTip.fr || "", ar: parsed.examTip.ar }
       : undefined,
     studyKind: parsed.studyKind as StudyKind | undefined,
     asymptotes: parsed.asymptotes,
@@ -197,60 +209,90 @@ export function extractJson(text: string) {
   }
 }
 
-export async function solveWithGemini(
-  request: SolveRequest & { imageBase64?: string; mimeType?: string },
-): Promise<MathSolution> {
-  const key = geminiApiKey();
-  if (!key) {
-    throw new Error("GEMINI_API_KEY is not set.");
-  }
+export type GeminiSolveRequest = SolveRequest & {
+  imageBase64?: string;
+  mimeType?: string;
+  /** Explicit curriculum from the form ("auto" = detect). */
+  curriculum?: string;
+  /** Platform curriculum id (fallback for detection). */
+  platformCurriculum?: string;
+  /** Precomputed decision (repair pass reuses it). */
+  decision?: CurriculumDecision;
+  /** CAS failures from a previous attempt: triggers a repair solve. */
+  feedback?: string;
+};
 
-  const userText = [
-    request.latex ? `LaTeX: ${request.latex}` : "",
-    request.question ? `Question: ${request.question}` : "",
-    `Language preference: ${request.language ?? "en"}`,
-    `Track hint: ${request.track ?? "ls"}`,
-  ]
-    .filter(Boolean)
-    .join("\n");
+type TierBudget = { thinking: "low" | "medium" | "high"; maxOutputTokens: number; deadlineMs: number; callTimeoutMs: number };
 
-  const parts: Array<Record<string, unknown>> = [{ text: `${SYSTEM}\n\n${userText || "Solve the problem in the image."}` }];
+/** Token caps and time budgets per level. Middle school targets < 15 s. */
+function budgetFor(decision: CurriculumDecision, tier: ModelTier): TierBudget {
+  if (tier === "fast") return { thinking: "low", maxOutputTokens: 8192, deadlineMs: 30_000, callTimeoutMs: 25_000 };
+  if (decision.level === "university") return { thinking: "high", maxOutputTokens: 20_480, deadlineMs: 180_000, callTimeoutMs: 100_000 };
+  return { thinking: "medium", maxOutputTokens: 16_384, deadlineMs: 120_000, callTimeoutMs: 90_000 };
+}
+
+export function decideFor(request: GeminiSolveRequest): CurriculumDecision {
+  return (
+    request.decision ??
+    detectCurriculum({
+      question: request.question,
+      latex: request.latex,
+      track: request.track,
+      selected: request.curriculum,
+      platform: request.platformCurriculum,
+    })
+  );
+}
+
+export function tierFor(decision: CurriculumDecision): ModelTier {
+  return tierForLevel(decision.level, { satAct: decision.curriculum === "sat_act" && !decision.proof });
+}
+
+export async function solveWithGemini(request: GeminiSolveRequest): Promise<MathSolution> {
+  const started = Date.now();
+  const decision = decideFor(request);
+  const tier = tierFor(decision);
+  const budget = budgetFor(decision, tier);
+  const language: LessonLanguage = request.language ?? "en";
+  const text = buildSolverPrompt({
+    question: request.question,
+    latex: request.latex,
+    track: request.track,
+    language,
+    decision,
+    feedback: request.feedback,
+  });
+  const parts: GeminiPart[] = [{ text }];
   if (request.imageBase64) {
-    parts.push({
-      inline_data: {
-        mime_type: request.mimeType || "image/jpeg",
-        data: request.imageBase64,
-      },
-    });
+    parts.push({ inline_data: { mime_type: request.mimeType || "image/jpeg", data: request.imageBase64 } });
   }
 
-  let lastError = "Gemini request failed.";
-  for (const model of geminiModels()) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts }],
-          generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
-        }),
-      });
-      if (!response.ok) {
-        lastError = `Gemini ${model} ${response.status}: ${(await response.text()).slice(0, 240)}`;
-        continue;
-      }
-      const json = (await response.json()) as {
-        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-      };
-      const text = json.candidates?.[0]?.content?.parts?.map((part) => part.text ?? "").join("\n") ?? "";
-      const parsed = geminiJsonSchema.parse(extractJson(text));
-      return solutionFromLlm(parsed, request, "gemini");
-    } catch (error) {
-      lastError = error instanceof Error ? error.message : lastError;
-    }
+  let calls: CallRecord[] = [];
+  try {
+    const result = await generate({ parts, tier, ...budget });
+    calls = result.calls;
+    const parsed = geminiJsonSchema.parse(extractJson(result.text));
+    const track = decision.level === "university" ? "university" : undefined;
+    const solution = solutionFromLlm(parsed, { ...request, language, track: track ?? request.track }, "gemini");
+    if (track) solution.track = track;
+    solution.curriculum = decision.curriculum;
+    solution.solverMeta = {
+      curriculum: decision.curriculum,
+      level: decision.level,
+      tier,
+      model: result.model,
+      calls,
+      solveMs: Date.now() - started,
+      costUsd: calls.reduce((sum, call) => sum + call.costUsd, 0),
+      checks: parsed.checks,
+      repaired: Boolean(request.feedback),
+    };
+    return solution;
+  } catch (error) {
+    const log = error instanceof GeminiError ? error.calls : calls;
+    const message = error instanceof Error ? error.message : "Gemini request failed.";
+    throw new GeminiError(message, log);
   }
-  throw new Error(lastError);
 }
 
 export async function solveWithOpenAI(request: SolveRequest): Promise<MathSolution> {

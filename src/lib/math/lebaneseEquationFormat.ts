@@ -50,18 +50,25 @@ const SPOKEN_TO_LATEX: Array<[RegExp, string]> = [
 
 const ATOM = String.raw`(?:\\[A-Za-z]+(?:\[[^\]]*\])?(?:\{[^{}]*\})*|[A-Za-z0-9]+(?:_\{[^{}]*\}|_[A-Za-z0-9]+|\^\{[^{}]*\}|\^[A-Za-z0-9]+)*|\([^()]{1,120}\)|\|[^\|]{1,80}\|)`;
 
-function protectSegments(tex: string, pattern: RegExp): { text: string; slots: string[] } {
+/**
+ * Each protect/restore pass owns a distinct token prefix. Sharing one prefix let the
+ * fraction pass restore `\text{…}` slots with fractions (or "") — see tests.
+ */
+type SegmentPrefix = "TXT" | "FRC" | "CHK";
+
+function protectSegments(tex: string, pattern: RegExp, prefix: SegmentPrefix): { text: string; slots: string[] } {
   const slots: string[] = [];
   const text = tex.replace(pattern, (match) => {
     const i = slots.length;
     slots.push(match);
-    return `@@MM${i}@@`;
+    return `@@${prefix}${i}@@`;
   });
   return { text, slots };
 }
 
-function restoreSegments(tex: string, slots: string[]) {
-  return tex.replace(/@@MM(\d+)@@/g, (_, n: string) => slots[Number(n)] ?? "");
+function restoreSegments(tex: string, slots: string[], prefix: SegmentPrefix) {
+  const token = new RegExp(`@@${prefix}(\\d+)@@`, "g");
+  return tex.replace(token, (match: string, n: string) => slots[Number(n)] ?? match);
 }
 
 function stripOuterParens(value: string) {
@@ -89,6 +96,7 @@ function convertSlashFractions(tex: string) {
   const protectedFrac = protectSegments(
     tex,
     /\\(?:d|t)?frac\s*\{[^{}]*\}\s*\{[^{}]*\}|https?:\/\/\S+/g,
+    "FRC",
   );
   let next = protectedFrac.text;
   const pair = new RegExp(`(${ATOM})\\s*/\\s*(${ATOM})`, "g");
@@ -101,7 +109,7 @@ function convertSlashFractions(tex: string) {
     new RegExp(String.raw`(\\(?:sin|cos|tan|ln|log|cot|sec|csc)\s*[A-Za-z0-9]+)\s*/\s*(${ATOM})`, "g"),
     (_m, num: string, den: string) => `\\frac{${num}}{${stripOuterParens(den)}}`,
   );
-  return restoreSegments(next, protectedFrac.slots);
+  return restoreSegments(next, protectedFrac.slots, "FRC");
 }
 
 function braceSuperscripts(tex: string) {
@@ -186,20 +194,20 @@ export function spokenMathToLebaneseLatex(spoken: string) {
 export function formatLebaneseEquation(input: string) {
   if (!input) return input;
   let tex = convertUnicodeMiniMath(input);
-  const textBits = protectSegments(tex, /\\text\s*\{[^{}]*\}/g);
+  const textBits = protectSegments(tex, /\\text\s*\{[^{}]*\}/g, "TXT");
   tex = textBits.text;
   tex = applySpokenReplacements(tex);
   tex = convertSqrts(tex);
   tex = braceSuperscripts(tex);
   tex = convertSlashFractions(tex);
   tex = convertLimitsAndIntegrals(tex);
-  tex = restoreSegments(tex, textBits.slots);
+  tex = restoreSegments(tex, textBits.slots, "TXT");
   return tex;
 }
 
 /** True when the string still has a student-visible slash fraction, unbraced caret, or `sqrt`. */
 export function hasForbiddenEquationForm(tex: string) {
-  const stripped = protectSegments(tex, /\\text\s*\{[^{}]*\}|https?:\/\/\S+/g).text;
+  const stripped = protectSegments(tex, /\\text\s*\{[^{}]*\}|https?:\/\/\S+/g, "CHK").text;
   if (/(?<![\\A-Za-z])sqrt\b/i.test(stripped)) return true;
   const withoutFrac = stripped.replace(/\\(?:d|t)?frac\s*\{[^{}]*\}\s*\{[^{}]*\}/g, "F");
   if (/(?<!:)(?<!\\)\//.test(withoutFrac)) return true;

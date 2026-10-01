@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { executeCodeEvolution } from "@/lib/agent/codeEvolutionAgent";
 import { canRunCodeEvolution, looksLikeCodeChange } from "@/lib/agent/codeEvolutionGate";
+import { generate, type GeminiPart } from "@/lib/solver/gemini/client";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,6 @@ type BotJsonBody = {
   url?: unknown;
 };
 
-type GeminiResponse = {
-  candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-};
-
 function firstString(...values: unknown[]): string {
   for (const value of values) {
     if (typeof value === "string" && value) return value;
@@ -28,8 +25,18 @@ function firstString(...values: unknown[]): string {
   return "";
 }
 
-function geminiText(data: GeminiResponse): string {
-  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+/** Plain-text Gemini call over the shared fast model list (no retired model ids). */
+async function geminiReply(parts: GeminiPart[]): Promise<string> {
+  const result = await generate({
+    parts,
+    tier: "fast",
+    thinking: "low",
+    maxOutputTokens: 2048,
+    deadlineMs: 30_000,
+    callTimeoutMs: 25_000,
+    json: false,
+  });
+  return result.text.trim();
 }
 
 export async function POST(request: Request) {
@@ -82,33 +89,12 @@ export async function POST(request: Request) {
       }
 
       try {
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        message = await geminiReply([
           {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [
-                {
-                  parts: [
-                    {
-                      text: "أنت المساعد الذكي محمد للأستاذ منذر حداره في منصة MathMentor. استمع للتسجيل الصوتي بدقة وفرّغه نصياً كما قيل تماماً دون أي زيادات أو مقدمات.",
-                    },
-                    {
-                      inline_data: {
-                        mime_type: mimeType.split(";")[0],
-                        data: base64Audio,
-                      },
-                    },
-                  ],
-                },
-              ],
-            }),
+            text: "أنت المساعد الذكي محمد للأستاذ منذر حداره في منصة MathMentor. استمع للتسجيل الصوتي بدقة وفرّغه نصياً كما قيل تماماً دون أي زيادات أو مقدمات.",
           },
-        );
-
-        const geminiData = (await geminiRes.json()) as GeminiResponse;
-        message = geminiText(geminiData);
+          { inline_data: { mime_type: mimeType.split(";")[0], data: base64Audio } },
+        ]);
       } catch (err) {
         console.error("Gemini Transcription Error:", err);
       }
@@ -136,32 +122,21 @@ export async function POST(request: Request) {
       });
     }
 
-    const aiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `أنت محمد، السكرتير الذكي والمساعد التنفيذي للأستاذ منذر حداره لمنصة MathMentor للرياضيات. أجب باحترافية واختصار وود:\n\nرسالة الأستاذ أو المستخدم: "${message}"`,
-                },
-              ],
-            },
-          ],
-        }),
-      },
-    );
-
-    const aiData = (await aiRes.json()) as GeminiResponse;
-    const finalReply = geminiText(aiData) || "🤝 أهلاً بك يا أستاذ منذر، استلمت رسالتك وجارٍ متابعتها.";
+    let aiText = "";
+    try {
+      aiText = await geminiReply([
+        {
+          text: `أنت محمد، السكرتير الذكي والمساعد التنفيذي للأستاذ منذر حداره لمنصة MathMentor للرياضيات. أجب باحترافية واختصار وود:\n\nرسالة الأستاذ أو المستخدم: "${message}"`,
+        },
+      ]);
+    } catch (err) {
+      console.error("Gemini chat error:", err instanceof Error ? err.message : "unknown");
+    }
+    const finalReply = aiText || "🤝 أهلاً بك يا أستاذ منذر، استلمت رسالتك وجارٍ متابعتها.";
 
     return NextResponse.json({ reply: finalReply, source: "gemini" });
   } catch (error) {
     console.error("Bot Route Error:", error);
-    const detail = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ reply: `خطأ في معالجة الطلب: ${detail}` }, { status: 500 });
+    return NextResponse.json({ reply: "خطأ في معالجة الطلب، حاول مجدداً بعد قليل." }, { status: 500 });
   }
 }
