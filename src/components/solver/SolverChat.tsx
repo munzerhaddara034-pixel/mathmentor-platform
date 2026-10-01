@@ -11,6 +11,7 @@ import { TutorOrb } from "@/components/v2/TutorOrb";
 import { MotionProvider } from "@/components/v2/motion/MotionProvider";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
+import { SOLVER_CURRICULUM_CHOICES, type SolverCurriculumChoice } from "./curriculumChoices";
 
 /** KaTeX JS only loads if the student opens the LaTeX option (samples are server-rendered). */
 const Katex = dynamic(() => import("@/components/studio/Katex").then((mod) => mod.Katex), { ssr: false });
@@ -19,14 +20,16 @@ type SolveMathResponse = { ok?: boolean; id?: string; resultPath?: string; error
 
 export type SolverSample = { id: string; label: string; tex: string; question: string; track: CertificateTrack; math: ReactNode };
 
-const SOLVER_TRACKS: CertificateTrack[] = ["brevet", "ls", "gs", "se", "sat", "lh", "eb7", "eb8", "s1"];
-const TRACK_OPTIONS: { value: CertificateTrack; label: string }[] = [
+const SOLVER_TRACKS: CertificateTrack[] = ["brevet", "ls", "gs", "se", "sat", "lh", "eb7", "eb8", "s1", "university"];
+/** Exam names are proper nouns (shown as-is); `university` is translated. */
+const TRACK_OPTIONS: { value: CertificateTrack; label?: string }[] = [
   { value: "brevet", label: "Brevet" },
   { value: "ls", label: "Terminale LS" },
   { value: "gs", label: "Terminale GS" },
   { value: "se", label: "Terminale SE" },
   { value: "sat", label: "SAT" },
   { value: "lh", label: "LH" },
+  { value: "university" },
 ];
 
 function asSolverTrack(value: string | undefined): CertificateTrack | undefined {
@@ -42,13 +45,15 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
   const s = t.solver;
   const router = useRouter();
   const reduce = useReducedMotion();
-  const { solverTrack, ready } = useCurriculum();
+  const { solverTrack, curriculumId, ready } = useCurriculum();
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const cameraButton = useRef<HTMLButtonElement>(null);
   const [question, setQuestion] = useState(initialQuestion);
   const [latex, setLatex] = useState("");
-  const [language, setLanguage] = useState<LessonLanguage>(locale);
+  // Solutions default to English; Arabic / French only when the student picks them (solver-doctor rule).
+  const [language, setLanguage] = useState<LessonLanguage>("en");
+  const [examStyle, setExamStyle] = useState<SolverCurriculumChoice>("auto");
   const [track, setTrack] = useState<CertificateTrack>("brevet");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -87,6 +92,8 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
       form.set("latex", latex);
       form.set("language", language);
       form.set("track", track);
+      form.set("curriculum", examStyle);
+      form.set("platformCurriculum", curriculumId);
       if (file) form.set("image", file);
       const response = await fetch("/api/solve-math", { method: "POST", body: form, credentials: "same-origin" });
       const payload = (await response.json()) as SolveMathResponse;
@@ -154,6 +161,30 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
         ) : null}
       </div>
 
+      <div className="v2-solver-style">
+        <label className="mm-field">
+          <span>{s.styleLabel}</span>
+          <select value={examStyle} onChange={(event) => setExamStyle(event.target.value as SolverCurriculumChoice)} aria-describedby="v2-solver-style-help">
+            {SOLVER_CURRICULUM_CHOICES.map((id) => (
+              <option key={id} value={id}>
+                {s.curricula[id]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="mm-field">
+          <span>{s.language}</span>
+          <select value={language} onChange={(event) => setLanguage(event.target.value as LessonLanguage)}>
+            <option value="en" lang="en">English</option>
+            <option value="ar" lang="ar">العربية</option>
+            <option value="fr" lang="fr">Français</option>
+          </select>
+        </label>
+        <p id="v2-solver-style-help" className="v2-muted v2-small">
+          {s.styleHelp}
+        </p>
+      </div>
+
       <form
         className="v2-dock glass"
         onSubmit={(event) => {
@@ -173,19 +204,11 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
           <summary>{s.options}</summary>
           <div className="v2-dock-options-grid">
             <label className="mm-field">
-              <span>{s.language}</span>
-              <select value={language} onChange={(event) => setLanguage(event.target.value as LessonLanguage)}>
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-                <option value="fr">Français</option>
-              </select>
-            </label>
-            <label className="mm-field">
               <span>{s.track}</span>
               <select value={track} onChange={(event) => setTrack(event.target.value as CertificateTrack)} dir="ltr">
                 {TRACK_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {option.label ?? s.trackUniversity}
                   </option>
                 ))}
               </select>

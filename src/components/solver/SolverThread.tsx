@@ -12,15 +12,15 @@ import type { MathQueryRecord, SolverStep } from "@/lib/solver/types";
 
 type Tri = { en?: string; fr?: string; ar?: string };
 
-/** Pick the UI-locale variant of AI content, falling back to English / whatever exists. */
-function pick(locale: Locale, value: Tri): string {
-  return (value[locale] || value.en || value.fr || value.ar || "").trim();
+/** Pick the requested variant of AI content, falling back to English / whatever exists. */
+function pick(lang: Locale, value: Tri): string {
+  return (value[lang] || value.en || value.fr || value.ar || "").trim();
 }
 
-function stepText(step: SolverStep, locale: Locale) {
+function stepText(step: SolverStep, lang: Locale) {
   return {
-    title: pick(locale, { en: step.title, fr: step.titleFr, ar: step.titleAr }),
-    body: pick(locale, { en: step.explanationEn, fr: step.explanationFr, ar: step.explanationAr }),
+    title: pick(lang, { en: step.title, fr: step.titleFr, ar: step.titleAr }),
+    body: pick(lang, { en: step.explanationEn, fr: step.explanationFr, ar: step.explanationAr }),
   };
 }
 
@@ -36,12 +36,16 @@ function graphFor(query: MathQueryRecord) {
 
 /**
  * Solver result as a conversation (server-rendered KaTeX): question → "I read" → key idea → steps →
- * graph → gold result card. Items fade in with a CSS stagger (static under reduced motion).
+ * graph → (needs review) → gold result card. Items fade in with a CSS stagger (static under reduced motion).
+ * AI prose follows the solution language the student asked for (and the curriculum's answer style), not
+ * the UI locale; chrome stays in the UI locale.
  */
 export function SolverThread({ query, m, locale }: { query: MathQueryRecord; m: Messages; locale: Locale }) {
   const r = m.result;
-  const tip = query.examTip ? pick(locale, query.examTip) : query.summary;
-  const aim = query.given ? pick(locale, { en: query.given.aimEn, fr: query.given.aimFr, ar: query.given.aimAr }) : "";
+  const lang: Locale = query.language ?? locale;
+  const tip = query.examTip ? pick(lang, query.examTip) : query.summary;
+  const aim = query.given ? pick(lang, { en: query.given.aimEn, fr: query.given.aimFr, ar: query.given.aimAr }) : "";
+  const style = query.curriculum ? m.solver.curricula[query.curriculum] : "";
   const plotted = query.needsRetake ? null : graphFor(query);
   let index = 0;
   return (
@@ -57,7 +61,11 @@ export function SolverThread({ query, m, locale }: { query: MathQueryRecord; m: 
         </p>
         <div className="v2-bub ai">
           {query.given ? <MathServer tex={query.given.latex} display /> : <MixedMathServer as="p" text={query.question} />}
-          {aim ? <p dir="auto">{aim}</p> : null}
+          {aim ? (
+            <p dir="auto" lang={lang}>
+              {aim}
+            </p>
+          ) : null}
         </div>
       </Reveal>
 
@@ -71,19 +79,33 @@ export function SolverThread({ query, m, locale }: { query: MathQueryRecord; m: 
           {tip ? (
             <Reveal index={index++} className="v2-keyidea">
               <span className="v2-keyidea-label">{r.keyIdea}</span>
-              <p dir="auto">{tip}</p>
+              <p dir="auto" lang={lang}>
+                {tip}
+              </p>
+            </Reveal>
+          ) : null}
+
+          {style ? (
+            <Reveal index={index++} className="v2-style-chip-row">
+              <span className="v2-chip v2-style-chip">{fmt(r.style, { style })}</span>
             </Reveal>
           ) : null}
 
           <section aria-label={r.steps} className="v2-steps">
             {query.steps.map((step, stepIndex) => {
-              const text = stepText(step, locale);
+              const text = stepText(step, lang);
               return (
                 <Reveal key={`${step.title}-${stepIndex}`} index={index++} className={`v2-step glass${step.boxed ? " is-boxed" : ""}`}>
                   <p className="v2-step-n">{fmt(r.step, { n: stepIndex + 1 })}</p>
-                  <h3 dir="auto">{text.title}</h3>
+                  <h3 dir="auto" lang={lang}>
+                    {text.title}
+                  </h3>
                   {step.latex ? <MathServer tex={step.latex} display /> : null}
-                  {text.body ? <p dir="auto">{text.body}</p> : null}
+                  {text.body ? (
+                    <p dir="auto" lang={lang}>
+                      {text.body}
+                    </p>
+                  ) : null}
                 </Reveal>
               );
             })}
@@ -100,8 +122,21 @@ export function SolverThread({ query, m, locale }: { query: MathQueryRecord; m: 
             </Reveal>
           ) : null}
 
-          <Reveal index={index++} className="v2-result">
-            <span className="v2-result-label">{r.result}</span>
+          {query.needsReview ? (
+            <Reveal index={index++} className="v2-step glass is-warn v2-review">
+              <h3>
+                <span aria-hidden="true">⚠️ </span>
+                {r.reviewTitle}
+              </h3>
+              <p>{r.reviewBody}</p>
+            </Reveal>
+          ) : null}
+
+          <Reveal index={index++} className={`v2-result${query.needsReview ? " is-review" : ""}`}>
+            <span className="v2-result-label">
+              {r.result}
+              {query.needsReview ? ` · ${r.reviewTitle}` : ""}
+            </span>
             <MathServer tex={query.finalAnswerLatex || query.finalAnswer} display />
             {query.finalAnswer && query.finalAnswerLatex ? <MixedMathServer as="p" text={query.finalAnswer} /> : null}
           </Reveal>

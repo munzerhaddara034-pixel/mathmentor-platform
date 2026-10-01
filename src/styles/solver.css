@@ -82,3 +82,17 @@ html.theme-light .v2-keyidea-label, [data-theme="light"] .v2-keyidea-label { col
   .v2-dock { bottom: 16px; }
   .v2-solver-head h1 { font-size: 24px; }
 }
+
+/* solver-doctor port: exam-style picker, answer-style chip, needs-review state */
+.v2-solver-style { display: grid; gap: 8px 12px; grid-template-columns: minmax(0, 1fr); align-items: end; }
+.v2-solver-style .mm-field { margin: 0; min-inline-size: 0; }
+.v2-solver-style select { inline-size: 100%; min-block-size: 44px; }
+.v2-solver-style > p { margin: 0; grid-column: 1 / -1; }
+@media (min-width: 560px) {
+  .v2-solver-style { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+.v2-style-chip-row { display: flex; }
+.v2-style-chip { font-size: 13px; font-weight: 600; color: var(--ink); max-inline-size: 100%; white-space: normal; }
+.v2-review { border-width: 1px; border-style: solid; background: rgb(var(--rose) / .08); }
+.v2-review h3 { color: var(--heading); }
+.v2-result.is-review { border-color: rgb(var(--rose) / .55); background: linear-gradient(180deg, rgb(var(--rose) / .10), rgb(var(--cta) / .06)); }
