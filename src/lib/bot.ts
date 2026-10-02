@@ -3,7 +3,10 @@ export async function botReply(question: string): Promise<string> {
     const response = await fetch("https://mathmentor-platform.onrender.com/api/bot", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: question }),
+      body: JSON.stringify({
+        message: question,
+        context: "أنت البروفيسور دكتور محمد، خبير عالمي في علوم الرياضيات لكافة المراحل (المتوسطة، الثانوية، والجامعية) ولجميع المناهج الدولية. قدم حلولاً دقيقة جداً وشروحات أكاديمية مفصلة. استخدم KaTeX للمعادلات الرياضية بصيغة Word Equation. التزم بأسلوب تعليمي احترافي تحت إشراف الأستاذ منذر حدارة."
+      }),
     });
     const data = await response.json();
     return data.reply || "🤝 أهلاً بك يا أستاذ منذر، تم استلام رسالتك.";
