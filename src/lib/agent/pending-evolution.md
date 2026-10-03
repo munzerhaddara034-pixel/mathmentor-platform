@@ -1,7 +1,7 @@
 # Agent code-evolution draft
 
 Request (Arabic/EN):
-محمد أمر تعديل جعل المنصه بالغه انكليزي مع وضع زر تبديل اللغه
+أمر جعل الفديوه شرح بالغه الانكليزي ووضع زر تبديل اللغه وان يكون بحرفيه تامه
 
 — Generated for instructor approval. Replace with real patch before commit if needed.
 Brand: الأستاذ منذر حداره
