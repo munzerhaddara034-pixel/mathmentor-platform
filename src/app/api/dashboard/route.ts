@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { academyLessons } from "@/lib/academyLessons";
+import { requireRole } from "@/lib/auth/server";
 import { readStore } from "@/lib/store";
 
 export async function GET() {
+  const gate = await requireRole(["teacher"]);
+  if (!gate.ok) return gate.error;
   const store = await readStore();
   const passed = store.progress.filter((item) => item.passedQuiz).length;
   const views = academyLessons.map((lesson) => ({

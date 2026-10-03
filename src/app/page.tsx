@@ -1,34 +1,41 @@
 import Link from "next/link";
+import { getSession } from "@/lib/auth/server";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const user = await getSession();
   return (
     <main className="shell">
       <section className="hero">
-        <p className="eyebrow">A clearer way to master mathematics</p>
+        <p className="eyebrow">Math Mentor</p>
         <h1>
-          Confidence is built
+          ثقة في الرياضيات
           <br />
-          <span className="accent">one proof at a time.</span>
+          <span className="accent">تُبنى درساً بعد درس.</span>
         </h1>
         <p>
-          صف كامل: الأستاذ منذر يكتب على اللوح والتلاميذ يتابعون. مساعد الذكاء الاصطناعي يعد رسائل المدارس والاشتراك،
-          ولا يرسل شيئاً قبل موافقة الأستاذ.
+          منصة الأستاذ منذر حدارة لطلاب الثانوية والشهادة المتوسطة في لبنان: صف يكتب على اللوح، بنوك بمستوى الامتحان،
+          ومساعد ذكي يراجع الأستاذ قبل أي رسالة تخرج.
         </p>
         <div className="row">
-          <Link href="/classroom" className="btn">
-            Classroom studio
-          </Link>
+          {user ? (
+            <Link href="/dashboard" className="btn">
+              لوحة التحكم
+            </Link>
+          ) : (
+            <>
+              <Link href="/signup" className="btn">
+                ابدأ كطالب
+              </Link>
+              <Link href="/login" className="ghost-btn">
+                تسجيل الدخول
+              </Link>
+            </>
+          )}
           <Link href="/lessons" className="ghost-btn">
-            Watch lessons
+            شاهد الدروس
           </Link>
           <Link href="/practice" className="ghost-btn">
             بنك الأسئلة
-          </Link>
-          <Link href="/subscribe" className="ghost-btn">
-            Subscription
-          </Link>
-          <Link href="/assistant" className="ghost-btn">
-            AI employee
           </Link>
         </div>
       </section>
@@ -36,17 +43,17 @@ export default function HomePage() {
         <article className="card">
           <p className="eyebrow">1</p>
           <h3>صفوف كل المستويات</h3>
-          <p className="muted">فيديوهات صف 7 و8 و9 و11 و12 وSAT: الأستاذ يكتب، والتلاميذ ينظرون إلى اللوح.</p>
+          <p className="muted">فيديوهات الصف 7 و8 و9 و11 و12 وSAT: الأستاذ يكتب، والتلاميذ ينظرون إلى اللوح.</p>
         </article>
         <article className="card">
           <p className="eyebrow">2</p>
-          <h3>مساعد يدير المنصة</h3>
-          <p className="muted">يعد رسائل المدارس والطلاب وطريقة الاشتراك، ثم ينتظر موافقة الأستاذ منذر.</p>
+          <h3>مسارات الشهادة</h3>
+          <p className="muted">علوم الحياة، اجتماع واقتصاد، علوم عامة، والشهادة المتوسطة — تدريب بأسلوب النماذج اللبنانية.</p>
         </article>
         <article className="card">
           <p className="eyebrow">3</p>
-          <h3>لا إرسال بلا اعتماد</h3>
-          <p className="muted">لا درس جديد ولا رسالة لولي أمر أو مدرسة تخرج قبل قرار الأستاذ.</p>
+          <h3>مساعد الأستاذ منذر</h3>
+          <p className="muted">دردشة عائمة في كل صفحة للشرح والاشتراك والدعم، بالعربية أولاً.</p>
         </article>
       </section>
     </main>

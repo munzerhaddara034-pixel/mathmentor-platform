@@ -10,7 +10,7 @@ export default function WatchLessonPage() {
   const pack = getVideoLessonPack(params.id);
   if (!pack) {
     return (
-      <main className="shell">
+      <main className="shell" dir="ltr">
         <h1>Lesson not found</h1>
         <p className="muted">No bilingual explainer is wired for “{params.id}”.</p>
         <Link href="/lessons">Back to video lessons</Link>

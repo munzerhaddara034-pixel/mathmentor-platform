@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { requireRole } from "@/lib/auth/server";
 import { updateDraft } from "@/lib/store";
 import type { ReviewStatus } from "@/lib/types";
 
 export async function POST(request: Request) {
+  const gate = await requireRole(["teacher"]);
+  if (!gate.ok) return gate.error;
   const body = (await request.json()) as {
     id?: string;
     status?: ReviewStatus;

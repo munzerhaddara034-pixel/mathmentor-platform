@@ -44,7 +44,7 @@ export default function StudentPage() {
   };
 
   return (
-    <main className="shell">
+    <main className="shell" dir="rtl">
       <p className="eyebrow">Student desk</p>
       <h1>تقدمك، درسك التالي، ودردشة مع صورة الدفتر</h1>
       <p className="muted">
