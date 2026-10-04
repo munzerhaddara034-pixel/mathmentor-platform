@@ -83,7 +83,10 @@ test("agent branch policy: only feat/fix/chore/docs, never main / master / agent
 test("Hamza (/admin/team): no typed live-branch override; server enforces the branch policy", () => {
   const card = src("components/admin/team/ProposalCard.tsx");
   assert.doesNotMatch(card, /confirmBranch|target === "live"|typeLiveBranch/);
-  assert.match(card, /agentCommitBranchCheck/);
+  // Hamza v2: the feature-branch field lives in the Approval #1 panel.
+  const approvePanel = src("components/admin/team/ApprovePanel.tsx");
+  assert.doesNotMatch(approvePanel, /confirmBranch|target === "live"|typeLiveBranch/);
+  assert.match(approvePanel, /agentCommitBranchCheck/);
   const approval = src("lib/team/approval.ts");
   assert.doesNotMatch(approval, /confirmBranch/);
   assert.match(approval, /agentCommitBranchCheck\(branch, \{ liveBranch: config\.baseBranch \}\)/);
