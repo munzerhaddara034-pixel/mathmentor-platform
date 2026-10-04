@@ -302,3 +302,17 @@ test("reply status line: delivered → sent note; failed send / build failure �
   assert.equal(attachmentStatusNoteAr({ hadAttachment: false, pdfError: "font" }), PDF_BUILD_FAILED_AR);
   assert.equal(attachmentStatusNoteAr({ hadAttachment: false }), "");
 });
+
+test("PDFs show readable maths only: no raw 'LaTeX (Word Equation): …' line (unicode blocks + Latin fallback)", async () => {
+  const { solutionPdfBlocks, solutionPdfLatin, solutionWhatsAppTextAr } = await import("../src/lib/agent/media/solutionFormat.ts");
+  const blocks = solutionPdfBlocks(sampleSolution, { createdAt: new Date("2026-10-05T00:00:00Z") });
+  const texts = blocks.map((b) => b.text || "").join("\n");
+  assert.ok(!/LaTeX|Word Equation/.test(texts), "no LaTeX source line in the branded PDF");
+  assert.ok(!texts.includes("\\{"), "no raw LaTeX escapes");
+  assert.ok(blocks.some((b) => b.kind === "highlight" && b.text.startsWith("الجواب النهائي:")), "readable final answer kept");
+  const latin = solutionPdfLatin(sampleSolution);
+  const raw = latin.toString("latin1") + streams(latin).map((s) => s.data.toString("latin1")).join("\n");
+  assert.ok(!/LaTeX \(Word Equation\)/.test(raw), "Latin fallback PDF drops the line too");
+  assert.match(raw, /FINAL ANSWER/);
+  assert.ok(!/LaTeX \(Word Equation\)/.test(solutionWhatsAppTextAr(sampleSolution)), "WhatsApp text never carried it");
+});
