@@ -1,5 +1,5 @@
 import { createId } from "../ids";
-import { readJsonFile, withStoreLock, writeJsonFile } from "../dataDir";
+import { readJsonFile, updateJsonFile, withStoreLock } from "../dataDir";
 import { isAdminEmail } from "./adminAllowlist";
 import {
   checkVerificationToken,
@@ -84,6 +84,11 @@ export type PublicUser = {
   liveCredits: number;
   aiExpiresAt: string | null;
   emailVerified: boolean;
+  /**
+   * The phone the user actually saved, or null. `phone` above keeps a display fallback for
+   * watermarks; notifications (WhatsApp) must use this field so they never go to the fallback number.
+   */
+  contactPhone: string | null;
 };
 
 export function defaultAiExpiry(from = new Date(), days = AI_ACCESS_DAYS) {
@@ -130,6 +135,7 @@ function toPublic(user: AuthUser): PublicUser {
     liveCredits: migrated.liveCredits ?? 0,
     aiExpiresAt: migrated.aiExpiresAt ?? null,
     emailVerified: isEmailVerified(migrated),
+    contactPhone: migrated.phone?.trim() || null,
   };
 }
 
@@ -158,25 +164,67 @@ async function readAuthStoreUnlocked(): Promise<AuthStoreData> {
   return { users: store.users.map(migrateUser), sessions: store.sessions, revokedTokens: store.revokedTokens };
 }
 
-async function writeAuthStoreUnlocked(store: AuthStoreData) {
-  await writeJsonFile(AUTH_FILE, {
+function serializeAuthStore(store: AuthStoreData): AuthStoreData {
+  return {
     users: store.users,
     sessions: store.sessions,
     revokedTokens: pruneRevoked(store.revokedTokens),
-  });
+  };
 }
 
 async function readAuthStore(): Promise<AuthStoreData> {
   return withStoreLock(AUTH_FILE, readAuthStoreUnlocked);
 }
 
+/**
+ * Locked read-modify-write of auth.json. In-process it is serialised by the store lock; on Postgres
+ * `updateJsonFile` also row-locks the document (SELECT … FOR UPDATE), so several instances can no
+ * longer overwrite each other's changes.
+ */
 async function mutateAuth<T>(fn: (store: AuthStoreData) => Promise<T> | T): Promise<T> {
-  return withStoreLock(AUTH_FILE, async () => {
-    const store = await readAuthStoreUnlocked();
-    const result = await fn(store);
-    await writeAuthStoreUnlocked(store);
-    return result;
+  let result!: T;
+  await updateJsonFile<Partial<AuthStoreData> | null>(AUTH_FILE, null, async (raw) => {
+    const store = normalizeAuthStore(raw ?? {});
+    const migrated: AuthStoreData = { users: store.users.map(migrateUser), sessions: store.sessions, revokedTokens: store.revokedTokens };
+    result = await fn(migrated);
+    return serializeAuthStore(migrated);
   });
+  return result;
+}
+
+/** The auth store document key (mm_documents.key on Postgres). */
+export const AUTH_DOCUMENT_KEY = AUTH_FILE;
+
+/**
+ * Pure: apply a confirmed payment to the raw auth.json document. Merges the tier, adds the plan's
+ * live credits once, and sets the AI expiry to `expiresAt` for AI_TIER / BOTH plans.
+ * Returns the next document and the user's public view (undefined when the user is unknown).
+ */
+export function applyPaidEntitlementToAuthDoc(
+  raw: unknown,
+  userId: string,
+  planId: string,
+  expiresAt: Date,
+): { doc: AuthStoreData; user?: PublicUser; previousAiExpiresAt: string | null } {
+  const store = normalizeAuthStore((raw && typeof raw === "object" ? raw : {}) as Partial<AuthStoreData>);
+  const users = store.users.map(migrateUser);
+  const doc: AuthStoreData = { users, sessions: store.sessions, revokedTokens: store.revokedTokens };
+  const user = users.find((item) => item.id === userId);
+  if (!user) return { doc: serializeAuthStore(doc), previousAiExpiresAt: null };
+  const previousAiExpiresAt = user.aiExpiresAt ?? null;
+  const incoming = planIdToSubscriptionType(planId);
+  user.entitlementPlanId = planId;
+  user.subscriptionType = mergeSubscription(user.subscriptionType ?? null, incoming);
+  user.liveCredits = (user.liveCredits ?? 0) + liveCreditsForPlan(planId);
+  if (incoming === "AI_TIER" || incoming === "BOTH") user.aiExpiresAt = expiresAt.toISOString();
+  return { doc: serializeAuthStore(doc), user: toPublic(user), previousAiExpiresAt };
+}
+
+/** Pure: current AI expiry of one user in a raw auth.json document (for the confirm dialog / maths). */
+export function aiExpiryFromAuthDoc(raw: unknown, userId: string): string | null {
+  const store = normalizeAuthStore((raw && typeof raw === "object" ? raw : {}) as Partial<AuthStoreData>);
+  const user = store.users.find((item) => item.id === userId);
+  return user ? migrateUser(user).aiExpiresAt ?? null : null;
 }
 
 export async function findUserByEmail(email: string) {

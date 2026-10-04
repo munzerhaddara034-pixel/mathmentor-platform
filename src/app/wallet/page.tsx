@@ -113,6 +113,9 @@ export default function WalletPage() {
           <button className="btn dark" type="button" onClick={() => setOpen(true)}>
             {t.redeemOpen}
           </button>
+          <a className="btn" href="/wallet/pay" style={{ marginInlineStart: 8 }}>
+            {t.iPaid}
+          </a>
         </article>
       </div>
       <section className="card" style={{ marginBlockStart: 20 }}>

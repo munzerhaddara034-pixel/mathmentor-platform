@@ -13,7 +13,8 @@ export type NotificationKind =
   | "exam_submitted"
   | "solver_issue"
   | "device_login"
-  | "whish_payment";
+  | "whish_payment"
+  | "payment";
 
 export type AppNotification = {
   id: string;

@@ -145,6 +145,118 @@ export const SCHEMA_MIGRATIONS: SchemaMigration[] = [
       ALTER TABLE mm_profile_users ADD COLUMN IF NOT EXISTS locale TEXT;
     `,
   },
+  {
+    id: "007_payments",
+    description: "Manual payment claims (Whish / OMT, USD) reviewed by the admin + receipt images (bytea)",
+    sql: `
+      CREATE TABLE IF NOT EXISTS mm_payments (
+        id                  TEXT PRIMARY KEY,
+        user_id             TEXT NOT NULL,
+        payer_name          TEXT NOT NULL CHECK (char_length(btrim(payer_name)) BETWEEN 2 AND 120),
+        payer_email         TEXT CHECK (payer_email IS NULL OR (char_length(payer_email) <= 254 AND payer_email LIKE '%_@_%')),
+        payer_phone         TEXT CHECK (payer_phone IS NULL OR payer_phone ~ '^\\+[0-9]{8,15}$'),
+        plan                TEXT NOT NULL CHECK (char_length(plan) BETWEEN 1 AND 40),
+        period              TEXT NOT NULL DEFAULT 'monthly' CHECK (period IN ('monthly', 'term')),
+        pricing_region      TEXT CHECK (pricing_region IN ('lebanon', 'gcc', 'international', 'admissions_us')),
+        expected_amount_usd NUMERIC(12,2) NOT NULL CHECK (expected_amount_usd > 0),
+        amount              NUMERIC(12,2) NOT NULL CHECK (amount > 0),
+        currency            TEXT NOT NULL DEFAULT 'USD' CHECK (currency = 'USD'),
+        method              TEXT NOT NULL CHECK (method IN ('whish', 'omt')),
+        reference           TEXT NOT NULL CHECK (reference ~ '^[A-Z0-9][A-Z0-9._/-]{2,63}$'),
+        reference_raw       TEXT NOT NULL CHECK (char_length(reference_raw) <= 100),
+        transfer_date       DATE NOT NULL,
+        receipt_url         TEXT,
+        order_id            TEXT,
+        status              TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'rejected')),
+        submitted_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+        reviewed_at         TIMESTAMPTZ,
+        reviewed_by         TEXT,
+        note                TEXT CHECK (note IS NULL OR char_length(note) <= 1000),
+        period_start        TIMESTAMPTZ,
+        period_end          TIMESTAMPTZ,
+        owner_notified_at   TIMESTAMPTZ,
+        student_notified_at TIMESTAMPTZ,
+        CONSTRAINT mm_payments_contact_chk CHECK (payer_email IS NOT NULL OR payer_phone IS NOT NULL),
+        CONSTRAINT mm_payments_review_chk CHECK (
+          (status = 'pending' AND reviewed_at IS NULL AND reviewed_by IS NULL) OR
+          (status <> 'pending' AND reviewed_at IS NOT NULL AND reviewed_by IS NOT NULL)),
+        CONSTRAINT mm_payments_confirmed_chk CHECK (status <> 'confirmed' OR (period_start IS NOT NULL AND period_end > period_start)),
+        CONSTRAINT mm_payments_rejected_chk CHECK (status <> 'rejected' OR (note IS NOT NULL AND btrim(note) <> ''))
+      );
+      -- A reference can be claimed again only after the earlier claim was rejected ("not received").
+      CREATE UNIQUE INDEX IF NOT EXISTS mm_payments_method_reference_active
+        ON mm_payments (method, reference) WHERE status IN ('pending', 'confirmed');
+      -- One open claim per student and plan (double clicks / spam); another plan is still allowed.
+      CREATE UNIQUE INDEX IF NOT EXISTS mm_payments_one_pending_per_plan
+        ON mm_payments (user_id, plan) WHERE status = 'pending';
+      CREATE INDEX IF NOT EXISTS mm_payments_pending_idx ON mm_payments (submitted_at) WHERE status = 'pending';
+      CREATE INDEX IF NOT EXISTS mm_payments_user_idx ON mm_payments (user_id, submitted_at DESC);
+      CREATE INDEX IF NOT EXISTS mm_payments_reviewed_idx ON mm_payments (status, reviewed_at DESC);
+      CREATE INDEX IF NOT EXISTS mm_payments_period_end_idx ON mm_payments (period_end) WHERE status = 'confirmed';
+
+      CREATE TABLE IF NOT EXISTS mm_payment_receipts (
+        payment_id TEXT PRIMARY KEY REFERENCES mm_payments (id) ON DELETE CASCADE,
+        mime_type  TEXT NOT NULL CHECK (mime_type IN ('image/jpeg', 'image/png', 'image/webp')),
+        size_bytes INTEGER NOT NULL CHECK (size_bytes BETWEEN 1 AND 5242880),
+        sha256     TEXT NOT NULL CHECK (sha256 ~ '^[0-9a-f]{64}$'),
+        bytes      BYTEA,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        purged_at  TIMESTAMPTZ,
+        CONSTRAINT mm_payment_receipts_bytes_chk CHECK ((bytes IS NULL) = (purged_at IS NOT NULL))
+      );
+      CREATE INDEX IF NOT EXISTS mm_payment_receipts_sha_idx ON mm_payment_receipts (sha256);
+    `,
+  },
+  {
+    id: "008_finance_views",
+    description: "Read-only finance view (paid / overdue / expiring) + grants for the optional mm_finance_ro role",
+    sql: `
+      CREATE OR REPLACE VIEW mm_finance_subscriptions AS
+      WITH u AS (
+        SELECT x->>'id' AS user_id,
+               x->>'name' AS name,
+               lower(x->>'email') AS email,
+               NULLIF(btrim(x->>'phone'), '') AS phone,
+               x->>'subscriptionType' AS subscription_type,
+               x->>'entitlementPlanId' AS plan,
+               CASE WHEN x->>'aiExpiresAt' ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}T' THEN (x->>'aiExpiresAt')::timestamptz END AS ai_expires_at,
+               CASE WHEN x->>'liveCredits' ~ '^[0-9]+(\\.[0-9]+)?$' THEN floor((x->>'liveCredits')::numeric)::int ELSE 0 END AS live_credits
+        FROM mm_documents d
+        CROSS JOIN LATERAL jsonb_array_elements(
+          CASE WHEN jsonb_typeof(d.data->'users') = 'array' THEN d.data->'users' ELSE '[]'::jsonb END) AS x
+        WHERE d.key = 'auth.json' AND x->>'role' = 'student'
+      ), p AS (
+        SELECT user_id,
+               max(period_end) FILTER (WHERE status = 'confirmed') AS paid_until,
+               max(reviewed_at) FILTER (WHERE status = 'confirmed') AS last_paid_at,
+               count(*) FILTER (WHERE status = 'pending') AS pending_count,
+               sum(amount) FILTER (WHERE status = 'confirmed') AS lifetime_paid_usd
+        FROM mm_payments
+        GROUP BY user_id
+      )
+      SELECT u.user_id, u.name, u.email, u.phone, u.subscription_type, u.plan, u.ai_expires_at, u.live_credits,
+             p.paid_until, p.last_paid_at, COALESCE(p.pending_count, 0) AS pending_count,
+             COALESCE(p.lifetime_paid_usd, 0) AS lifetime_paid_usd,
+             GREATEST(u.ai_expires_at, p.paid_until) AS expires_at,
+             CASE
+               WHEN GREATEST(u.ai_expires_at, p.paid_until) IS NULL THEN 'never_paid'
+               WHEN GREATEST(u.ai_expires_at, p.paid_until) < now() THEN 'overdue'
+               WHEN GREATEST(u.ai_expires_at, p.paid_until) < now() + interval '7 days' THEN 'expiring_soon'
+               ELSE 'active'
+             END AS finance_status
+      FROM u
+      LEFT JOIN p USING (user_id);
+
+      DO $grant$
+      BEGIN
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'mm_finance_ro') THEN
+          GRANT USAGE ON SCHEMA public TO mm_finance_ro;
+          GRANT SELECT ON mm_payments, mm_finance_subscriptions TO mm_finance_ro;
+        END IF;
+      END
+      $grant$;
+    `,
+  },
 ];
 
 export const MIGRATIONS_TABLE_SQL = `

@@ -5,9 +5,11 @@ import type { LiveBooking } from "@/lib/live/types";
 import { getMathQuery, listMathQueries, patchMathQuery } from "@/lib/solver/store";
 import type { MathQueryRecord } from "@/lib/solver/types";
 import { getHeyGenJob } from "@/lib/studio/heygenJobs";
+import { resolvePaymentSettings } from "@/lib/payments/config";
 import { sendWhatsApp, teacherWhatsApp } from "./adapter";
 
-const WHISH_PHONE = "96170772968";
+/** Whish number shown in booking / subscription messages (PAYMENTS_WHISH_NUMBER, default 70772968). */
+const WHISH_PHONE = resolvePaymentSettings(null).whish.number;
 const TEACHER_AR = "منذر أحمد حداره";
 const TEACHER_EN = "Munzer Ahmad Haddara";
 
@@ -150,7 +152,7 @@ export async function notifyVideoReady(query: MathQueryRecord) {
   } catch {
     /* optional */
   }
-  const phone = user?.phone;
+  const phone = user?.contactPhone;
   if (!phone) {
     await patchMathQuery(query.id, { videoNotifiedAt: new Date().toISOString() });
     return undefined;

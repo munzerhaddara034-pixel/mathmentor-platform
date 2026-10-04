@@ -9,6 +9,8 @@ export const WHATSAPP_KINDS = [
   "subscribe_request",
   "agent_ops",
   "school_outreach",
+  "payment_submitted",
+  "payment_result",
 ] as const;
 export type WhatsAppKind = (typeof WHATSAPP_KINDS)[number];
 

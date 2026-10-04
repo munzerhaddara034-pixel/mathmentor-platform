@@ -26,6 +26,8 @@ export type ManualTransferCheckoutProps = {
   transferredLabel?: string;
   claimed?: boolean;
   className?: string;
+  /** Link to /wallet/pay, where the student submits the reference + receipt for admin confirmation. */
+  showPaidLink?: boolean;
 };
 
 /**
@@ -52,6 +54,7 @@ export function ManualTransferCheckout({
   transferredLabel,
   claimed = false,
   className = "",
+  showPaidLink = true,
 }: ManualTransferCheckoutProps) {
   const { locale } = useI18n();
   const t = billingMessages[locale].checkout;
@@ -95,6 +98,13 @@ export function ManualTransferCheckout({
         >
           {transferredBusy ? "…" : (transferredLabel ?? t.transferred)}
         </button>
+      ) : null}
+      {showPaidLink && (method === "whish" || method === "omt") ? (
+        <p style={{ marginTop: 8 }}>
+          <a className="btn" href="/wallet/pay">
+            {t.iPaid}
+          </a>
+        </p>
       ) : null}
     </div>
   );

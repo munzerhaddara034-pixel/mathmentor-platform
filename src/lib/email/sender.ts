@@ -10,7 +10,9 @@
  * SMTP is not bundled; add a provider here (e.g. nodemailer) if Resend is not wanted.
  */
 
-export type EmailMessage = { to: string; subject: string; text: string; html?: string };
+/** Resend attachment: base64 content (total e-mail incl. attachments must stay under 40 MB). */
+export type EmailAttachment = { filename: string; content: string };
+export type EmailMessage = { to: string; subject: string; text: string; html?: string; attachments?: EmailAttachment[] };
 export type EmailSendResult = { ok: boolean; provider: "resend" | "log" | "none"; error?: string; id?: string };
 
 type Env = Record<string, string | undefined>;
@@ -42,7 +44,14 @@ export async function sendEmail(
           Authorization: `Bearer ${env.RESEND_API_KEY!.trim()}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ from, to: [message.to], subject: message.subject, text: message.text, html: message.html }),
+        body: JSON.stringify({
+          from,
+          to: [message.to],
+          subject: message.subject,
+          text: message.text,
+          html: message.html,
+          ...(message.attachments?.length ? { attachments: message.attachments } : {}),
+        }),
       });
       const payload = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
       if (!res.ok) return { ok: false, provider, error: `resend ${res.status}: ${String(payload.message ?? "").slice(0, 160)}` };
@@ -52,7 +61,8 @@ export async function sendEmail(
     }
   }
   if (provider === "log") {
-    (opts.log ?? console.info)(`[mathmentor][email:dev-log] to=${message.to} subject=${JSON.stringify(message.subject)}\n${message.text}`);
+    const files = message.attachments?.length ? ` attachments=${message.attachments.map((item) => item.filename).join(",")}` : "";
+    (opts.log ?? console.info)(`[mathmentor][email:dev-log] to=${message.to} subject=${JSON.stringify(message.subject)}${files}\n${message.text}`);
     return { ok: true, provider };
   }
   console.warn("[mathmentor][email] No e-mail provider configured (set RESEND_API_KEY + EMAIL_FROM). Message not sent.");

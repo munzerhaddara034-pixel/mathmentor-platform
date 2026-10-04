@@ -104,7 +104,7 @@ export async function POST(request: Request) {
     }
 
     if (!staff && pricingTier === "external") {
-      const phone = normalizePhone(guest?.phone || user?.phone || "");
+      const phone = normalizePhone(guest?.phone || user?.contactPhone || "");
       const name = guest?.name?.trim() || user?.name || "";
       if (!phone || !name) {
         return NextResponse.json(
@@ -122,7 +122,8 @@ export async function POST(request: Request) {
     const transfer = whishTransferInstructions(pricingTier);
 
     const studentName = guest?.name?.trim() || user?.name || "Guest";
-    const studentPhone = normalizePhone(guest?.phone || user?.phone || "");
+    // contactPhone, not phone: `phone` carries a display fallback that must never receive WhatsApp.
+    const studentPhone = normalizePhone(guest?.phone || user?.contactPhone || "");
     const studentEmail = (guest?.email?.trim() || user?.email || "").toLowerCase();
     const studentId = user?.id || createId("guest");
 

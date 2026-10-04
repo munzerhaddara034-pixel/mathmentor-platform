@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
+import { isVerifiedAdmin } from "@/lib/payments/http";
+import { appendAuditLog } from "@/lib/security/audit";
+import { clientIpFrom } from "@/lib/security/rateLimit";
+import { isSameOriginRequest } from "@/lib/security/origin";
 import {
   confirmSubscribePayment,
   getOrder,
@@ -41,7 +45,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
-    const action = body.action || (staff ? "teacher_confirm" : "student_mark");
+    // Activation is admin-only (owner decision 2026-10): teachers may view/mark but never activate.
+    const admin = isVerifiedAdmin(user);
+    const action = body.action || (admin ? "teacher_confirm" : "student_mark");
 
     if (action === "student_mark") {
       if (!isOwner && !staff) {
@@ -82,17 +88,27 @@ export async function POST(request: Request) {
       });
     }
 
-    if (!staff) {
+    if (!admin) {
       return NextResponse.json(
-        { error: "Only staff can confirm payment.", errorAr: "الأستاذ فقط يؤكد الدفع." },
+        { error: "Only the admin can confirm a payment.", errorAr: "تأكيد الدفع للمدير فقط." },
         { status: 403 },
       );
+    }
+    if (!isSameOriginRequest(request.headers)) {
+      return NextResponse.json({ error: "Forbidden origin." }, { status: 403 });
     }
 
     const confirmed = await confirmSubscribePayment(order.id, user.id);
     if (!confirmed.ok) {
       return NextResponse.json({ error: confirmed.error, errorAr: confirmed.errorAr }, { status: 400 });
     }
+    await appendAuditLog({
+      action: "billing.order.confirm",
+      actor: { id: user.id, email: user.email, role: user.role },
+      target: order.id,
+      ip: clientIpFrom(request.headers),
+      details: { alreadyPaid: confirmed.alreadyPaid, planId: confirmed.order.planId, amount: confirmed.order.amount },
+    }).catch((error: unknown) => console.error("[mathmentor][audit] billing.order.confirm failed", error instanceof Error ? error.message : error));
 
     if (!confirmed.alreadyPaid) {
       try {
@@ -121,9 +137,11 @@ export async function POST(request: Request) {
         /* optional */
       }
       try {
+        // Only the student's own saved phone: never fall back to the confirming admin's phone.
+        const studentPhone = confirmed.order.studentPhone?.trim();
         const { notifyActivation } = await import("@/lib/whatsapp/notify");
-        await notifyActivation({
-          phone: confirmed.order.studentPhone || user.phone,
+        if (studentPhone) await notifyActivation({
+          phone: studentPhone,
           name: confirmed.order.studentName,
           planName: confirmed.order.planNameAr || confirmed.order.planName,
           code: `WHISH-${confirmed.order.id}`,
