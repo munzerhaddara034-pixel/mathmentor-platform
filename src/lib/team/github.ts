@@ -9,11 +9,12 @@ import { createHash } from "node:crypto";
 import { promisify } from "node:util";
 import { Octokit } from "@octokit/rest";
 import { githubCommitConfig } from "@/lib/agent/githubCommit";
+import { hamzaBaseBranch, hamzaLiveBranches } from "@/lib/hamza/config";
 
 export type TeamGithubConfig = {
   owner: string;
   repo: string;
-  /** Base / live branch (Render builds it). */
+  /** Base / live branch (Render builds it): HAMZA_BASE_BRANCH, legacy fallback GITHUB_BRANCH. */
   baseBranch: string;
   tokenPresent: boolean;
 };
@@ -32,13 +33,18 @@ export function teamGithubConfig(): TeamGithubConfig {
   return {
     owner: process.env.GITHUB_OWNER?.trim() || base.owner || "munzerhaddara034-pixel",
     repo: process.env.GITHUB_REPO?.trim() || base.repo || "mathmentor-platform",
-    baseBranch: process.env.GITHUB_BRANCH?.trim() || "agent-hub-latest",
+    baseBranch: hamzaBaseBranch().branch,
     tokenPresent: Boolean(token()),
   };
 }
 
 export function isProtectedBranch(branch: string, config = teamGithubConfig()): boolean {
-  return branch === config.baseBranch || LEGACY_PROTECTED_BRANCHES.includes(branch) || FORBIDDEN_BRANCHES.includes(branch);
+  return (
+    branch === config.baseBranch ||
+    hamzaLiveBranches().includes(branch) ||
+    LEGACY_PROTECTED_BRANCHES.includes(branch) ||
+    FORBIDDEN_BRANCHES.includes(branch)
+  );
 }
 
 const BRANCH_RE = /^(?!.*\.\.)(?!.*\/\/)[A-Za-z0-9][A-Za-z0-9._\/-]{1,80}$/;
@@ -136,6 +142,7 @@ export async function commitFilesToBranch(input: CommitFilesInput, config = team
   // Hamza only ever commits to a fresh feat/*-style branch — never the live branch or main.
   const allowed = agentCommitBranchCheck(input.branch, { liveBranch: config.baseBranch });
   if (!allowed.ok) return { ok: false, error: allowed.reasonAr };
+  if (hamzaLiveBranches().includes(input.branch)) return { ok: false, error: `الكتابة على ${input.branch} ممنوعة (فرع حيّ).` };
   const kit = new Octokit({ auth: token() });
   const { owner, repo } = config;
   try {
