@@ -17,6 +17,7 @@ type Body = {
   allowLarge?: unknown;
   branch?: unknown;
   typedBranch?: unknown;
+  text?: unknown;
 };
 
 function str(value: unknown, max = 120): string | undefined {
@@ -26,6 +27,7 @@ function str(value: unknown, max = 120): string | undefined {
 /**
  * POST {action, confirm:true, …} — human click only, same-origin only.
  * issue_code {step:"open_pr"|"merge", branch?} · approve {code, reviewed} · merge {code, typedBranch} · reject · refresh_ci
+ * · revise {text} (queues a new revision) · revert (merged → revert proposal)
  */
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const gate = await requireTeamStaff();
@@ -54,6 +56,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       allowLarge: body.allowLarge === true,
       branch: str(body.branch),
       typedBranch: str(body.typedBranch),
+      text: str(body.text, 2000),
       actor: { ...gate.actor, ip: clientIpFrom(request.headers) },
     });
     if (!result.ok) return teamError(result.status, result.error, result.errorAr);

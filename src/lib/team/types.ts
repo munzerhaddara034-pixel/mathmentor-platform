@@ -2,6 +2,7 @@
  * Shared (client + server) types for the /admin/team chat.
  * Channel ids follow docs/TEAM_CHAT_SPEC.md §0.1.
  */
+import type { PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import type { HamzaPipelineState } from "@/lib/hamza/types";
 
 export const TEAM_CHANNEL_IDS = ["team", "mohamed", "sami", "developer"] as const;
@@ -169,6 +170,8 @@ export type TeamThreadResponse = {
   channel: TeamChannelId;
   messages: TeamMessage[];
   proposals: TeamProposal[];
+  /** Hamza background tasks of this channel (newest last; server-only fields stripped). */
+  tasks: PublicHamzaTask[];
   storage: "postgres" | "file";
 };
 

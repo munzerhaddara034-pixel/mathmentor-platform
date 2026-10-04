@@ -2,19 +2,23 @@
  * /admin/team decisions on a Hamza proposal — the ONLY entry point that leads to GitHub writes, and only
  * through the Hamza pipeline (src/lib/hamza/pipeline):
  *   issue_code (step open_pr | merge) → approve (code #1 → feat/* branch + PR) → CI → merge (code #2 + typed
- *   live-branch name, CI green) · reject · refresh_ci.
+ *   live-branch name, CI green) · reject · refresh_ci · revise (queue a new revision) · revert (merged → revert proposal).
  * Typing «موافق» in the chat never approves anything; neither does WhatsApp.
  */
 import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { publicProposal } from "@/lib/hamza/publicProposal";
 import { approveMerge, approveOpenPr, issueCode, refreshCi, rejectProposal, type PipelineResult } from "@/lib/hamza/pipeline";
 import { pipelineDeps } from "@/lib/hamza/pipeline/deps";
+import { requestRevert } from "@/lib/hamza/revert";
+import { requestRevision } from "@/lib/hamza/revise";
+import { taskDeps } from "@/lib/hamza/tasks/deps";
+import { publicTask, type PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import type { ApprovalAction } from "@/lib/hamza/types";
 import type { TeamActor } from "./agents";
 import { FORBIDDEN_BRANCHES, isValidBranchName, teamGithubConfig } from "./github";
 import type { TeamMessage, TeamProposal } from "./types";
 
-export const DECISION_ACTIONS = ["issue_code", "approve", "merge", "reject", "refresh_ci"] as const;
+export const DECISION_ACTIONS = ["issue_code", "approve", "merge", "reject", "refresh_ci", "revise", "revert"] as const;
 export type DecisionAction = (typeof DECISION_ACTIONS)[number];
 
 export type DecisionInput = {
@@ -30,11 +34,13 @@ export type DecisionInput = {
   branch?: string;
   /** merge: the live branch name typed by the approver. */
   typedBranch?: string;
+  /** revise: what to change. */
+  text?: string;
   actor: TeamActor & { ip?: string };
 };
 
 export type DecisionResult =
-  | { ok: true; proposal: TeamProposal; message?: TeamMessage; code?: string; expiresAt?: string }
+  | { ok: true; proposal: TeamProposal; message?: TeamMessage; code?: string; expiresAt?: string; task?: PublicHamzaTask }
   | { ok: false; status: number; error: string; errorAr: string };
 
 function fail(status: number, error: string, errorAr: string): DecisionResult {
@@ -80,5 +86,12 @@ export async function decideProposal(input: DecisionInput): Promise<DecisionResu
       return out(await rejectProposal(deps, { proposalId: input.proposalId, actor }));
     case "refresh_ci":
       return out(await refreshCi(deps, { proposalId: input.proposalId }));
+    case "revert":
+      return out(await requestRevert(deps, { proposalId: input.proposalId, actor }));
+    case "revise": {
+      const revised = await requestRevision({ ...taskDeps(), repo: deps.repo }, { proposalId: input.proposalId, text: input.text ?? "", actor });
+      if (!revised.ok) return fail(revised.status, revised.error, revised.errorAr);
+      return { ok: true, proposal: publicProposal(revised.proposal), message: revised.message, task: publicTask(revised.task) };
+    }
   }
 }

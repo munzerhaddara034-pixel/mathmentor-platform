@@ -60,6 +60,10 @@ export const pgTaskRepo: HamzaTaskRepo = {
     const rows = await dbQuery<Row>(`SELECT data FROM mm_hamza_tasks WHERE status IN ('queued', 'running', 'budget_paused') ORDER BY created_at ASC`);
     return rows.map((row) => row.data);
   },
+  async listRecent(limit) {
+    const rows = await dbQuery<Row>(`SELECT data FROM mm_hamza_tasks ORDER BY created_at DESC LIMIT $1`, [limit]);
+    return rows.map((row) => row.data);
+  },
   async addStep(taskId, step) {
     await dbQuery(`INSERT INTO mm_hamza_steps (task_id, at, data) VALUES ($1, $2, $3::jsonb)`, [taskId, step.at, JSON.stringify(step)]);
   },

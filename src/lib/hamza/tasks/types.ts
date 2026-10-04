@@ -67,6 +67,8 @@ export interface HamzaTaskRepo {
   claimNext(workerId: string, now: Date, leaseMs: number): Promise<HamzaTask | undefined>;
   listByChannel(channel: TeamChannelId, limit: number): Promise<HamzaTask[]>;
   listActive(): Promise<HamzaTask[]>;
+  /** Newest first, all channels (activity view). */
+  listRecent(limit: number): Promise<HamzaTask[]>;
   addStep(taskId: string, step: AgentStepRecord): Promise<void>;
   listSteps(taskId: string, limit: number): Promise<AgentStepRecord[]>;
   monthSpentUsd(sinceIso: string): Promise<number>;

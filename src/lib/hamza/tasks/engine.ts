@@ -79,6 +79,7 @@ export function engineRepo(kind: "file" | "memory", read: () => Promise<TaskStor
     claimNext: (workerId, now, leaseMs) => mutate((store) => claimIn(store, workerId, now, leaseMs)),
     listByChannel: async (channel, limit) =>
       clone((await read()).tasks.filter((task) => task.channel === channel).slice(-limit)),
+    listRecent: async (limit) => clone([...(await read()).tasks].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit)),
     listActive: async () => clone((await read()).tasks.filter((task) => ACTIVE.includes(task.status))),
     addStep: (taskId, step) => mutate((store) => addStepIn(store, taskId, step)),
     listSteps: async (taskId, limit) => clone(((await read()).steps[taskId] ?? []).slice(-limit)),
