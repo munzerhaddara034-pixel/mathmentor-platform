@@ -82,7 +82,8 @@ export function isPublicPath(pathname: string) {
   const path = normalizePath(pathname);
   if (PUBLIC_PATHS.includes(path)) return true;
   if (path.startsWith("/api/auth/")) return true;
-  if (path.startsWith("/api/bot")) return true;
+  if (path.startsWith("/api/bot")) return true; // route enforces its own auth (AI access)
+  if (path === "/api/health") return true;
   if (path.startsWith("/api/whish/")) return true;
   if (path === "/api/live/slots" || path === "/api/live/book") return true;
   // Guest join links (signed, verified in the route) and the classroom API (own guard).
