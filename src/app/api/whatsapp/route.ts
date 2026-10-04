@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMetaSignature } from "@/lib/security/webhookSignature";
+import { warnOnce } from "@/lib/security/webhookProvenance";
+import { isAuthorizedInstructorPhone, normalizeWhatsAppDigits } from "@/lib/whatsapp/adapter";
+import { POST as agentWebhookPost } from "@/app/api/agent/whatsapp-voice/route";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,6 +69,7 @@ export async function POST(request: NextRequest) {
     if (appSecret && !verifyMetaSignature(rawBody, request.headers.get("x-hub-signature-256"), appSecret)) {
       return NextResponse.json({ status: "invalid_signature" }, { status: 401 });
     }
+    if (!appSecret) warnOnce("WHATSAPP_APP_SECRET is not set — Meta webhook signatures are not verified (/api/whatsapp).");
     let body: MetaWebhookBody = {};
     try {
       body = JSON.parse(rawBody || "{}") as MetaWebhookBody;
@@ -75,6 +79,17 @@ export async function POST(request: NextRequest) {
     const message = body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
     const fromNumber = message?.from;
     const incomingText = message?.text?.body;
+
+    // If Meta's callback URL points here, the instructor's text / voice notes / photos still reach
+    // محمد: hand the untouched raw body (and its signature header) to the agent webhook, which
+    // re-verifies the signature and answers in the background.
+    if (fromNumber && isAuthorizedInstructorPhone(normalizeWhatsAppDigits(fromNumber))) {
+      const headers = new Headers({ "content-type": "application/json" });
+      const signature = request.headers.get("x-hub-signature-256");
+      if (signature) headers.set("x-hub-signature-256", signature);
+      const forwardUrl = new URL("/api/agent/whatsapp-voice", request.url).toString();
+      return agentWebhookPost(new Request(forwardUrl, { method: "POST", headers, body: rawBody }));
+    }
 
     if (!fromNumber || !incomingText) {
       return NextResponse.json({ status: "ignored" }, { status: 200 });

@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { verifyMetaSignature } from "@/lib/security/webhookSignature";
+import {
+  inboundProvenance,
+  publicUrlCandidates,
+  UNVERIFIED_PRIVILEGED_REFUSAL_AR,
+  warnOnce,
+  type ProvenanceDecision,
+} from "@/lib/security/webhookProvenance";
 import { createId } from "@/lib/ids";
 import { authorizeAgentRequest } from "@/lib/agent/auth";
 import { latestHealth } from "@/lib/agent/store";
@@ -7,6 +13,8 @@ import { runWhatsAppVoicePipeline } from "@/lib/agent/voicePipeline";
 import {
   handleApprovalInboundText,
   appendRevisionNote,
+  isApprovalCommand,
+  isRejectCommand,
   listAwaitingApprovals,
 } from "@/lib/agent/approvalWorkflow";
 import {
@@ -23,6 +31,68 @@ import {
 import { categoryForMime, type InboundMediaKind } from "@/lib/whatsapp/media/policy";
 import { parseMockExamRequest } from "@/lib/agent/media/captionIntent";
 import { dispatchInboundMedia, dispatchMockExam } from "@/lib/agent/media/dispatch";
+import { sendMediaAck } from "@/lib/agent/media/reply";
+import { dispatchAgentTurn } from "@/lib/agent/media/whatsappAgent";
+
+function webhookSecretFrom(request: Request): string | null {
+  const header = request.headers.get("x-webhook-secret");
+  if (header) return header;
+  try {
+    return new URL(request.url).searchParams.get("secret");
+  } catch {
+    return null;
+  }
+}
+
+/** Provider authenticity for inbound webhooks (Meta HMAC / Twilio HMAC / UltraMsg shared secret). */
+function provenanceFor(
+  request: Request,
+  source: "meta" | "ultramsg" | "twilio",
+  rawBody: string | null,
+  twilioParams: Array<[string, string]> = [],
+): ProvenanceDecision {
+  const decision = inboundProvenance({
+    source,
+    provider: (process.env.WHATSAPP_PROVIDER || "meta").trim().toLowerCase(),
+    rawBody,
+    metaSignatureHeader: request.headers.get("x-hub-signature-256"),
+    appSecret: process.env.WHATSAPP_APP_SECRET,
+    twilio: {
+      authToken: process.env.TWILIO_AUTH_TOKEN,
+      urls: publicUrlCandidates(request.url, request.headers, process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL),
+      params: twilioParams,
+      signatureHeader: request.headers.get("x-twilio-signature"),
+    },
+    ultramsg: {
+      provided: webhookSecretFrom(request),
+      dedicatedSecret: process.env.WHATSAPP_WEBHOOK_SECRET,
+      fallbackSecret: process.env.AGENT_WEBHOOK_SECRET,
+    },
+  });
+  if (decision.ok && decision.warning) warnOnce(decision.warning);
+  return decision;
+}
+
+/**
+ * Non-maths instructor text / transcripts → intent pipeline (appointments, reminders, briefings…),
+ * WhatsApp confirmation first, Agent Hub task after. Runs in the background for webhooks.
+ */
+async function pipelineAndConfirm(input: { text: string; fromVoice: boolean; senderDigits: string; privileged: boolean }) {
+  const { task, campaign, schoolReport, stagedApproval } = await runWhatsAppVoicePipeline({
+    transcript: input.text,
+    senderPhone: input.senderDigits,
+    persist: false,
+  });
+  if (input.fromVoice) task.transcriptSource = "whisper";
+  if (input.privileged && task.whisperTranscript?.trim() && !stagedApproval) {
+    const awaiting = await listAwaitingApprovals(3);
+    if (awaiting[0] && task.intent.kind === "general_task" && /عدّل|عدل|غيّر|غير|edit|revise|change/i.test(task.whisperTranscript)) {
+      await appendRevisionNote(awaiting[0].id, task.whisperTranscript.slice(0, 400));
+    }
+  }
+  const health = task.intent.kind === "platform_health" ? await latestHealth() : null;
+  await sendAgentWhatsAppConfirmation({ to: input.senderDigits, task, campaign, schoolReport, health });
+}
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -361,6 +431,8 @@ export async function POST(request: Request) {
   try {
     const contentType = request.headers.get("content-type") || "";
     let parsed: InboundParsed;
+    /** True only for a cryptographically verified webhook (or an authorized staff call). */
+    let privileged = false;
 
     if (contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded")) {
       const form = await request.formData();
@@ -368,6 +440,11 @@ export async function POST(request: Request) {
       // Twilio webhook vs staff multipart: Twilio has From/WaId; staff has file fields
       const hasStaffFile = Boolean(form.get("file") || form.get("audio") || form.get("voice"));
       if (twilio && !hasStaffFile && twilio.isWebhookStyle) {
+        const params: Array<[string, string]> = [];
+        for (const [key, value] of form.entries()) if (typeof value === "string") params.push([key, value]);
+        const provenance = provenanceFor(request, "twilio", null, params);
+        if (!provenance.ok) return NextResponse.json({ ok: false, error: provenance.error }, { status: provenance.status });
+        privileged = provenance.privileged;
         parsed = twilio;
       } else {
         parsed = await parseStaffMultipart(form);
@@ -385,13 +462,15 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: false, error: "Invalid JSON or multipart body." }, { status: 400 });
       }
       const meta = parseMetaPayload(body);
-      // Meta signs every webhook (X-Hub-Signature-256). When WHATSAPP_APP_SECRET is set, forged
-      // "from the instructor's phone" payloads are rejected before any agent action runs.
-      const appSecret = process.env.WHATSAPP_APP_SECRET?.trim() || "";
-      if (meta && appSecret && !verifyMetaSignature(rawBody, request.headers.get("x-hub-signature-256"), appSecret)) {
-        return NextResponse.json({ ok: false, error: "Invalid webhook signature." }, { status: 401 });
-      }
       const ultra = meta ? null : parseUltraMsgPayload(body);
+      // Meta signs every webhook (X-Hub-Signature-256); Twilio signs with X-Twilio-Signature;
+      // UltraMsg carries a shared secret. Forged "from the instructor's phone" payloads are rejected
+      // (when the provider's secret is configured) or at least never get privileged actions.
+      if (meta || ultra || request.headers.get("x-hub-signature-256")) {
+        const provenance = provenanceFor(request, meta ? "meta" : "ultramsg", rawBody);
+        if (!provenance.ok) return NextResponse.json({ ok: false, error: provenance.error }, { status: provenance.status });
+        privileged = provenance.privileged;
+      }
       if (meta && (meta.senderPhone || meta.mediaId || meta.textBody || meta.source === "meta")) {
         // Empty status callbacks: ACK quickly (no phone / no content)
         if (!meta.senderPhone && !meta.mediaId && !meta.textBody && !meta.mediaUrl && !meta.mediaKind) {
@@ -412,6 +491,7 @@ export async function POST(request: Request) {
     if (!parsed.isWebhookStyle) {
       const auth = await authorizeAgentRequest(request);
       if (!auth.ok) return auth.error;
+      privileged = auth.mode !== "demo";
     }
 
     senderDigits = parsed.senderPhone
@@ -487,8 +567,26 @@ export async function POST(request: Request) {
     const filename = parsed.filename;
     const mimeType = parsed.mimeType;
 
+    // Unverified webhook (provider secret not configured): no approvals over WhatsApp.
+    if (
+      !privileged &&
+      parsed.isWebhookStyle &&
+      senderDigits &&
+      isAuthorizedInstructorPhone(senderDigits) &&
+      transcript &&
+      !mediaId &&
+      !mediaUrl &&
+      !bytes &&
+      (isApprovalCommand(transcript) || isRejectCommand(transcript))
+    ) {
+      console.warn("[mathmentor] approval command over an unverified webhook refused (set WHATSAPP_APP_SECRET).");
+      await sendMediaAck(senderDigits, UNVERIFIED_PRIVILEGED_REFUSAL_AR);
+      return NextResponse.json({ ok: false, source: parsed.source, refused: "unverified_webhook_approval" });
+    }
+
     // Approval listener: موافق / اعتمد / انشر → DEPLOYED (never auto-deploy without this).
     if (
+      privileged &&
       parsed.isWebhookStyle &&
       senderDigits &&
       isAuthorizedInstructorPhone(senderDigits) &&
@@ -578,6 +676,39 @@ export async function POST(request: Request) {
       if (awaiting[0] && transcript) {
         /* handled below after whisper */
       }
+    }
+
+    // Instructor text / voice note over the webhook → محمد agent turn in the background:
+    // voice → STT; maths → upgraded solver (+ PDF); mock exam → PDF; anything else → intent pipeline.
+    const agentKind: "text" | "audio" | null =
+      transcript && !mediaId && !mediaUrl && !bytes
+        ? "text"
+        : !bytes && (mediaId || mediaUrl) && (parsed.mediaKind === "audio" || !parsed.mediaKind)
+          ? "audio"
+          : null;
+    if (parsed.isWebhookStyle && senderDigits && isAuthorizedInstructorPhone(senderDigits) && agentKind) {
+      const from = senderDigits;
+      const isPrivileged = privileged;
+      const dispatched = await dispatchAgentTurn(
+        {
+          from,
+          kind: agentKind,
+          text: agentKind === "text" ? transcript : undefined,
+          mediaId,
+          mediaUrl,
+          mimeType,
+          filename,
+          messageId: parsed.messageId,
+        },
+        ({ text, fromVoice }) => pipelineAndConfirm({ text, fromVoice, senderDigits: from, privileged: isPrivileged }),
+        true,
+      );
+      return NextResponse.json({
+        ok: true,
+        source: parsed.source,
+        accepted: agentKind === "audio" ? "voice_note" : "text",
+        duplicate: dispatched.mode === "background" ? Boolean(dispatched.duplicate) : false,
+      });
     }
 
     // "امتحان تجريبي" / "mock exam" text → generated mock exam PDF sent back as a document.
@@ -679,6 +810,7 @@ export async function POST(request: Request) {
 
     // Voice edits while a draft awaits approval → stay AWAITING_APPROVAL with revision notes.
     if (
+      privileged &&
       senderDigits &&
       isAuthorizedInstructorPhone(senderDigits) &&
       task.whisperTranscript?.trim() &&
