@@ -71,3 +71,10 @@ test("strings mentioning the any type are prose, ts directives count only in com
   assert.deepEqual(rules([newFile("src/lib/p.ts", "/* @ts-nocheck */\n")]), ["error:no-any"]);
   assert.deepEqual(rules([newFile("src/components/Q.tsx", 'export const q = () => window.matchMedia("(min-width: 900px)").matches;\n')]), []);
 });
+
+test("function spans ignore braces inside regex literals, strings and comments", async () => {
+  const { codeOnly } = await import("../src/lib/hamza/standards.ts");
+  assert.equal(codeOnly('if (!/\\btry\\s*\\{/.test(x)) { // {'), "if (! 0.test(x)) { ");
+  const content = 'function a() {\n  const re = /\\{/;\n  const s = "{";\n  return re;\n}\nfunction b() {\n  return 1;\n}\n';
+  assert.deepEqual(functionSpans(content).map((f) => [f.name, f.start, f.end]), [["a", 1, 5], ["b", 6, 8]]);
+});

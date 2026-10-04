@@ -59,6 +59,14 @@ function isCode(path: string): boolean {
   return /\.(ts|tsx|mts|cts)$/.test(path);
 }
 
+/** A line without strings, regex literals and // comments (so their braces are not counted). */
+export function codeOnly(line: string): string {
+  return line
+    .replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '""')
+    .replace(/(^|[=(,:!&|?{};]|\breturn)\s*\/(?:\\.|\[(?:\\.|[^\]\n])*\]|[^/\n\\[])+\/[a-z]*/g, "$1 0")
+    .replace(/\/\/.*$/, "");
+}
+
 /** Top-level-ish function spans via brace matching (good enough for warnings). */
 export function functionSpans(content: string): Array<{ name: string; start: number; end: number }> {
   const lines = content.split("\n");
@@ -71,7 +79,7 @@ export function functionSpans(content: string): Array<{ name: string; start: num
     let opened = false;
     let end = i;
     for (let j = i; j < lines.length; j += 1) {
-      for (const ch of lines[j].replace(/(["'`])(?:\\.|(?!\1).)*\1/g, "")) {
+      for (const ch of codeOnly(lines[j])) {
         if (ch === "{") (depth += 1), (opened = true);
         else if (ch === "}") depth -= 1;
       }
