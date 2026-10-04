@@ -1,8 +1,10 @@
 /**
- * Render a solver MathSolution for WhatsApp (Arabic text, readable math) and as a simple PDF.
+ * Render a solver MathSolution for WhatsApp (Arabic text, readable math) and as a branded PDF
+ * (embedded Arabic + Latin fonts; header/footer «منذر حداره · MathMentor»).
  * Math uses the Lebanese Word-Equation LaTeX (formatLebaneseEquation) converted for each channel.
  */
 import { buildSimplePdf } from "@/lib/exams/pdf";
+import { brandedPdfFilename, buildBrandedPdf, MATHMENTOR_BRAND, type PdfBlock } from "@/lib/pdf/brandedPdf";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import { asciiForPdf, latexToReadable } from "@/lib/math/latexToReadable";
 import type { SolutionVerdict } from "@/lib/solver/verify";
@@ -52,7 +54,7 @@ export function clampWhatsAppText(text: string, max = WHATSAPP_TEXT_MAX): string
 
 export function solutionWhatsAppTextAr(
   solution: MathSolution,
-  options?: { verdict?: SolutionVerdict; headerAr?: string; pdfAttached?: boolean },
+  options?: { verdict?: SolutionVerdict; headerAr?: string },
 ): string {
   if (solution.needsRetake) {
     return [
@@ -85,7 +87,6 @@ export function solutionWhatsAppTextAr(
   if (solution.warning && (solution.source === "demo" || solution.needsReview)) {
     lines.push(`⚠️ ${whatsappPersonaText(solution.warning).slice(0, 200)}`);
   }
-  if (options?.pdfAttached) lines.push("📄 بعتتلك الحل كمان كملف PDF.");
   lines.push(MEDIA_SIGNATURE_AR);
   return clampWhatsAppText(whatsappPersonaText(lines.join("\n")));
 }
@@ -99,10 +100,89 @@ function verdictLineEn(verdict: SolutionVerdict | undefined): string {
   return "Verification (Mohamed): uncertain - needs teacher review";
 }
 
-/** Simple (Helvetica, Latin-only) PDF of the solution with readable math + Word-Equation LaTeX. */
-export function solutionPdf(solution: MathSolution, options?: { verdict?: SolutionVerdict; question?: string }): Buffer {
+/** WhatsApp file name of every solution PDF (platform brand, never a generic name). */
+export const SOLUTION_PDF_FILENAME = brandedPdfFilename("solution");
+/** Caption on the WhatsApp document message. */
+export const SOLUTION_PDF_CAPTION_AR = `📄 الحل الكامل — ${MATHMENTOR_BRAND.headerAr}`;
+
+export type SolutionPdfOptions = { verdict?: SolutionVerdict; question?: string; createdAt?: Date };
+export type SolutionPdfResult = { bytes: Buffer; renderer: "unicode" | "latin_fallback"; error?: string };
+
+/** Readable (Unicode) maths for the PDF: x², √, ≤, ∞ … (the embedded fonts cover them). */
+function pdfMathUnicode(tex: string | undefined): string {
+  if (!tex?.trim()) return "";
+  return latexToReadable(formatLebaneseEquation(tex));
+}
+
+function verdictLineArPdf(verdict: SolutionVerdict | undefined): string {
+  if (!verdict) return "التحقّق: لم يُشغَّل.";
+  return verdict.noteAr || verdictLineEn(verdict);
+}
+
+/** YYYY-MM-DD in the platform's time zone (Asia/Beirut). */
+function beirutDate(date: Date): string {
+  try {
+    return date.toLocaleDateString("en-CA", { timeZone: "Asia/Beirut" });
+  } catch {
+    return date.toISOString().slice(0, 10);
+  }
+}
+
+/** Branded Unicode PDF blocks (Arabic + Latin + maths) for a solver MathSolution. */
+export function solutionPdfBlocks(solution: MathSolution, options?: SolutionPdfOptions): PdfBlock[] {
+  const created = options?.createdAt ?? new Date();
+  const blocks: PdfBlock[] = [
+    {
+      kind: "subtitle",
+      text: `${solution.track} · ${whatsappPersonaText(solution.topic, { latin: true })} · ${beirutDate(created)}`,
+    },
+  ];
+  const question = (options?.question || "").trim();
+  if (question) {
+    blocks.push({ kind: "heading", text: "السؤال" });
+    blocks.push({ kind: "paragraph", text: waProse(question) });
+  }
+  const given = pdfMathUnicode(solution.given?.latex);
+  const aim = solution.given?.aimAr || solution.given?.aimEn;
+  if (given || aim) {
+    blocks.push({ kind: "heading", text: "المعطيات والمطلوب" });
+    if (given) blocks.push({ kind: "math", text: given });
+    if (aim) blocks.push({ kind: "paragraph", text: `المطلوب: ${waProse(aim)}` });
+  }
+  if (solution.steps.length) blocks.push({ kind: "heading", text: "خطوات الحل" });
+  solution.steps.forEach((step, index) => {
+    const title = waProse(whatsappPersonaText(step.titleAr || step.title));
+    blocks.push({ kind: "paragraph", text: `${index + 1}) ${title}`, bold: true });
+    const math = pdfMathUnicode(step.latex);
+    if (math) blocks.push({ kind: "math", text: math });
+    const why = step.explanationAr || step.explanationEn;
+    if (why) blocks.push({ kind: "paragraph", text: waProse(whatsappPersonaText(why)), indent: 12 });
+    const theorem = step.theoremAr || step.theoremEn;
+    if (theorem) blocks.push({ kind: "paragraph", text: `القاعدة: ${waProse(theorem)}`, indent: 12, muted: true });
+  });
+  const final = pdfMathUnicode(solution.finalAnswerLatex) || solution.finalAnswer;
+  if (final) blocks.push({ kind: "highlight", text: `الجواب النهائي: ${final}` });
+  if (solution.finalAnswerLatex) {
+    blocks.push({ kind: "paragraph", text: `LaTeX (Word Equation): ${formatLebaneseEquation(solution.finalAnswerLatex)}`, muted: true });
+  }
+  const tip = solution.examTip?.ar || solution.examTip?.en;
+  if (tip) {
+    blocks.push({ kind: "heading", text: "نصيحة للامتحان" });
+    blocks.push({ kind: "paragraph", text: waProse(tip) });
+  }
+  blocks.push({ kind: "rule" });
+  blocks.push({ kind: "paragraph", text: verdictLineArPdf(options?.verdict), muted: true });
+  if (solution.warning && (solution.source === "demo" || solution.needsReview)) {
+    blocks.push({ kind: "paragraph", text: `⚠ ${whatsappPersonaText(solution.warning)}`, muted: true });
+  }
+  blocks.push({ kind: "paragraph", text: MEDIA_SIGNATURE_AR, muted: true });
+  return blocks;
+}
+
+/** Latin-only fallback (Helvetica) used when the embedded fonts cannot be loaded. */
+export function solutionPdfLatin(solution: MathSolution, options?: SolutionPdfOptions): Buffer {
   const lines: string[] = [
-    "Prof. Munzer Haddara / MathMentor - solution by Mohamed (AI assistant)",
+    `${MATHMENTOR_BRAND.headerLatin} - solution by Mohamed (AI assistant)`,
     `Track: ${solution.track}   Topic: ${asciiForPdf(solution.topic)}`,
     "",
   ];
@@ -124,6 +204,26 @@ export function solutionPdf(solution: MathSolution, options?: { verdict?: Soluti
   lines.push(`FINAL ANSWER: ${asciiForPdf(final)}`);
   if (solution.finalAnswerLatex) lines.push(`LaTeX (Word Equation): ${formatLebaneseEquation(solution.finalAnswerLatex)}`);
   if (solution.examTip?.en) lines.push("", `Exam tip: ${pdfProse(solution.examTip.en)}`);
-  lines.push("", verdictLineEn(options?.verdict));
-  return buildSimplePdf("MathMentor - Worked solution", lines);
+  lines.push("", verdictLineEn(options?.verdict), "", `${MATHMENTOR_BRAND.headerLatin} - mathmentor`);
+  return buildSimplePdf(`${MATHMENTOR_BRAND.headerLatin} - Worked solution`, lines);
+}
+
+/**
+ * Branded solution PDF: Unicode (Arabic-capable) renderer first, Latin-only builder as a fallback.
+ * Throws only if both fail (callers catch, log and tell the student).
+ */
+export function renderSolutionPdf(solution: MathSolution, options?: SolutionPdfOptions): SolutionPdfResult {
+  try {
+    const bytes = buildBrandedPdf({ title: "حل المسألة — Worked solution", blocks: solutionPdfBlocks(solution, options), createdAt: options?.createdAt });
+    return { bytes, renderer: "unicode" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unicode pdf failed";
+    console.error(`[whatsapp-agent] branded PDF renderer failed, using the Latin fallback: ${message.slice(0, 200)}`);
+    return { bytes: solutionPdfLatin(solution, options), renderer: "latin_fallback", error: message };
+  }
+}
+
+/** Back-compat: the solution PDF bytes. */
+export function solutionPdf(solution: MathSolution, options?: SolutionPdfOptions): Buffer {
+  return renderSolutionPdf(solution, options).bytes;
 }

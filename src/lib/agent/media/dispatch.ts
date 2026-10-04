@@ -59,9 +59,10 @@ export async function sendMockExam(input: { to: string; track?: string; messageI
     const exam = await buildMockExamPdf({ track: input.track });
     const reply = await replyToMediaMessage({
       to: input.to,
-      replyAr: `${exam.captionAr}\n📄 الملف مرفق.`,
+      replyAr: exam.captionAr,
       status: "completed",
       note: "whatsapp_mock_exam_pdf",
+      attachmentSentNoteAr: "📄 الملف مرفق.",
       filename: exam.filename,
       mimeType: "application/pdf",
       sizeBytes: exam.bytes.length,
