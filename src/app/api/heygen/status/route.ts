@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { fetchAvatarTalkingVideo, hasHeyGenKey } from "@/lib/studio/heygen";
 import { getHeyGenJob, listHeyGenJobs, patchHeyGenJob, playerPathForJob, resolveJobTimeline } from "@/lib/studio/heygenJobs";
 import { notifyVideoJobIfReady } from "@/lib/whatsapp/notify";
+import { apiRequireStaff, apiSession } from "@/lib/auth/guards";
+import { publicHeyGenJob } from "@/lib/security/publicViews";
 
 export const runtime = "nodejs";
 
@@ -41,9 +43,34 @@ async function statusPayload(jobId: string) {
   });
 }
 
+/**
+ * Signed-in non-staff (the student player): read-only, published jobs only, public job shape
+ * (no script / notes / provider ids / errors), no HeyGen refresh and no WhatsApp notify side effects.
+ */
+async function publicStatusPayload(jobId: string) {
+  const job = await getHeyGenJob(jobId);
+  if (!job || !job.studentEnabled) {
+    return NextResponse.json({ error: "Unknown jobId." }, { status: 404 });
+  }
+  return NextResponse.json({
+    job: publicHeyGenJob(job),
+    timeline: resolveJobTimeline(job),
+    playerPath: playerPathForJob(job),
+    demoMode: job.demo,
+  });
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const jobId = url.searchParams.get("jobId") || url.searchParams.get("video_id") || "";
+  const staff = await apiRequireStaff();
+  if (staff.error) {
+    // Listing every job (scripts, notes, provider ids) is staff-only.
+    if (!jobId) return staff.error;
+    const session = await apiSession();
+    if (session.error) return session.error;
+    return publicStatusPayload(jobId);
+  }
   if (!jobId) {
     const jobs = await listHeyGenJobs();
     return NextResponse.json({
@@ -55,6 +82,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  // POST refreshes from HeyGen, patches the job and may notify on WhatsApp: staff only.
+  const staff = await apiRequireStaff();
+  if (staff.error) return staff.error;
   let json: unknown = {};
   try {
     json = await request.json();

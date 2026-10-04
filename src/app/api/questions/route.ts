@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiRequireStaff } from "@/lib/auth/guards";
+import { publicQuestion } from "@/lib/security/publicViews";
 import { addCustomQuestion, readStore, updateCustomQuestion } from "@/lib/store";
 import { createId } from "@/lib/ids";
 import { formatLebaneseEquation, formatMathIslands } from "@/lib/math/lebaneseEquationFormat";
@@ -18,7 +19,10 @@ export async function GET(request: Request) {
   const lessonId = new URL(request.url).searchParams.get("lessonId");
   const store = await readStore();
   const rows = lessonId ? store.customQuestions.filter((item) => item.lessonId === lessonId) : store.customQuestions;
-  return NextResponse.json({ questions: rows });
+  // Answer keys (correctIndex) and worked solutions (steps) are staff-only; everyone else gets the prompts.
+  const staff = await apiRequireStaff();
+  if (!staff.error) return NextResponse.json({ questions: rows });
+  return NextResponse.json({ questions: rows.map(publicQuestion) });
 }
 
 export async function POST(request: Request) {
