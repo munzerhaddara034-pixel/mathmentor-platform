@@ -183,8 +183,12 @@ test("maths detection: maths vs secretary commands", () => {
 });
 
 test("persona: WhatsApp renames the website tutor to محمد, keeps the real teacher's name", () => {
-  assert.equal(whatsappPersonaText("تصحيح — أستاذ منذر (معلّم بالذكاء الاصطناعي)، تحقّق ثانٍ"), "تصحيح — محمد، تحقّق ثانٍ");
-  assert.equal(whatsappPersonaText("Correction — Professor Munzer (AI tutor), second check", { latin: true }), "Correction — Mohamed, second check");
+  assert.equal(whatsappPersonaText("تصحيح — يوسف (معلّم بالذكاء الاصطناعي)، تحقّق ثانٍ"), "تصحيح — محمد، تحقّق ثانٍ");
+  assert.equal(whatsappPersonaText("Correction — Youssef (AI tutor), second check", { latin: true }), "Correction — Mohamed, second check");
+  assert.equal(whatsappPersonaText("Correction — Youssef (tuteur IA), seconde vérification", { latin: true }), "Correction — Mohamed, seconde vérification");
+  // A "Youssef" inside a word problem (no AI-tutor badge) is left alone.
+  assert.equal(whatsappPersonaText("Youssef buys 3 pens at $2 each."), "Youssef buys 3 pens at $2 each.");
+  assert.equal(whatsappPersonaText("اشترى يوسف 3 أقلام"), "اشترى يوسف 3 أقلام");
   assert.match(whatsappPersonaText(MEDIA_SIGNATURE_AR), /الأستاذ منذر حداره/);
 });
 
