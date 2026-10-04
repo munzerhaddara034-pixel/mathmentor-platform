@@ -7,6 +7,7 @@ import { runAgentLoop } from "../agent/loop";
 import { agentProtocol } from "../agent/protocol";
 import type { AgentOutcome } from "../agent/types";
 import { beirutMonth } from "../cost";
+import { repoMapFor } from "../repoMap";
 import { createRepoTools } from "../tools";
 import type { HamzaTask } from "../tasks/types";
 import { hamzaMessage, proposalText, usd } from "./messages";
@@ -85,7 +86,7 @@ export async function runHamzaTask(deps: RunnerDeps, task: HamzaTask): Promise<v
     const snapshot = await deps.openSnapshot(ref);
     const tools = createRepoTools({ snapshot, github: deps.reader() ?? undefined, ciChecks: config.ciChecks });
     const brief = target ? revisionBrief(task, target, ref) : undefined;
-    const system = [deps.systemPrompt, agentProtocol({ repo: deps.repoLabel, base: ref, sha: snapshot.sha, maxToolCalls: config.limits.maxToolCalls, revision: brief }), task.extraContext ?? ""]
+    const system = [deps.systemPrompt, agentProtocol({ repo: deps.repoLabel, base: ref, sha: snapshot.sha, maxToolCalls: config.limits.maxToolCalls, revision: brief, repoMap: await repoMapFor(snapshot) }), task.extraContext ?? ""]
       .filter(Boolean)
       .join("\n\n");
     const month = beirutMonth(deps.now());
