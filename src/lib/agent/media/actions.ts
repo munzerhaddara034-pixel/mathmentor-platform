@@ -3,7 +3,7 @@
  * Every external call is wrapped; each action returns a ready Arabic reply.
  */
 import { AGENT_PERSONA_AR, SOLUTION_VERIFIER_RULES_AR } from "@/lib/agent/persona";
-import { runMathSolver } from "@/lib/solver/engine";
+import { solveAndVerify } from "@/lib/solver/pipeline";
 import { hasGeminiKey } from "@/lib/solver/llm";
 import { patchMathQuery, saveMathQuery } from "@/lib/solver/store";
 import { verifySolution, type SolutionVerdict } from "@/lib/solver/verify";
@@ -13,6 +13,13 @@ import { isPdfMime } from "@/lib/whatsapp/media/policy";
 import { geminiReadFile } from "./geminiFile";
 import { extractPdfText } from "./pdfText";
 import { clampWhatsAppText, solutionPdf, solutionWhatsAppTextAr } from "./solutionFormat";
+import {
+  isGeminiQuotaError,
+  QUOTA_APOLOGY_AR,
+  type MathSolveOutcome,
+  type MathSolveRequest,
+  type ReplyAttachment,
+} from "@/lib/whatsapp/agentCore";
 
 export type FileForAction = {
   bytes: Buffer;
@@ -72,80 +79,145 @@ function toRecord(solution: MathSolution, file: FileForAction, from: string): Om
   };
 }
 
-/** Image / PDF of a math problem → Gemini vision solver → محمد verifier → reply (+ optional PDF). */
-export async function solveFileAction(file: FileForAction, from: string, wantPdf: boolean): Promise<ActionOutcome> {
-  if (!hasGeminiKey()) return { ok: false, replyAr: `${GEMINI_MISSING_AR}\n${MEDIA_SIGNATURE_AR}`, relatedIds: [], note: "gemini_missing" };
+function toVerdict(solution: MathSolution): SolutionVerdict | undefined {
+  const v = solution.solverMeta?.verification;
+  if (!v) return undefined;
+  return { status: v.status, noteAr: v.noteAr, issues: [], calls: [] };
+}
+
+/**
+ * The WhatsApp maths answer for محمد: the upgraded solver (solveAndVerify — fast/strong tiers, CAS
+ * check, repair pass, sync verification for Bac / university) on a typed question, a transcribed
+ * voice note or a photo. 429 → { reason: "quota" } so the caller sends a short apology.
+ */
+export async function solveForWhatsApp(request: MathSolveRequest): Promise<MathSolveOutcome> {
+  if (!hasGeminiKey()) {
+    const textAr = request.imageBase64
+      ? `${GEMINI_MISSING_AR}\n${MEDIA_SIGNATURE_AR}`
+      : `وصلني سؤالك ✅ بس خدمة الحلّ الذكي (Gemini) مش مفعّلة على الخادم حالياً، فما قدرت حلّه.\n${MEDIA_SIGNATURE_AR}`;
+    return { ok: false, reason: "unavailable", textAr, error: "gemini_missing" };
+  }
+  const file: FileForAction = {
+    bytes: request.imageBase64 ? Buffer.from(request.imageBase64, "base64") : Buffer.alloc(0),
+    mimeType: request.mimeType || (request.imageBase64 ? "image/jpeg" : "text/plain"),
+    filename: request.imageName || (request.imageBase64 ? "whatsapp-photo" : "whatsapp-text"),
+    caption: request.question,
+    recordId: request.imageName || "",
+    fileUrl: "",
+  };
 
   let solution: MathSolution;
   try {
-    solution = await runMathSolver({
-      question: file.caption || "",
+    solution = await solveAndVerify({
+      question: request.question || "",
       language: "ar",
-      imageName: file.filename,
-      imageBase64: file.bytes.toString("base64"),
-      mimeType: file.mimeType,
+      imageBase64: request.imageBase64,
+      mimeType: request.imageBase64 ? request.mimeType : undefined,
+      imageName: request.imageBase64 ? file.filename : undefined,
     });
   } catch (error) {
-    return { ok: false, replyAr: "", relatedIds: [], note: error instanceof Error ? error.message : "solver failed" };
+    const message = error instanceof Error ? error.message : "solver failed";
+    return { ok: false, reason: isGeminiQuotaError(error) ? "quota" : "failed", error: message };
   }
-
-  // runMathSolver maps a Gemini *failure* on a photo to a demo "retake" — don't blame the photo.
-  if (solution.needsRetake && solution.source === "demo") {
+  if (solution.needsRetake) {
     return {
       ok: false,
-      replyAr: mediaErrorReplyAr("ai_busy", { kindAr: isPdfMime(file.mimeType) ? "الملف" : "الصورة" }),
-      relatedIds: [],
-      note: "gemini_unavailable",
+      reason: "failed",
+      // A demo "retake" means Gemini itself failed — don't blame the photo.
+      textAr:
+        solution.source === "demo"
+          ? mediaErrorReplyAr("ai_busy", { kindAr: isPdfMime(request.mimeType) ? "الملف" : request.imageBase64 ? "الصورة" : "السؤال" })
+          : solutionWhatsAppTextAr(solution, {}),
+      error: "needs_retake",
     };
   }
 
   const relatedIds: string[] = [];
-  let verdict: SolutionVerdict | undefined;
   let record: MathQueryRecord | undefined;
   try {
-    record = await saveMathQuery(toRecord(solution, file, from));
+    record = await saveMathQuery(toRecord(solution, file, request.from));
     relatedIds.push(record.id);
   } catch {
     record = undefined;
   }
-  if (!solution.needsRetake && solution.source !== "demo") {
+
+  let verdict = toVerdict(solution);
+  if (!verdict && solution.source !== "demo") {
     try {
       const probe: MathQueryRecord = record ?? {
-        ...toRecord(solution, file, from),
+        ...toRecord(solution, file, request.from),
         id: "unsaved",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       verdict = await verifySolution(probe);
-      if (record) {
-        await patchMathQuery(record.id, {
-          auditStatus: verdict.status === "unverified" ? "pending" : verdict.status,
-          auditNote: verdict.noteAr,
-        });
-      }
-    } catch {
+    } catch (error) {
+      if (isGeminiQuotaError(error)) console.error("[whatsapp-agent] Gemini quota exhausted (429) during verification");
       verdict = undefined;
     }
   }
+  if (record && verdict) {
+    try {
+      await patchMathQuery(record.id, {
+        auditStatus: verdict.status === "unverified" ? "pending" : verdict.status,
+        auditNote: verdict.noteAr,
+      });
+    } catch {
+      /* audit status is best effort */
+    }
+  }
 
-  let pdf: ActionOutcome["pdf"];
-  if (wantPdf && !solution.needsRetake) {
+  let pdf: ReplyAttachment | undefined;
+  if (request.wantPdf) {
     try {
       pdf = {
-        bytes: solutionPdf(solution, { verdict, question: file.caption }),
+        bytes: solutionPdf(solution, { verdict, question: request.question }),
         filename: `MathMentor-solution-${new Date().toISOString().slice(0, 10)}.pdf`,
         caption: "📄 الحل الكامل — محمد · الأستاذ منذر حداره",
+        mimeType: "application/pdf",
       };
     } catch {
       pdf = undefined;
     }
   }
   return {
-    ok: !solution.needsRetake,
-    replyAr: solutionWhatsAppTextAr(solution, { verdict, pdfAttached: Boolean(pdf) }),
-    relatedIds,
+    ok: true,
+    textAr: solutionWhatsAppTextAr(solution, { verdict, pdfAttached: Boolean(pdf) }),
     pdf,
-    note: verdict ? `verify:${verdict.status}` : undefined,
+    relatedIds,
+  };
+}
+
+/** Image / PDF of a math problem → upgraded solver (+ verification) → reply (+ optional PDF). */
+export async function solveFileAction(file: FileForAction, from: string, wantPdf: boolean): Promise<ActionOutcome> {
+  const outcome = await solveForWhatsApp({
+    question: file.caption || "",
+    imageBase64: file.bytes.toString("base64"),
+    mimeType: file.mimeType,
+    imageName: file.filename,
+    wantPdf,
+    from,
+  });
+  if (outcome.ok) {
+    return {
+      ok: true,
+      replyAr: outcome.textAr,
+      relatedIds: outcome.relatedIds ?? [],
+      pdf: outcome.pdf ? { bytes: outcome.pdf.bytes, filename: outcome.pdf.filename, caption: outcome.pdf.caption } : undefined,
+    };
+  }
+  if (outcome.reason === "quota") {
+    console.error("[whatsapp-agent] Gemini quota exhausted (429) while solving a file");
+    return { ok: false, replyAr: QUOTA_APOLOGY_AR, relatedIds: [], note: "gemini_quota" };
+  }
+  if (outcome.reason === "unavailable") {
+    return { ok: false, replyAr: outcome.textAr || "", relatedIds: [], note: "gemini_missing" };
+  }
+  return {
+    ok: false,
+    replyAr: outcome.textAr || mediaErrorReplyAr("ai_busy", { kindAr: isPdfMime(file.mimeType) ? "الملف" : "الصورة" }),
+    relatedIds: [],
+    note: outcome.error || "solver failed",
   };
 }
 
@@ -184,6 +256,10 @@ export async function summarizeFileAction(file: FileForAction): Promise<ActionOu
     };
   }
   if (!hasGeminiKey()) return { ok: false, replyAr: `${GEMINI_MISSING_AR}\n${MEDIA_SIGNATURE_AR}`, relatedIds: [], note: "gemini_missing" };
+  if (isGeminiQuotaError(result.error)) {
+    console.error("[whatsapp-agent] Gemini quota exhausted (429) while summarizing a file");
+    return { ok: false, replyAr: QUOTA_APOLOGY_AR, relatedIds: [], note: "gemini_quota" };
+  }
   return { ok: false, replyAr: "", relatedIds: [], note: result.error };
 }
 
@@ -204,6 +280,10 @@ export async function verifyExamFileAction(file: FileForAction): Promise<ActionO
     .filter(Boolean)
     .join("\n");
   const result = await geminiReadFile({ prompt, bytes: file.bytes, mimeType: file.mimeType, temperature: 0 });
+  if (!result.ok && isGeminiQuotaError(result.error)) {
+    console.error("[whatsapp-agent] Gemini quota exhausted (429) while verifying an exam file");
+    return { ok: false, replyAr: QUOTA_APOLOGY_AR, relatedIds: [], note: "gemini_quota" };
+  }
   if (!result.ok) return { ok: false, replyAr: "", relatedIds: [], note: result.error };
   return {
     ok: true,

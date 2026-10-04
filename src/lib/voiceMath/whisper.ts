@@ -1,4 +1,6 @@
 import { openaiSolverKey, geminiApiKey } from "@/lib/solver/llm";
+import { geminiModels } from "@/lib/solver/gemini/models";
+import { geminiTranscribeAudio } from "@/lib/whatsapp/agentCore";
 import { DEMO_DICTATION_AR, DEMO_DICTATION_EN, demoTranscriptFromStub } from "./demo";
 import type { VoiceTranscript, WhisperSegment } from "./types";
 import type { LessonLanguage } from "@/lib/studio/timeline";
@@ -85,14 +87,13 @@ export async function transcribeWithWhisper(input: {
   };
 }
 
-function geminiSttModels(): string[] {
-  const pinned = process.env.GEMINI_VOICE_MODEL?.trim() || process.env.GEMINI_MODEL?.trim();
-  return pinned
-    ? [pinned]
-    : ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.0-flash", "gemini-1.5-flash"];
+/** Shared fast-tier list (no retired ids: gemini-2.5-flash / 2.0-flash / 1.5-flash now 404). */
+export function geminiSttModels(): string[] {
+  const pinned = process.env.GEMINI_VOICE_MODEL?.trim();
+  return pinned ? [pinned, ...geminiModels().filter((model) => model !== pinned)] : geminiModels();
 }
 
-/** Gemini multimodal STT fallback when OpenAI Whisper is unavailable. */
+/** Gemini multimodal STT fallback when OpenAI Whisper is unavailable (WhatsApp voice notes: ogg/opus). */
 export async function transcribeWithGeminiAudio(input: {
   bytes: Buffer;
   mimeType?: string;
@@ -100,69 +101,21 @@ export async function transcribeWithGeminiAudio(input: {
 }): Promise<VoiceTranscript> {
   const key = geminiApiKey();
   if (!key) throw new Error("GEMINI_API_KEY is not set.");
-  const mime =
-    (input.mimeType || "audio/ogg").split(";")[0].trim() || "audio/ogg";
-  const b64 = input.bytes.toString("base64");
-  const langHint =
-    input.language === "en"
-      ? "English"
-      : input.language === "fr"
-        ? "French"
-        : "Arabic (Lebanese dialect or MSA is fine)";
-  const prompt =
-    `Transcribe this WhatsApp voice note accurately in ${langHint}. ` +
-    `Return ONLY the spoken transcript text with no commentary, no quotes, no markdown.`;
-
-  let lastError = "Gemini audio STT failed.";
-  for (const model of geminiSttModels()) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                { inline_data: { mime_type: mime, data: b64 } },
-                { text: prompt },
-              ],
-            },
-          ],
-          generationConfig: { temperature: 0 },
-        }),
-      });
-      if (!response.ok) {
-        lastError = `Gemini STT ${response.status}: ${(await response.text()).slice(0, 180)}`;
-        continue;
-      }
-      const json = (await response.json()) as {
-        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-      };
-      const text =
-        json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("\n").trim() || "";
-      if (!text) {
-        lastError = "Gemini returned empty transcript.";
-        continue;
-      }
-      // Reject obvious refusal / meta answers
-      if (/^(i (cannot|can't|am unable)|sorry|as an ai)/i.test(text) && text.length < 80) {
-        lastError = "Gemini refused audio transcription.";
-        continue;
-      }
-      return {
-        text,
-        language: input.language,
-        segments: [],
-        source: "whisper", // real STT; treat as whisper-equivalent for pipeline
-        warning: `Transcribed via Gemini (${model}) after Whisper unavailable.`,
-      };
-    } catch (error) {
-      lastError = error instanceof Error ? error.message : "Gemini STT error";
-    }
-  }
-  throw new Error(lastError);
+  const result = await geminiTranscribeAudio({
+    key,
+    models: geminiSttModels(),
+    bytes: input.bytes,
+    mimeType: input.mimeType,
+    fetchImpl: fetch,
+  });
+  if (!result.ok) throw new Error(result.quota ? `Gemini STT quota exhausted (429): ${result.error}` : result.error);
+  return {
+    text: result.text,
+    language: input.language,
+    segments: [],
+    source: "whisper", // real STT; treat as whisper-equivalent for pipeline
+    warning: `Transcribed via Gemini (${result.model}).`,
+  };
 }
 
 function withPoliteDemoWarning(

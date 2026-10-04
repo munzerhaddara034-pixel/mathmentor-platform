@@ -8,6 +8,7 @@ import { asciiForPdf, latexToReadable } from "@/lib/math/latexToReadable";
 import type { SolutionVerdict } from "@/lib/solver/verify";
 import type { MathSolution } from "@/lib/solver/types";
 import { MEDIA_SIGNATURE_AR } from "@/lib/whatsapp/media/errorsAr";
+import { whatsappPersonaText } from "@/lib/whatsapp/agentCore";
 
 /** WhatsApp text body limit is 4096; keep headroom. */
 export const WHATSAPP_TEXT_MAX = 3800;
@@ -66,7 +67,7 @@ export function solutionWhatsAppTextAr(
   if (solution.given?.aimAr) lines.push(`المطلوب: ${waProse(solution.given.aimAr)}`);
   lines.push("");
   solution.steps.slice(0, 12).forEach((step, index) => {
-    const title = step.titleAr || step.title;
+    const title = whatsappPersonaText(step.titleAr || step.title);
     lines.push(`${index + 1}) ${waProse(title)}`);
     const math = waMath(step.latex);
     if (math) lines.push(`   ${math}`);
@@ -81,10 +82,12 @@ export function solutionWhatsAppTextAr(
   if (solution.examTip?.ar) lines.push(`💡 ${waProse(solution.examTip.ar).slice(0, 240)}`);
   const verdict = verdictLineAr(options?.verdict);
   if (verdict) lines.push("", verdict);
-  if (solution.warning && solution.source === "demo") lines.push(`⚠️ ${solution.warning.slice(0, 200)}`);
+  if (solution.warning && (solution.source === "demo" || solution.needsReview)) {
+    lines.push(`⚠️ ${whatsappPersonaText(solution.warning).slice(0, 200)}`);
+  }
   if (options?.pdfAttached) lines.push("📄 بعتتلك الحل كمان كملف PDF.");
   lines.push(MEDIA_SIGNATURE_AR);
-  return clampWhatsAppText(lines.join("\n"));
+  return clampWhatsAppText(whatsappPersonaText(lines.join("\n")));
 }
 
 function verdictLineEn(verdict: SolutionVerdict | undefined): string {
@@ -110,7 +113,7 @@ export function solutionPdf(solution: MathSolution, options?: { verdict?: Soluti
   if (solution.given?.aimEn) lines.push(`Aim: ${pdfProse(solution.given.aimEn)}`);
   lines.push("");
   solution.steps.forEach((step, index) => {
-    lines.push(`Step ${index + 1}. ${pdfProse(step.title)}`);
+    lines.push(`Step ${index + 1}. ${pdfProse(whatsappPersonaText(step.title, { latin: true }))}`);
     const math = pdfMath(step.latex);
     if (math) lines.push(`    ${math}`);
     if (step.explanationEn) lines.push(`    ${pdfProse(step.explanationEn)}`);

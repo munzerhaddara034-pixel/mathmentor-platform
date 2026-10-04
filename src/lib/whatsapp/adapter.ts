@@ -1,4 +1,6 @@
+import { metaDownloadMedia, metaSendMessage, metaTextPayload } from "./agentCore";
 import { graphUrl } from "./graphBase";
+import { providerMediaAuthHeaders } from "./mediaHosts";
 import { appendWhatsAppMessage } from "./store";
 import type { WhatsAppKind, WhatsAppMessage, WhatsAppProvider } from "./types";
 
@@ -96,24 +98,8 @@ async function sendUltraMsg(to: string, body: string) {
 
 async function sendMeta(to: string, body: string) {
   const token = metaAccessToken();
-  const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID!.trim();
-  const toDigits = to.replace(/^\+/, "");
-  const response = await fetch(graphUrl(`${encodeURIComponent(phoneId)}/messages`), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: toDigits,
-      type: "text",
-      text: { body },
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`Meta WhatsApp ${response.status}: ${(await response.text()).slice(0, 240)}`);
-  }
+  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID!.trim();
+  await metaSendMessage({ cfg: { token, phoneNumberId, graphUrl }, payload: metaTextPayload(to, body), fetchImpl: fetch });
 }
 
 export async function sendWhatsApp(input: {
@@ -205,44 +191,11 @@ export type MetaMediaFetchResult = MetaMediaFetchSuccess | MetaMediaFetchFailure
 
 /** Download Meta Cloud API media by id (requires WHATSAPP_ACCESS_TOKEN). Never silent — always ok or error. */
 export async function fetchMetaMediaById(mediaId: string): Promise<MetaMediaFetchResult> {
+  if (!mediaId.trim()) return { ok: false, error: "empty mediaId" };
   const token = metaAccessToken();
-  if (!mediaId.trim()) {
-    return { ok: false, error: "empty mediaId" };
-  }
-  if (!token) {
-    return {
-      ok: false,
-      error: "WHATSAPP_ACCESS_TOKEN / WHATSAPP_TOKEN missing — cannot download Meta media",
-    };
-  }
-  try {
-    const metaRes = await fetch(graphUrl(encodeURIComponent(mediaId)), {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!metaRes.ok) {
-      const detail = (await metaRes.text()).slice(0, 240);
-      return { ok: false, error: `Meta media metadata ${metaRes.status}: ${detail}` };
-    }
-    const metaJson = (await metaRes.json()) as { url?: string; mime_type?: string };
-    if (!metaJson.url) {
-      return { ok: false, error: "Meta media metadata missing url" };
-    }
-    const fileRes = await fetch(metaJson.url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!fileRes.ok) {
-      const detail = (await fileRes.text()).slice(0, 240);
-      return { ok: false, error: `Meta media download ${fileRes.status}: ${detail}` };
-    }
-    const mimeType = metaJson.mime_type || fileRes.headers.get("content-type") || undefined;
-    const ab = await fileRes.arrayBuffer();
-    return { ok: true, bytes: Buffer.from(ab), mimeType };
-  } catch (error) {
-    return {
-      ok: false,
-      error: error instanceof Error ? error.message : "Meta media fetch threw",
-    };
-  }
+  if (!token) return { ok: false, error: "WHATSAPP_ACCESS_TOKEN / WHATSAPP_TOKEN missing — cannot download Meta media" };
+  const result = await metaDownloadMedia({ mediaId, token, graphUrl, fetchImpl: fetch });
+  return result.ok ? { ok: true, bytes: result.bytes, mimeType: result.mimeType } : { ok: false, error: result.error };
 }
 
 /** Fetch media URL; attaches Meta/Twilio auth when available. */
@@ -250,17 +203,14 @@ export async function fetchWhatsAppMediaBytes(
   mediaUrl: string,
 ): Promise<{ bytes: Buffer; mimeType?: string } | null> {
   try {
-    const headers: Record<string, string> = {};
-    const metaTok = metaAccessToken();
-    if (metaTok && /graph\.facebook|fbcdn|whatsapp/i.test(mediaUrl)) {
-      headers.Authorization = `Bearer ${metaTok}`;
-    }
-    const twilioSid = process.env.TWILIO_ACCOUNT_SID?.trim();
-    const twilioTok = process.env.TWILIO_AUTH_TOKEN?.trim();
-    if (twilioSid && twilioTok && /api\.twilio\.com|twilio\.com/i.test(mediaUrl)) {
-      headers.Authorization = `Basic ${Buffer.from(`${twilioSid}:${twilioTok}`).toString("base64")}`;
-    }
-    const response = await fetch(mediaUrl, { headers });
+    if (!/^https:\/\//i.test(mediaUrl)) return null;
+    // Credentials only for the provider's own hosts (parsed hostname, not a substring of the URL).
+    const headers = providerMediaAuthHeaders(mediaUrl, {
+      metaToken: metaAccessToken(),
+      twilioSid: process.env.TWILIO_ACCOUNT_SID?.trim(),
+      twilioToken: process.env.TWILIO_AUTH_TOKEN?.trim(),
+    });
+    const response = await fetch(mediaUrl, { headers, signal: AbortSignal.timeout(30_000) });
     if (!response.ok) return null;
     const mimeType = response.headers.get("content-type") || undefined;
     const ab = await response.arrayBuffer();

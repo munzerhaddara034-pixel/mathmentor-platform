@@ -22,7 +22,8 @@ export function isDuplicateMessage(messageId: string | undefined): boolean {
   return false;
 }
 
-function runLater(label: string, task: () => Promise<unknown>): void {
+/** Run after the webhook response (Meta retries slow webhooks). Errors are logged, never thrown. */
+export function runLater(label: string, task: () => Promise<unknown>): void {
   const wrapped = async () => {
     try {
       await task();

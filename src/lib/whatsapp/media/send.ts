@@ -1,17 +1,23 @@
 /**
  * Outbound WhatsApp media for محمد.
- * Meta: POST /{phone-number-id}/media (multipart upload) → media id → POST /{phone-number-id}/messages.
- * UltraMsg / Twilio: public link only. Unconfigured: logged to the outbox (no network).
+ * Meta: POST /{phone-number-id}/media (multipart upload) → media id → POST /{phone-number-id}/messages
+ * with `{ type: "document", document: { id } }` — generated files never depend on a public link
+ * (the platform's file routes are staff-only and the Render disk is wiped on every deploy).
+ * UltraMsg: link, or base64 bytes for documents. Twilio: public link only.
+ * Unconfigured: logged to the outbox (no network).
  */
 import { configuredWhatsAppProvider, toE164, whatsappConfigured } from "@/lib/whatsapp/adapter";
+import { metaSendMessage, metaUploadMedia } from "@/lib/whatsapp/agentCore";
 import { appendWhatsAppMessage } from "@/lib/whatsapp/store";
-import { graphErrorDetail, graphUrl, metaCredentials } from "./graph";
+import { graphUrl, metaCredentials } from "./graph";
 import { buildMediaMessagePayload, type MediaRef } from "./payload";
 import { baseMime, checkOutboundMedia, formatMegabytes, safeFilename, type MediaCategory } from "./policy";
 import { checkMediaRecipient } from "./recipientPolicy";
 import { saveMediaRecord } from "./store";
 
 const SEND_TIMEOUT_MS = 45_000;
+/** UltraMsg caps base64 bodies at ~2–10M chars; keep documents well under (≈1.4MB raw → 1.9M chars). */
+const ULTRAMSG_MAX_BASE64_BYTES = 1_400_000;
 
 export type SendMediaInput = {
   type: MediaCategory;
@@ -44,20 +50,7 @@ export type SendMediaResult = {
 export async function uploadMetaMedia(bytes: Buffer, mimeType: string, filename: string): Promise<string> {
   const creds = metaCredentials();
   if (!creds) throw new Error("Meta WhatsApp credentials missing (WHATSAPP_ACCESS_TOKEN + WHATSAPP_PHONE_NUMBER_ID)");
-  const form = new FormData();
-  form.append("messaging_product", "whatsapp");
-  form.append("type", mimeType);
-  form.append("file", new Blob([new Uint8Array(bytes)], { type: mimeType }), filename);
-  const res = await fetch(graphUrl(`${encodeURIComponent(creds.phoneNumberId)}/media`), {
-    method: "POST",
-    headers: { Authorization: `Bearer ${creds.token}` },
-    body: form,
-    signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`Meta media upload ${await graphErrorDetail(res)}`);
-  const json = (await res.json()) as { id?: string };
-  if (!json.id) throw new Error("Meta media upload returned no id");
-  return json.id;
+  return metaUploadMedia({ cfg: { ...creds, graphUrl }, bytes, mimeType, filename, fetchImpl: fetch });
 }
 
 async function sendMetaMediaMessage(to: string, input: SendMediaInput, media: MediaRef): Promise<string | undefined> {
@@ -71,17 +64,10 @@ async function sendMetaMediaMessage(to: string, input: SendMediaInput, media: Me
     filename: input.filename,
     replyToMessageId: input.replyToMessageId,
   });
-  const res = await fetch(graphUrl(`${encodeURIComponent(creds.phoneNumberId)}/messages`), {
-    method: "POST",
-    headers: { Authorization: `Bearer ${creds.token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
-  });
-  if (!res.ok) throw new Error(`Meta media message ${await graphErrorDetail(res)}`);
-  const json = (await res.json()) as { messages?: Array<{ id?: string }> };
-  return json.messages?.[0]?.id;
+  return metaSendMessage({ cfg: { ...creds, graphUrl }, payload, fetchImpl: fetch });
 }
 
+/** `link` is an https URL, or (documents) the raw base64 of the file — UltraMsg accepts both. */
 async function sendUltraMsgMedia(to: string, input: SendMediaInput, link: string): Promise<void> {
   const instance = process.env.ULTRAMSG_INSTANCE_ID?.trim() || "";
   const token = process.env.ULTRAMSG_TOKEN?.trim() || "";
@@ -173,6 +159,10 @@ export async function sendWhatsAppMedia(
     } else if (normalized.link && (provider === "ultramsg" || provider === "twilio")) {
       if (provider === "ultramsg") await sendUltraMsgMedia(to, normalized, normalized.link);
       else await sendTwilioMedia(to, normalized, normalized.link);
+      status = "sent";
+    } else if (provider === "ultramsg" && normalized.bytes && normalized.type === "document" && normalized.bytes.length <= ULTRAMSG_MAX_BASE64_BYTES) {
+      // No public link needed: UltraMsg takes the document itself as base64.
+      await sendUltraMsgMedia(to, normalized, normalized.bytes.toString("base64"));
       status = "sent";
     } else {
       status = "failed";
