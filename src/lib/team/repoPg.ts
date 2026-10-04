@@ -66,6 +66,14 @@ export const pgTeamRepo: TeamRepo = {
     ]);
     return rows.map((row) => row.data);
   },
+  async listProposalsByStatus(statuses, limit) {
+    if (!statuses.length) return [];
+    const rows = await dbQuery<DataRow<TeamProposal>>(
+      "SELECT data FROM mm_team_proposals WHERE status = ANY($1::text[]) ORDER BY updated_at DESC LIMIT $2",
+      [statuses, limit],
+    );
+    return rows.map((row) => row.data);
+  },
   async transitionProposal(id, from, patch) {
     return withTransaction(async (client) => {
       const found = await client.query<DataRow<TeamProposal>>(

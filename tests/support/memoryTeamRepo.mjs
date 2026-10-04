@@ -29,6 +29,13 @@ export function createMemoryTeamRepo() {
     async listProposals(ids) {
       return ids.map((id) => proposals.get(id)).filter(Boolean).map((p) => structuredClone(p));
     },
+    async listProposalsByStatus(statuses, limit) {
+      return [...proposals.values()]
+        .filter((p) => statuses.includes(p.status))
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+        .slice(0, limit)
+        .map((p) => structuredClone(p));
+    },
     async transitionProposal(id, from, patch) {
       const current = proposals.get(id);
       if (!current || !from.includes(current.status)) return undefined;
