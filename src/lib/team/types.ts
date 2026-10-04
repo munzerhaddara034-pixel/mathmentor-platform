@@ -45,6 +45,8 @@ export type TeamMessage = {
   referredById?: string;
   /** Developer proposal attached to this message. */
   proposalId?: string;
+  /** Hamza background task this message belongs to (TaskCard renders under it). */
+  taskId?: string;
   /** Image prompt drafted by سامي (always shown, image or not). */
   imagePrompt?: string;
   /** Redaction notice when a secret was removed from a human message. */
