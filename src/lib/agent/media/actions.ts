@@ -12,7 +12,13 @@ import { mediaErrorReplyAr, MEDIA_SIGNATURE_AR } from "@/lib/whatsapp/media/erro
 import { isPdfMime } from "@/lib/whatsapp/media/policy";
 import { geminiReadFile } from "./geminiFile";
 import { extractPdfText } from "./pdfText";
-import { clampWhatsAppText, solutionPdf, solutionWhatsAppTextAr } from "./solutionFormat";
+import {
+  clampWhatsAppText,
+  renderSolutionPdf,
+  SOLUTION_PDF_CAPTION_AR,
+  SOLUTION_PDF_FILENAME,
+  solutionWhatsAppTextAr,
+} from "./solutionFormat";
 import {
   isGeminiQuotaError,
   QUOTA_APOLOGY_AR,
@@ -35,6 +41,8 @@ export type ActionOutcome = {
   replyAr: string;
   relatedIds: string[];
   pdf?: { bytes: Buffer; filename: string; caption: string };
+  /** A PDF was due but could not be generated. */
+  pdfError?: string;
   note?: string;
 };
 
@@ -168,22 +176,31 @@ export async function solveForWhatsApp(request: MathSolveRequest): Promise<MathS
   }
 
   let pdf: ReplyAttachment | undefined;
+  let pdfError: string | undefined;
   if (request.wantPdf) {
     try {
+      const rendered = renderSolutionPdf(solution, { verdict, question: request.question });
+      if (!rendered.bytes.length) throw new Error("empty PDF");
       pdf = {
-        bytes: solutionPdf(solution, { verdict, question: request.question }),
-        filename: `MathMentor-solution-${new Date().toISOString().slice(0, 10)}.pdf`,
-        caption: "📄 الحل الكامل — محمد · الأستاذ منذر حداره",
+        bytes: rendered.bytes,
+        filename: SOLUTION_PDF_FILENAME,
+        caption: SOLUTION_PDF_CAPTION_AR,
         mimeType: "application/pdf",
       };
-    } catch {
+      console.info(
+        `[whatsapp-agent] solution PDF built (${rendered.renderer}, ${rendered.bytes.length} bytes) for …${request.from.slice(-4)}`,
+      );
+    } catch (error) {
+      pdfError = error instanceof Error ? error.message : "pdf build failed";
+      console.error(`[whatsapp-agent] solution PDF build failed: ${pdfError.slice(0, 200)}`);
       pdf = undefined;
     }
   }
   return {
     ok: true,
-    textAr: solutionWhatsAppTextAr(solution, { verdict, pdfAttached: Boolean(pdf) }),
+    textAr: solutionWhatsAppTextAr(solution, { verdict }),
     pdf,
+    pdfError,
     relatedIds,
   };
 }
@@ -204,6 +221,7 @@ export async function solveFileAction(file: FileForAction, from: string, wantPdf
       replyAr: outcome.textAr,
       relatedIds: outcome.relatedIds ?? [],
       pdf: outcome.pdf ? { bytes: outcome.pdf.bytes, filename: outcome.pdf.filename, caption: outcome.pdf.caption } : undefined,
+      pdfError: wantPdf && !outcome.pdf ? outcome.pdfError ?? "pdf_missing" : undefined,
     };
   }
   if (outcome.reason === "quota") {

@@ -6,6 +6,7 @@
 import { buildMockExamPdf } from "./mockExamPdf";
 import { solveForWhatsApp } from "./actions";
 import { isDuplicateMessage, runLater } from "./dispatch";
+import { recallLastPdf, rememberLastPdf } from "./lastPdf";
 import { replyToMediaMessage, sendMediaAck } from "./reply";
 import { geminiApiKey } from "@/lib/solver/llm";
 import { geminiSttModels, hasWhisperKey, transcribeWithWhisper } from "@/lib/voiceMath/whisper";
@@ -48,6 +49,7 @@ export function whatsappAgentDeps(fallback: AgentTurnDeps["fallback"]): AgentTur
       return { bytes: exam.bytes, filename: exam.filename, captionAr: exam.captionAr };
     },
     reply: async (reply) => {
+      if (reply.attachment) rememberLastPdf(reply.to, reply.attachment);
       await replyToMediaMessage({
         to: reply.to,
         replyAr: reply.textAr,
@@ -56,6 +58,8 @@ export function whatsappAgentDeps(fallback: AgentTurnDeps["fallback"]): AgentTur
         relatedIds: reply.relatedIds,
         parameters: reply.transcript ? { transcript: reply.transcript.slice(0, 500) } : undefined,
         attachment: reply.attachment,
+        attachmentSentNoteAr: reply.attachmentSentNoteAr,
+        pdfError: reply.pdfError,
         filename: reply.attachment?.filename,
         mimeType: reply.attachment?.mimeType,
         sizeBytes: reply.attachment?.bytes.length,
@@ -63,6 +67,7 @@ export function whatsappAgentDeps(fallback: AgentTurnDeps["fallback"]): AgentTur
       });
     },
     fallback,
+    lastPdf: recallLastPdf,
     ack: sendMediaAck,
     log: (level, message) => {
       if (level === "error") console.error(message);

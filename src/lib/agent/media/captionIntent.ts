@@ -10,7 +10,13 @@ const VERIFY_RE =
 const SUMMARIZE_RE = /لخّص|لخص|ملخّص|ملخص|تلخيص|summar|résum|resum|extract|استخرج|اقرأ|اقرا/i;
 const STORE_RE = /احفظ|إحفظ|خزّن|خزن|أرشف|ارشف|\bsave\b|\bstore\b|archive|للأرشيف|للارشيف/i;
 const SOLVE_RE = /حلّ|حل|حلها|حلا|solve|résou|resou|answer|جاوب|أجب|اجب/i;
-const PDF_RE = /\bpdf\b|بي\s*دي\s*اف|بدف|كملف|ك\s*ملف/i;
+/**
+ * "PDF" as typed or as speech-to-text writes it: pdf / PDF, «بي دي إف / أف / اف», «بدف», «ملف», file,
+ * document, fichier. (The old pattern missed «بي دي إف» — the usual Arabic spelling and what
+ * Whisper / Gemini transcripts produce — so voice requests never got their PDF.)
+ */
+const PDF_RE =
+  /pdf|بي\s*دي\s*[اإأآ]ف|ب\s*د\s*ف|بدف|پي\s*دي\s*[اإأآ]ف|كملف|ك\s*ملف|(?:^|[\s،,.:;!؟?«(])(?:ب?ال)?ملف|\bfile\b|\bdocument\b|مستند|fichier/i;
 
 /**
  * Caption wins when present. Defaults:
@@ -40,6 +46,24 @@ export function detectMediaAction(input: {
 /** Caption asks for the answer as a PDF document. */
 export function wantsPdfReply(caption: string | undefined): boolean {
   return PDF_RE.test(caption || "");
+}
+
+/**
+ * When محمد attaches the branded PDF to a maths answer on WhatsApp:
+ * - "always" (default): every solved problem (typed, voice note or photo) also gets the PDF;
+ * - "on_request": only when the message asks for it (pdf / بي دي إف / ملف …).
+ * Set with WHATSAPP_PDF_REPLY=always|on_request.
+ */
+export type PdfReplyMode = "always" | "on_request";
+
+export function pdfReplyMode(env: Record<string, string | undefined> = process.env): PdfReplyMode {
+  const raw = (env.WHATSAPP_PDF_REPLY || "").trim().toLowerCase();
+  return raw === "on_request" || raw === "on-request" || raw === "request" ? "on_request" : "always";
+}
+
+/** Attach the solution PDF to this maths answer? */
+export function shouldSendPdf(text: string | undefined, mode: PdfReplyMode = pdfReplyMode()): boolean {
+  return mode === "always" || wantsPdfReply(text);
 }
 
 /** Text command asking محمد for a mock exam PDF. */
