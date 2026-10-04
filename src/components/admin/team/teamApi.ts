@@ -68,13 +68,21 @@ export function transcribeVoice(blob: Blob, filename: string) {
   );
 }
 
-export type DecisionBody = { action: "approve" | "reject"; confirm: true; branch?: string };
+export type ProposalActionBody =
+  | { action: "issue_code"; confirm: true; step: "open_pr" | "merge"; branch?: string }
+  | { action: "approve"; confirm: true; code: string; reviewed: boolean; allowLarge?: boolean; branch?: string }
+  | { action: "merge"; confirm: true; code: string; typedBranch: string }
+  | { action: "reject" | "refresh_ci" | "revert"; confirm: true };
 
-export function decideProposal(id: string, body: DecisionBody) {
-  return safe<{ ok: true; proposal: TeamProposal; message: TeamMessage }>(() =>
+export type ProposalActionResponse = { ok: true; proposal: TeamProposal; message?: TeamMessage; code?: string; expiresAt?: string };
+
+/** Every Hamza decision (codes, approvals, merge, reject, CI refresh, revert) — same-origin JSON POST. */
+export function proposalAction(id: string, body: ProposalActionBody) {
+  return safe<ProposalActionResponse>(() =>
     fetch(`/api/admin/team/proposals/${encodeURIComponent(id)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(body),
     }),
   );

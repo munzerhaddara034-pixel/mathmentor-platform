@@ -13,7 +13,7 @@ type Props = {
   message: TeamMessage;
   proposal?: TeamProposal;
   referredByName?: string;
-  onDecided: (proposal: TeamProposal, message: TeamMessage) => void;
+  onDecided: (proposal: TeamProposal, message?: TeamMessage) => void;
 };
 
 function timeLabel(iso: string, locale: Locale) {

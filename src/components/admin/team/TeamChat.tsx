@@ -117,19 +117,20 @@ export function TeamChat({ staffName }: { staffName: string }) {
     return true;
   };
 
-  const onDecided = (proposal: TeamProposal, message: TeamMessage) => {
+  const onDecided = useCallback((proposal: TeamProposal, message?: TeamMessage) => {
     setThreads((current) => {
       const base = current[proposal.channel] ?? EMPTY;
+      const known = message ? base.messages.some((item) => item.id === message.id) : true;
       return {
         ...current,
         [proposal.channel]: {
           ...base,
-          messages: [...base.messages, message],
+          messages: message && !known ? [...base.messages, message] : base.messages,
           proposals: { ...base.proposals, [proposal.id]: proposal },
         },
       };
     });
-  };
+  }, []);
 
   return (
     <div className="team-chat">
