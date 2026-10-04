@@ -17,7 +17,8 @@
     "video:continuity": "python3 scripts/render-lesson-video.py content/lessons/grade-12-ls-continuity/video.json --both",
     "video:derivatives": "python3 scripts/render-lesson-video.py content/lessons/grade-12-ls-derivatives/video.json --both",
     "video:brevet-geometry": "python3 scripts/render-lesson-video.py content/lessons/brevet-geometry-thales/video.json --both",
-    "video:lessons": "npm run video:continuity && npm run video:derivatives && npm run video:brevet-geometry"
+    "video:lessons": "npm run video:continuity && npm run video:derivatives && npm run video:brevet-geometry",
+    "check:standards": "node --import ./tests/support/register.mjs scripts/check-standards.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

@@ -2,7 +2,7 @@
 import { TIER_LIMITS } from "./limits";
 
 export const PROJECT_RULES = `## Project rules (MathMentor) — enforced by the platform, not optional
-- TypeScript strict. Never \`any\`, \`as any\`, \`<any>\`, \`@ts-ignore\`, \`@ts-nocheck\`, \`@ts-expect-error\`. Name your types.
+- TypeScript strict: no explicit any type, no casts to it, no ts-ignore / ts-nocheck / ts-expect-error comments. Name your types (or use unknown + narrowing).
 - Small components: a component file ≤ 200 lines, a function ≤ 60 lines. Split into src/components/<area>/.
 - Client components that call fetch: wrap in try/catch, render a skeleton (src/components/ui/Skeleton.tsx) while loading and a visible error (ApiErrorBanner, role="alert").
 - Maths for students: KaTeX components (src/components/ui/MathInline.tsx / MathServer.tsx) + formatLebaneseEquation. No raw $…$ in TSX strings, no slash fractions.
