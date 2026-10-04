@@ -104,6 +104,17 @@ export const authRateLimits = {
   verifyTokenIp: createRateLimiter({ windowMs: 15 * MINUTE, max: 30 }),
 };
 
+/** Payment-claim limiters (per process; the DB also caps open claims per student). */
+export const paymentRateLimits = {
+  /** "I paid" submissions per student account. */
+  submitUserHour: createRateLimiter({ windowMs: 60 * MINUTE, max: 5 }),
+  submitUserDay: createRateLimiter({ windowMs: 24 * 60 * MINUTE, max: 20 }),
+  /** Submissions per client IP. */
+  submitIp: createRateLimiter({ windowMs: 60 * MINUTE, max: 20 }),
+  /** Admin review actions (confirm / reject / settings) per admin. */
+  adminAction: createRateLimiter({ windowMs: MINUTE, max: 60 }),
+};
+
 export function tooManyRequestsBody(retryAfterSec: number) {
   const minutes = Math.max(1, Math.ceil(retryAfterSec / 60));
   return {

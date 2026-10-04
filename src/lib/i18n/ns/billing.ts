@@ -60,6 +60,7 @@ const en = {
     transferTo: "Transfer via Whish to:",
     claimed: "Transfer recorded — waiting for Professor Munzer Haddara to confirm.",
     transferred: "I've transferred",
+    iPaid: "I paid — send the reference",
   },
   pendingOrders: {
     title: "Whish subscriptions awaiting confirmation",
@@ -128,6 +129,7 @@ const ar: BillingMessages = {
     transferTo: "حوّل عبر Whish إلى:",
     claimed: "تم تسجيل التحويل — بانتظار تأكيد الأستاذ منذر حداره.",
     transferred: "لقد حوّلت",
+    iPaid: "لقد دفعت — أرسل رقم العملية",
   },
   pendingOrders: {
     title: "اشتراكات Whish بانتظار التأكيد",
@@ -194,6 +196,7 @@ const fr: BillingMessages = {
     transferTo: "Virement Whish au :",
     claimed: "Virement enregistré — en attente de la confirmation du Professeur Munzer Haddara.",
     transferred: "J'ai effectué le virement",
+    iPaid: "J'ai payé — envoyer la référence",
   },
   pendingOrders: {
     title: "Abonnements Whish en attente de confirmation",

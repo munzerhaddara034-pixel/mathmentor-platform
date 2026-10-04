@@ -2,10 +2,13 @@ import { AdminConsole } from "@/components/admin/AdminConsole";
 import { adminMessages } from "@/lib/i18n/ns/admin";
 import { getI18n } from "@/lib/i18n/server";
 import Link from "next/link";
+import { requireStaff } from "@/lib/auth/guards";
+import { isVerifiedAdmin } from "@/lib/payments/http";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
+  const live = await requireStaff("/admin");
   const { locale } = await getI18n();
   const t = adminMessages[locale].pages;
   const links = [
@@ -16,6 +19,7 @@ export default async function AdminPage() {
     { href: "/admin/team", label: t.linkTeam },
     { href: "/admin/b2b-manager", label: t.linkB2b },
     { href: "/dashboard", label: t.linkCodes },
+    ...(isVerifiedAdmin(live.user) ? [{ href: "/admin/payments", label: t.linkPayments }] : []),
   ];
   return (
     <main className="shell">

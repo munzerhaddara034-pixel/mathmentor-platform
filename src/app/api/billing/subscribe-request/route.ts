@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const result = await createSubscribeOrder({
       userId: user.id,
       studentName: user.name,
-      studentPhone: user.phone || "",
+      studentPhone: user.contactPhone || "", // never the display fallback number
       planId,
       period,
       region,
