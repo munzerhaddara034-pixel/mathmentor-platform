@@ -473,7 +473,7 @@ async function tryLlmVariants(
     solution: sub.solution,
   }));
 
-  const instruction = `You are Prof. Munzer Haddara writing ORIGINAL SAT Math practice (not College Board copyright). Return JSON { "questions": [ { "skill", "prompt", "latex", "responseType": "mcq"|"spr", "choices": [{"id","text"}], "correctAnswer", "solution", "marks" } ] } with exactly ${count} NEW items in the same skill/pattern as the sources (different numbers/context). Use KaTeX fractions \\frac{a}{b}, no slash fractions. Never say Al-Tarah. Sources:\n${JSON.stringify(compact)}`;
+  const instruction = `You are the MathMentor AI exam generator (brand: منذر حداره · MathMentor; an AI, never the human teacher) writing ORIGINAL SAT Math practice (not College Board copyright). Return JSON { "questions": [ { "skill", "prompt", "latex", "responseType": "mcq"|"spr", "choices": [{"id","text"}], "correctAnswer", "solution", "marks" } ] } with exactly ${count} NEW items in the same skill/pattern as the sources (different numbers/context). Use KaTeX fractions \\frac{a}{b}, no slash fractions. Never say Al-Tarah. Sources:\n${JSON.stringify(compact)}`;
 
   try {
     let text = "";
@@ -712,7 +712,7 @@ async function tryLlmOfficialVariants(opts: {
   const note = opts.skillNote?.trim() ? ` Teacher skill note: ${opts.skillNote.trim()}.` : "";
   const moduleHint = opts.module ? ` Target Module ${opts.module}.` : "";
 
-  const instruction = `You are Prof. Munzer Haddara / MathMentor AI employee writing ORIGINAL Digital SAT Math practice (NOT College Board copyright). Follow the public blueprint: 2 modules × ~27 questions; domains Algebra, Advanced Math, Problem-Solving & Data, Geometry & Trig; MCQ A–D and SPR. Create exactly ${opts.count} NEW items in the style of Practice Test #${opts.officialTest} (pedagogy reference only — do NOT quote or paraphrase any real CB item).${moduleHint}${note} Prefer skills: ${JSON.stringify(skillList)}. Return JSON { "questions": [ { "skill", "prompt", "latex", "responseType": "mcq"|"spr", "choices": [{"id","text"}], "correctAnswer", "solution", "marks" } ] }. Use KaTeX \\frac{a}{b}, no slash fractions. Never say Al-Tarah. Never copy College Board wording.`;
+  const instruction = `You are the MathMentor AI exam generator (brand: منذر حداره · MathMentor; an AI, never the human teacher) writing ORIGINAL Digital SAT Math practice (NOT College Board copyright). Follow the public blueprint: 2 modules × ~27 questions; domains Algebra, Advanced Math, Problem-Solving & Data, Geometry & Trig; MCQ A–D and SPR. Create exactly ${opts.count} NEW items in the style of Practice Test #${opts.officialTest} (pedagogy reference only — do NOT quote or paraphrase any real CB item).${moduleHint}${note} Prefer skills: ${JSON.stringify(skillList)}. Return JSON { "questions": [ { "skill", "prompt", "latex", "responseType": "mcq"|"spr", "choices": [{"id","text"}], "correctAnswer", "solution", "marks" } ] }. Use KaTeX \\frac{a}{b}, no slash fractions. Never say Al-Tarah. Never copy College Board wording.`;
 
   try {
     let text = "";
