@@ -1,7 +1,7 @@
 /**
  * سامي image generation. Uses a real image API only when a key exists:
  *  - SAMI_IMAGE_PROVIDER=openai + OPENAI_API_KEY → OpenAI Images (gpt-image-1)
- *  - otherwise GEMINI_API_KEY → Gemini image model (SAMI_IMAGE_MODEL, default gemini-3.1-flash-image → gemini-2.5-flash-image)
+ *  - otherwise GEMINI_API_KEY → Gemini image model (SAMI_IMAGE_MODEL, default gemini-3.1-flash-image → gemini-3-pro-image; gemini-2.5-flash-image shut down 2026-10-02)
  *  - SAMI_IMAGE_GEN=off or no key → prompt only (the chat shows the prompt + a clear description).
  */
 import { geminiApiKey, openaiSolverKey } from "@/lib/solver/llm";
@@ -30,7 +30,7 @@ export function imageProviderAvailable(): "openai" | "gemini" | null {
 
 function imageModels(): string[] {
   const pinned = process.env.SAMI_IMAGE_MODEL?.trim();
-  return pinned ? [pinned] : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
+  return pinned ? [pinned] : ["gemini-3.1-flash-image", "gemini-3-pro-image"];
 }
 
 async function viaGemini(prompt: string): Promise<GeneratedImage> {

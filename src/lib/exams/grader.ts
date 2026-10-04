@@ -89,10 +89,10 @@ export async function gradePaper(paper: OfficialPaper, answers: Record<string, s
       answer: answers[sub.id] ?? "",
     }));
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(process.env.GEMINI_MODEL?.trim() || "gemini-flash-latest")}:generateContent`, // gemini-2.5-flash is retired (404)
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           contents: [
             {

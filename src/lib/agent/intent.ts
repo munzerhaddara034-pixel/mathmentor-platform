@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import { geminiApiKey } from "@/lib/solver/llm";
+import { geminiApiKey, geminiModels } from "@/lib/solver/llm";
 import { INSTRUCTOR_AR, INSTRUCTOR_EN } from "@/lib/pedagogy/lebanese";
 import { arabicMatchBlob, normalizeArabicForMatch } from "./arabicNormalize";
 import { AGENT_PERSONA_AR, AGENT_PERSONA_EN, SOLUTION_VERIFIER_RULES_AR } from "./persona";
@@ -188,13 +188,6 @@ export function heuristicIntent(transcript: string): WhatsAppVoiceIntent {
   };
 }
 
-function geminiModels(): string[] {
-  const pinned = process.env.GEMINI_MODEL?.trim();
-  return pinned
-    ? [pinned]
-    : ["gemini-flash-latest", "gemini-2.5-flash", "gemini-flash-lite-latest"];
-}
-
 export async function parseVoiceIntent(transcript: string): Promise<WhatsAppVoiceIntent> {
   const text = transcript.trim();
   if (!text) {
@@ -243,16 +236,19 @@ export async function parseVoiceIntent(transcript: string): Promise<WhatsAppVoic
 
   for (const model of geminiModels()) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
       const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: { temperature: 0.1, responseMimeType: "application/json" },
         }),
       });
-      if (!response.ok) continue;
+      if (!response.ok) {
+        if (response.status === 429) console.warn(`[mathmentor] intent: Gemini ${model} quota (429) — trying next model / heuristic`);
+        continue;
+      }
       const json = (await response.json()) as {
         candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
       };

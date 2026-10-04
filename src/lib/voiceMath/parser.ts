@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { OFFICIAL_METHODOLOGY_PROMPT, INSTRUCTOR_EN, INSTRUCTOR_AR, ACADEMY_LINE } from "@/lib/pedagogy/lebanese";
 import { assembleSolution } from "@/lib/solver/assemble";
-import { geminiApiKey, openaiSolverKey } from "@/lib/solver/llm";
+import { geminiApiKey, geminiModels, openaiSolverKey } from "@/lib/solver/llm";
 import type { MathSolution, SolverStep, StudyKind } from "@/lib/solver/types";
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
@@ -153,9 +153,8 @@ function extractJson(text: string) {
 
 function geminiSpeechModels() {
   const pinned = process.env.GEMINI_VOICE_MODEL?.trim() || process.env.GEMINI_MODEL?.trim();
-  return pinned
-    ? [pinned]
-    : ["gemini-1.5-pro", "gemini-1.5-pro-latest", "gemini-2.0-flash", "gemini-2.5-flash"];
+  // Shared list: the old ids (gemini-1.5-pro / 2.0-flash / 2.5-flash) are retired and 404.
+  return pinned ? [pinned, ...geminiModels().filter((model) => model !== pinned)] : geminiModels();
 }
 
 function toLatexSteps(parsed: z.infer<typeof parseJsonSchema>): LatexStep[] {
@@ -258,10 +257,10 @@ async function parseWithGemini(transcript: string, language: LessonLanguage, tra
   let lastError = "Gemini speech parser failed.";
   for (const model of geminiSpeechModels()) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(key)}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
       const response = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: `${SPEECH_PROMPT}\n\n${userText}` }] }],
           generationConfig: { temperature: 0.15, responseMimeType: "application/json" },
