@@ -101,7 +101,7 @@ export async function applyPatch(snapshot: RepoSnapshot, ops: PatchOp[]): Promis
   const files: TeamProposalFile[] = [];
   const touched = new Set<string>();
   const claim = (path: string) => {
-    if (!isAllowedPath(path)) errors.push(`${path}: path is not writable from the platform (allowed: src/ docs/ content/ scripts/ public/ README.md).`);
+    if (!isAllowedPath(path)) errors.push(`${path}: path is not writable from the platform (allowed: src/ docs/ content/ scripts/ public/ tests/ README.md).`);
     if (touched.has(path)) errors.push(`${path}: touched by more than one op — merge them into one.`);
     touched.add(path);
   };

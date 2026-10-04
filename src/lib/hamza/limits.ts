@@ -40,6 +40,9 @@ const HIGH_RISK = [
   /^src\/lib\/hamza\//,
   /^src\/lib\/team\/(approval|github|codeChecks|guard)\.ts$/,
   /^scripts\/db-/,
+  // Weakening the security / lockdown tests or the test loader must stand out in review.
+  /^tests\/(security|codeEvolutionLockdown|webhook)[^/]*\.test\.mjs$/,
+  /^tests\/support\//,
   /^next\.config\./,
 ];
 

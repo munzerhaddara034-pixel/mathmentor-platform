@@ -10,5 +10,5 @@ export const PROJECT_RULES = `## Project rules (MathMentor) — enforced by the 
 - UI strings in en (default) / ar / fr through the existing i18n catalogues (src/lib/i18n/ns/*.ts), same keys in all three.
 - Brand: «منذر حداره» / "Munzer Haddara" only.
 - Secrets only from process.env, never in code. Never touch .env*, data/, .github/, package-lock.json.
-- Writable paths: src/ docs/ content/ scripts/ public/ README.md. Patch size: ≤${TIER_LIMITS.standard.files} files / ${TIER_LIMITS.standard.lines} lines (standard); ≤${TIER_LIMITS.large.files} / ${TIER_LIMITS.large.lines} needs an explicit "large change" approval.
+- Writable paths: src/ docs/ content/ scripts/ public/ tests/ README.md. Patch size: ≤${TIER_LIMITS.standard.files} files / ${TIER_LIMITS.standard.lines} lines (standard); ≤${TIER_LIMITS.large.files} / ${TIER_LIMITS.large.lines} needs an explicit "large change" approval.
 - Tests: every new module gets a test (tests/*.test.mjs with node:test).`;

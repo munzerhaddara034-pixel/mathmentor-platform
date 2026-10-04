@@ -101,6 +101,8 @@ async function main() {
     assert.equal(checks.staticFindings([{ path: "src/ok.tsx", content: "export const a = 1;\n", addedLines: ["export const a = 1;"] }]).length, 0);
     assert.equal(checks.isAllowedPath("src/components/BookSessionButton.tsx"), true);
     assert.equal(checks.isAllowedPath("../etc/passwd"), false);
+    assert.equal(checks.isAllowedPath("tests/newModule.test.mjs"), true);
+    assert.equal(checks.isAllowedPath(".github/workflows/hamza-ci.yml"), false);
   });
   test("constants guard: full numbers, brand, Barème quarter marks", () => {
     assert.equal(constants.enforceConstants("Whish 70772968 · واتساب 76 532 421"), "Whish 96170772968 · واتساب 96176532421");
