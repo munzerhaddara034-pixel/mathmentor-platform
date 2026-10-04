@@ -1,4 +1,4 @@
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import { classroomPath } from "@/lib/livekit/roomNames";
 import { livekitEnv } from "@/lib/livekit/config";
@@ -14,6 +14,45 @@ import {
 } from "./types";
 
 const STORE_FILE = "live-sessions.json";
+
+/** Unpaid / unconfirmed GUEST holds release their slot after this many minutes (0 disables). */
+export const DEFAULT_GUEST_HOLD_TTL_MINUTES = 30;
+
+export function guestHoldTtlMs(env: Record<string, string | undefined> = process.env): number {
+  const raw = env.LIVE_GUEST_HOLD_TTL_MINUTES?.trim();
+  const minutes = raw === undefined || raw === "" ? DEFAULT_GUEST_HOLD_TTL_MINUTES : Number(raw);
+  if (!Number.isFinite(minutes) || minutes < 0) return DEFAULT_GUEST_HOLD_TTL_MINUTES * 60_000;
+  return Math.round(minutes * 60_000);
+}
+
+/** Guest bookings carry a generated `guest-…` student id (no account). */
+export function isGuestBooking(booking: Pick<LiveBooking, "studentId">) {
+  return booking.studentId.startsWith("guest-");
+}
+
+/**
+ * Pure: a guest hold that is still unpaid / unconfirmed (no payment, no "I transferred" mark)
+ * once `ttlMs` has passed since it was created.
+ */
+export function isExpiredGuestHold(booking: LiveBooking, now: number, ttlMs: number) {
+  if (ttlMs <= 0 || !isGuestBooking(booking)) return false;
+  if (booking.status !== "pending_payment" && booking.status !== "requested") return false;
+  if (booking.paymentStatus === "paid" || booking.studentMarkedPaidAt || booking.paidAt) return false;
+  const created = Date.parse(booking.createdAt);
+  return Number.isFinite(created) && now - created >= ttlMs;
+}
+
+/** Pure: cancel expired guest holds (slot released). Returns the same array when nothing expired. */
+export function expireGuestHolds(bookings: LiveBooking[], now = Date.now(), ttlMs = guestHoldTtlMs()) {
+  let expired = 0;
+  const at = new Date(now).toISOString();
+  const next = bookings.map((booking) => {
+    if (!isExpiredGuestHold(booking, now, ttlMs)) return booking;
+    expired += 1;
+    return { ...booking, status: "cancelled" as const, holdExpiredAt: at, updatedAt: at };
+  });
+  return { bookings: expired ? next : bookings, expired };
+}
 
 export function generateSlotsFromAvailability(availability: TeacherAvailability, existing: LiveSlot[] = []): LiveSlot[] {
   const tz = availability.timezone || "Asia/Beirut";
@@ -72,35 +111,51 @@ function normalizeAvailability(value: Partial<TeacherAvailability> | undefined):
   };
 }
 
-async function readLiveStore(): Promise<LiveStoreData> {
+function liveSeed(): LiveStoreData {
   const availability = DEFAULT_AVAILABILITY;
-  const initial: LiveStoreData = {
-    slots: generateSlotsFromAvailability(availability),
-    bookings: [],
-    availability,
+  return { slots: generateSlotsFromAvailability(availability), bookings: [], availability };
+}
+
+/** True when the stored document must be (re)generated or has guest holds to release. */
+function needsMaintenance(parsed: Partial<LiveStoreData> | null | undefined, now: number) {
+  if (!parsed || typeof parsed !== "object") return true;
+  const slots = Array.isArray(parsed.slots) ? parsed.slots : [];
+  if (!slots.length || !parsed.availability) return true;
+  const bookings = Array.isArray(parsed.bookings) ? parsed.bookings : [];
+  const ttl = guestHoldTtlMs();
+  return bookings.some((booking) => isExpiredGuestHold(booking, now, ttl));
+}
+
+function normalizeLive(parsed: Partial<LiveStoreData>): LiveStoreData {
+  return {
+    slots: Array.isArray(parsed.slots) ? parsed.slots : [],
+    bookings: Array.isArray(parsed.bookings) ? parsed.bookings : [],
+    availability: normalizeAvailability(parsed.availability),
   };
-  try {
-    const parsed = await readJsonFile<Partial<LiveStoreData>>(STORE_FILE, initial);
-    const bookings = Array.isArray(parsed.bookings) ? parsed.bookings : [];
-    const nextAvailability = normalizeAvailability(parsed.availability);
-    let slots = Array.isArray(parsed.slots) ? parsed.slots : [];
-    if (!slots.length || !parsed.availability) {
-      const generated = generateSlotsFromAvailability(
-        nextAvailability,
-        slots.filter((slot) => bookings.some((b) => b.slotId === slot.id && b.status !== "cancelled")),
-      );
-      const bookedIds = new Set(bookings.filter((item) => item.status !== "cancelled").map((item) => item.slotId));
-      const keep = slots.filter((slot) => bookedIds.has(slot.id));
-      slots = [...keep, ...generated];
-      const next = { slots, bookings, availability: nextAvailability };
-      await writeJsonFile(STORE_FILE, next);
-      return next;
+}
+
+/**
+ * Read the live store. Maintenance writes (first-run slot generation, releasing expired guest holds)
+ * happen lazily here, under the document lock and re-checked, so a reader never overwrites a booking.
+ */
+async function readLiveStore(): Promise<LiveStoreData> {
+  const now = Date.now();
+  const parsed = await readJsonFile<Partial<LiveStoreData>>(STORE_FILE, liveSeed());
+  if (!needsMaintenance(parsed, now)) return normalizeLive(parsed);
+  return withDocumentLock(STORE_FILE, async () => {
+    const current = await readJsonFile<Partial<LiveStoreData>>(STORE_FILE, liveSeed());
+    if (!needsMaintenance(current, now)) return normalizeLive(current);
+    const base = current && typeof current === "object" ? current : {};
+    const store = normalizeLive(base);
+    if (!store.slots.length || !base.availability) {
+      const bookedIds = new Set(store.bookings.filter((item) => item.status !== "cancelled").map((item) => item.slotId));
+      const keep = store.slots.filter((slot) => bookedIds.has(slot.id));
+      store.slots = [...keep, ...generateSlotsFromAvailability(store.availability, keep)];
     }
-    return { slots, bookings, availability: nextAvailability };
-  } catch {
-    await writeJsonFile(STORE_FILE, initial);
-    return initial;
-  }
+    store.bookings = expireGuestHolds(store.bookings, now).bookings;
+    await writeJsonFile(STORE_FILE, store);
+    return store;
+  });
 }
 
 async function writeLiveStore(store: LiveStoreData) {
@@ -113,15 +168,17 @@ export async function getAvailability() {
 }
 
 export async function setAvailability(input: Partial<TeacherAvailability>) {
-  const store = await readLiveStore();
-  const availability = normalizeAvailability({ ...store.availability, ...input, windows: input.windows ?? store.availability.windows });
-  store.availability = availability;
-  const bookedIds = new Set(store.bookings.filter((item) => item.status !== "cancelled").map((item) => item.slotId));
-  const keepBooked = store.slots.filter((slot) => bookedIds.has(slot.id));
-  const generated = generateSlotsFromAvailability(availability, keepBooked);
-  store.slots = [...keepBooked, ...generated];
-  await writeLiveStore(store);
-  return store;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readLiveStore();
+    const availability = normalizeAvailability({ ...store.availability, ...input, windows: input.windows ?? store.availability.windows });
+    store.availability = availability;
+    const bookedIds = new Set(store.bookings.filter((item) => item.status !== "cancelled").map((item) => item.slotId));
+    const keepBooked = store.slots.filter((slot) => bookedIds.has(slot.id));
+    const generated = generateSlotsFromAvailability(availability, keepBooked);
+    store.slots = [...keepBooked, ...generated];
+    await writeLiveStore(store);
+    return store;
+  });
 }
 
 export async function listSlots() {
@@ -149,24 +206,28 @@ export async function availableSlots() {
 }
 
 export async function addSlot(input: { startsAt: string; durationMinutes?: number; capacity?: number; note?: string }) {
-  const store = await readLiveStore();
-  const slot: LiveSlot = {
-    id: createId("slot"),
-    startsAt: input.startsAt,
-    durationMinutes: input.durationMinutes ?? store.availability.durationMinutes ?? 45,
-    capacity: input.capacity ?? 1,
-    note: input.note,
-    createdAt: new Date().toISOString(),
-  };
-  store.slots.push(slot);
-  await writeLiveStore(store);
-  return slot;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readLiveStore();
+    const slot: LiveSlot = {
+      id: createId("slot"),
+      startsAt: input.startsAt,
+      durationMinutes: input.durationMinutes ?? store.availability.durationMinutes ?? 45,
+      capacity: input.capacity ?? 1,
+      note: input.note,
+      createdAt: new Date().toISOString(),
+    };
+    store.slots.push(slot);
+    await writeLiveStore(store);
+    return slot;
+  });
 }
 
 export async function removeSlot(id: string) {
-  const store = await readLiveStore();
-  store.slots = store.slots.filter((item) => item.id !== id);
-  await writeLiveStore(store);
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readLiveStore();
+    store.slots = store.slots.filter((item) => item.id !== id);
+    await writeLiveStore(store);
+  });
 }
 
 export async function bookSlot(input: {
@@ -185,62 +246,67 @@ export async function bookSlot(input: {
   paymentCheckoutUrl?: string;
   pricingTier?: LiveBooking["pricingTier"];
 }) {
-  const store = await readLiveStore();
-  const slot = store.slots.find((item) => item.id === input.slotId);
-  if (!slot) return { ok: false as const, error: "Slot not found.", errorAr: "الموعد غير موجود." };
-  if (Date.parse(slot.startsAt) <= Date.now()) {
-    return { ok: false as const, error: "That slot is in the past.", errorAr: "هذا الموعد مضى." };
-  }
-  const active = store.bookings.filter((item) => item.slotId === slot.id && item.status !== "cancelled");
-  if (active.length >= slot.capacity) {
-    return { ok: false as const, error: "This slot is already booked.", errorAr: "هذا الموعد محجوز." };
-  }
-  if (store.bookings.some((item) => item.studentId === input.studentId && item.slotId === slot.id && item.status !== "cancelled")) {
-    return { ok: false as const, error: "You already booked this slot.", errorAr: "لقد حجزت هذا الموعد مسبقاً." };
-  }
-
   const bookingId = createId("live");
   const classroomUrl = classroomPath(bookingId);
   const livekitReady = livekitEnv().configured;
-  // In-app classroom is always the primary link; an external meeting only when a real one exists.
-  const external = livekitReady
-    ? null
-    : await createMeetingLink({
-        id: bookingId,
-        topic: `MathMentor live · ${input.studentName} · Prof. Munzer Ahmad Haddara`,
-        startsAt: slot.startsAt,
-        durationMinutes: slot.durationMinutes,
-      });
+  // Reserve atomically (document lock); the slot is checked and taken in one locked step.
+  const reserved = await withDocumentLock(STORE_FILE, async () => {
+    const store = await readLiveStore();
+    const slot = store.slots.find((item) => item.id === input.slotId);
+    if (!slot) return { ok: false as const, error: "Slot not found.", errorAr: "الموعد غير موجود." };
+    if (Date.parse(slot.startsAt) <= Date.now()) {
+      return { ok: false as const, error: "That slot is in the past.", errorAr: "هذا الموعد مضى." };
+    }
+    const active = store.bookings.filter((item) => item.slotId === slot.id && item.status !== "cancelled");
+    if (active.length >= slot.capacity) {
+      return { ok: false as const, error: "This slot is already booked.", errorAr: "هذا الموعد محجوز." };
+    }
+    if (store.bookings.some((item) => item.studentId === input.studentId && item.slotId === slot.id && item.status !== "cancelled")) {
+      return { ok: false as const, error: "You already booked this slot.", errorAr: "لقد حجزت هذا الموعد مسبقاً." };
+    }
+    const status = input.status ?? "confirmed";
+    const now = new Date().toISOString();
+    const booking: LiveBooking = {
+      id: bookingId,
+      slotId: slot.id,
+      startsAt: slot.startsAt,
+      durationMinutes: slot.durationMinutes,
+      studentId: input.studentId,
+      studentName: input.studentName,
+      studentEmail: input.studentEmail,
+      studentPhone: input.studentPhone,
+      status,
+      meetingProvider: "livekit",
+      classroomUrl,
+      classroomRoomId: bookingId,
+      paymentStatus: input.paymentStatus ?? (status === "pending_payment" ? "pending" : "none"),
+      paymentProvider: input.paymentProvider ?? "none",
+      paymentExternalId: input.paymentExternalId,
+      paymentAmount: input.paymentAmount,
+      paymentCurrency: input.paymentCurrency,
+      paymentCheckoutUrl: input.paymentCheckoutUrl,
+      pricingTier: input.pricingTier,
+      creditDeducted: false,
+      createdAt: now,
+      updatedAt: now,
+    };
+    store.bookings.unshift(booking);
+    await writeLiveStore(store);
+    return { ok: true as const, booking };
+  });
+  if (!reserved.ok || livekitReady) return reserved;
 
-  const status = input.status ?? "confirmed";
-  const booking: LiveBooking = {
+  // In-app classroom is always the primary link; an external meeting (Zoom API / Meet template) only
+  // when a real one exists — created AFTER the lock so a slow provider never holds the store.
+  const external = await createMeetingLink({
     id: bookingId,
-    slotId: slot.id,
-    startsAt: slot.startsAt,
-    durationMinutes: slot.durationMinutes,
-    studentId: input.studentId,
-    studentName: input.studentName,
-    studentEmail: input.studentEmail,
-    studentPhone: input.studentPhone,
-    status,
-    meetingLink: external?.url,
-    meetingProvider: external?.provider ?? "livekit",
-    classroomUrl,
-    classroomRoomId: bookingId,
-    paymentStatus: input.paymentStatus ?? (status === "pending_payment" ? "pending" : "none"),
-    paymentProvider: input.paymentProvider ?? "none",
-    paymentExternalId: input.paymentExternalId,
-    paymentAmount: input.paymentAmount,
-    paymentCurrency: input.paymentCurrency,
-    paymentCheckoutUrl: input.paymentCheckoutUrl,
-    pricingTier: input.pricingTier,
-    creditDeducted: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  store.bookings.unshift(booking);
-  await writeLiveStore(store);
-  return { ok: true as const, booking };
+    topic: `MathMentor live · ${input.studentName} · Prof. Munzer Ahmad Haddara`,
+    startsAt: reserved.booking.startsAt,
+    durationMinutes: reserved.booking.durationMinutes,
+  });
+  if (!external) return reserved;
+  const patched = await patchBooking(bookingId, { meetingLink: external.url, meetingProvider: external.provider });
+  return { ok: true as const, booking: patched ?? { ...reserved.booking, meetingLink: external.url, meetingProvider: external.provider } };
 }
 
 export async function getBooking(id: string) {
@@ -261,28 +327,30 @@ export async function confirmPaidBooking(
     paymentExternalId?: number;
   },
 ) {
-  const store = await readLiveStore();
-  const index = store.bookings.findIndex((item) => item.id === id);
-  if (index < 0) return { ok: false as const, error: "Booking not found." };
-  const current = store.bookings[index];
-  if (current.status === "cancelled") {
-    return { ok: false as const, error: "Booking was cancelled." };
-  }
-  if (current.status === "confirmed" && current.paymentStatus === "paid") {
-    return { ok: true as const, booking: current, alreadyPaid: true as const };
-  }
-  const next: LiveBooking = {
-    ...current,
-    status: "confirmed",
-    paymentStatus: "paid",
-    paymentProvider: patch?.paymentProvider ?? current.paymentProvider ?? "manual",
-    paymentExternalId: patch?.paymentExternalId ?? current.paymentExternalId,
-    paidAt: current.paidAt || new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  store.bookings[index] = next;
-  await writeLiveStore(store);
-  return { ok: true as const, booking: next, alreadyPaid: false as const };
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readLiveStore();
+    const index = store.bookings.findIndex((item) => item.id === id);
+    if (index < 0) return { ok: false as const, error: "Booking not found." };
+    const current = store.bookings[index];
+    if (current.status === "cancelled") {
+      return { ok: false as const, error: "Booking was cancelled." };
+    }
+    if (current.status === "confirmed" && current.paymentStatus === "paid") {
+      return { ok: true as const, booking: current, alreadyPaid: true as const };
+    }
+    const next: LiveBooking = {
+      ...current,
+      status: "confirmed",
+      paymentStatus: "paid",
+      paymentProvider: patch?.paymentProvider ?? current.paymentProvider ?? "manual",
+      paymentExternalId: patch?.paymentExternalId ?? current.paymentExternalId,
+      paidAt: current.paidAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    store.bookings[index] = next;
+    await writeLiveStore(store);
+    return { ok: true as const, booking: next, alreadyPaid: false as const };
+  });
 }
 
 export async function patchBooking(
@@ -306,16 +374,18 @@ export async function patchBooking(
     studentMarkedPaidAt?: string;
   },
 ) {
-  const store = await readLiveStore();
-  const index = store.bookings.findIndex((item) => item.id === id);
-  if (index < 0) return undefined;
-  store.bookings[index] = {
-    ...store.bookings[index],
-    ...patch,
-    updatedAt: new Date().toISOString(),
-  };
-  await writeLiveStore(store);
-  return store.bookings[index];
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readLiveStore();
+    const index = store.bookings.findIndex((item) => item.id === id);
+    if (index < 0) return undefined;
+    store.bookings[index] = {
+      ...store.bookings[index],
+      ...patch,
+      updatedAt: new Date().toISOString(),
+    };
+    await writeLiveStore(store);
+    return store.bookings[index];
+  });
 }
 
 export async function bookingsNeedingReminder(windowMin = 20, windowMax = 40) {

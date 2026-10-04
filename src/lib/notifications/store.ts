@@ -1,5 +1,5 @@
 import { createId } from "@/lib/ids";
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { listPublicUsers } from "@/lib/auth/store";
 import { isStaffRole } from "@/lib/auth/paths";
 
@@ -57,19 +57,21 @@ export async function unreadCount(userId: string) {
 }
 
 export async function pushNotification(input: Omit<AppNotification, "id" | "createdAt" | "read"> & { id?: string; read?: boolean }) {
-  const store = await readNotifs();
-  if (input.relatedId && store.notifications.some((item) => item.userId === input.userId && item.relatedId === input.relatedId && item.kind === input.kind)) {
-    return store.notifications.find((item) => item.userId === input.userId && item.relatedId === input.relatedId && item.kind === input.kind)!;
-  }
-  const record: AppNotification = {
-    ...input,
-    id: input.id ?? createId("ntf"),
-    read: input.read ?? false,
-    createdAt: new Date().toISOString(),
-  };
-  store.notifications.unshift(record);
-  await writeNotifs(store);
-  return record;
+  return withDocumentLock(FILE, async () => {
+    const store = await readNotifs();
+    if (input.relatedId && store.notifications.some((item) => item.userId === input.userId && item.relatedId === input.relatedId && item.kind === input.kind)) {
+      return store.notifications.find((item) => item.userId === input.userId && item.relatedId === input.relatedId && item.kind === input.kind)!;
+    }
+    const record: AppNotification = {
+      ...input,
+      id: input.id ?? createId("ntf"),
+      read: input.read ?? false,
+      createdAt: new Date().toISOString(),
+    };
+    store.notifications.unshift(record);
+    await writeNotifs(store);
+    return record;
+  });
 }
 
 export async function notifyStaff(input: Omit<AppNotification, "id" | "createdAt" | "read" | "userId" | "audience">) {
@@ -83,20 +85,24 @@ export async function notifyStaff(input: Omit<AppNotification, "id" | "createdAt
 }
 
 export async function markRead(id: string, userId: string) {
-  const store = await readNotifs();
-  const item = store.notifications.find((row) => row.id === id && row.userId === userId);
-  if (!item) return undefined;
-  item.read = true;
-  await writeNotifs(store);
-  return item;
+  return withDocumentLock(FILE, async () => {
+    const store = await readNotifs();
+    const item = store.notifications.find((row) => row.id === id && row.userId === userId);
+    if (!item) return undefined;
+    item.read = true;
+    await writeNotifs(store);
+    return item;
+  });
 }
 
 export async function markAllRead(userId: string) {
-  const store = await readNotifs();
-  for (const item of store.notifications) {
-    if (item.userId === userId) item.read = true;
-  }
-  await writeNotifs(store);
+  return withDocumentLock(FILE, async () => {
+    const store = await readNotifs();
+    for (const item of store.notifications) {
+      if (item.userId === userId) item.read = true;
+    }
+    await writeNotifs(store);
+  });
 }
 
 export async function seedIfNeeded() {

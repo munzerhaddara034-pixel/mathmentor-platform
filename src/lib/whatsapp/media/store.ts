@@ -5,7 +5,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { platformDataDir, readJsonFile, withStoreLock, writeJsonFile } from "@/lib/dataDir";
+import { platformDataDir, readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import { safeFilename, type InboundMediaKind } from "./policy";
 
@@ -50,7 +50,7 @@ async function readStore(): Promise<MediaStore> {
 }
 
 async function upsert(record: WhatsAppMediaRecord): Promise<WhatsAppMediaRecord> {
-  return withStoreLock(META_FILE, async () => {
+  return withDocumentLock(META_FILE, async () => {
     const store = await readStore();
     const index = store.files.findIndex((f) => f.id === record.id);
     if (index >= 0) store.files[index] = record;
@@ -114,7 +114,7 @@ export async function patchMediaRecord(
   patch: Partial<Omit<WhatsAppMediaRecord, "id" | "createdAt">>,
 ): Promise<WhatsAppMediaRecord | undefined> {
   try {
-    return await withStoreLock(META_FILE, async () => {
+    return await withDocumentLock(META_FILE, async () => {
       const store = await readStore();
       const index = store.files.findIndex((f) => f.id === id);
       if (index < 0) return undefined;

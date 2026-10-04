@@ -1,4 +1,4 @@
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import type { WhatsAppMessage } from "./types";
 
@@ -16,16 +16,18 @@ async function writeOutbox(store: OutboxStore) {
 }
 
 export async function appendWhatsAppMessage(input: Omit<WhatsAppMessage, "id" | "createdAt"> & { id?: string }) {
-  const store = await readOutbox();
-  const next: WhatsAppMessage = {
-    ...input,
-    id: input.id || createId("wa"),
-    createdAt: new Date().toISOString(),
-  };
-  store.messages.unshift(next);
-  store.messages = store.messages.slice(0, 500);
-  await writeOutbox(store);
-  return next;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readOutbox();
+    const next: WhatsAppMessage = {
+      ...input,
+      id: input.id || createId("wa"),
+      createdAt: new Date().toISOString(),
+    };
+    store.messages.unshift(next);
+    store.messages = store.messages.slice(0, 500);
+    await writeOutbox(store);
+    return next;
+  });
 }
 
 export async function listWhatsAppMessages(limit = 120) {

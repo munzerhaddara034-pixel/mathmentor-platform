@@ -17,7 +17,7 @@
  * SQLite: mm_data_migrations), so later boots are a no-op. Only row counts are logged.
  */
 import { readFile, writeFile } from "node:fs/promises";
-import { dataFile, readJsonFile, resolveJsonBackend, withStoreLock, writeJsonFile } from "@/lib/dataDir";
+import { dataFile, readJsonFile, resolveJsonBackend, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { isPostgresEnabled, withTransaction } from "@/lib/db/pg";
 import { openProfileSqliteIfExists } from "./profileSqlite";
 
@@ -202,17 +202,17 @@ function cleanSqliteProfiles(ids: Set<string>, counts: DemoCleanupCounts): "ran"
 }
 
 async function cleanJsonStores(ids: Set<string>, counts: DemoCleanupCounts): Promise<"ran" | "skipped"> {
-  return withStoreLock(MARKER_DOC, async () => {
+  return withDocumentLock(MARKER_DOC, async () => {
     if (await markerApplied()) return "skipped";
     const backend = await resolveJsonBackend();
-    await withStoreLock("auth.json", async () => {
+    await withDocumentLock("auth.json", async () => {
       const doc = await readJsonFile<unknown>("auth.json", null, { persistFallback: false });
       const next = cleanAuthDoc(doc, ids, counts, "");
       if (next) await writeJsonFile("auth.json", next);
       if (backend !== "filesystem") await cleanLocalFile("auth.json", (local) => cleanAuthDoc(local, ids, counts, "localFile."));
     });
     for (const { doc: name, field } of DEPENDENT_DOCS) {
-      await withStoreLock(name, async () => {
+      await withDocumentLock(name, async () => {
         const doc = await readJsonFile<unknown>(name, null, { persistFallback: false });
         const next = cleanDependentDoc(doc, field, ids, counts, `${name}.${field}`);
         if (next) await writeJsonFile(name, next);

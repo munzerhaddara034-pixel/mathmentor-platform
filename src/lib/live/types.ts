@@ -54,6 +54,8 @@ export type LiveBooking = {
   paidAt?: string;
   creditDeducted?: boolean;
   studentMarkedPaidAt?: string;
+  /** Set when an unpaid guest hold was auto-cancelled after LIVE_GUEST_HOLD_TTL_MINUTES. */
+  holdExpiredAt?: string;
   createdAt: string;
   updatedAt: string;
 };

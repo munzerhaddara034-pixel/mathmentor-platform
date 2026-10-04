@@ -1,7 +1,7 @@
 /** File fallback for the team chat (data/team-chat.json + data/team-uploads/*) when DATABASE_URL is unset. */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { platformDataDir, readJsonFile, withStoreLock, writeJsonFile } from "@/lib/dataDir";
+import { platformDataDir, readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import type { TeamRepo } from "./repo";
 import type { TeamAttachmentRef, TeamMessage, TeamProposal } from "./types";
 
@@ -28,7 +28,7 @@ async function readStore(): Promise<TeamFileStore> {
 }
 
 async function mutate<T>(fn: (store: TeamFileStore) => T): Promise<T> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     const value = fn(store);
     if (store.messages.length > MAX_MESSAGES) store.messages = store.messages.slice(-MAX_MESSAGES);

@@ -8,6 +8,7 @@ import { compactStroke, roundPoint, shouldSample } from "@/lib/livekit/strokeCod
 import { LiveBoardPlot } from "./LiveBoardPlot";
 import { useNs } from "@/components/i18n/useNs";
 import { liveMessages } from "@/lib/i18n/ns/live";
+import { randomSuffix } from "@/lib/ids";
 
 const COLORS = [
   { id: "navy", value: "#10213d" },
@@ -103,7 +104,7 @@ export function MathWhiteboard({
     if (!canWrite) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     draftRef.current = {
-      id: `st-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `st-${Date.now().toString(36)}-${randomSuffix(3)}`,
       color,
       width: 3.2,
       points: [relativePoint(event)],
@@ -134,7 +135,7 @@ export function MathWhiteboard({
     const cleaned = formatLebaneseEquation(latex.trim());
     if (!cleaned) return;
     onEquation({
-      id: `eq-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `eq-${Date.now().toString(36)}-${randomSuffix(3)}`,
       latex: cleaned,
       authorId,
       createdAt: new Date().toISOString(),
@@ -147,7 +148,7 @@ export function MathWhiteboard({
     const expression = plotExpr.trim();
     if (!expression) return;
     onPlot({
-      id: `pl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `pl-${Date.now().toString(36)}-${randomSuffix(3)}`,
       expression,
       xMin: -3,
       xMax: 3,

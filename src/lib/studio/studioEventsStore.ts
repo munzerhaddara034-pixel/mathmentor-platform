@@ -1,4 +1,4 @@
-import { readJsonFile, writeJsonFile } from "../dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "../dataDir";
 import { canvasActionSchema, type CanvasAction } from "./timeline";
 
 const EVENTS_FILE = "studio-events.json";
@@ -26,13 +26,15 @@ export async function getStudioEvents(lessonId: string): Promise<CanvasAction[] 
 }
 
 export async function saveStudioEvents(lessonId: string, events: CanvasAction[]) {
-  const parsed = canvasActionSchema.array().safeParse(events);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? "Invalid events");
-  }
-  const store = await readStore();
-  const record = { events: parsed.data, updatedAt: new Date().toISOString() };
-  store.lessons[lessonId] = record;
-  await writeStore(store);
-  return record;
+  return withDocumentLock(EVENTS_FILE, async () => {
+    const parsed = canvasActionSchema.array().safeParse(events);
+    if (!parsed.success) {
+      throw new Error(parsed.error.issues[0]?.message ?? "Invalid events");
+    }
+    const store = await readStore();
+    const record = { events: parsed.data, updatedAt: new Date().toISOString() };
+    store.lessons[lessonId] = record;
+    await writeStore(store);
+    return record;
+  });
 }

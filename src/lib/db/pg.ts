@@ -91,7 +91,10 @@ export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>)
   try {
     await client.query("BEGIN");
     const value = await fn(client);
-    await client.query("COMMIT");
+    const committed = await client.query("COMMIT");
+    // A statement that failed inside `fn` (even if its error was caught) aborts the transaction and
+    // Postgres answers COMMIT with ROLLBACK: surface that instead of reporting success.
+    if ((committed as { command?: string }).command === "ROLLBACK") throw new Error("[mathmentor] transaction aborted; nothing was committed");
     return value;
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);

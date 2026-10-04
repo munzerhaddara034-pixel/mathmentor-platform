@@ -2,7 +2,7 @@
  * File / Netlify Blobs JSON persistence for agent records.
  */
 
-import { readJsonFile, writeJsonFile, withStoreLock } from "@/lib/dataDir";
+import { readJsonFile, writeJsonFile, withDocumentLock } from "@/lib/dataDir";
 import type {
   ActionReminder,
   AgentStoreSnapshot,
@@ -88,7 +88,7 @@ export async function latestHealth(): Promise<PlatformHealthSnapshot | null> {
 }
 
 export async function saveSchoolReport(report: SchoolReport): Promise<SchoolReport> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.schoolReports = trimList([report, ...store.schoolReports.filter((r) => r.id !== report.id)]);
     await writeStore(store);
@@ -97,7 +97,7 @@ export async function saveSchoolReport(report: SchoolReport): Promise<SchoolRepo
 }
 
 export async function saveParentDigest(digest: ParentDigest): Promise<ParentDigest> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.parentDigests = trimList([digest, ...store.parentDigests.filter((d) => d.id !== digest.id)]);
     await writeStore(store);
@@ -106,7 +106,7 @@ export async function saveParentDigest(digest: ParentDigest): Promise<ParentDige
 }
 
 export async function saveCampaign(campaign: MarketingCampaign): Promise<MarketingCampaign> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.campaigns = trimList([campaign, ...store.campaigns.filter((c) => c.id !== campaign.id)]);
     await writeStore(store);
@@ -123,7 +123,7 @@ export async function patchCampaign(
   id: string,
   patch: Partial<MarketingCampaign>,
 ): Promise<MarketingCampaign | undefined> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     const idx = store.campaigns.findIndex(
       (c) => c.id === id || c.heygenJobId === id || c.heygenVideoId === id,
@@ -141,7 +141,7 @@ export async function patchCampaign(
 }
 
 export async function saveVoiceTask(task: WhatsAppVoiceTask): Promise<WhatsAppVoiceTask> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.voiceTasks = trimList([task, ...store.voiceTasks.filter((t) => t.id !== task.id)]);
     await writeStore(store);
@@ -158,7 +158,7 @@ export async function patchVoiceTask(
   id: string,
   patch: Partial<WhatsAppVoiceTask>,
 ): Promise<WhatsAppVoiceTask | undefined> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     const idx = store.voiceTasks.findIndex((t) => t.id === id);
     const now = new Date().toISOString();
@@ -201,7 +201,7 @@ export async function patchVoiceTask(
 }
 
 export async function saveHealth(snapshot: PlatformHealthSnapshot): Promise<PlatformHealthSnapshot> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.health = trimList([snapshot, ...store.health]);
     await writeStore(store);
@@ -235,7 +235,7 @@ export async function getApprovalItem(id: string): Promise<ApprovalItem | undefi
 }
 
 export async function saveApprovalItem(item: ApprovalItem): Promise<ApprovalItem> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.approvals = trimList([item, ...store.approvals.filter((a) => a.id !== item.id)]);
     await writeStore(store);
@@ -246,7 +246,7 @@ export async function saveApprovalItem(item: ApprovalItem): Promise<ApprovalItem
 export async function saveEvolutionSnapshot(
   snapshot: SelfEvolutionSnapshot,
 ): Promise<SelfEvolutionSnapshot> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.evolution = trimList([snapshot, ...store.evolution]);
     await writeStore(store);
@@ -265,7 +265,7 @@ export async function listAppointments(limit = 40): Promise<ScheduleAppointment[
 }
 
 export async function saveAppointment(appointment: ScheduleAppointment): Promise<ScheduleAppointment> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.appointments = trimList([
       appointment,
@@ -282,7 +282,7 @@ export async function listReminders(limit = 40): Promise<ActionReminder[]> {
 }
 
 export async function saveReminder(reminder: ActionReminder): Promise<ActionReminder> {
-  return withStoreLock(FILE, async () => {
+  return withDocumentLock(FILE, async () => {
     const store = await readStore();
     store.reminders = trimList([
       reminder,

@@ -17,6 +17,7 @@ import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
 import type { WhiteboardEquation } from "@/lib/livekit/protocol";
 import type { LatexStep, VoiceMathJob } from "@/lib/voiceMath/types";
 import type { PedagogicalTutorResult } from "@/lib/curriculum/tutorTypes";
+import { randomSuffix } from "@/lib/ids";
 
 type SolvePayload = {
   ok?: boolean;
@@ -62,7 +63,7 @@ function pushLatexList(
   const stamp = Date.now().toString(36);
   fragments.forEach((latex, index) => {
     onEquation({
-      id: `eq-${prefix}-${stamp}-${index.toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `eq-${prefix}-${stamp}-${index.toString(36)}-${randomSuffix(3)}`,
       latex: formatLebaneseEquation(latex),
       authorId,
       createdAt: new Date().toISOString(),

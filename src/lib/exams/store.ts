@@ -1,5 +1,5 @@
 import { createId } from "@/lib/ids";
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { OFFICIAL_PAPERS } from "./papers";
 import type { ExamAttempt, GeneratedSimilarSet } from "./types";
 
@@ -17,15 +17,17 @@ async function writeAttempts(store: AttemptStore) {
 }
 
 export async function saveExamAttempt(attempt: Omit<ExamAttempt, "id" | "createdAt"> & { id?: string }) {
-  const store = await readAttempts();
-  const record: ExamAttempt = {
-    ...attempt,
-    id: attempt.id ?? createId("examatt"),
-    createdAt: new Date().toISOString(),
-  };
-  store.attempts.unshift(record);
-  await writeAttempts(store);
-  return record;
+  return withDocumentLock(FILE, async () => {
+    const store = await readAttempts();
+    const record: ExamAttempt = {
+      ...attempt,
+      id: attempt.id ?? createId("examatt"),
+      createdAt: new Date().toISOString(),
+    };
+    store.attempts.unshift(record);
+    await writeAttempts(store);
+    return record;
+  });
 }
 
 export async function getExamAttempt(id: string) {
@@ -68,11 +70,13 @@ async function writeGenerated(store: GeneratedStore) {
 }
 
 export async function saveGeneratedSet(set: GeneratedSimilarSet) {
-  const store = await readGenerated();
-  store.sets.unshift(set);
-  store.sets = store.sets.slice(0, 200);
-  await writeGenerated(store);
-  return set;
+  return withDocumentLock(GENERATED_FILE, async () => {
+    const store = await readGenerated();
+    store.sets.unshift(set);
+    store.sets = store.sets.slice(0, 200);
+    await writeGenerated(store);
+    return set;
+  });
 }
 
 export async function listGeneratedSets(filter?: { userId?: string; paperId?: string }) {

@@ -1,5 +1,5 @@
 import { createId } from "@/lib/ids";
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { formatInTimeZone, BEIRUT_TZ } from "@/lib/live/timezone";
 import { listPublicUsers } from "@/lib/auth/store";
 
@@ -100,14 +100,19 @@ function bumpStreak(profile: StudentGamification, day: string) {
 }
 
 export async function getProfile(userId: string, name?: string) {
-  const store = await readGame();
-  let profile = store.profiles.find((item) => item.userId === userId);
-  if (!profile) {
-    profile = emptyProfile(userId, name || "Student");
-    store.profiles.push(profile);
-    await writeGame(store);
-  }
-  return profile;
+  const existing = (await readGame()).profiles.find((item) => item.userId === userId);
+  if (existing) return existing;
+  // First visit: create under the document lock (re-checked, so concurrent first reads add one profile).
+  return withDocumentLock(FILE, async () => {
+    const store = await readGame();
+    let profile = store.profiles.find((item) => item.userId === userId);
+    if (!profile) {
+      profile = emptyProfile(userId, name || "Student");
+      store.profiles.push(profile);
+      await writeGame(store);
+    }
+    return profile;
+  });
 }
 
 export async function recordActivity(input: {
@@ -119,37 +124,39 @@ export async function recordActivity(input: {
   examTrack?: string;
   lessonId?: string;
 }) {
-  const store = await readGame();
-  let profile = store.profiles.find((item) => item.userId === input.userId);
-  if (!profile) {
-    profile = emptyProfile(input.userId, input.name || "Student");
-    store.profiles.push(profile);
-  }
-  if (input.name) profile.name = input.name;
-  const day = todayBeirut();
-  bumpStreak(profile, day);
+  return withDocumentLock(FILE, async () => {
+    const store = await readGame();
+    let profile = store.profiles.find((item) => item.userId === input.userId);
+    if (!profile) {
+      profile = emptyProfile(input.userId, input.name || "Student");
+      store.profiles.push(profile);
+    }
+    if (input.name) profile.name = input.name;
+    const day = todayBeirut();
+    bumpStreak(profile, day);
 
-  let gained = XP[input.kind] ?? 10;
-  if (input.kind === "exam") {
-    const percent = input.examPercent ?? 0;
-    gained = Math.round(percent / 2);
-    if (percent >= 80) gained += 25;
-    if (percent >= 100) gained += 15;
-  }
-  profile.xp += gained;
-  const month = monthKey();
-  profile.monthlyXp[month] = (profile.monthlyXp[month] ?? 0) + gained;
-  const topic = input.topic || (input.examTrack?.includes("brevet") ? "brevet" : input.kind === "solver" ? "solver" : input.kind);
-  profile.topicXp[topic] = (profile.topicXp[topic] ?? 0) + gained;
-  if (input.kind === "exam" && (input.examTrack ?? "").includes("brevet") && (input.examPercent ?? 0) >= 70) {
-    profile.topicXp.brevet = (profile.topicXp.brevet ?? 0) + 50;
-  }
-  if (input.kind === "exam" && (input.examPercent ?? 0) >= 80) {
-    profile.topicXp.calculus = (profile.topicXp.calculus ?? 0) + 20;
-  }
-  applyBadges(profile);
-  await writeGame(store);
-  return { profile, gained, day };
+    let gained = XP[input.kind] ?? 10;
+    if (input.kind === "exam") {
+      const percent = input.examPercent ?? 0;
+      gained = Math.round(percent / 2);
+      if (percent >= 80) gained += 25;
+      if (percent >= 100) gained += 15;
+    }
+    profile.xp += gained;
+    const month = monthKey();
+    profile.monthlyXp[month] = (profile.monthlyXp[month] ?? 0) + gained;
+    const topic = input.topic || (input.examTrack?.includes("brevet") ? "brevet" : input.kind === "solver" ? "solver" : input.kind);
+    profile.topicXp[topic] = (profile.topicXp[topic] ?? 0) + gained;
+    if (input.kind === "exam" && (input.examTrack ?? "").includes("brevet") && (input.examPercent ?? 0) >= 70) {
+      profile.topicXp.brevet = (profile.topicXp.brevet ?? 0) + 50;
+    }
+    if (input.kind === "exam" && (input.examPercent ?? 0) >= 80) {
+      profile.topicXp.calculus = (profile.topicXp.calculus ?? 0) + 20;
+    }
+    applyBadges(profile);
+    await writeGame(store);
+    return { profile, gained, day };
+  });
 }
 
 export async function monthlyLeaderboard(month = monthKey()) {
