@@ -101,6 +101,11 @@ export const en = {
     typing: "Replying…",
     placeholder: "Type your question…",
     send: "Send",
+    signInPrompt: "Youssef, the AI tutor, is available to signed-in students. Sign in (or create a free account) to start chatting.",
+    signInCta: "Sign in",
+    upgradePrompt: "AI chat with Youssef is part of the AI subscription. Activate a card or subscribe to continue.",
+    upgradeCta: "Activate AI access",
+    rateLimited: "Too many messages in a short time. Please wait a few minutes and try again.",
   },
   auth: {
     loginTitle: "Log in",

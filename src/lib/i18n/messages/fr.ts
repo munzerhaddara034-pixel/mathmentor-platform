@@ -99,6 +99,11 @@ export const fr: Messages = {
     typing: "Réponse en cours…",
     placeholder: "Écrivez votre question…",
     send: "Envoyer",
+    signInPrompt: "Youssef, le tuteur IA, est réservé aux élèves connectés. Connectez-vous (ou créez un compte gratuit) pour discuter.",
+    signInCta: "Se connecter",
+    upgradePrompt: "Le chat IA avec Youssef fait partie de l’abonnement IA. Activez une carte ou abonnez-vous pour continuer.",
+    upgradeCta: "Activer l’IA",
+    rateLimited: "Trop de messages en peu de temps. Patientez quelques minutes puis réessayez.",
   },
   auth: {
     loginTitle: "Connexion",

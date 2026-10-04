@@ -430,6 +430,7 @@ textarea { min-height: 120px; resize: vertical; }
 .chat-log { max-height: 280px; overflow: auto; padding: 12px; }
 .chat-log .user { background: var(--gold-soft); padding: 8px 10px; border-radius: 12px; }
 .chat-log .bot { background: var(--bot-bg); padding: 8px 10px; border-radius: 12px; }
+.chat-log .chat-link { font-weight: 700; text-decoration: underline; white-space: nowrap; }
 .chat-panel form { display: flex; gap: 8px; padding: 10px; }
 .chat-panel input { flex: 1; }
 .print-sheet .paper { min-height: 70vh; }
