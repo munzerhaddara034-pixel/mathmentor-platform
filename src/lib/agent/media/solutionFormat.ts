@@ -161,10 +161,8 @@ export function solutionPdfBlocks(solution: MathSolution, options?: SolutionPdfO
     if (theorem) blocks.push({ kind: "paragraph", text: `القاعدة: ${waProse(theorem)}`, indent: 12, muted: true });
   });
   const final = pdfMathUnicode(solution.finalAnswerLatex) || solution.finalAnswer;
+  // Readable maths only: the raw "LaTeX (Word Equation): …" source line is not shown to students in PDFs.
   if (final) blocks.push({ kind: "highlight", text: `الجواب النهائي: ${final}` });
-  if (solution.finalAnswerLatex) {
-    blocks.push({ kind: "paragraph", text: `LaTeX (Word Equation): ${formatLebaneseEquation(solution.finalAnswerLatex)}`, muted: true });
-  }
   const tip = solution.examTip?.ar || solution.examTip?.en;
   if (tip) {
     blocks.push({ kind: "heading", text: "نصيحة للامتحان" });
@@ -202,7 +200,6 @@ export function solutionPdfLatin(solution: MathSolution, options?: SolutionPdfOp
   });
   const final = pdfMath(solution.finalAnswerLatex) || solution.finalAnswer;
   lines.push(`FINAL ANSWER: ${asciiForPdf(final)}`);
-  if (solution.finalAnswerLatex) lines.push(`LaTeX (Word Equation): ${formatLebaneseEquation(solution.finalAnswerLatex)}`);
   if (solution.examTip?.en) lines.push("", `Exam tip: ${pdfProse(solution.examTip.en)}`);
   lines.push("", verdictLineEn(options?.verdict), "", `${MATHMENTOR_BRAND.headerLatin} - mathmentor`);
   return buildSimplePdf(`${MATHMENTOR_BRAND.headerLatin} - Worked solution`, lines);
