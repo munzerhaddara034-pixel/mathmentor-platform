@@ -3,6 +3,7 @@ import { verifyMetaSignature } from "@/lib/security/webhookSignature";
 import { warnOnce } from "@/lib/security/webhookProvenance";
 import { isAuthorizedInstructorPhone, normalizeWhatsAppDigits } from "@/lib/whatsapp/adapter";
 import { POST as agentWebhookPost } from "@/app/api/agent/whatsapp-voice/route";
+import { decideMetaVerification, logVerificationFailure } from "@/lib/whatsapp/verifyToken";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,10 +13,10 @@ export const dynamic = "force-dynamic";
  * Credentials come only from the environment — never hardcode tokens or phone-number IDs here.
  *   WHATSAPP_ACCESS_TOKEN     Meta permanent / system-user token (alias: WHATSAPP_TOKEN)
  *   WHATSAPP_PHONE_NUMBER_ID  Sender phone-number ID from Meta → WhatsApp → API setup
- *   WHATSAPP_VERIFY_TOKEN     Value typed into Meta's webhook "Verify token" field
+ *   WHATSAPP_VERIFY_TOKEN     Value typed into Meta's webhook "Verify token" field (required —
+ *                             no built-in fallback; unset ⇒ verification fails closed with a log line)
  */
 const GRAPH_API_VERSION = "v21.0";
-const DEFAULT_VERIFY_TOKEN = "mathmentor_verify_token_2026";
 
 type WhatsAppConfig = { accessToken: string; phoneNumberId: string };
 
@@ -33,10 +34,6 @@ type MetaWebhookBody = {
   }>;
 };
 
-function verifyToken() {
-  return process.env.WHATSAPP_VERIFY_TOKEN?.trim() || DEFAULT_VERIFY_TOKEN;
-}
-
 function whatsappConfig(): WhatsAppConfig | null {
   const accessToken = (process.env.WHATSAPP_ACCESS_TOKEN || process.env.WHATSAPP_TOKEN || "").trim();
   const phoneNumberId = (process.env.WHATSAPP_PHONE_NUMBER_ID || "").trim();
@@ -46,17 +43,14 @@ function whatsappConfig(): WhatsAppConfig | null {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const mode = searchParams.get("hub.mode");
-  const token = searchParams.get("hub.verify_token");
-  const challenge = searchParams.get("hub.challenge");
-
-  if (mode === "subscribe" && token === verifyToken()) {
-    return new NextResponse(challenge || "", {
+  const decision = decideMetaVerification(searchParams);
+  if (decision.ok) {
+    return new NextResponse(decision.challenge, {
       status: 200,
       headers: { "Content-Type": "text/plain" },
     });
   }
-
+  logVerificationFailure("/api/whatsapp", decision.reason);
   return new NextResponse("Verification failed", { status: 403 });
 }
 

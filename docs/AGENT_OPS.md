@@ -36,7 +36,7 @@ Intents (WhatsApp text/voice → `runWhatsAppVoicePipeline`):
 ### Meta Cloud API verify (GET)
 
 1. In Meta Developer Console → WhatsApp → Configuration → Webhook, set Callback URL to the URL above.
-2. Verify token = `WHATSAPP_VERIFY_TOKEN` (default documented: `mathmentor_secret_token`).
+2. Verify token = the value of `WHATSAPP_VERIFY_TOKEN` (required; there is no default — if unset, verification fails closed and the server logs why).
 3. Subscribe to `messages`.
 4. Meta sends `GET ?hub.mode=subscribe&hub.verify_token=…&hub.challenge=…` → API returns **plain-text** `hub.challenge` when the token matches.
 
@@ -117,7 +117,7 @@ Gemini structured JSON when `GEMINI_API_KEY` is set; otherwise Arabic/EN heurist
 Set in Site settings → Environment variables (or `netlify env:set`):
 
 ```bash
-WHATSAPP_VERIFY_TOKEN=mathmentor_secret_token
+WHATSAPP_VERIFY_TOKEN=<long random value, same as in Meta>
 INSTRUCTOR_WHATSAPP_NUMBER=96176532421
 WHATSAPP_PROVIDER=meta   # meta | ultramsg | twilio
 # Meta (optional):

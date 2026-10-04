@@ -7,6 +7,7 @@ import {
   type ProvenanceDecision,
 } from "@/lib/security/webhookProvenance";
 import { createId } from "@/lib/ids";
+import { configuredVerifyToken, decideMetaVerification, isVerificationAttempt, logVerificationFailure } from "@/lib/whatsapp/verifyToken";
 import { authorizeAgentRequest } from "@/lib/agent/auth";
 import { latestHealth } from "@/lib/agent/store";
 import { runWhatsAppVoicePipeline } from "@/lib/agent/voicePipeline";
@@ -26,7 +27,6 @@ import {
   instructorWhatsAppNumber,
   isAuthorizedInstructorPhone,
   normalizeWhatsAppDigits,
-  teacherWhatsApp,
 } from "@/lib/whatsapp/adapter";
 import { categoryForMime, type InboundMediaKind } from "@/lib/whatsapp/media/policy";
 import { parseMockExamRequest } from "@/lib/agent/media/captionIntent";
@@ -386,41 +386,37 @@ function parseStaffJson(body: Record<string, unknown>): InboundParsed {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const mode = url.searchParams.get("hub.mode") || url.searchParams.get("hub_mode");
-  const token = url.searchParams.get("hub.verify_token") || url.searchParams.get("hub_verify_token");
-  const challenge = url.searchParams.get("hub.challenge") || url.searchParams.get("hub_challenge");
-  const expected = process.env.WHATSAPP_VERIFY_TOKEN?.trim() || "mathmentor_secret_token";
-
-  if (mode === "subscribe" && token && token === expected && challenge) {
-    return new NextResponse(challenge, {
-      status: 200,
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-    });
+  if (isVerificationAttempt(url.searchParams)) {
+    // Meta webhook verification: token only from WHATSAPP_VERIFY_TOKEN (no hardcoded fallback).
+    const decision = decideMetaVerification(url.searchParams);
+    if (decision.ok) {
+      return new NextResponse(decision.challenge, {
+        status: 200,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
+      });
+    }
+    logVerificationFailure("/api/agent/whatsapp-voice", decision.reason);
+    return new NextResponse("Verification failed", { status: 403 });
   }
 
-  return NextResponse.json({
-    ok: true,
-    endpoint: "agent-whatsapp-voice",
-    brand: "Prof. Munzer Haddara / الأستاذ منذر حداره",
-    webhookUrl: "https://mathmentor-platform.onrender.com/api/agent/whatsapp-voice",
-    verify: {
+  // Plain GET (health probe / setup assistant self-ping). Never expose phone numbers or allowlists.
+  const body: Record<string, unknown> = { ok: true, endpoint: "agent-whatsapp-voice" };
+  const auth = await authorizeAgentRequest(request).catch(() => null);
+  if (auth?.ok && (auth.mode === "staff" || auth.mode === "secret")) {
+    body.verify = {
       modeParam: "hub.mode=subscribe",
       tokenEnv: "WHATSAPP_VERIFY_TOKEN",
+      tokenConfigured: Boolean(configuredVerifyToken()),
       challengeParam: "hub.challenge",
-    },
-    allowlist: {
-      instructor: instructorWhatsAppNumber(),
-      acceptedForms: ["76532421", "076532421", "96176532421", "+96176532421", "0096176532421"],
-      note: "Agent Hub voice allowlist only — Whish/payment remains TEACHER_WHATSAPP / WHISH_TRANSFER_PHONE 96170772968",
-    },
-    whishPaymentPhone: teacherWhatsApp(),
-    accepts: [
+    };
+    body.accepts = [
       "Meta Cloud API webhook (GET verify + POST messages)",
       "UltraMsg-style JSON webhook",
       "Twilio WhatsApp form posts",
       "Staff multipart / JSON from Agent Hub",
-    ],
-  });
+    ];
+  }
+  return NextResponse.json(body);
 }
 
 export async function POST(request: Request) {
