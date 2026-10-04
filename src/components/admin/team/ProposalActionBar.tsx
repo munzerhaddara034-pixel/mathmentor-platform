@@ -5,9 +5,10 @@ import { useNs } from "@/components/i18n/useNs";
 import { fmt } from "@/lib/i18n/format";
 import { teamMessages } from "@/lib/i18n/ns/team";
 import type { TeamProposal } from "@/lib/team/types";
+import { ReviseBox } from "./ReviseBox";
 import type { useProposalAction } from "./useProposalAction";
 
-export type CardMode = "idle" | "approve" | "merge" | "reject" | "revert";
+export type CardMode = "idle" | "approve" | "merge" | "reject" | "revert" | "revise";
 
 type Props = {
   proposal: TeamProposal;
@@ -30,6 +31,7 @@ export function ProposalActionBar({ proposal, mode, setMode, action }: Props) {
     if (data) setMode("idle");
   };
 
+  if (mode === "revise") return <ReviseBox action={action} onClose={() => setMode("idle")} />;
   if (mode === "reject" || mode === "revert") {
     return (
       <div className="team-confirm" role="dialog" aria-modal="false" aria-label={t.confirmLabel}>
@@ -72,6 +74,11 @@ export function ProposalActionBar({ proposal, mode, setMode, action }: Props) {
       {status === "merged" && !state?.reverted && !state?.revertProposalId ? (
         <button type="button" className="btn ghost-btn" onClick={() => setMode("revert")}>
           {h.revert}
+        </button>
+      ) : null}
+      {REJECTABLE.includes(status) ? (
+        <button type="button" className="btn ghost-btn" onClick={() => setMode("revise")}>
+          {h.askChange}
         </button>
       ) : null}
       {REJECTABLE.includes(status) ? (

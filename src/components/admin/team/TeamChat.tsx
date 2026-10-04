@@ -13,19 +13,15 @@ import {
 import { ChannelList } from "./ChannelList";
 import { Composer } from "./Composer";
 import { MessageBubble } from "./MessageBubble";
+import { HamzaActivityPanel } from "./HamzaActivityPanel";
 import { TeamThreadSkeleton, TeamTypingBubble } from "./TeamChatSkeleton";
 import { fetchThread, sendTeamMessage, teamErrorText } from "./teamApi";
+import { EMPTY_THREAD as EMPTY, hasActiveWork, indexById, taskCardOwners, threadFrom, type Thread } from "./threadState";
+import { useThreadPolling } from "./useThreadPolling";
+import type { PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { fmt } from "@/lib/i18n/format";
 import { teamMessages } from "@/lib/i18n/ns/team";
-
-type Thread = { messages: TeamMessage[]; proposals: Record<string, TeamProposal>; loaded: boolean };
-
-const EMPTY: Thread = { messages: [], proposals: {}, loaded: false };
-
-function indexProposals(list: TeamProposal[]): Record<string, TeamProposal> {
-  return Object.fromEntries(list.map((proposal) => [proposal.id, proposal]));
-}
 
 /** Messenger-style team chat for staff (follows the site locale; RTL in ar, mobile-first). */
 export function TeamChat({ staffName }: { staffName: string }) {
@@ -43,21 +39,23 @@ export function TeamChat({ staffName }: { staffName: string }) {
   const thread = threads[channel] ?? EMPTY;
   const meta = TEAM_CHANNELS.find((item) => item.id === channel) ?? TEAM_CHANNELS[0];
 
-  const load = useCallback(async (target: TeamChannelId) => {
-    setLoading(true);
-    setErrorText("");
+  const load = useCallback(async (target: TeamChannelId, silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setErrorText("");
+    }
     const result = await fetchThread(target);
-    setLoading(false);
+    if (!silent) setLoading(false);
     if (!result.ok) {
-      setErrorText(teamErrorText(result, locale, t));
+      if (!silent) setErrorText(teamErrorText(result, locale, t));
       return;
     }
     setStorage(result.data.storage);
-    setThreads((current) => ({
-      ...current,
-      [target]: { messages: result.data.messages, proposals: indexProposals(result.data.proposals), loaded: true },
-    }));
+    setThreads((current) => ({ ...current, [target]: threadFrom(result.data) }));
   }, [locale, t]);
+  const refresh = useCallback(() => void load(channel, true), [channel, load]);
+  useThreadPolling(hasActiveWork(thread), refresh);
+  const owners = useMemo(() => taskCardOwners(thread.messages), [thread.messages]);
 
   useEffect(() => {
     void load(channel);
@@ -108,12 +106,14 @@ export function TeamChat({ staffName }: { staffName: string }) {
       return {
         ...current,
         [target]: {
+          ...base,
           loaded: true,
           messages: [...base.messages.filter((m) => m.id !== optimistic.id), message, ...replies],
-          proposals: { ...base.proposals, ...indexProposals(proposals) },
+          proposals: { ...base.proposals, ...indexById(proposals) },
         },
       };
     });
+    if (replies.some((reply) => reply.taskId)) void load(target, true);
     return true;
   };
 
@@ -129,6 +129,15 @@ export function TeamChat({ staffName }: { staffName: string }) {
           proposals: { ...base.proposals, [proposal.id]: proposal },
         },
       };
+    });
+    // Revisions queue a task and reverts update the original card: reload quietly.
+    if (message?.taskId || proposal.hamza?.revertOf) void load(proposal.channel, true);
+  }, [load]);
+
+  const onTaskUpdated = useCallback((task: PublicHamzaTask) => {
+    setThreads((current) => {
+      const base = current[task.channel] ?? EMPTY;
+      return { ...current, [task.channel]: { ...base, tasks: { ...base.tasks, [task.id]: task } } };
     });
   }, []);
 
@@ -150,6 +159,7 @@ export function TeamChat({ staffName }: { staffName: string }) {
             </span>
           ) : null}
         </header>
+        {channel === "developer" ? <HamzaActivityPanel /> : null}
         <div className="team-messages" aria-live="polite">
           {loading && !thread.loaded ? <TeamThreadSkeleton /> : null}
           {thread.loaded && !thread.messages.length ? (
@@ -162,8 +172,10 @@ export function TeamChat({ staffName }: { staffName: string }) {
                 key={message.id}
                 message={message}
                 proposal={proposal && proposal.messageId === message.id ? proposal : undefined}
+                task={message.taskId && owners.get(message.taskId) === message.id ? thread.tasks[message.taskId] : undefined}
                 referredByName={referredNames(message)}
                 onDecided={onDecided}
+                onTaskUpdated={onTaskUpdated}
               />
             );
           })}

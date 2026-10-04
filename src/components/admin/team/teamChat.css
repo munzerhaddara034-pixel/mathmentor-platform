@@ -276,3 +276,26 @@
   .team-diff-split { grid-template-columns: 1fr 1fr; }
   .team-diff-split .team-diff-row { min-inline-size: 0; overflow: hidden; }
 }
+
+/* Hamza v2 — background task card, revise box, activity panel (mobile-first, logical properties) */
+.team-task { border: 1px solid var(--line); border-radius: 12px; padding-block: 8px; padding-inline: 10px; margin-block-start: 8px; display: grid; gap: 4px; background: var(--surface); }
+.team-task-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.85rem; }
+.team-task-pill { display: inline-block; border-radius: 999px; padding-inline: 8px; font-size: 0.72rem; font-weight: 700; border: 1px solid var(--line); }
+.team-task-pill.is-running, .team-task-pill.is-queued { background: #eef4ff; border-color: #9db8f5; }
+.team-task-pill.is-done { background: #eaf7ee; border-color: #8fd0a2; }
+.team-task-pill.is-failed { background: #fdecec; border-color: #f0a3a3; }
+.team-task-pill.is-budget_paused { background: #fff6e5; border-color: #f2c66d; }
+.team-task-cost { font-weight: 700; }
+.team-task-line { margin: 0; font-size: 0.82rem; overflow-wrap: anywhere; }
+.team-task-bar { block-size: 4px; border-radius: 4px; background: linear-gradient(90deg, transparent, #9db8f5, transparent); background-size: 200% 100%; animation: team-task-slide 1.4s linear infinite; }
+@keyframes team-task-slide { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .team-task-bar { animation: none; background: #9db8f5; } }
+.team-revise-input { inline-size: 100%; min-block-size: 88px; border: 1px solid var(--line); border-radius: 10px; padding: 8px; font: inherit; }
+.team-activity { border-block-end: 1px solid var(--line); padding-block: 6px; padding-inline: 12px; }
+.team-activity > summary { cursor: pointer; min-block-size: 44px; display: flex; align-items: center; font-weight: 700; }
+.team-activity-body { display: grid; gap: 6px; padding-block-end: 8px; max-block-size: 60vh; overflow: auto; }
+.team-activity-meter { block-size: 8px; border-radius: 8px; background: var(--line); overflow: hidden; }
+.team-activity-meter > span { display: block; block-size: 100%; background: #4f7be8; }
+.team-activity-h { font-size: 0.9rem; margin-block: 6px 0; }
+.team-activity-list { margin: 0; padding-inline-start: 18px; display: grid; gap: 4px; font-size: 0.82rem; overflow-wrap: anywhere; }
+.team-activity-events code { font-size: 0.78rem; }

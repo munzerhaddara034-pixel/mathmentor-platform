@@ -2,6 +2,8 @@
 import type { Locale } from "@/lib/i18n/config";
 import { fmt } from "@/lib/i18n/format";
 import type { TeamMessages } from "@/lib/i18n/ns/team";
+import type { HamzaActivity } from "@/lib/hamza/activityTypes";
+import type { PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import type { TeamMessage, TeamProposal, TeamSendResponse, TeamThreadResponse } from "@/lib/team/types";
 
 /** Server text (Arabic, sometimes English) when the API sent one; otherwise a client key for the UI to translate. */
@@ -72,9 +74,10 @@ export type ProposalActionBody =
   | { action: "issue_code"; confirm: true; step: "open_pr" | "merge"; branch?: string }
   | { action: "approve"; confirm: true; code: string; reviewed: boolean; allowLarge?: boolean; branch?: string }
   | { action: "merge"; confirm: true; code: string; typedBranch: string }
+  | { action: "revise"; confirm: true; text: string }
   | { action: "reject" | "refresh_ci" | "revert"; confirm: true };
 
-export type ProposalActionResponse = { ok: true; proposal: TeamProposal; message?: TeamMessage; code?: string; expiresAt?: string };
+export type ProposalActionResponse = { ok: true; proposal: TeamProposal; message?: TeamMessage; code?: string; expiresAt?: string; task?: PublicHamzaTask };
 
 /** Every Hamza decision (codes, approvals, merge, reject, CI refresh, revert) — same-origin JSON POST. */
 export function proposalAction(id: string, body: ProposalActionBody) {
@@ -90,4 +93,19 @@ export function proposalAction(id: string, body: ProposalActionBody) {
 
 export function attachmentUrl(id: string) {
   return `/api/admin/team/attachments/${encodeURIComponent(id)}`;
+}
+
+/** Cancel a Hamza task, or continue a budget-paused one up to the max task budget. */
+export function taskAction(id: string, action: "cancel" | "continue") {
+  return safe<{ ok: true; task: PublicHamzaTask }>(() =>
+    fetch(`/api/admin/team/tasks/${encodeURIComponent(id)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action }),
+    }),
+  );
+}
+
+export function fetchHamzaActivity() {
+  return safe<{ ok: true; activity: HamzaActivity }>(() => fetch("/api/admin/team/hamza/activity", { cache: "no-store" }));
 }
