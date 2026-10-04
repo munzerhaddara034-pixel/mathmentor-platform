@@ -1,7 +1,8 @@
 /**
  * Team chat acceptance/unit tests (routing, loop guard, secrets, approval gate, diff, storage).
- *   npx tsx scripts/test-team-chat.ts                 → file storage (temp data dir)
- *   DATABASE_URL=postgres://… npx tsx scripts/test-team-chat.ts → Postgres storage
+ *   npm run test:team                                  → file storage (temp data dir)
+ *   DATABASE_URL=postgres://… npm run test:team        → Postgres storage
+ *   (npx tsx scripts/test-team-chat.ts also works.)
  * The LLM is replaced by a deterministic fake HERE ONLY (setTeamLlmOverride); production code always calls Gemini.
  * GITHUB_TOKEN is removed for this process so no commit can ever happen from the tests.
  */
@@ -230,7 +231,8 @@ async function main() {
       branch: "agent-hub-latest",
       actor,
     });
-    assert.ok(!liveNoType.ok && liveNoType.status === 400);
+    // The typed live-branch override is gone: the live branch is refused like main (403).
+    assert.ok(!liveNoType.ok && liveNoType.status === 403);
     const noToken = await approval.decideProposal({ proposalId: proposal.id, action: "approve", confirm: true, actor });
     assert.ok(noToken.ok && noToken.proposal.status === "failed" && /GITHUB_TOKEN/.test(noToken.proposal.error ?? ""));
     const rejected = await approval.decideProposal({ proposalId: proposal.id, action: "reject", confirm: true, actor });

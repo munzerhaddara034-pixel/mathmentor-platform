@@ -2,7 +2,10 @@ import { existsSync, statSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
-const SRC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../src");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const SRC = path.join(ROOT, "src");
+/** Folders whose TypeScript uses extensionless relative imports (Next.js / tsx style). */
+const TS_ROOTS = [SRC, path.join(ROOT, "scripts")];
 const EXTENSIONS = [".ts", ".tsx", ".mts", ".js", ".mjs"];
 
 function isFile(candidate) {
@@ -26,7 +29,7 @@ export async function resolve(specifier, context, nextResolve) {
     if (found) return nextResolve(pathToFileURL(found).href, context);
   }
   const parent = context.parentURL?.startsWith("file:") ? fileURLToPath(context.parentURL) : "";
-  if ((specifier.startsWith("./") || specifier.startsWith("../")) && parent.startsWith(SRC) && !path.extname(specifier)) {
+  if ((specifier.startsWith("./") || specifier.startsWith("../")) && TS_ROOTS.some((root) => parent.startsWith(root)) && !path.extname(specifier)) {
     const found = probe(path.resolve(path.dirname(parent), specifier));
     if (found && existsSync(found)) return nextResolve(pathToFileURL(found).href, context);
   }
