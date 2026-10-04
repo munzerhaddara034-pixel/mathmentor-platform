@@ -33,6 +33,7 @@ async function main() {
   const types = await import("../src/lib/team/types");
 
   const actor = { id: "user-test-staff", name: "Prof. Munzer Haddara", email: "staff.test@example.invalid", role: "teacher" };
+  process.env.TEAM_APPROVER_EMAILS = actor.email;
 
   test("§2.2 test 5: multi-topic team message → محمد alone", () => {
     const r = routing.routeHumanMessage("team", "بدنا نطلق دورة G12 SE الشهر الجاي: بدنا صفحة تسجيل، وبوستر، ونموذج امتحان تجريبي.");
@@ -233,7 +234,20 @@ async function main() {
     });
     // The typed live-branch override is gone: the live branch is refused like main (403).
     assert.ok(!liveNoType.ok && liveNoType.status === 403);
-    const noToken = await approval.decideProposal({ proposalId: proposal.id, action: "approve", confirm: true, actor });
+    // Hamza v2: the button alone is not enough — Approval #1 needs the in-app code bound to this diff.
+    const noCode = await approval.decideProposal({ proposalId: proposal.id, action: "approve", confirm: true, reviewed: true, actor });
+    assert.ok(!noCode.ok && noCode.status === 403);
+    const issued = await approval.decideProposal({ proposalId: proposal.id, action: "issue_code", step: "open_pr", confirm: true, actor });
+    assert.ok(issued.ok && /^HMZ-/.test(issued.code ?? ""));
+    assert.ok(issued.ok && !JSON.stringify(issued.proposal).includes(String(issued.proposal.hamza?.codes.open_pr?.hash ?? "§")));
+    const noToken = await approval.decideProposal({
+      proposalId: proposal.id,
+      action: "approve",
+      confirm: true,
+      reviewed: true,
+      code: issued.ok ? issued.code : "",
+      actor,
+    });
     assert.ok(noToken.ok && noToken.proposal.status === "failed" && /GITHUB_TOKEN/.test(noToken.proposal.error ?? ""));
     const rejected = await approval.decideProposal({ proposalId: proposal.id, action: "reject", confirm: true, actor });
     assert.ok(rejected.ok && rejected.proposal.status === "rejected");

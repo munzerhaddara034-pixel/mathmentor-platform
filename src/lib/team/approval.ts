@@ -1,130 +1,84 @@
 /**
- * «موافقة ونشر» / «رفض» — the ONLY code path that commits. Called from the approval route after a human click.
+ * /admin/team decisions on a Hamza proposal — the ONLY entry point that leads to GitHub writes, and only
+ * through the Hamza pipeline (src/lib/hamza/pipeline):
+ *   issue_code (step open_pr | merge) → approve (code #1 → feat/* branch + PR) → CI → merge (code #2 + typed
+ *   live-branch name, CI green) · reject · refresh_ci.
+ * Typing «موافق» in the chat never approves anything; neither does WhatsApp.
  */
-import { createId } from "@/lib/ids";
-import type { TeamActor } from "./agents";
-import { MAX_CHANGED_LINES, staticFindings } from "./codeChecks";
 import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
-import { FORBIDDEN_BRANCHES, commitFilesToBranch, isProtectedBranch, isValidBranchName, teamGithubConfig } from "./github";
-import { teamRepo } from "./store";
+import { publicProposal } from "@/lib/hamza/publicProposal";
+import { approveMerge, approveOpenPr, issueCode, refreshCi, rejectProposal, type PipelineResult } from "@/lib/hamza/pipeline";
+import { pipelineDeps } from "@/lib/hamza/pipeline/deps";
+import type { ApprovalAction } from "@/lib/hamza/types";
+import type { TeamActor } from "./agents";
+import { FORBIDDEN_BRANCHES, isValidBranchName, teamGithubConfig } from "./github";
 import type { TeamMessage, TeamProposal } from "./types";
+
+export const DECISION_ACTIONS = ["issue_code", "approve", "merge", "reject", "refresh_ci"] as const;
+export type DecisionAction = (typeof DECISION_ACTIONS)[number];
 
 export type DecisionInput = {
   proposalId: string;
-  action: "approve" | "reject";
+  action: DecisionAction;
   confirm: boolean;
+  /** issue_code: which approval step the code is for. */
+  step?: ApprovalAction;
+  code?: string;
+  reviewed?: boolean;
+  allowLarge?: boolean;
+  /** Feature branch override (open_pr only; feat/ fix/ chore/ docs/ — never the live branch or main). */
   branch?: string;
-  actor: TeamActor;
+  /** merge: the live branch name typed by the approver. */
+  typedBranch?: string;
+  actor: TeamActor & { ip?: string };
 };
 
 export type DecisionResult =
-  | { ok: true; proposal: TeamProposal; message: TeamMessage }
+  | { ok: true; proposal: TeamProposal; message?: TeamMessage; code?: string; expiresAt?: string }
   | { ok: false; status: number; error: string; errorAr: string };
 
 function fail(status: number, error: string, errorAr: string): DecisionResult {
   return { ok: false, status, error, errorAr };
 }
 
-function addedLines(diff: string) {
-  return diff
-    .split("\n")
-    .filter((line) => line.startsWith("+") && !line.startsWith("+++"))
-    .map((line) => line.slice(1));
+function out(result: PipelineResult): DecisionResult {
+  if (!result.ok) return fail(result.status, result.error, result.errorAr);
+  return { ok: true, proposal: publicProposal(result.proposal), message: result.message, code: result.code, expiresAt: result.expiresAt };
 }
 
-async function post(proposal: TeamProposal, text: string, notice?: string): Promise<TeamMessage> {
-  const message: TeamMessage = {
-    id: createId("tmsg"),
-    channel: proposal.channel,
-    authorKind: "system",
-    authorId: "system",
-    authorName: "المنصة",
-    text,
-    attachments: [],
-    createdAt: new Date().toISOString(),
-    proposalId: proposal.id,
-    notice,
-  };
-  await teamRepo().addMessage(message);
-  return message;
+/** Feature-branch override: only a new feat/*-style branch, never the live branch or main. */
+function branchProblem(branch: string): DecisionResult | null {
+  const config = teamGithubConfig();
+  if (!isValidBranchName(branch)) return fail(400, "Invalid branch name.", "اسم الفرع غير صالح.");
+  if (FORBIDDEN_BRANCHES.includes(branch)) return fail(403, `Writing to ${branch} is blocked from the platform.`, `الكتابة على ${branch} ممنوعة من داخل المنصة.`);
+  const allowed = agentCommitBranchCheck(branch, { liveBranch: config.baseBranch });
+  return allowed.ok ? null : fail(403, allowed.reason, allowed.reasonAr);
 }
 
 export async function decideProposal(input: DecisionInput): Promise<DecisionResult> {
   if (!input.confirm) return fail(400, "Explicit confirmation required.", "يلزم تأكيد صريح.");
-  const repo = teamRepo();
-  const proposal = await repo.getProposal(input.proposalId);
-  if (!proposal) return fail(404, "Proposal not found.", "الـ Diff غير موجود.");
-  const now = new Date().toISOString();
-
-  if (input.action === "reject") {
-    const updated = await repo.transitionProposal(proposal.id, ["pending", "failed"], {
-      status: "rejected",
-      decidedBy: input.actor.name,
-      decidedAt: now,
-    });
-    if (!updated) return fail(409, "Proposal is no longer pending.", "هذا الـ Diff لم يعد بانتظار قرار.");
-    const message = await post(updated, `❌ رفض ${input.actor.name} الـ Diff «${updated.commitMessage}». لم يحدث أي Commit.`);
-    return { ok: true, proposal: updated, message };
+  const deps = pipelineDeps();
+  const actor = input.actor;
+  const branch = input.branch?.trim();
+  if (branch && (input.action === "approve" || input.action === "issue_code")) {
+    const problem = branchProblem(branch);
+    if (problem) return problem;
   }
-
-  const config = teamGithubConfig();
-  const branch = (input.branch || proposal.targetBranch).trim();
-  if (!isValidBranchName(branch)) return fail(400, "Invalid branch name.", "اسم الفرع غير صالح.");
-  if (FORBIDDEN_BRANCHES.includes(branch)) {
-    return fail(403, `Writing to ${branch} is blocked from the platform.`, `الكتابة على ${branch} ممنوعة من داخل المنصة.`);
+  switch (input.action) {
+    case "issue_code":
+      return out(await issueCode(deps, { proposalId: input.proposalId, action: input.step === "merge" ? "merge" : "open_pr", actor, branch }));
+    case "approve": {
+      const current = await deps.repo.getProposal(input.proposalId);
+      if (branch && current && branch !== current.targetBranch) {
+        return fail(409, "The branch changed: request a new approval code for it.", "تغيّر الفرع: اطلب رمز موافقة جديداً له.");
+      }
+      return out(await approveOpenPr(deps, { proposalId: input.proposalId, code: input.code ?? "", reviewed: input.reviewed === true, allowLarge: input.allowLarge, actor }));
+    }
+    case "merge":
+      return out(await approveMerge(deps, { proposalId: input.proposalId, code: input.code ?? "", typedBranch: input.typedBranch ?? "", actor }));
+    case "reject":
+      return out(await rejectProposal(deps, { proposalId: input.proposalId, actor }));
+    case "refresh_ci":
+      return out(await refreshCi(deps, { proposalId: input.proposalId }));
   }
-  // No typed "live branch" override any more: only a new feat/*-style branch, never the live branch or main.
-  const allowed = agentCommitBranchCheck(branch, { liveBranch: config.baseBranch });
-  if (!allowed.ok || isProtectedBranch(branch, config)) {
-    return fail(403, allowed.ok ? `Writing to ${branch} is blocked from the platform.` : allowed.reason, allowed.ok ? `الكتابة على ${branch} ممنوعة.` : allowed.reasonAr);
-  }
-  // Re-run the guards on the stored content (defence in depth).
-  const findings = staticFindings(
-    proposal.files.map((file) => ({ path: file.path, content: file.newContent, addedLines: addedLines(file.diff) })),
-  );
-  const changed = proposal.files.reduce((sum, file) => sum + file.additions + file.deletions, 0);
-  if (changed > MAX_CHANGED_LINES) findings.push(`حجم التغيير ${changed} سطر يتجاوز الحد.`);
-  if (findings.length) return fail(422, "Proposal failed safety checks.", findings.join(" · "));
-
-  const locked = await repo.transitionProposal(proposal.id, ["pending", "failed"], {
-    status: "committing",
-    decidedBy: input.actor.name,
-    decidedAt: now,
-  });
-  if (!locked) return fail(409, "Proposal is no longer pending.", "هذا الـ Diff قيد التنفيذ أو حُسم مسبقاً.");
-
-  const result = await commitFilesToBranch(
-    {
-      branch,
-      createFromBase: true,
-      message: `${proposal.commitMessage}\n\nApproved in /admin/team by ${input.actor.name}. Proposal ${proposal.id}.`,
-      files: proposal.files.map((file) => ({ path: file.path, content: file.newContent, baseSha: file.baseSha })),
-    },
-    config,
-  );
-  if (!result.ok) {
-    const failed = (await repo.transitionProposal(proposal.id, ["committing"], { status: "failed", error: result.error })) ?? locked;
-    const message = await post(failed, `⚠️ فشل الـ Commit على ${branch}: ${result.error}\nلم يُكتب شيء. يمكنك إعادة المحاولة أو الرفض.`);
-    return { ok: true, proposal: failed, message };
-  }
-  const committed =
-    (await repo.transitionProposal(proposal.id, ["committing"], {
-      status: "committed",
-      committedBranch: result.branch,
-      commitSha: result.sha,
-      commitUrl: result.url,
-      error: undefined,
-    })) ?? locked;
-  const live = result.branch === config.baseBranch;
-  const text = [
-    `✅ Commit بموافقة ${input.actor.name}`,
-    `- الفرع: ${result.branch}${result.branchCreated ? ` (أُنشئ من ${config.baseBranch})` : ""}`,
-    `- SHA: ${result.sha.slice(0, 7)} — ${result.url}`,
-    `- الملفات: ${proposal.files.map((file) => file.path).join("، ")}`,
-    "- الفحوص داخل المنصة: الأسرار ✓ · any/@ts-ignore ✓ · صياغة TypeScript ✓",
-    "- tsc --noEmit و npm run build: لم يُشغَّلا داخل خادم Render — شغّلهما على هذا الفرع قبل الدمج.",
-    live ? "- هذا هو الفرع الحيّ: Render سيعيد النشر تلقائياً." : `- Render لا ينشر هذا الفرع؛ الدمج في ${config.baseBranch} يحتاج موافقة منفصلة.`,
-  ].join("\n");
-  const message = await post(committed, text);
-  return { ok: true, proposal: committed, message };
 }

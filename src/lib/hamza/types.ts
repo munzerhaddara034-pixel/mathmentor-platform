@@ -104,9 +104,8 @@ export type HamzaPipelineState = {
   timeline: TimelineEvent[];
   cost?: HamzaCost;
   taskId?: string;
-};
-
-/** What the browser sees: the same state without the hashed codes, plus whether a code is active. */
-export type PublicHamzaState = Omit<HamzaPipelineState, "codes"> & {
-  activeCode: Partial<Record<ApprovalAction, { expiresAt: string; issuedTo: string }>>;
+  /** Browser view only (publicProposal): which codes are live, never the hashes. */
+  activeCode?: Partial<Record<ApprovalAction, { expiresAt: string; issuedTo: string }>>;
+  /** Last pipeline error shown on the card. */
+  lastError?: string;
 };

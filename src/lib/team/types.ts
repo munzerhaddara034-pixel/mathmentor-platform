@@ -2,6 +2,7 @@
  * Shared (client + server) types for the /admin/team chat.
  * Channel ids follow docs/TEAM_CHAT_SPEC.md §0.1.
  */
+import type { HamzaPipelineState } from "@/lib/hamza/types";
 
 export const TEAM_CHANNEL_IDS = ["team", "mohamed", "sami", "developer"] as const;
 export type TeamChannelId = (typeof TEAM_CHANNEL_IDS)[number];
@@ -52,17 +53,53 @@ export type TeamMessage = {
   notice?: string;
 };
 
-export type TeamProposalStatus = "pending" | "committing" | "committed" | "rejected" | "failed";
+/**
+ * pending → committing (opening the PR) → ci_running → ci_passed | ci_failed → merging → merged.
+ * "committed" is the pre-PR flow (feature-branch commit only) kept for old rows.
+ */
+export type TeamProposalStatus =
+  | "pending"
+  | "committing"
+  | "committed"
+  | "ci_running"
+  | "ci_failed"
+  | "ci_passed"
+  | "merging"
+  | "merged"
+  | "rejected"
+  | "failed";
+
+export const TEAM_PROPOSAL_STATUSES: TeamProposalStatus[] = [
+  "pending",
+  "committing",
+  "committed",
+  "ci_running",
+  "ci_failed",
+  "ci_passed",
+  "merging",
+  "merged",
+  "rejected",
+  "failed",
+];
+
+export type TeamFileChange = "add" | "modify" | "delete" | "rename";
 
 export type TeamProposalFile = {
   path: string;
-  /** Blob sha on the base branch when the diff was proposed (null = new file). */
+  /** Blob sha on the base when the diff was proposed (null = new file). For a rename: the old path's sha. */
   baseSha: string | null;
   isNew: boolean;
+  /** Full new content ("" for a delete). */
   newContent: string;
   diff: string;
   additions: number;
   deletions: number;
+  /** Multi-file patches (Hamza v2). Absent on old rows = add (isNew) or modify. */
+  change?: TeamFileChange;
+  /** Rename source. */
+  oldPath?: string;
+  /** Content before the change (split view, revert). Absent for new files. */
+  oldContent?: string;
 };
 
 export type TeamProposal = {
@@ -89,6 +126,8 @@ export type TeamProposal = {
   commitSha?: string;
   commitUrl?: string;
   error?: string;
+  /** Hamza v2 pipeline (PR, CI, codes, timeline, cost). Codes are stripped before reaching the browser. */
+  hamza?: HamzaPipelineState;
 };
 
 export type TeamChannelMeta = {
