@@ -7,7 +7,7 @@
  *   (text / voice note / photo → upgraded solver → signed reply, PDF attached on request).
  * Relative imports with .ts extensions only, so `node --test` loads it without the Next alias.
  */
-import { parseMockExamRequest, wantsPdfReply } from "../agent/media/captionIntent.ts";
+import { parseMockExamRequest, shouldSendPdf, wantsPdfReply } from "../agent/media/captionIntent.ts";
 import { MEDIA_SIGNATURE_AR } from "./media/errorsAr.ts";
 import { baseMime, checkInboundMedia, INBOUND_MAX_BYTES, type MediaCategory } from "./media/policy.ts";
 import { isMetaMediaHost } from "./mediaHosts.ts";
@@ -319,6 +319,27 @@ export const IMAGE_DOWNLOAD_FAILED_AR =
 export const SOLVE_FAILED_AR =
   "ما قدرت كمّل حلّ المسألة هلّق بسبب عطل تقني مؤقت.\n" + "ابعتها مرة تانية بعد شوي.\n" + MEDIA_SIGNATURE_AR;
 
+/** Appended (before the signature) once the PDF document went out. */
+export const PDF_SENT_AR = "📄 بعتتلك الحل كامل كمان كملف PDF (MathMentor · منذر حداره).";
+/** The PDF was built but WhatsApp refused / failed the document send. */
+export const PDF_SEND_FAILED_AR =
+  "⚠️ ما قدرت إبعتلك ملف الـ PDF هلّق بسبب عطل تقني.\n" + "ابعتلي «PDF» بعد شوي وبرجع بعتلك ياه.";
+/** The PDF itself could not be generated. */
+export const PDF_BUILD_FAILED_AR =
+  "⚠️ ما قدرت حضّر ملف الـ PDF هلّق — الحل كامل مكتوب فوق.\n" + "إذا بدّك ياه كملف، ابعتلي «PDF» بعد شوي.";
+/** «PDF» asked on its own but there is no recent solution to send. */
+export const PDF_NOTHING_TO_RESEND_AR =
+  "📄 ما عندي حل جديد إبعتلك ياه كملف PDF.\n" + "ابعتلي المسألة (نص، صوت أو صورة) وبرجعلك بالحل مع ملف PDF.\n" + MEDIA_SIGNATURE_AR;
+
+/** Put a status note just above the «— محمد …» signature (or at the end when there is none). */
+export function withNoteBeforeSignature(text: string, note: string): string {
+  if (!note) return text;
+  const at = text.lastIndexOf(MEDIA_SIGNATURE_AR);
+  if (at < 0) return `${text}\n${note}`;
+  const head = text.slice(0, at).replace(/\s+$/, "");
+  return `${head}\n${note}\n${text.slice(at)}`;
+}
+
 export const SOLVE_ACK_AR = "⏳ وصلتني المسألة، عم حلّها وإتحقّق منها… دقيقة وبرجعلك.";
 export const MOCK_EXAM_ACK_AR = "⏳ عم حضّرلك امتحان تجريبي كملف PDF… لحظات.";
 
@@ -365,6 +386,13 @@ export function looksLikeMathRequest(text: string | undefined): boolean {
   return true;
 }
 
+/** «ابعتلي ياه PDF» / "send it as a PDF": short, asks for a PDF, and is not a secretary / ops command. */
+export function isBarePdfRequest(text: string | undefined): boolean {
+  const t = (text || "").trim();
+  if (!t || t.length > 80) return false;
+  return wantsPdfReply(t) && !OPS_WORDS.test(t) && !looksLikeMathRequest(t);
+}
+
 /* ------------------------------------------------------------------ Turn orchestration */
 
 export type MathSolveRequest = {
@@ -379,7 +407,8 @@ export type MathSolveRequest = {
 export type ReplyAttachment = { bytes: Buffer; filename: string; caption: string; mimeType: string };
 
 export type MathSolveOutcome =
-  | { ok: true; textAr: string; pdf?: ReplyAttachment; relatedIds?: string[] }
+  /** `pdfError`: a PDF was due but could not be generated (the student is told; text still goes out). */
+  | { ok: true; textAr: string; pdf?: ReplyAttachment; pdfError?: string; relatedIds?: string[] }
   | { ok: false; reason: "quota" | "unavailable" | "failed"; textAr?: string; error?: string };
 
 export type AgentReply = {
@@ -388,6 +417,10 @@ export type AgentReply = {
   status: "completed" | "failed";
   note: string;
   attachment?: ReplyAttachment;
+  /** A PDF was due but could not be generated → the reply says so. */
+  pdfError?: string;
+  /** Status line appended when the attachment is delivered (default: none). */
+  attachmentSentNoteAr?: string;
   replyToMessageId?: string;
   transcript?: string;
   relatedIds?: string[];
@@ -414,12 +447,14 @@ export type AgentTurnDeps = {
   /** Non-maths text / transcripts (appointments, reminders, briefings…) → the intent pipeline. */
   fallback: (input: { text: string; fromVoice: boolean }) => Promise<void>;
   ack?: (to: string, textAr: string) => Promise<void>;
+  /** Latest solution PDF sent to this number (for a bare «ابعتلي ياه PDF»). */
+  lastPdf?: (from: string) => ReplyAttachment | undefined;
   /** Persist an inbound photo for Agent Hub (best effort). */
   storeInbound?: (file: { bytes: Buffer; mimeType: string; filename?: string; caption?: string; mediaId?: string; messageId?: string }) => Promise<string | undefined>;
   log?: (level: "info" | "warn" | "error", message: string) => void;
 };
 
-export type AgentTurnRoute = "math" | "mock_exam" | "fallback" | "stt_failed" | "quota" | "download_failed" | "empty";
+export type AgentTurnRoute = "math" | "mock_exam" | "pdf_resend" | "fallback" | "stt_failed" | "quota" | "download_failed" | "empty";
 export type AgentTurnResult = { route: AgentTurnRoute; transcript?: string; ok: boolean };
 
 function heardLine(transcript: string): string {
@@ -450,12 +485,17 @@ export async function answerMath(
   }
   const prefix = context.transcript ? `${heardLine(context.transcript)}\n\n` : "";
   if (outcome.ok) {
+    if (request.wantPdf && !outcome.pdf) {
+      deps.log?.("error", `[whatsapp-agent] solution PDF missing: ${outcome.pdfError ?? "solver returned no PDF"}`.slice(0, 300));
+    }
     await deps.reply({
       to: request.from,
       textAr: `${prefix}${outcome.textAr}`,
       status: "completed",
       note: context.note,
       attachment: outcome.pdf,
+      attachmentSentNoteAr: outcome.pdf ? PDF_SENT_AR : undefined,
+      pdfError: request.wantPdf && !outcome.pdf ? outcome.pdfError ?? "pdf_missing" : undefined,
       replyToMessageId: context.messageId,
       transcript: context.transcript,
       relatedIds: outcome.relatedIds,
@@ -514,7 +554,7 @@ export async function runAgentTurn(input: AgentTurnInput, deps: AgentTurnDeps): 
           imageBase64: downloaded.bytes.toString("base64"),
           mimeType: downloaded.mimeType,
           imageName: input.filename || recordId,
-          wantPdf: wantsPdfReply(input.caption),
+          wantPdf: shouldSendPdf(input.caption),
           from: to,
         },
         deps,
@@ -559,9 +599,10 @@ export async function runAgentTurn(input: AgentTurnInput, deps: AgentTurnDeps): 
         const exam = await deps.mockExam(mock.track);
         await deps.reply({
           to,
-          textAr: `${transcript ? `${heardLine(transcript)}\n\n` : ""}${exam.captionAr}\n📄 الملف مرفق.`,
+          textAr: `${transcript ? `${heardLine(transcript)}\n\n` : ""}${exam.captionAr}`,
           status: "completed",
           note: "whatsapp_mock_exam_pdf",
+          attachmentSentNoteAr: "📄 الملف مرفق.",
           attachment: { bytes: exam.bytes, filename: exam.filename, caption: exam.captionAr, mimeType: "application/pdf" },
           replyToMessageId: input.messageId,
           transcript,
@@ -578,11 +619,28 @@ export async function runAgentTurn(input: AgentTurnInput, deps: AgentTurnDeps): 
     if (looksLikeMathRequest(text)) {
       await safeAck(deps, to, SOLVE_ACK_AR);
       const ok = await answerMath(
-        { question: text, wantPdf: wantsPdfReply(text), from: to },
+        { question: text, wantPdf: shouldSendPdf(text), from: to },
         deps,
         { messageId: input.messageId, transcript, note: transcript ? "whatsapp_voice_solve" : "whatsapp_text_solve" },
       );
       return { route: "math", transcript, ok };
+    }
+
+    // «ابعتلي ياه PDF» on its own → the latest solution PDF again (never the intent pipeline).
+    if (isBarePdfRequest(text) && deps.lastPdf) {
+      const last = deps.lastPdf(to);
+      await deps.reply({
+        to,
+        textAr: last
+          ? `${transcript ? `${heardLine(transcript)}\n\n` : ""}📄 هيدا آخر ملف PDF حضّرتلك ياه.\n${MEDIA_SIGNATURE_AR}`
+          : PDF_NOTHING_TO_RESEND_AR,
+        status: last ? "completed" : "failed",
+        note: last ? "whatsapp_pdf_resend" : "whatsapp_pdf_resend_none",
+        attachment: last,
+        replyToMessageId: input.messageId,
+        transcript,
+      });
+      return { route: "pdf_resend", transcript, ok: Boolean(last) };
     }
 
     await deps.fallback({ text, fromVoice: Boolean(transcript) });

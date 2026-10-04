@@ -14,6 +14,7 @@ import {
   type InboundMediaKind,
 } from "@/lib/whatsapp/media/policy";
 import { patchMediaRecord, saveMediaRecord, type WhatsAppMediaRecord } from "@/lib/whatsapp/media/store";
+import { PDF_SENT_AR } from "@/lib/whatsapp/agentCore";
 import {
   solveFileAction,
   summarizeFileAction,
@@ -21,7 +22,8 @@ import {
   type ActionOutcome,
   type FileForAction,
 } from "./actions";
-import { detectMediaAction, wantsPdfReply, type MediaAction } from "./captionIntent";
+import { detectMediaAction, shouldSendPdf, type MediaAction } from "./captionIntent";
+import { rememberLastPdf } from "./lastPdf";
 import { replyToMediaMessage, sendMediaAck, type MediaReplyResult } from "./reply";
 
 export type InboundMediaMessage = {
@@ -93,7 +95,7 @@ function storedReplyAr(record: WhatsAppMediaRecord, kindAr: string): string {
 
 async function runAction(action: MediaAction, file: FileForAction, from: string, caption?: string): Promise<ActionOutcome> {
   try {
-    if (action === "solve") return await solveFileAction(file, from, wantsPdfReply(caption));
+    if (action === "solve") return await solveFileAction(file, from, shouldSendPdf(caption));
     if (action === "summarize") return await summarizeFileAction(file);
     if (action === "verify_exam") return await verifyExamFileAction(file);
     return { ok: true, replyAr: "", relatedIds: [] };
@@ -188,6 +190,7 @@ export async function handleInboundMedia(msg: InboundMediaMessage): Promise<Inbo
     }
 
     const replyAr = outcome.replyAr || mediaErrorReplyAr("processing_failed", { kindAr });
+    if (outcome.pdf) rememberLastPdf(msg.from, { ...outcome.pdf, mimeType: "application/pdf" });
     const reply = await replyToMediaMessage({
       to: msg.from,
       replyAr,
@@ -200,6 +203,8 @@ export async function handleInboundMedia(msg: InboundMediaMessage): Promise<Inbo
       parameters: { mediaRecordId: record.id, action, mediaKind: msg.kind },
       relatedIds: [record.id, ...outcome.relatedIds],
       attachment: outcome.pdf,
+      attachmentSentNoteAr: outcome.pdf ? PDF_SENT_AR : undefined,
+      pdfError: outcome.pdfError,
       replyToMessageId: msg.messageId,
     });
 
