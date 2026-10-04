@@ -10,7 +10,7 @@ import { WHISH_NUMBER } from "@/lib/team/constants";
 import { dualLiveSessionPrices } from "@/lib/whish/client";
 import "@/styles/home.css";
 
-/** Home — redesign-v2 A «أستاذ منذر» / Professor Munzer. Server-rendered; no KaTeX or motion JS. */
+/** Home — redesign-v2 A, AI tutor «يوسف» / Youssef. Server-rendered; no KaTeX or motion JS. */
 export default async function HomePage() {
   const [user, { m, locale }] = await Promise.all([getSession(), getI18n()]);
   const prices = dualLiveSessionPrices();

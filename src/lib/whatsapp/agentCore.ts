@@ -324,16 +324,17 @@ export const MOCK_EXAM_ACK_AR = "⏳ عم حضّرلك امتحان تجريبي
 
 /**
  * WhatsApp answers stay personified as «محمد» (owner decision): the website tutor persona
- * (Professor Munzer / أستاذ منذر, AI tutor) that the shared solver writes into correction steps is
- * renamed on this channel. «الأستاذ منذر حداره» (the real teacher, in the signature) is untouched.
+ * (Youssef / يوسف, AI tutor) that the shared solver writes into correction steps is renamed on this
+ * channel. Only the badge form ("Youssef (AI tutor)", "Youssef · AI tutor", …) is renamed, so a "Youssef"
+ * inside a word problem stays as written. «الأستاذ منذر حداره» (the real teacher, in the signature) is untouched.
  */
 export function whatsappPersonaText(text: string, options?: { latin?: boolean }): string {
   if (!text) return text;
   const en = options?.latin ? "Mohamed" : "محمد";
   return text
-    .replace(/Professor Munzer(?:\s*\(AI tutor\)|\s*·\s*AI tutor)?/g, en)
-    .replace(/Professeur Munzer(?:\s*\(tuteur IA\)|\s*·\s*tuteur IA)?/g, en)
-    .replace(/«?أستاذ منذر»?\s*(?:\(معلّم بالذكاء الاصطناعي\)|·\s*معلّم بالذكاء الاصطناعي)/g, "محمد");
+    .replace(/Youssef\s*(?:\(AI tutor\)|·\s*AI tutor)/g, en)
+    .replace(/Youssef\s*(?:\(tuteur IA\)|·\s*tuteur IA)/gi, en)
+    .replace(/«?يوسف»?\s*(?:\(معلّم بالذكاء الاصطناعي\)|·\s*معلّم بالذكاء الاصطناعي)/g, "محمد");
 }
 
 /* ------------------------------------------------------------------ Maths detection */

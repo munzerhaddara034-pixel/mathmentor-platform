@@ -17,7 +17,7 @@ function tutorAnswer(question: string, fileName?: string) {
   if (q.includes("next") || q.includes("التالي") || q.includes("stuck") || q.includes("علق")) {
     return `Do not skip. Open your last lesson, pause on the rule box, copy it from memory, then play the independent-check scene. After that open the next chapter in Classroom Studio. If a line is still blocked, send a photo of that line only.`;
   }
-  return `I am the classroom tutor. ${hint ? "Keep the four-line method: given, rule, steps, check." : ""} Your question: “${question || "empty"}”. I will not jump to a final number until those four lines exist. Type the given, or upload a notebook photo. Professor Munzer reviews anything that looks like an official-exam full paper.`;
+  return `I am Youssef, the AI classroom tutor. ${hint ? "Keep the four-line method: given, rule, steps, check." : ""} Your question: “${question || "empty"}”. I will not jump to a final number until those four lines exist. Type the given, or upload a notebook photo. Professor Munzer reviews anything that looks like an official-exam full paper.`;
 }
 
 export async function GET() {

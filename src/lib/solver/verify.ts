@@ -1,5 +1,5 @@
 /**
- * Independent verification pass (مدقّق الحلول) of the Professor Munzer AI tutor — a second Gemini pass over AI solutions.
+ * Independent verification pass (مدقّق الحلول) of the Youssef AI tutor — a second Gemini pass over AI solutions.
  * University / Bac: runs synchronously before the student sees the answer (see pipeline.ts).
  * Middle school: runs in the background and only updates the admin audit log.
  */
@@ -116,7 +116,7 @@ async function notifyMunzer(record: MathQueryRecord, verdict: SolutionVerdict): 
     kind: "solver_issue",
     title: "Solution needs review",
     titleAr: `حل ${NEEDS_REVIEW_AR}`,
-    body: `The AI verifier flagged a Professor Munzer (AI tutor) solution: ${record.question.slice(0, 120)}`,
+    body: `The AI verifier flagged a Youssef (AI tutor) solution: ${record.question.slice(0, 120)}`,
     bodyAr: verdict.noteAr,
     href: "/admin",
     relatedId: record.id,
