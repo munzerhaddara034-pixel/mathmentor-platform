@@ -1,7 +1,9 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { pgGetDocument, pgSetDocument, pgUpdateDocument } from "./db/documents";
-import { isPostgresEnabled } from "./db/pg";
+import type { PoolClient } from "pg";
+import { pgGetDocument, pgSetDocument } from "./db/documents";
+import { isPostgresEnabled, withTransaction } from "./db/pg";
 
 /**
  * JSON store resolution order: test override → Postgres (DATABASE_URL) → Netlify Blobs → data/ files.
@@ -21,6 +23,13 @@ type JsonBackend = {
 };
 
 const fileLocks = new Map<string, Promise<unknown>>();
+
+/**
+ * Documents locked by the current async call chain (see withDocumentLock). On Postgres `client` is the
+ * open transaction holding the advisory + row locks: reads/writes of the locked keys go through it.
+ */
+type DocumentLockContext = { keys: ReadonlySet<string>; client: PoolClient | null };
+const documentLocks = new AsyncLocalStorage<DocumentLockContext>();
 let blobsStorePromise: Promise<BlobsJsonStore | null> | undefined;
 let blobsGaveUp = false;
 let backendOverride: JsonBackend | null = null;
@@ -120,6 +129,8 @@ async function filesystemBackend(): Promise<JsonBackend> {
 function postgresBackend(): JsonBackend {
   return {
     async getJSON(key) {
+      const client = lockedClientFor(key);
+      if (client) return txGetJSON(client, key);
       const data = await pgGetDocument(key);
       if (data != null) return data;
       if (process.env.PG_IMPORT_LOCAL_FILES === "0") return null;
@@ -134,9 +145,45 @@ function postgresBackend(): JsonBackend {
       return local;
     },
     async setJSON(key, value) {
+      const client = lockedClientFor(key);
+      if (client) return txSetJSON(client, key, value);
       await pgSetDocument(key, value);
     },
   };
+}
+
+/** The open Postgres transaction of the current withDocumentLock scope (null on file / Blobs backends). */
+export function currentDocumentTransaction(): PoolClient | null {
+  return documentLocks.getStore()?.client ?? null;
+}
+
+/** The transaction client when `key` is locked by the current call chain on Postgres. */
+function lockedClientFor(key: string): PoolClient | null {
+  const context = documentLocks.getStore();
+  return context?.client && context.keys.has(key) ? context.client : null;
+}
+
+async function txGetJSON(client: PoolClient, key: string): Promise<unknown | null> {
+  const result = await client.query<{ data: unknown }>("SELECT data FROM mm_documents WHERE key = $1", [key]);
+  if (result.rows.length && result.rows[0].data != null) return result.rows[0].data;
+  if (process.env.PG_IMPORT_LOCAL_FILES === "0") return null;
+  let local: unknown = null;
+  try {
+    local = JSON.parse(await readFile(dataFile(key), "utf8")) as unknown;
+  } catch {
+    local = null;
+  }
+  if (local == null) return null;
+  await txSetJSON(client, key, local);
+  return local;
+}
+
+async function txSetJSON(client: PoolClient, key: string, value: unknown): Promise<void> {
+  await client.query(
+    `INSERT INTO mm_documents (key, data, updated_at) VALUES ($1, $2::jsonb, now())
+     ON CONFLICT (key) DO UPDATE SET data = EXCLUDED.data, updated_at = now()`,
+    [key, JSON.stringify(value ?? null)],
+  );
 }
 
 async function blobsBackend(store: BlobsJsonStore): Promise<JsonBackend> {
@@ -185,8 +232,14 @@ async function activeBackend(): Promise<JsonBackend> {
   return filesystemBackend();
 }
 
+/** In-process mutex for one store key (re-entrant inside withDocumentLock for the same key). */
 export async function withStoreLock<T>(name: string, fn: () => Promise<T>): Promise<T> {
   const key = blobKey(name);
+  if (documentLocks.getStore()?.keys.has(key)) return fn();
+  return acquireProcessLock(key, fn);
+}
+
+async function acquireProcessLock<T>(key: string, fn: () => Promise<T>): Promise<T> {
   const previous = fileLocks.get(key) ?? Promise.resolve();
   let release!: () => void;
   const gate = new Promise<void>((resolve) => {
@@ -201,6 +254,50 @@ export async function withStoreLock<T>(name: string, fn: () => Promise<T>): Prom
     release();
     if (fileLocks.get(key) === current) fileLocks.delete(key);
   }
+}
+
+/** Stable 64-bit advisory-lock id per document key (namespaced so it never meets other lock ids). */
+export const DOCUMENT_ADVISORY_LOCK_SQL = "SELECT pg_advisory_xact_lock(hashtextextended('mm_documents:' || $1, 0))";
+
+/**
+ * Atomic read-modify-write over one or more JSON documents.
+ * - Every backend: an in-process mutex per key (keys taken in sorted order, so no lock-order cycles).
+ * - Postgres (DATABASE_URL): ONE transaction that takes pg_advisory_xact_lock on each key (works even
+ *   when the row does not exist yet) plus SELECT … FOR UPDATE on the existing document row (so it also
+ *   excludes code that row-locks mm_documents directly, e.g. payment confirmation). Every readJsonFile /
+ *   writeJsonFile / updateJsonFile of a locked key inside `fn` runs on that transaction, so all writes
+ *   commit together or roll back together when `fn` throws.
+ * Re-entrant: nested calls for keys already held run inline; new keys join the same transaction.
+ * Keep network calls out of `fn` — the transaction holds a pooled connection.
+ */
+export async function withDocumentLock<T>(names: string | string[], fn: () => Promise<T>): Promise<T> {
+  const wanted = [...new Set((Array.isArray(names) ? names : [names]).map(blobKey))].sort();
+  const outer = documentLocks.getStore();
+  const missing = wanted.filter((key) => !outer?.keys.has(key));
+  if (!missing.length) return fn();
+  const usePg = !backendOverride && isPostgresEnabled();
+
+  const lockInProcess = (index: number, inner: () => Promise<T>): Promise<T> =>
+    index >= missing.length ? inner() : acquireProcessLock(missing[index], () => lockInProcess(index + 1, inner));
+
+  return lockInProcess(0, async () => {
+    const keys = new Set([...(outer?.keys ?? []), ...missing]);
+    if (!usePg) return documentLocks.run({ keys, client: null }, fn);
+    const lockRows = async (client: PoolClient) => {
+      for (const key of missing) {
+        await client.query(DOCUMENT_ADVISORY_LOCK_SQL, [key]);
+        await client.query("SELECT 1 FROM mm_documents WHERE key = $1 FOR UPDATE", [key]);
+      }
+    };
+    if (outer?.client) {
+      await lockRows(outer.client);
+      return documentLocks.run({ keys, client: outer.client }, fn);
+    }
+    return withTransaction(async (client) => {
+      await lockRows(client);
+      return documentLocks.run({ keys, client }, fn);
+    });
+  });
 }
 
 export async function readJsonFile<T>(name: string, fallback: T, options?: { persistFallback?: boolean }): Promise<T> {
@@ -262,14 +359,12 @@ export async function writeJsonFile<T>(name: string, data: T) {
 }
 
 /**
- * Locked read-modify-write for one JSON store key.
- * - In-process: serialised per key by `withStoreLock`.
- * - Postgres: also row-locked (`SELECT … FOR UPDATE` in a transaction), so several
- *   instances can update the same document without losing writes.
+ * Locked read-modify-write for one JSON store key (see withDocumentLock):
+ * in-process mutex, plus on Postgres an advisory lock and SELECT … FOR UPDATE in one transaction,
+ * so several instances can update the same document without losing writes.
  */
 export async function updateJsonFile<T>(name: string, fallback: T, update: (current: T) => T | Promise<T>): Promise<T> {
-  return withStoreLock(name, async () => {
-    if (!backendOverride && isPostgresEnabled()) return pgUpdateDocument(blobKey(name), fallback, update);
+  return withDocumentLock(name, async () => {
     const current = await readJsonFile<T>(name, fallback, { persistFallback: false });
     const next = await update(current);
     await writeJsonFile(name, next);

@@ -4,7 +4,7 @@
  * Without DATABASE_URL: appended to the `audit-log.json` document store.
  * Every entry is also written as one structured log line, so it survives even if storage fails.
  */
-import { updateJsonFile } from "@/lib/dataDir";
+import { currentDocumentTransaction, updateJsonFile } from "@/lib/dataDir";
 import { dbQuery, isPostgresEnabled } from "@/lib/db/pg";
 import { buildAuditEntry, type AuditInput } from "./auditEntry";
 
@@ -50,4 +50,14 @@ export async function appendAuditLog(input: AuditInput): Promise<void> {
   await updateJsonFile<{ entries: typeof entry[] }>(AUDIT_DOC, { entries: [] }, (current) => ({
     entries: [...(Array.isArray(current?.entries) ? current.entries : []), entry],
   }));
+}
+
+/**
+ * Audit from inside a withDocumentLock scope: on Postgres the row is written on the scope's
+ * transaction (it commits or rolls back with the change it describes); otherwise appendAuditLog.
+ */
+export async function appendAuditLogLocked(input: AuditInput): Promise<void> {
+  const client = currentDocumentTransaction();
+  if (client) return appendAuditLogTx(client, input);
+  return appendAuditLog(input);
 }

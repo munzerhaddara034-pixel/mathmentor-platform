@@ -1,9 +1,14 @@
+import { appendAuditLogLocked, type AuditInput } from "@/lib/security/audit";
 import { createId } from "@/lib/ids";
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
-import { findUserById, setUserSubscription } from "@/lib/auth/store";
+import { DuplicateCardCodeError, cleanCardPrefix, generateCardCodes, normalizeCardCode } from "@/lib/cards/codes";
+import { readJsonFile, updateJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
+import { AUTH_DOCUMENT_KEY, applyLiveTopUp, findUserById } from "@/lib/auth/store";
 import { planIdToSubscriptionType } from "@/lib/auth/tiers";
 
 const FILE = "billing.json";
+
+/** The billing document key (mm_documents.key on Postgres). */
+export const BILLING_DOCUMENT_KEY = FILE;
 
 export type LedgerKind = "activation" | "topup" | "live_booking" | "ai_grant";
 
@@ -38,25 +43,31 @@ function seed(): BillingStore {
   return { codes: [], ledger: [] };
 }
 
+function normalizeBilling(data: Partial<BillingStore> | null | undefined): BillingStore {
+  if (!data || !Array.isArray(data.codes) || !Array.isArray(data.ledger)) return seed();
+  return data as BillingStore;
+}
+
 async function readBilling(): Promise<BillingStore> {
-  const data = await readJsonFile<BillingStore>(FILE, seed());
-  if (!Array.isArray(data.codes) || !Array.isArray(data.ledger)) return seed();
-  return data;
+  return normalizeBilling(await readJsonFile<BillingStore>(FILE, seed()));
 }
 
 async function writeBilling(store: BillingStore) {
   await writeJsonFile(FILE, store);
 }
 
+/** Locked append (re-entrant inside redeemCode's lock, so the ledger row commits with the redeem). */
 export async function addLedger(entry: Omit<LedgerEntry, "id" | "createdAt"> & { id?: string }) {
-  const store = await readBilling();
   const record: LedgerEntry = {
     ...entry,
     id: entry.id ?? createId("led"),
     createdAt: new Date().toISOString(),
   };
-  store.ledger.unshift(record);
-  await writeBilling(store);
+  await updateJsonFile<BillingStore>(FILE, seed(), (current) => {
+    const store = normalizeBilling(current);
+    store.ledger.unshift(record);
+    return store;
+  });
   return record;
 }
 
@@ -70,6 +81,7 @@ export async function listTopUpCodes() {
   return store.codes;
 }
 
+/** Admin-only (enforced by /api/billing/topup). Codes come from node:crypto (cards/codes.ts). */
 export async function createTopUpCodes(input: {
   prefix?: string;
   liveHours: number;
@@ -78,62 +90,80 @@ export async function createTopUpCodes(input: {
   expiresAt?: string;
   createdBy?: string;
   code?: string;
-}) {
-  const store = await readBilling();
-  const count = Math.min(Math.max(input.count ?? 1, 1), 50);
-  const hours = Math.max(1, Math.round(input.liveHours));
-  const created: TopUpCode[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const suffix = Math.random().toString(36).slice(2, 7).toUpperCase();
-    const code =
-      count === 1 && input.code?.trim()
-        ? input.code.trim().toUpperCase()
-        : `${(input.prefix || "MUNZER-HRS").trim().toUpperCase()}-${suffix}`;
-    created.push({
+}, options?: { audit?: (created: TopUpCode[]) => AuditInput }) {
+  return withDocumentLock(FILE, async () => {
+    const store = await readBilling();
+    const count = Math.min(Math.max(Math.floor(Number(input.count ?? 1)) || 1, 1), 50);
+    const hours = Math.max(1, Math.round(input.liveHours));
+    const existing = store.codes.map((item) => item.code);
+    let codes: string[];
+    if (count === 1 && input.code?.trim()) {
+      const custom = normalizeCardCode(input.code);
+      if (existing.some((code) => code.toUpperCase() === custom)) throw new DuplicateCardCodeError();
+      codes = [custom];
+    } else {
+      codes = generateCardCodes(cleanCardPrefix(input.prefix, "MUNZER-HRS"), count, existing);
+    }
+    const createdAt = new Date().toISOString();
+    const created: TopUpCode[] = codes.map((code) => ({
       code,
       liveHours: hours,
       used: false,
-      createdAt: new Date().toISOString(),
+      createdAt,
       expiresAt: input.expiresAt,
       note: input.note,
       createdBy: input.createdBy,
-    });
-  }
-  store.codes.unshift(...created);
-  await writeBilling(store);
-  return created;
+    }));
+    store.codes.unshift(...created);
+    await writeBilling(store);
+    // Same transaction as the cards on Postgres: no card exists without its audit row.
+    if (options?.audit) await appendAuditLogLocked(options.audit(created));
+    return created;
+  });
 }
 
-export async function redeemTopUp(code: string, userId: string, studentName: string) {
-  const store = await readBilling();
-  const card = store.codes.find((item) => item.code.toLowerCase() === code.trim().toLowerCase());
-  if (!card) return { ok: false as const, error: "رمز الشحن غير صحيح", errorEn: "Unknown top-up code." };
-  if (card.used) return { ok: false as const, error: "هذا الرمز مستخدم", errorEn: "This top-up code was already used." };
-  if (card.expiresAt && Date.parse(card.expiresAt) < Date.now()) {
-    return { ok: false as const, error: "انتهت صلاحية الرمز", errorEn: "This top-up code has expired." };
-  }
-  card.used = true;
-  card.usedBy = studentName;
-  card.usedUserId = userId;
-  const user = await findUserById(userId);
-  const nextCredits = (user?.liveCredits ?? 0) + card.liveHours;
-  const currentType = user?.subscriptionType ?? null;
-  const nextType =
-    currentType === "AI_TIER" || currentType === "BOTH" ? "BOTH" : currentType === "LIVE_TIER" ? "LIVE_TIER" : "LIVE_TIER";
-  await setUserSubscription(userId, { liveCredits: nextCredits, subscriptionType: nextType });
-  const record: LedgerEntry = {
-    id: createId("led"),
-    userId,
-    kind: "topup",
-    hoursDelta: card.liveHours,
-    code: card.code,
-    description: `Redeemed live-hour top-up (+${card.liveHours} h)`,
-    descriptionAr: `شحن حصص مباشرة (+${card.liveHours} ساعات)`,
-    createdAt: new Date().toISOString(),
-  };
-  store.ledger.unshift(record);
-  await writeBilling(store);
-  return { ok: true as const, hours: card.liveHours, liveCredits: nextCredits, code: card.code };
+export type TopUpRedeemResult =
+  | { ok: true; hours: number; liveCredits: number; code: string }
+  | { ok: false; error: string; errorEn: string; reason: "unknown" | "used" | "expired" | "user_not_found" };
+
+/**
+ * Claim one live-hour top-up code and credit the student. Atomic: billing.json and auth.json are
+ * locked together (withDocumentLock: in-process mutex; on Postgres advisory + row locks in ONE
+ * transaction), the card is checked, the credits are added relative to the locked balance and the
+ * ledger row is written — all commit together, so a code can never be redeemed twice and two
+ * concurrent top-ups never overwrite each other's balance.
+ */
+export async function redeemTopUp(code: string, userId: string, studentName: string): Promise<TopUpRedeemResult> {
+  return withDocumentLock([AUTH_DOCUMENT_KEY, FILE], async () => {
+    const store = await readBilling();
+    const wanted = code.trim().toLowerCase();
+    const card = store.codes.find((item) => item.code.toLowerCase() === wanted);
+    if (!card) return { ok: false as const, reason: "unknown" as const, error: "رمز الشحن غير صحيح", errorEn: "Unknown top-up code." };
+    if (card.used) return { ok: false as const, reason: "used" as const, error: "هذا الرمز مستخدم", errorEn: "This top-up code was already used." };
+    if (card.expiresAt && Date.parse(card.expiresAt) < Date.now()) {
+      return { ok: false as const, reason: "expired" as const, error: "انتهت صلاحية الرمز", errorEn: "This top-up code has expired." };
+    }
+    const user = await applyLiveTopUp(userId, card.liveHours);
+    if (!user) {
+      return { ok: false as const, reason: "user_not_found" as const, error: "الحساب غير موجود", errorEn: "Account not found." };
+    }
+    card.used = true;
+    card.usedBy = studentName;
+    card.usedUserId = userId;
+    const record: LedgerEntry = {
+      id: createId("led"),
+      userId,
+      kind: "topup",
+      hoursDelta: card.liveHours,
+      code: card.code,
+      description: `Redeemed live-hour top-up (+${card.liveHours} h)`,
+      descriptionAr: `شحن حصص مباشرة (+${card.liveHours} ساعات)`,
+      createdAt: new Date().toISOString(),
+    };
+    store.ledger.unshift(record);
+    await writeBilling(store);
+    return { ok: true as const, hours: card.liveHours, liveCredits: user.liveCredits, code: card.code };
+  });
 }
 
 export async function recordLiveBookingDebit(userId: string, bookingId: string, studentName: string) {

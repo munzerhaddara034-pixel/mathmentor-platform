@@ -1,4 +1,6 @@
-import { readJsonFile, writeJsonFile } from "./dataDir";
+import { appendAuditLogLocked, type AuditInput } from "./security/audit";
+import { DuplicateCardCodeError, cleanCardPrefix, generateCardCodes, normalizeCardCode } from "./cards/codes";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "./dataDir";
 import { lebaneseCatalog } from "./curriculum";
 import { GRADE_12_LS_CH1_ID, grade12LsCh1Draft } from "./grade12LsCh1";
 import { createId } from "./ids";
@@ -205,33 +207,39 @@ export async function addQuizAttempt(attempt: QuizAttempt) {
   return attempt;
 }
 
+/** The store document key (mm_documents.key on Postgres). */
+export const STORE_DOCUMENT_KEY = STORE_FILE;
+
+/**
+ * Claim one scratch card. Atomic: read → check → mark used → write runs under withDocumentLock
+ * (in-process mutex; on Postgres advisory + row lock in one transaction), so two concurrent redeems
+ * of the same single-use card can never both succeed. Called inside redeemCode's wider lock.
+ */
 export async function redeemCard(code: string, studentName: string, phone?: string, userId?: string) {
-  const store = await readStore();
-  const card = store.scratchCards.find((item) => item.code.toLowerCase() === code.trim().toLowerCase());
-  if (!card) return { ok: false as const, error: "رمز غير صحيح" };
-  if (card.used && !card.reusable) return { ok: false as const, error: "هذه البطاقة مستخدمة" };
-  if (card.expiresAt && new Date(card.expiresAt).getTime() < Date.now()) {
-    return { ok: false as const, error: "انتهت صلاحية هذا الكود" };
-  }
-  if (!card.reusable) {
-    card.used = true;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    const wanted = code.trim().toLowerCase();
+    const card = store.scratchCards.find((item) => item.code.toLowerCase() === wanted);
+    if (!card) return { ok: false as const, error: "رمز غير صحيح", reason: "unknown" as const };
+    if (card.used && !card.reusable) return { ok: false as const, error: "هذه البطاقة مستخدمة", reason: "used" as const };
+    if (card.expiresAt && new Date(card.expiresAt).getTime() < Date.now()) {
+      return { ok: false as const, error: "انتهت صلاحية هذا الكود", reason: "expired" as const };
+    }
+    if (!card.reusable) card.used = true;
     card.usedBy = studentName;
     card.usedPhone = phone;
-  } else {
-    card.usedBy = studentName;
-    card.usedPhone = phone;
-  }
-  const entitlement: Entitlement = {
-    id: createId("ent"),
-    studentName,
-    phone,
-    planId: card.planId,
-    unlockedAt: new Date().toISOString(),
-    userId,
-  };
-  store.entitlements.unshift(entitlement);
-  await writeStore(store);
-  return { ok: true as const, planId: card.planId, entitlement };
+    const entitlement: Entitlement = {
+      id: createId("ent"),
+      studentName,
+      phone,
+      planId: card.planId,
+      unlockedAt: new Date().toISOString(),
+      userId,
+    };
+    store.entitlements.unshift(entitlement);
+    await writeStore(store);
+    return { ok: true as const, planId: card.planId, entitlement, code: card.code };
+  });
 }
 
 export async function addCustomQuestion(question: QuizQuestion) {
@@ -241,36 +249,46 @@ export async function addCustomQuestion(question: QuizQuestion) {
   return question;
 }
 
+/**
+ * Admin-only (enforced by /api/cards). Codes come from node:crypto (cards/codes.ts); a custom single
+ * code that already exists is refused (DuplicateCardCodeError) instead of silently duplicated.
+ */
 export async function createScratchCards(input: {
   code?: string;
   planId: string;
   count?: number;
   note?: string;
   expiresAt?: string;
-}) {
-  const store = await readStore();
-  const count = Math.min(Math.max(input.count ?? 1, 1), 100);
-  const batchId = createId("batch");
-  const created: ScratchCard[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
-    const code =
-      count === 1 && input.code?.trim()
-        ? input.code.trim().toUpperCase()
-        : `${(input.code || "MUNZER").trim().toUpperCase()}-${suffix}`;
-    created.push({
+}, options?: { audit?: (created: ScratchCard[]) => AuditInput }) {
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    const count = Math.min(Math.max(Math.floor(Number(input.count ?? 1)) || 1, 1), 100);
+    const batchId = createId("batch");
+    const existing = store.scratchCards.map((card) => card.code);
+    let codes: string[];
+    if (count === 1 && input.code?.trim()) {
+      const custom = normalizeCardCode(input.code);
+      if (existing.some((code) => code.toUpperCase() === custom)) throw new DuplicateCardCodeError();
+      codes = [custom];
+    } else {
+      codes = generateCardCodes(cleanCardPrefix(input.code, "MUNZER"), count, existing);
+    }
+    const createdAt = new Date().toISOString();
+    const created: ScratchCard[] = codes.map((code) => ({
       code,
       planId: input.planId,
       used: false,
-      createdAt: new Date().toISOString(),
+      createdAt,
       expiresAt: input.expiresAt || undefined,
       batchId,
       note: input.note,
-    });
-  }
-  store.scratchCards.unshift(...created);
-  await writeStore(store);
-  return created;
+    }));
+    store.scratchCards.unshift(...created);
+    await writeStore(store);
+    // Same transaction as the cards on Postgres: no card exists without its audit row.
+    if (options?.audit) await appendAuditLogLocked(options.audit(created));
+    return created;
+  });
 }
 
 export async function addExam(exam: ExamPaper) {

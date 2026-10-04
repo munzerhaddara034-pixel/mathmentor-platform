@@ -286,6 +286,21 @@ export async function setUserSubscription(
   });
 }
 
+/**
+ * Live-hour top-up: add `hours` to the locked balance (never a stale read-then-set) and make the tier
+ * include live classes (AI_TIER / BOTH → BOTH, anything else → LIVE_TIER). Undefined when unknown.
+ */
+export async function applyLiveTopUp(userId: string, hours: number) {
+  return mutateAuth((store) => {
+    const user = store.users.find((item) => item.id === userId);
+    if (!user) return undefined;
+    user.liveCredits = Math.max(0, (user.liveCredits ?? 0) + hours);
+    const current = user.subscriptionType ?? null;
+    user.subscriptionType = current === "AI_TIER" || current === "BOTH" ? "BOTH" : "LIVE_TIER";
+    return toPublic(user);
+  });
+}
+
 export async function adjustLiveCredits(userId: string, delta: number) {
   return mutateAuth((store) => {
     const user = store.users.find((item) => item.id === userId);

@@ -115,6 +115,31 @@ export const paymentRateLimits = {
   adminAction: createRateLimiter({ windowMs: MINUTE, max: 60 }),
 };
 
+/**
+ * Card / top-up code redemption (/api/redeem and /api/billing/redeem share these buckets, so the two
+ * routes cannot be alternated). Every attempt counts — slows guessing of unused codes.
+ */
+export const redeemRateLimits = {
+  /** Attempts per signed-in account. */
+  user: createRateLimiter({ windowMs: 15 * MINUTE, max: 10 }),
+  /** Attempts per client IP (a little higher: a class may share one school NAT). */
+  ip: createRateLimiter({ windowMs: 15 * MINUTE, max: 30 }),
+};
+
+/** Admin card-generation calls per admin. */
+export const cardAdminRateLimits = {
+  create: createRateLimiter({ windowMs: MINUTE, max: 20 }),
+};
+
+/** Count one redeem attempt for this user + IP; returns the retry delay when either budget is spent. */
+export function hitRedeemLimits(userId: string, ip: string, now = Date.now()): RateLimitResult {
+  const byUser = redeemRateLimits.user.hit(`u:${userId}`, now);
+  if (!byUser.ok) return byUser;
+  const byIp = redeemRateLimits.ip.hit(`ip:${ip}`, now);
+  if (!byIp.ok) return byIp;
+  return { ok: true, remaining: Math.min(byUser.remaining, byIp.remaining) };
+}
+
 export function tooManyRequestsBody(retryAfterSec: number) {
   const minutes = Math.max(1, Math.ceil(retryAfterSec / 60));
   return {
