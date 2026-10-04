@@ -1,10 +1,17 @@
-import { GoogleGenAI } from "@google/genai";
-import { Octokit } from "@octokit/rest";
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
-const GITHUB_OWNER = process.env.GITHUB_OWNER || "munzerhaddara034-pixel";
-const GITHUB_REPO = process.env.GITHUB_REPO || "mathmentor-platform";
-const GITHUB_BRANCH = process.env.GITHUB_BRANCH || "cursor/platform-shell-auth-dashboard-2f19";
+/**
+ * "Path C" — the chat-widget / voice code-evolution engine — is DISABLED.
+ *
+ * It used to let staff wording in the site chat or a voice note («صفحة», «غير», «عدّل» …) make Gemini
+ * rewrite a whole file and commit it straight to GITHUB_BRANCH with no human review, and it replied
+ * "success" even when nothing happened. It now never calls Gemini or GitHub and never claims success.
+ * Code changes go through Hamza in /admin/team (feat/* branch + explicit human approval) only.
+ * The previous implementation is in git history (release-2026-10-01 before this change).
+ */
+import {
+  CHAT_CODE_EVOLUTION_ENABLED,
+  CODE_EVOLUTION_DISABLED_AR,
+  CODE_EVOLUTION_DISABLED_EN,
+} from "@/lib/security/agentBranches";
 
 export interface CodeEvolutionPlan {
   targetFilePath: string;
@@ -14,149 +21,29 @@ export interface CodeEvolutionPlan {
 }
 
 export type CodeEvolutionResult = {
-  success: boolean;
+  success: false;
+  disabled: true;
   fileUpdated: string;
   commitMessage: string;
+  messageAr: string;
+  messageEn: string;
 };
 
-type PlannerJson = { targetFilePath?: unknown; commitMessage?: unknown };
-
-function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : String(error);
+export function codeEvolutionEnabled(): boolean {
+  return CHAT_CODE_EVOLUTION_ENABLED;
 }
 
-function parsePlan(text: string | undefined): PlannerJson {
-  try {
-    const parsed: unknown = JSON.parse(text || "{}");
-    return parsed && typeof parsed === "object" ? (parsed as PlannerJson) : {};
-  } catch {
-    return {};
-  }
-}
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
-});
-
-/**
- * محرك المهندس البرمجي:
- * يستقبل الأمر الهندسي، يحدد الملف المعني ويقرأ محتواه من GitHub،
- * ثم يولد التعديل المناسب، وينفذ الـ Commit مباشرة في الفرع المناسب.
- *
- * Callers must gate this with `canRunCodeEvolution` (see ./codeEvolutionGate).
- */
+/** Always refuses: no Gemini call, no GitHub read/write. */
 export async function executeCodeEvolution(params: { prompt: string; branch?: string }): Promise<CodeEvolutionResult> {
-  const branch = params.branch || GITHUB_BRANCH;
-  const octokit = new Octokit({ auth: GITHUB_TOKEN });
-
-  try {
-    // 1. تحديد الملف المطلوب تعديله وفهم التغييرات عبر نموذج Gemini المعتمد
-    const plannerResponse = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `أنت كبير مهندسي البرمجيات لمنصة MathMentor.
-طلب التعديل من الأستاذ منذر: "${params.prompt}"
-
-حدد بدقة:
-1. ما هو المسار النسبي الدقيق للملف المطلوب تعديله (مثال: "src/app/page.tsx")؟
-2. رسالة الـ Commit المناسبة باللغة الإنجليزية.
-
-أجب بصيغة JSON فقط:
-{
-  "targetFilePath": string,
-  "commitMessage": string
-}`,
-            },
-          ],
-        },
-      ],
-      config: { responseMimeType: "application/json" },
-    });
-
-    const plan = parsePlan(plannerResponse.text);
-    const targetFilePath =
-      typeof plan.targetFilePath === "string" && plan.targetFilePath ? plan.targetFilePath : "src/app/page.tsx";
-    const commitMessage =
-      typeof plan.commitMessage === "string" && plan.commitMessage
-        ? plan.commitMessage
-        : `Auto update via AI: ${params.prompt}`;
-
-    // 2. قراءة الكود الحالي للملف من مستودع GitHub
-    let existingContent = "";
-    let fileSha: string | undefined = undefined;
-
-    try {
-      const fileData = await octokit.rest.repos.getContent({
-        owner: GITHUB_OWNER,
-        repo: GITHUB_REPO,
-        path: targetFilePath,
-        ref: branch,
-      });
-
-      if (!Array.isArray(fileData.data) && "content" in fileData.data) {
-        existingContent = Buffer.from(fileData.data.content, "base64").toString("utf-8");
-        fileSha = fileData.data.sha;
-      }
-    } catch (readErr) {
-      console.warn("File may not exist, creating new or proceeding:", errorMessage(readErr));
-    }
-
-    // 3. كتابة وتوليد الكود المحدّث كاملاً بالذكاء الاصطناعي
-    const coderResponse = await ai.models.generateContent({
-      model: "gemini-1.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `أنت كبير مهندسي البرمجيات لمنصة MathMentor.
-المطلوب تنفيذ التعديل التالي بدقة: "${params.prompt}"
-مسار الملف: "${targetFilePath}"
-
-محتوى الملف الحالي:
-\`\`\`
-${existingContent}
-\`\`\`
-
-قواعد صارمة:
-- أعد كتابة كود الملف كاملاً وجاهزاً للتشغيل والإنتاج.
-- لا تضع أي شروحات أو مقدمات خارج كود المصدر.
-- أرجع فقط الكود الصافي النقي.`,
-            },
-          ],
-        },
-      ],
-    });
-
-    let newCode = coderResponse.text || existingContent;
-    newCode = newCode.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "").trim();
-
-    // 4. رفع الـ Commit المباشر إلى مستودع GitHub
-    await octokit.rest.repos.createOrUpdateFileContents({
-      owner: GITHUB_OWNER,
-      repo: GITHUB_REPO,
-      path: targetFilePath,
-      message: commitMessage,
-      content: Buffer.from(newCode, "utf-8").toString("base64"),
-      branch: branch,
-      sha: fileSha,
-    });
-
-    return {
-      success: true,
-      fileUpdated: targetFilePath,
-      commitMessage: commitMessage,
-    };
-  } catch (error) {
-    console.error("Code Evolution Agent Execution Failed:", error);
-    return {
-      success: false,
-      fileUpdated: "src/app/page.tsx",
-      commitMessage: `تعذر إتمام التعديل برمجياً: ${errorMessage(error)}`,
-    };
-  }
+  console.warn("codeEvolution: request refused — chat/voice code evolution is disabled", {
+    promptChars: params.prompt?.length ?? 0,
+  });
+  return {
+    success: false,
+    disabled: true,
+    fileUpdated: "",
+    commitMessage: "",
+    messageAr: CODE_EVOLUTION_DISABLED_AR,
+    messageEn: CODE_EVOLUTION_DISABLED_EN,
+  };
 }

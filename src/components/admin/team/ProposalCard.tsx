@@ -10,6 +10,7 @@ import { useI18n } from "@/components/i18n/I18nProvider";
 import { fmt } from "@/lib/i18n/format";
 import { teamMessages } from "@/lib/i18n/ns/team";
 import { rich } from "@/lib/i18n/rich";
+import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 
 type Props = {
   proposal: TeamProposal;
@@ -22,16 +23,15 @@ export function ProposalCard({ proposal, onDecided }: Props) {
   const tm = teamMessages[locale];
   const t = tm.proposal;
   const [mode, setMode] = useState<"idle" | "approve" | "reject">("idle");
-  const [target, setTarget] = useState<"feature" | "live">("feature");
   const [branch, setBranch] = useState(proposal.targetBranch);
-  const [typed, setTyped] = useState("");
   const [reviewed, setReviewed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorText, setErrorText] = useState("");
   const open = proposal.status === "pending" || proposal.status === "failed";
-  const chosenBranch = target === "live" ? proposal.baseBranch : branch.trim();
-  const canSubmit =
-    mode === "reject" || (reviewed && chosenBranch.length > 2 && (target === "feature" || typed === proposal.baseBranch));
+  const chosenBranch = branch.trim();
+  // Only a feat/*-style branch; the live branch and main are refused here and again on the server.
+  const branchCheck = agentCommitBranchCheck(chosenBranch, { liveBranch: proposal.baseBranch });
+  const canSubmit = mode === "reject" || (reviewed && branchCheck.ok);
 
   const submit = async () => {
     if (!canSubmit || busy) return;
@@ -41,7 +41,6 @@ export function ProposalCard({ proposal, onDecided }: Props) {
       action: mode === "reject" ? "reject" : "approve",
       confirm: true,
       branch: mode === "approve" ? chosenBranch : undefined,
-      confirmBranch: mode === "approve" && target === "live" ? typed : undefined,
     });
     setBusy(false);
     if (!result.ok) {
@@ -117,33 +116,18 @@ export function ProposalCard({ proposal, onDecided }: Props) {
           {mode === "approve" ? (
             <>
               <p className="team-confirm-title">{t.confirmTitle}</p>
-              <label className="team-radio">
-                <input type="radio" checked={target === "feature"} onChange={() => setTarget("feature")} />
+              <label className="team-field">
                 {t.featureBranch}
-              </label>
-              {target === "feature" ? (
                 <input
                   className="team-input"
                   dir="ltr"
                   value={branch}
                   onChange={(event) => setBranch(event.target.value)}
                   aria-label={t.featureBranchName}
+                  aria-invalid={!branchCheck.ok}
                 />
-              ) : null}
-              <label className="team-radio">
-                <input type="radio" checked={target === "live"} onChange={() => setTarget("live")} />
-                {rich(t.liveBranch, { branch: <code dir="ltr">{proposal.baseBranch}</code> })}
               </label>
-              {target === "live" ? (
-                <input
-                  className="team-input"
-                  dir="ltr"
-                  placeholder={proposal.baseBranch}
-                  value={typed}
-                  onChange={(event) => setTyped(event.target.value)}
-                  aria-label={t.typeLiveBranch}
-                />
-              ) : null}
+              <p className="team-hint">{rich(t.branchRule, { branch: <code dir="ltr">{proposal.baseBranch}</code> })}</p>
               <label className="team-check">
                 <input type="checkbox" checked={reviewed} onChange={(event) => setReviewed(event.target.checked)} />
                 {t.reviewed}

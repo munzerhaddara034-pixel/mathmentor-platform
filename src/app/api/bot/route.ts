@@ -140,12 +140,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ reply: "تعذر قراءة الرسالة أو تفريغ المقطع الصوتي، يرجى إعادة المحاولة." }, { status: 400 });
     }
 
-    // 3. التحقق من الأوامر الهندسية والبرمجية (فقط لجلسة الأستاذ أو سر الوكيل — لا لزوار الدردشة)
+    // 3. أوامر تعديل الكود من الدردشة (Path C) معطّلة كلياً: للطاقم نرد برسالة «معطّل» صريحة، ولا نَدّعي النجاح أبداً.
     if (looksLikeCodeChange(message, ["عنوان"])) {
       if (await canRunCodeEvolution(request)) {
         const result = await executeCodeEvolution({ prompt: message });
-        const reply = `🤝 أهلاً بك يا أستاذ منذر!\nأنجز المهندس التعديل بنجاح 🚀\n• نص الأمر المستلم: "${message}"\n• الملف المحدّث: ${result.fileUpdated}\n• التغيير: ${result.commitMessage}`;
-        return NextResponse.json({ reply, source: "code-evolution-agent", transcript: message });
+        return NextResponse.json({
+          reply: result.messageAr,
+          source: "code-evolution-disabled",
+          disabled: true,
+          success: false,
+          transcript: message,
+        });
       }
       console.info("bot: code-change wording from an unauthenticated caller — answered as chat, no commit.");
     }

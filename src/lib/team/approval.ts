@@ -4,6 +4,7 @@
 import { createId } from "@/lib/ids";
 import type { TeamActor } from "./agents";
 import { MAX_CHANGED_LINES, staticFindings } from "./codeChecks";
+import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { FORBIDDEN_BRANCHES, commitFilesToBranch, isProtectedBranch, isValidBranchName, teamGithubConfig } from "./github";
 import { teamRepo } from "./store";
 import type { TeamMessage, TeamProposal } from "./types";
@@ -13,7 +14,6 @@ export type DecisionInput = {
   action: "approve" | "reject";
   confirm: boolean;
   branch?: string;
-  confirmBranch?: string;
   actor: TeamActor;
 };
 
@@ -73,12 +73,10 @@ export async function decideProposal(input: DecisionInput): Promise<DecisionResu
   if (FORBIDDEN_BRANCHES.includes(branch)) {
     return fail(403, `Writing to ${branch} is blocked from the platform.`, `الكتابة على ${branch} ممنوعة من داخل المنصة.`);
   }
-  if (isProtectedBranch(branch, config) && input.confirmBranch !== branch) {
-    return fail(
-      400,
-      "Type the protected branch name to confirm.",
-      `${branch} فرع محمي (Render يبني منه). اكتب اسمه حرفياً في خانة التأكيد.`,
-    );
+  // No typed "live branch" override any more: only a new feat/*-style branch, never the live branch or main.
+  const allowed = agentCommitBranchCheck(branch, { liveBranch: config.baseBranch });
+  if (!allowed.ok || isProtectedBranch(branch, config)) {
+    return fail(403, allowed.ok ? `Writing to ${branch} is blocked from the platform.` : allowed.reason, allowed.ok ? `الكتابة على ${branch} ممنوعة.` : allowed.reasonAr);
   }
   // Re-run the guards on the stored content (defence in depth).
   const findings = staticFindings(
@@ -98,7 +96,7 @@ export async function decideProposal(input: DecisionInput): Promise<DecisionResu
   const result = await commitFilesToBranch(
     {
       branch,
-      createFromBase: !isProtectedBranch(branch, config),
+      createFromBase: true,
       message: `${proposal.commitMessage}\n\nApproved in /admin/team by ${input.actor.name}. Proposal ${proposal.id}.`,
       files: proposal.files.map((file) => ({ path: file.path, content: file.newContent, baseSha: file.baseSha })),
     },

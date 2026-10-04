@@ -2,6 +2,7 @@
  * وكيل المطوّر: request → read repo files (GitHub API) → propose a unified diff with Arabic explanation.
  * It NEVER commits: commits happen only in the approval route after a human clicks «موافقة ونشر».
  */
+import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { createId } from "@/lib/ids";
 import {
   MAX_CHANGED_LINES,
@@ -57,7 +58,7 @@ export function chooseBranch(humanText: string, suggested: string, commitMessage
   const named = humanText.match(/\b((?:feat|fix|chore|docs)\/[A-Za-z0-9._-]{2,60})/);
   const candidates = [named?.[1] ?? "", suggested.trim()];
   for (const candidate of candidates) {
-    if (candidate && isValidBranchName(candidate) && !isProtectedBranch(candidate) && /^(feat|fix|chore|docs)\//.test(candidate)) {
+    if (candidate && isValidBranchName(candidate) && !isProtectedBranch(candidate) && agentCommitBranchCheck(candidate, { liveBranch: teamGithubConfig().baseBranch }).ok) {
       return candidate;
     }
   }
@@ -232,7 +233,7 @@ export async function runDeveloperAgent(input: {
     testPlanAr: stringField(proposed, "testPlanAr").slice(0, 1200),
     commitMessage,
     baseBranch: config.baseBranch,
-    targetBranch: FORBIDDEN_BRANCHES.includes(targetBranch) ? `feat/${slug(commitMessage)}` : targetBranch,
+    targetBranch: agentCommitBranchCheck(targetBranch, { liveBranch: config.baseBranch }).ok ? targetBranch : `feat/${slug(commitMessage)}`,
     files: proposalFiles,
     status: "pending",
     checks,

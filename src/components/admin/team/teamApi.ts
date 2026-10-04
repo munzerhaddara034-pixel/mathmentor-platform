@@ -68,7 +68,7 @@ export function transcribeVoice(blob: Blob, filename: string) {
   );
 }
 
-export type DecisionBody = { action: "approve" | "reject"; confirm: true; branch?: string; confirmBranch?: string };
+export type DecisionBody = { action: "approve" | "reject"; confirm: true; branch?: string };
 
 export function decideProposal(id: string, body: DecisionBody) {
   return safe<{ ok: true; proposal: TeamProposal; message: TeamMessage }>(() =>

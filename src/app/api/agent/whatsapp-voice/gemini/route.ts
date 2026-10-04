@@ -67,10 +67,11 @@ export async function POST(req: NextRequest) {
 إذا كان استفساراً عاماً أو دراسياً، أجب عليه باحترافية واختصار باسم الأستاذ منذر حداره.`;
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      // gemini-1.5-flash is retired (404); key goes in a header, never the URL.
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(process.env.GEMINI_MODEL?.trim() || "gemini-flash-latest")}:generateContent`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           contents: [
             {
@@ -104,9 +105,15 @@ export async function POST(req: NextRequest) {
           { status: 403 },
         );
       }
+      // Path C is disabled: never claims success, never commits.
       const result = await executeCodeEvolution({ prompt: transcript });
-      const reply = `🎙️ استلمت رسالتكم الصوتية يا أستاذ منذر:\n"${transcript}"\n\n🚀 أنجز المهندس البرمجي التعديل فوراً:\n• الملف المحدّث: ${result.fileUpdated}\n• التغيير: ${result.commitMessage}\n• الحالة: تم حفظ الـ Commit وتحديث المنصة بنجاح.`;
-      return NextResponse.json({ reply, source: "code-evolution-agent", transcript });
+      return NextResponse.json({
+        reply: `${result.messageAr}\n\n"${transcript}"`,
+        source: "code-evolution-disabled",
+        disabled: true,
+        success: false,
+        transcript,
+      });
     }
 
     return NextResponse.json({ reply: transcript, source: "gemini-voice" });

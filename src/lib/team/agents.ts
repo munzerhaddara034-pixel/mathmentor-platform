@@ -2,6 +2,7 @@
  * Team chat orchestrator: store the human message, route it (§2), run the agents with the loop guard,
  * and persist every reply. Agent messages never trigger routing; approvals never come from agents.
  */
+import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { createId } from "@/lib/ids";
 import { baremeQuarterIssues, enforceConstants } from "./constants";
 import { MOHAMED_ACTIONS_PROTOCOL_AR, beirutNowAr, mohamedDataContext } from "./context";
@@ -224,8 +225,10 @@ async function approvalByTextReply(channel: TeamChannelId, human: TeamMessage, p
     lines.push(`الكتابة على ${branch} ممنوعة من داخل المنصة. الـ Diff يبقى على فرع الميزة ${pending.targetBranch}.`);
   } else if (branch && isProtectedBranch(branch, config)) {
     lines.push(
-      `${branch} هو الفرع الحيّ الذي يبني منه Render. النشر عليه مباشرة يحتاج أن تختاره في نافذة «موافقة ونشر» وتكتب اسمه حرفياً للتأكيد.`,
+      `${branch} هو الفرع الحيّ الذي يبني منه Render — لا يمكن للوكيل الكتابة عليه إطلاقاً. الـ Diff يبقى على فرع الميزة ${pending.targetBranch}؛ الدمج في الفرع الحيّ يتم خارج المنصة بعد المراجعة.`,
     );
+  } else if (branch && !agentCommitBranchCheck(branch, { liveBranch: config.baseBranch }).ok) {
+    lines.push(`الفرع ${branch} غير مسموح: فروع الوكيل تبدأ بـ feat/ أو fix/ أو chore/ أو docs/. الـ Diff يبقى على ${pending.targetBranch}.`);
   } else if (branch && isValidBranchName(branch) && branch !== pending.targetBranch) {
     const updated = await teamRepo().transitionProposal(pending.id, ["pending", "failed"], { status: pending.status, targetBranch: branch });
     if (updated) proposal = updated;

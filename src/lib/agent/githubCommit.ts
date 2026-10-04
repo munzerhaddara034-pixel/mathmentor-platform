@@ -1,9 +1,15 @@
 /**
  * Direct GitHub file commit for agent code-evolution (after instructor approval).
- * Never call without ApprovalItem state APPROVED/DEPLOYED path.
+ * DISABLED (AGENT_HUB_CODE_COMMITS_ENABLED=false): returns { ok:false, disabled:true } without touching GitHub.
+ * Even if re-enabled it refuses main/master/agent-hub-latest and anything that is not a feat/*-style branch.
  * Brand: Prof. Munzer Haddara / الأستاذ منذر حداره
  */
 import { Octokit } from "@octokit/rest";
+import {
+  AGENT_HUB_CODE_COMMITS_ENABLED,
+  CODE_COMMITS_DISABLED_AR,
+  agentCommitBranchCheck,
+} from "@/lib/security/agentBranches";
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "";
 /** Default repo name when env empty — owner still required. */
@@ -37,7 +43,14 @@ export function githubCommitConfig(): {
 
 export async function commitCodeDirectly(
   req: CodeChangeRequest,
-): Promise<{ ok: boolean; commitUrl?: string; error?: string }> {
+): Promise<{ ok: boolean; commitUrl?: string; error?: string; disabled?: boolean }> {
+  if (!AGENT_HUB_CODE_COMMITS_ENABLED) {
+    return { ok: false, disabled: true, error: CODE_COMMITS_DISABLED_AR };
+  }
+  const branchCheck = agentCommitBranchCheck(GITHUB_BRANCH);
+  if (!branchCheck.ok) {
+    return { ok: false, error: branchCheck.reasonAr };
+  }
   if (!GITHUB_TOKEN || !GITHUB_OWNER) {
     return {
       ok: false,

@@ -5,9 +5,9 @@ import { canApprove, requireTeamStaff, teamError } from "@/lib/team/guard";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Body = { action?: unknown; confirm?: unknown; branch?: unknown; confirmBranch?: unknown };
+type Body = { action?: unknown; confirm?: unknown; branch?: unknown };
 
-/** POST {action:"approve"|"reject", confirm:true, branch?, confirmBranch?} — human click only. */
+/** POST {action:"approve"|"reject", confirm:true, branch?} — human click only. `branch` must be feat/*-style (never the live branch or main). */
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const gate = await requireTeamStaff();
   if (!gate.ok) return gate.response;
@@ -29,7 +29,6 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
       action,
       confirm: body.confirm === true,
       branch: typeof body.branch === "string" ? body.branch : undefined,
-      confirmBranch: typeof body.confirmBranch === "string" ? body.confirmBranch : undefined,
       actor: gate.actor,
     });
     if (!result.ok) return teamError(result.status, result.error, result.errorAr);

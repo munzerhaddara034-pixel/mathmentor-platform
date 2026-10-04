@@ -3,6 +3,7 @@
  * create a feature branch and commit the approved files atomically (single commit, no force).
  * Built on the same Octokit + env contract as src/lib/agent/githubCommit.ts.
  */
+import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { promisify } from "node:util";
@@ -19,7 +20,7 @@ export type TeamGithubConfig = {
 
 /** Branches the in-platform agent may never write to. */
 export const FORBIDDEN_BRANCHES = ["main", "master"];
-/** Branches that need the approver to type the exact branch name (live Render branch + previous one). */
+/** Old live branch — never writable by agents (see src/lib/security/agentBranches.ts). */
 export const LEGACY_PROTECTED_BRANCHES = ["cursor/platform-shell-auth-dashboard-2f19"];
 
 function token(): string {
@@ -132,6 +133,9 @@ export type CommitFilesResult =
 export async function commitFilesToBranch(input: CommitFilesInput, config = teamGithubConfig()): Promise<CommitFilesResult> {
   if (!token()) return { ok: false, error: "GITHUB_TOKEN غير معرّف في متغيرات البيئة على Render." };
   if (FORBIDDEN_BRANCHES.includes(input.branch)) return { ok: false, error: `الكتابة على ${input.branch} ممنوعة من داخل المنصة.` };
+  // Hamza only ever commits to a fresh feat/*-style branch — never the live branch or main.
+  const allowed = agentCommitBranchCheck(input.branch, { liveBranch: config.baseBranch });
+  if (!allowed.ok) return { ok: false, error: allowed.reasonAr };
   const kit = new Octokit({ auth: token() });
   const { owner, repo } = config;
   try {

@@ -2,6 +2,7 @@
  * WhatsApp voice → Whisper → intent → best-effort execute → Arabic confirmation.
  */
 
+import { CODE_COMMITS_DISABLED_AR } from "@/lib/security/agentBranches";
 import { createId } from "@/lib/ids";
 import { isPracticeDemoDictation, transcribeAudioOrDemo } from "@/lib/voiceMath/whisper";
 import {
@@ -20,7 +21,6 @@ import {
 } from "./approvalWorkflow";
 import { saveVoiceTask } from "./store";
 import {
-  CODE_EVOLUTION_CONFIRM_AR,
   SCHOOL_OUTREACH_CONFIRM_AR,
   extractCodeChangeDraft,
   extractSchoolLead,
@@ -161,9 +161,8 @@ function arabicConfirmation(
   if (kind === "code_evolution_request") {
     return [
       header,
-      CODE_EVOLUTION_CONFIRM_AR,
       `• المعرّفات: ${ids}`,
-      `لا يُنشأ Commit قبل اعتمادكم صراحةً.`,
+      CODE_COMMITS_DISABLED_AR,
     ].join("\n");
   }
   if (kind === "school_outreach_request") {
@@ -453,7 +452,7 @@ export async function runWhatsAppVoicePipeline(input: {
             titleAr: `تطوير كود · ${draft.filePath}`,
             titleEn: `Code evolution · ${draft.filePath}`,
             previewAr: [
-              CODE_EVOLUTION_CONFIRM_AR,
+              CODE_COMMITS_DISABLED_AR,
               "",
               draft.summaryAr,
               "",

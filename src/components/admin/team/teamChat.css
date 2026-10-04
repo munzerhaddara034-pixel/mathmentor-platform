@@ -223,3 +223,5 @@
 /* Keep KaTeX's absolutely-positioned MathML inside the scrollable display box (prevents mobile page zoom-out). */
 .team-rich .katex-display, .team-rich .katex, .team-rich-table-wrap { position: relative; }
 .team-rich .katex-display { max-width: 100%; }
+.team-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; }
+.team-hint { font-size: 0.78rem; color: var(--muted); margin: 0; }

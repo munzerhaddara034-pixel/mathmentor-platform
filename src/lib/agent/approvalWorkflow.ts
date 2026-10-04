@@ -13,6 +13,7 @@ import {
   saveApprovalItem,
 } from "./store";
 import { commitCodeDirectly } from "./githubCommit";
+import { AGENT_HUB_CODE_COMMITS_ENABLED, CODE_COMMITS_DISABLED_AR } from "@/lib/security/agentBranches";
 import { dispatchSchoolPitch, type SchoolLead } from "./schoolPitch";
 import type {
   ApprovalItem,
@@ -226,6 +227,7 @@ async function runApprovalSideEffects(
       return { noticeAr: "مسودّة الكود ناقصة (filePath) — لم يُنشأ Commit." };
     }
     const res = await commitCodeDirectly({ filePath, commitMessage, newContent });
+    if (res.disabled) return { noticeAr: CODE_COMMITS_DISABLED_AR };
     if (!res.ok) {
       return { noticeAr: `فشل Commit: ${res.error || "unknown"}` };
     }
@@ -260,6 +262,10 @@ export async function approveAndDeploy(
   if (item.state === "REJECTED") return { ok: false, error: "already rejected" };
   if (item.state !== "AWAITING_APPROVAL" && item.state !== "APPROVED" && item.state !== "DRAFTED") {
     return { ok: false, error: `cannot approve from ${item.state}` };
+  }
+  // Path B: code-evolution proposals stay listable but can't be approved into a commit.
+  if (item.kind === "code_evolution" && !AGENT_HUB_CODE_COMMITS_ENABLED) {
+    return { ok: false, error: CODE_COMMITS_DISABLED_AR };
   }
 
   let next = await transition(item, "APPROVED", {
@@ -338,7 +344,10 @@ export async function handleApprovalInboundText(input: {
   if (!text) return { handled: false, replyAr: "" };
 
   if (isApprovalCommand(text)) {
-    const awaiting = (await listApprovalItems(40)).filter((i) => i.state === "AWAITING_APPROVAL");
+    // "ok"/«موافق» never approves a code-evolution proposal (commits are disabled).
+    const awaiting = (await listApprovalItems(40)).filter(
+      (i) => i.state === "AWAITING_APPROVAL" && (i.kind !== "code_evolution" || AGENT_HUB_CODE_COMMITS_ENABLED),
+    );
     const target = awaiting[0];
     if (!target) {
       return {
