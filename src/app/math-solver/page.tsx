@@ -13,7 +13,7 @@ import "@/styles/solver.css";
 
 export const dynamic = "force-dynamic";
 
-/** Solver — chat with Youssef, the AI tutor (redesign-v2 A). Samples are server-rendered KaTeX. */
+/** Solver — chat with Dr. Mohamed · Munzer's assistant, the AI tutor (redesign-v2 A). Samples are server-rendered KaTeX. */
 export default async function MathSolverPage({ searchParams }: { searchParams: Promise<{ q?: string; photo?: string }> }) {
   const [user, { m }, params] = await Promise.all([getSession(), getI18n(), searchParams]);
   const staff = user?.role === "teacher";

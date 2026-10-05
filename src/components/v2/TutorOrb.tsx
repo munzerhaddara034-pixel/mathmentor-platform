@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 export type OrbState = "idle" | "listening" | "thinking" | "speaking";
 
 /**
- * «يوسف» / Youssef AI-tutor orb. Pure CSS (radial + conic gradients), server-renderable, no JS.
+ * «الدكتور محمد · مساعد منذر» AI-tutor orb. Pure CSS (radial + conic gradients), server-renderable, no JS.
  * `rings` adds the orbit rings used by the hero; every loop stops under prefers-reduced-motion (v2.css).
  */
 export function TutorOrb({

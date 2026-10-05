@@ -49,56 +49,69 @@ function seed(): StoreData {
   };
 }
 
+function isStoreShape(value: unknown): value is StoreData {
+  const parsed = value as Partial<StoreData> | null;
+  return Boolean(parsed && typeof parsed === "object" && Array.isArray(parsed.library) && Array.isArray(parsed.drafts));
+}
+
+/**
+ * Read + normalise store.json. A malformed document is reset to the seed under the document lock
+ * (re-checked first, so a concurrent writer is never clobbered). Backend errors (e.g. Postgres down)
+ * now surface instead of overwriting the stored data with the seed.
+ */
 async function ensureStore(): Promise<StoreData> {
   const initial = withFeaturedLesson(seed());
-  try {
-    const parsed = await readJsonFile<StoreData>(STORE_FILE, initial);
-    if (!Array.isArray(parsed.library) || !Array.isArray(parsed.drafts)) {
-      throw new Error("invalid store");
-    }
-    parsed.managerMessages ??= [];
-    parsed.outreach ??= [];
-    parsed.settings ??= defaultSettings;
-    if (!parsed.settings.phone || parsed.settings.phone.includes("71 000") || parsed.settings.whatsapp.includes("71000000")) {
-      parsed.settings = {
-        ...parsed.settings,
-        phone: defaultSettings.phone,
-        whatsapp: defaultSettings.whatsapp,
-        contactNote: defaultSettings.contactNote,
-      };
-    }
-    parsed.studentChat ??= [];
-    parsed.progress ??= [];
-    parsed.customLessons ??= [];
-    parsed.scratchCards ??= [];
-    parsed.quizAttempts ??= [];
-    parsed.customQuestions ??= [];
-    parsed.entitlements ??= [];
-    parsed.exams ??= [];
-    const planIds = new Set((parsed.settings.plans ?? []).map((plan) => plan.id));
-    for (const plan of defaultSettings.plans) {
-      if (!planIds.has(plan.id)) parsed.settings.plans.push(plan);
-    }
-    // Keep subscription marketing labels in sync with defaultSettings (ids/prices stay stable).
-    parsed.settings.plans = parsed.settings.plans.map((plan) => {
-      const fresh = defaultSettings.plans.find((item) => item.id === plan.id);
-      if (!fresh) return plan;
-      return {
-        ...plan,
-        name: fresh.name,
-        arabicName: fresh.arabicName,
-        includes: fresh.includes,
-        usdMonthly: fresh.usdMonthly,
-        usdTerm: fresh.usdTerm,
-        tier: fresh.tier,
-        liveCredits: fresh.liveCredits,
-      };
-    });
-    return withFeaturedLesson(parsed);
-  } catch {
+  const first = await readJsonFile<StoreData>(STORE_FILE, initial);
+  if (isStoreShape(first)) return normalizeStore(first);
+  return withDocumentLock(STORE_FILE, async () => {
+    const again = await readJsonFile<StoreData>(STORE_FILE, initial);
+    if (isStoreShape(again)) return normalizeStore(again);
     await writeJsonFile(STORE_FILE, initial);
     return initial;
+  });
+}
+
+function normalizeStore(parsed: StoreData): StoreData {
+  parsed.managerMessages ??= [];
+  parsed.outreach ??= [];
+  parsed.settings ??= defaultSettings;
+  if (!parsed.settings.phone || parsed.settings.phone.includes("71 000") || String(parsed.settings.whatsapp ?? "").includes("71000000")) {
+    parsed.settings = {
+      ...parsed.settings,
+      phone: defaultSettings.phone,
+      whatsapp: defaultSettings.whatsapp,
+      contactNote: defaultSettings.contactNote,
+    };
   }
+  parsed.studentChat ??= [];
+  parsed.progress ??= [];
+  parsed.customLessons ??= [];
+  parsed.scratchCards ??= [];
+  parsed.quizAttempts ??= [];
+  parsed.customQuestions ??= [];
+  parsed.entitlements ??= [];
+  parsed.exams ??= [];
+  if (!Array.isArray(parsed.settings.plans)) parsed.settings = { ...parsed.settings, plans: [] };
+  const planIds = new Set(parsed.settings.plans.map((plan) => plan.id));
+  for (const plan of defaultSettings.plans) {
+    if (!planIds.has(plan.id)) parsed.settings.plans.push(plan);
+  }
+  // Keep subscription marketing labels in sync with defaultSettings (ids/prices stay stable).
+  parsed.settings.plans = parsed.settings.plans.map((plan) => {
+    const fresh = defaultSettings.plans.find((item) => item.id === plan.id);
+    if (!fresh) return plan;
+    return {
+      ...plan,
+      name: fresh.name,
+      arabicName: fresh.arabicName,
+      includes: fresh.includes,
+      usdMonthly: fresh.usdMonthly,
+      usdTerm: fresh.usdTerm,
+      tier: fresh.tier,
+      liveCredits: fresh.liveCredits,
+    };
+  });
+  return withFeaturedLesson(parsed);
 }
 
 function withFeaturedLesson(store: StoreData): StoreData {
@@ -118,93 +131,115 @@ export async function writeStore(data: StoreData): Promise<StoreData> {
 }
 
 export async function addLibraryItem(item: LibraryItem): Promise<LibraryItem> {
-  const store = await readStore();
-  store.library.unshift(item);
-  await writeStore(store);
-  return item;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.library.unshift(item);
+    await writeStore(store);
+    return item;
+  });
 }
 
 export async function addDrafts(drafts: ContentDraft[]): Promise<ContentDraft[]> {
-  const store = await readStore();
-  store.drafts.unshift(...drafts);
-  await writeStore(store);
-  return drafts;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.drafts.unshift(...drafts);
+    await writeStore(store);
+    return drafts;
+  });
 }
 
 export async function updateDraft(
   id: string,
   patch: Partial<ContentDraft>,
 ): Promise<ContentDraft | undefined> {
-  const store = await readStore();
-  const index = store.drafts.findIndex((draft) => draft.id === id);
-  if (index < 0) return undefined;
-  store.drafts[index] = { ...store.drafts[index], ...patch };
-  await writeStore(store);
-  return store.drafts[index];
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    const index = store.drafts.findIndex((draft) => draft.id === id);
+    if (index < 0) return undefined;
+    store.drafts[index] = { ...store.drafts[index], ...patch };
+    await writeStore(store);
+    return store.drafts[index];
+  });
 }
 
 export async function addManagerMessage(message: ManagerMessage) {
-  const store = await readStore();
-  store.managerMessages.push(message);
-  await writeStore(store);
-  return message;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.managerMessages.push(message);
+    await writeStore(store);
+    return message;
+  });
 }
 
 export async function addOutreach(item: OutreachDraft) {
-  const store = await readStore();
-  store.outreach.unshift(item);
-  await writeStore(store);
-  return item;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.outreach.unshift(item);
+    await writeStore(store);
+    return item;
+  });
 }
 
 export async function reviewOutreach(id: string, status: OutreachDraft["status"], professorNote?: string) {
-  const store = await readStore();
-  const index = store.outreach.findIndex((item) => item.id === id);
-  if (index < 0) return undefined;
-  store.outreach[index] = {
-    ...store.outreach[index],
-    status,
-    professorNote,
-    reviewedAt: new Date().toISOString(),
-  };
-  await writeStore(store);
-  return store.outreach[index];
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    const index = store.outreach.findIndex((item) => item.id === id);
+    if (index < 0) return undefined;
+    store.outreach[index] = {
+      ...store.outreach[index],
+      status,
+      professorNote,
+      reviewedAt: new Date().toISOString(),
+    };
+    await writeStore(store);
+    return store.outreach[index];
+  });
 }
 
 export async function patchSettings(patch: Partial<PlatformSettings>) {
-  const store = await readStore();
-  store.settings = { ...store.settings, ...patch, plans: patch.plans ?? store.settings.plans };
-  await writeStore(store);
-  return store.settings;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.settings = { ...store.settings, ...patch, plans: patch.plans ?? store.settings.plans };
+    await writeStore(store);
+    return store.settings;
+  });
 }
 
 export async function addCustomLesson(lesson: AcademyLessonRecord) {
-  const store = await readStore();
-  store.customLessons.unshift(lesson);
-  await writeStore(store);
-  return lesson;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.customLessons.unshift(lesson);
+    await writeStore(store);
+    return lesson;
+  });
 }
 
 export async function addStudentChat(message: StudentChatMessage) {
-  const store = await readStore();
-  store.studentChat.push(message);
-  await writeStore(store);
-  return message;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.studentChat.push(message);
+    await writeStore(store);
+    return message;
+  });
 }
 
 export async function addProgress(entry: ProgressEntry) {
-  const store = await readStore();
-  store.progress = store.progress.filter((item) => item.lessonId !== entry.lessonId);
-  store.progress.push(entry);
-  await writeStore(store);
-  return store.progress;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.progress = store.progress.filter((item) => item.lessonId !== entry.lessonId);
+    store.progress.push(entry);
+    await writeStore(store);
+    return store.progress;
+  });
 }
 
 export async function addQuizAttempt(attempt: QuizAttempt) {
-  const store = await readStore();
-  store.quizAttempts.unshift(attempt);
-  await writeStore(store);
-  return attempt;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.quizAttempts.unshift(attempt);
+    await writeStore(store);
+    return attempt;
+  });
 }
 
 /** The store document key (mm_documents.key on Postgres). */
@@ -243,10 +278,12 @@ export async function redeemCard(code: string, studentName: string, phone?: stri
 }
 
 export async function addCustomQuestion(question: QuizQuestion) {
-  const store = await readStore();
-  store.customQuestions.unshift(question);
-  await writeStore(store);
-  return question;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.customQuestions.unshift(question);
+    await writeStore(store);
+    return question;
+  });
 }
 
 /**
@@ -292,17 +329,21 @@ export async function createScratchCards(input: {
 }
 
 export async function addExam(exam: ExamPaper) {
-  const store = await readStore();
-  store.exams.unshift(exam);
-  await writeStore(store);
-  return exam;
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    store.exams.unshift(exam);
+    await writeStore(store);
+    return exam;
+  });
 }
 
 export async function updateCustomQuestion(id: string, patch: Partial<QuizQuestion>) {
-  const store = await readStore();
-  const index = store.customQuestions.findIndex((item) => item.id === id);
-  if (index < 0) return undefined;
-  store.customQuestions[index] = { ...store.customQuestions[index], ...patch };
-  await writeStore(store);
-  return store.customQuestions[index];
+  return withDocumentLock(STORE_FILE, async () => {
+    const store = await readStore();
+    const index = store.customQuestions.findIndex((item) => item.id === id);
+    if (index < 0) return undefined;
+    store.customQuestions[index] = { ...store.customQuestions[index], ...patch };
+    await writeStore(store);
+    return store.customQuestions[index];
+  });
 }

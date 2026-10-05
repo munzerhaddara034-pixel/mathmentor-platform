@@ -7,14 +7,25 @@ import { agentMessages } from "@/lib/i18n/ns/agent";
 
 const CALLBACK_URL =
   "https://mathmentor-platform.onrender.com/api/agent/whatsapp-voice";
-const VERIFY_TOKEN = "mathmentor_secret_token";
 const META_CONFIG_URL =
   "https://developers.facebook.com/apps/2130954954482381/whatsapp-business/configuration/";
-const SELF_PING_CHALLENGE = "1158201444";
-const SELF_PING_PATH =
-  `/api/agent/whatsapp-voice?hub.mode=subscribe&hub.verify_token=${VERIFY_TOKEN}&hub.challenge=${SELF_PING_CHALLENGE}`;
 
-type CopyKey = "callback" | "token";
+/**
+ * The verify token is a server secret (WHATSAPP_VERIFY_TOKEN). It is never hardcoded or shown here;
+ * the admin types it for the self-ping, which checks that it matches the server value.
+ */
+function selfPingPath(token: string, challenge: string) {
+  const params = new URLSearchParams({ "hub.mode": "subscribe", "hub.verify_token": token, "hub.challenge": challenge });
+  return `/api/agent/whatsapp-voice?${params.toString()}`;
+}
+
+function randomChallenge() {
+  const bytes = new Uint32Array(2);
+  crypto.getRandomValues(bytes);
+  return `${bytes[0]}${bytes[1]}`;
+}
+
+type CopyKey = "callback";
 
 type PingState =
   | { kind: "idle" }
@@ -50,13 +61,14 @@ async function copyText(value: string): Promise<boolean> {
 /**
  * Quick-copy credentials + Meta console link + webhook self-ping
  * for WhatsApp Cloud API setup in Agent Hub.
- * Brand: Prof. Munzer Haddara / الأستاذ منذر حداره.
+ * Brand: منذر حداره · MathMentor.
  */
 export function WhatsAppSetupAssistant() {
   const { locale } = useI18n();
   const t = agentMessages[locale].whatsapp;
   const [copiedKey, setCopiedKey] = useState<CopyKey | null>(null);
   const [ping, setPing] = useState<PingState>({ kind: "idle" });
+  const [token, setToken] = useState("");
   const copyTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -81,16 +93,22 @@ export function WhatsAppSetupAssistant() {
   }, []);
 
   const runSelfPing = useCallback(async () => {
+    const typed = token.trim();
+    if (!typed) {
+      setPing({ kind: "error", message: t.tokenMissing });
+      return;
+    }
+    const challenge = randomChallenge();
     setPing({ kind: "loading" });
     try {
-      const res = await fetch(SELF_PING_PATH, {
+      const res = await fetch(selfPingPath(typed, challenge), {
         method: "GET",
         credentials: "same-origin",
         cache: "no-store",
       });
       const bodyText = await res.text();
       const trimmed = bodyText.trim();
-      if (res.status === 200 && trimmed === SELF_PING_CHALLENGE) {
+      if (res.status === 200 && trimmed === challenge) {
         setPing({
           kind: "ok",
           message: t.pingOk,
@@ -108,7 +126,7 @@ export function WhatsAppSetupAssistant() {
         message: error instanceof Error ? error.message : t.pingError,
       });
     }
-  }, [t]);
+  }, [t, token]);
 
   return (
     <section
@@ -138,17 +156,20 @@ export function WhatsAppSetupAssistant() {
         <div className="agent-wa-cred-row">
           <div className="agent-wa-cred-meta">
             <span className="agent-wa-cred-label">{t.token}</span>
-            <code className="agent-wa-cred-value" dir="ltr">
-              {VERIFY_TOKEN}
-            </code>
+            <span className="muted" dir="auto">
+              {t.tokenHint}
+            </span>
+            <input
+              type="password"
+              autoComplete="off"
+              className="agent-wa-cred-value"
+              dir="ltr"
+              aria-label={t.tokenInput}
+              placeholder={t.tokenInput}
+              value={token}
+              onChange={(event) => setToken(event.target.value)}
+            />
           </div>
-          <button
-            type="button"
-            className="btn agent-wa-copy-btn"
-            onClick={() => void onCopy("token", VERIFY_TOKEN)}
-          >
-            {copiedKey === "token" ? t.copied : t.copy}
-          </button>
         </div>
       </div>
 

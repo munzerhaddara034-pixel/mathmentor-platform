@@ -8,9 +8,21 @@
  * Relative imports with .ts extensions only, so `node --test` loads it without the Next alias.
  */
 import { parseMockExamRequest, shouldSendPdf, wantsPdfReply } from "../agent/media/captionIntent.ts";
+import { detectCurriculum } from "../solver/curriculum/detect.ts";
 import { MEDIA_SIGNATURE_AR } from "./media/errorsAr.ts";
 import { baseMime, checkInboundMedia, INBOUND_MAX_BYTES, type MediaCategory } from "./media/policy.ts";
 import { isMetaMediaHost } from "./mediaHosts.ts";
+import {
+  clearPendingLevelSolve,
+  LEVEL_ASK_NUMBERED_AR,
+  LEVEL_BUTTONS,
+  levelSolveHints,
+  parseLevelChoice,
+  recallPendingLevelSolve,
+  recallThreadLevel,
+  rememberPendingLevelSolve,
+  rememberThreadLevel,
+} from "./levelPick.ts";
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
@@ -213,6 +225,30 @@ export function metaTextPayload(to: string, body: string) {
   };
 }
 
+/** Meta Cloud API interactive reply buttons (max 3, title ≤ 20 chars). */
+export function metaInteractiveButtonsPayload(
+  to: string,
+  body: string,
+  buttons: ReadonlyArray<{ id: string; title: string }>,
+) {
+  return {
+    messaging_product: "whatsapp" as const,
+    recipient_type: "individual" as const,
+    to: to.replace(/[^\d]/g, ""),
+    type: "interactive" as const,
+    interactive: {
+      type: "button" as const,
+      body: { text: body.slice(0, 1024) },
+      action: {
+        buttons: buttons.slice(0, 3).map((button) => ({
+          type: "reply" as const,
+          reply: { id: button.id.slice(0, 256), title: button.title.slice(0, 20) },
+        })),
+      },
+    },
+  };
+}
+
 /* ------------------------------------------------------------------ Gemini */
 
 /** True when a Gemini failure is a quota / rate limit (HTTP 429, RESOURCE_EXHAUSTED). */
@@ -344,15 +380,19 @@ export const SOLVE_ACK_AR = "⏳ وصلتني المسألة، عم حلّها �
 export const MOCK_EXAM_ACK_AR = "⏳ عم حضّرلك امتحان تجريبي كملف PDF… لحظات.";
 
 /**
- * WhatsApp answers stay personified as «محمد» (owner decision): the website tutor persona
- * (Youssef / يوسف, AI tutor) that the shared solver writes into correction steps is renamed on this
- * channel. Only the badge form ("Youssef (AI tutor)", "Youssef · AI tutor", …) is renamed, so a "Youssef"
- * inside a word problem stays as written. «الأستاذ منذر حداره» (the real teacher, in the signature) is untouched.
+ * WhatsApp answers stay personified as the short signature «محمد» (owner decision). The website tutor
+ * display name ("Dr. Mohamed · Munzer's assistant" / «الدكتور محمد · مساعد منذر», plus AI-tutor badge forms,
+ * and the retired Youssef / يوسف badge forms) that the shared solver writes into correction steps is
+ * shortened on this channel. A bare given name inside a word problem is left alone. «الأستاذ منذر حداره»
+ * (the real teacher, in the signature) is untouched.
  */
 export function whatsappPersonaText(text: string, options?: { latin?: boolean }): string {
   if (!text) return text;
   const en = options?.latin ? "Mohamed" : "محمد";
   return text
+    .replace(/Dr\.?\s*Mohamed\s*·\s*Munzer's assistant(?:\s*(?:\(AI tutor\)|·\s*AI tutor))?/g, en)
+    .replace(/Dr\.?\s*Mohamed\s*·\s*assistant de Munzer(?:\s*(?:\(tuteur IA\)|·\s*tuteur IA))?/gi, en)
+    .replace(/الدكتور محمد\s*·\s*مساعد منذر(?:\s*(?:\(معلّم بالذكاء الاصطناعي\)|·\s*معلّم بالذكاء الاصطناعي))?/g, "محمد")
     .replace(/Youssef\s*(?:\(AI tutor\)|·\s*AI tutor)/g, en)
     .replace(/Youssef\s*(?:\(tuteur IA\)|·\s*tuteur IA)/gi, en)
     .replace(/«?يوسف»?\s*(?:\(معلّم بالذكاء الاصطناعي\)|·\s*معلّم بالذكاء الاصطناعي)/g, "محمد");
@@ -403,6 +443,10 @@ export type MathSolveRequest = {
   imageName?: string;
   wantPdf: boolean;
   from: string;
+  /** Explicit level from the WhatsApp picker / remembered thread choice. */
+  level?: "middle" | "secondary" | "university";
+  /** Track hint paired with the level (brevet / gs / university). */
+  track?: string;
 };
 
 export type ReplyAttachment = { bytes: Buffer; filename: string; caption: string; mimeType: string };
@@ -425,6 +469,8 @@ export type AgentReply = {
   replyToMessageId?: string;
   transcript?: string;
   relatedIds?: string[];
+  /** Meta interactive reply buttons (Ultramsg/Twilio get the numbered text in textAr instead). */
+  interactiveButtons?: ReadonlyArray<{ id: string; title: string }>;
 };
 
 export type AgentTurnInput = {
@@ -455,7 +501,7 @@ export type AgentTurnDeps = {
   log?: (level: "info" | "warn" | "error", message: string) => void;
 };
 
-export type AgentTurnRoute = "math" | "mock_exam" | "pdf_resend" | "fallback" | "stt_failed" | "quota" | "download_failed" | "empty";
+export type AgentTurnRoute = "math" | "math_level_picked" | "level_ask" | "mock_exam" | "pdf_resend" | "fallback" | "stt_failed" | "quota" | "download_failed" | "empty";
 export type AgentTurnResult = { route: AgentTurnRoute; transcript?: string; ok: boolean };
 
 function heardLine(transcript: string): string {
@@ -471,6 +517,31 @@ async function safeAck(deps: AgentTurnDeps, to: string, text: string) {
   }
 }
 
+
+function levelButtons() {
+  return LEVEL_BUTTONS.map(({ id, title }) => ({ id, title }));
+}
+
+/** Ask متوسط / ثانوي / جامعي (Meta buttons + numbered fallback text). */
+async function askForLevel(
+  deps: Pick<AgentTurnDeps, "reply">,
+  to: string,
+  pending: { question: string; wantPdf: boolean; imageBase64?: string; mimeType?: string; imageName?: string },
+  context: { messageId?: string; transcript?: string },
+) {
+  rememberPendingLevelSolve(to, pending);
+  const prefix = context.transcript ? `${heardLine(context.transcript)}\n\n` : "";
+  await deps.reply({
+    to,
+    textAr: `${prefix}${LEVEL_ASK_NUMBERED_AR}`,
+    status: "completed",
+    note: "whatsapp_level_ask",
+    interactiveButtons: levelButtons(),
+    replyToMessageId: context.messageId,
+    transcript: context.transcript,
+  });
+}
+
 /** Solve (photo and/or text) with the upgraded solver and reply; quota → short apology. Never throws. */
 export async function answerMath(
   request: MathSolveRequest,
@@ -479,7 +550,13 @@ export async function answerMath(
 ): Promise<boolean> {
   let outcome: MathSolveOutcome;
   try {
-    outcome = await deps.solve(request);
+    const remembered = request.level ?? recallThreadLevel(request.from);
+    const hints = remembered ? levelSolveHints(remembered) : undefined;
+    outcome = await deps.solve({
+      ...request,
+      level: request.level ?? hints?.level,
+      track: request.track ?? hints?.track,
+    });
   } catch (error) {
     const quota = isGeminiQuotaError(error);
     outcome = { ok: false, reason: quota ? "quota" : "failed", error: error instanceof Error ? error.message : "solver failed" };
@@ -548,15 +625,40 @@ export async function runAgentTurn(input: AgentTurnInput, deps: AgentTurnDeps): 
       } catch {
         recordId = undefined;
       }
+      const question = (input.caption || "").trim() || "حل المسألة في الصورة";
+      const remembered = recallThreadLevel(to);
+      const decision = detectCurriculum({
+        question,
+        level: remembered,
+        track: remembered ? levelSolveHints(remembered).track : undefined,
+      });
+      if (decision.ambiguous && !remembered) {
+        await askForLevel(
+          deps,
+          to,
+          {
+            question,
+            wantPdf: true, // inbound photo → always branded solution PDF
+            imageBase64: downloaded.bytes.toString("base64"),
+            mimeType: downloaded.mimeType,
+            imageName: input.filename || recordId,
+          },
+          { messageId: input.messageId },
+        );
+        return { route: "level_ask", ok: true };
+      }
       await safeAck(deps, to, SOLVE_ACK_AR);
+      const hints = remembered ? levelSolveHints(remembered) : levelSolveHints(decision.level);
       const ok = await answerMath(
         {
-          question: input.caption,
+          question,
           imageBase64: downloaded.bytes.toString("base64"),
           mimeType: downloaded.mimeType,
           imageName: input.filename || recordId,
-          wantPdf: shouldSendPdf(input.caption),
+          wantPdf: true, // inbound photo → always branded solution PDF
           from: to,
+          level: hints.level,
+          track: hints.track,
         },
         deps,
         { messageId: input.messageId, note: "whatsapp_image_solve" },
@@ -617,10 +719,48 @@ export async function runAgentTurn(input: AgentTurnInput, deps: AgentTurnDeps): 
       }
     }
 
-    if (looksLikeMathRequest(text)) {
+    // Level picker reply (button id / 1·2·3 / متوسط·ثانوي·جامعي) for a pending ambiguous question.
+    const levelChoice = parseLevelChoice(text);
+    const pendingLevel = recallPendingLevelSolve(to);
+    if (pendingLevel && levelChoice) {
+      clearPendingLevelSolve(to);
+      rememberThreadLevel(to, levelChoice);
+      const hints = levelSolveHints(levelChoice);
       await safeAck(deps, to, SOLVE_ACK_AR);
       const ok = await answerMath(
-        { question: text, wantPdf: shouldSendPdf(text), from: to },
+        {
+          question: pendingLevel.question,
+          wantPdf: pendingLevel.wantPdf,
+          imageBase64: pendingLevel.imageBase64,
+          mimeType: pendingLevel.mimeType,
+          imageName: pendingLevel.imageName,
+          from: to,
+          level: hints.level,
+          track: hints.track,
+        },
+        deps,
+        { messageId: input.messageId, transcript, note: "whatsapp_math_level_picked" },
+      );
+      return { route: "math_level_picked", transcript, ok };
+    }
+    if (levelChoice) rememberThreadLevel(to, levelChoice);
+
+    if (looksLikeMathRequest(text)) {
+      const remembered = recallThreadLevel(to);
+      const decision = detectCurriculum({ question: text, level: remembered, track: remembered ? levelSolveHints(remembered).track : undefined });
+      if (decision.ambiguous && !remembered) {
+        await askForLevel(
+          deps,
+          to,
+          { question: text, wantPdf: shouldSendPdf(text) },
+          { messageId: input.messageId, transcript },
+        );
+        return { route: "level_ask", transcript, ok: true };
+      }
+      await safeAck(deps, to, SOLVE_ACK_AR);
+      const hints = remembered ? levelSolveHints(remembered) : levelSolveHints(decision.level);
+      const ok = await answerMath(
+        { question: text, wantPdf: shouldSendPdf(text), from: to, level: hints.level, track: hints.track },
         deps,
         { messageId: input.messageId, transcript, note: transcript ? "whatsapp_voice_solve" : "whatsapp_text_solve" },
       );

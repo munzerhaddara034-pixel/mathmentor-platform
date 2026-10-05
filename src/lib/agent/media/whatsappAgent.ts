@@ -64,6 +64,7 @@ export function whatsappAgentDeps(fallback: AgentTurnDeps["fallback"]): AgentTur
         mimeType: reply.attachment?.mimeType,
         sizeBytes: reply.attachment?.bytes.length,
         replyToMessageId: reply.replyToMessageId,
+        interactiveButtons: reply.interactiveButtons,
       });
     },
     fallback,

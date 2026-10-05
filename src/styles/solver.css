@@ -1,4 +1,4 @@
-/* Solver — redesign-v2 A chat with Youssef (AI tutor) (mobile-first, logical properties). */
+/* Solver — redesign-v2 A chat with Dr. Mohamed · Munzer's assistant (AI tutor) (mobile-first, logical properties). */
 .shell.mm-solver { max-width: 820px; }
 .v2-solver { display: grid; gap: 12px; padding-top: 12px; padding-bottom: 24px; }
 .v2-solver-head { display: flex; align-items: center; gap: 12px; }

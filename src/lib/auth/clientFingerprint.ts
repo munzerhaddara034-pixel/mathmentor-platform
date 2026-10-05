@@ -1,4 +1,5 @@
 import type { DeviceClass, DeviceFingerprint } from "./device";
+import { randomSuffix } from "../ids";
 
 const DEVICE_ID_KEY = "mm_device_id";
 /** QA override: set to "mobile" or "desktop" in localStorage to simulate a second class. */
@@ -6,7 +7,7 @@ export const QA_DEVICE_CLASS_KEY = "mm_qa_device_class";
 
 function randomId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-  return `dev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `dev-${Date.now().toString(36)}-${randomSuffix(8)}`;
 }
 
 export function collectDeviceFingerprint(): DeviceFingerprint {

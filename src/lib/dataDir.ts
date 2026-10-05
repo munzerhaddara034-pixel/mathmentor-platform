@@ -3,7 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { PoolClient } from "pg";
 import { pgGetDocument, pgSetDocument } from "./db/documents";
-import { isPostgresEnabled, withTransaction } from "./db/pg";
+import { dbQuery, isPostgresEnabled, withTransaction } from "./db/pg";
 
 /**
  * JSON store resolution order: test override → Postgres (DATABASE_URL) → Netlify Blobs → data/ files.
@@ -307,7 +307,7 @@ export async function readJsonFile<T>(name: string, fallback: T, options?: { per
     const backend = await activeBackend();
     const data = await backend.getJSON(key);
     if (data == null) {
-      if (persistFallback) await backend.setJSON(key, fallback);
+      if (persistFallback) return (await persistFallbackDocument(backend, key, fallback)) as T;
       return fallback;
     }
     return data as T;
@@ -338,8 +338,45 @@ export async function readJsonFile<T>(name: string, fallback: T, options?: { per
   }
 }
 
+/**
+ * First read of a missing document stores the fallback ONLY if nobody created it meanwhile
+ * (create-if-missing), and returns whatever is stored — an unlocked reader can never overwrite a
+ * document a locked writer just created. Postgres: INSERT … ON CONFLICT DO NOTHING; other backends:
+ * re-check under the in-process mutex.
+ */
+async function persistFallbackDocument(backend: JsonBackend, key: string, fallback: unknown): Promise<unknown> {
+  if (documentLocks.getStore()?.keys.has(key)) {
+    await backend.setJSON(key, fallback);
+    return fallback;
+  }
+  if (!backendOverride && isPostgresEnabled()) {
+    await dbQuery(
+      `INSERT INTO mm_documents (key, data, updated_at) VALUES ($1, $2::jsonb, now()) ON CONFLICT (key) DO NOTHING`,
+      [key, JSON.stringify(fallback ?? null)],
+    );
+    return (await pgGetDocument(key)) ?? fallback;
+  }
+  return acquireProcessLock(key, async () => {
+    const existing = await backend.getJSON(key);
+    if (existing != null) return existing;
+    await backend.setJSON(key, fallback);
+    return fallback;
+  });
+}
+
+/**
+ * Test/QA switch: MM_STRICT_DOCUMENT_LOCKS=1 makes every writeJsonFile outside withDocumentLock (for that
+ * key) throw, so tests prove each store mutation is a locked read-modify-write. Off in production.
+ */
+function assertWriteLocked(key: string) {
+  if (process.env.MM_STRICT_DOCUMENT_LOCKS !== "1") return;
+  if (documentLocks.getStore()?.keys.has(key)) return;
+  throw new Error(`[mathmentor] unlocked write to ${key}: wrap the read-modify-write in withDocumentLock`);
+}
+
 export async function writeJsonFile<T>(name: string, data: T) {
   const key = blobKey(name);
+  assertWriteLocked(key);
   try {
     const backend = await activeBackend();
     await backend.setJSON(key, data);

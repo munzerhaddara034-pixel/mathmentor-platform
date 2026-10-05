@@ -17,6 +17,7 @@ import {
   runAgentTurn,
   withNoteBeforeSignature,
 } from "../src/lib/whatsapp/agentCore.ts";
+import { rememberThreadLevel, resetLevelPickStoresForTests } from "../src/lib/whatsapp/levelPick.ts";
 import { MEDIA_SIGNATURE_AR } from "../src/lib/whatsapp/media/errorsAr.ts";
 import { renderSolutionPdf, SOLUTION_PDF_CAPTION_AR, SOLUTION_PDF_FILENAME } from "../src/lib/agent/media/solutionFormat.ts";
 
@@ -207,7 +208,13 @@ test("PDF policy: always by default, on_request via WHATSAPP_PDF_REPLY", () => {
   assert.equal(shouldSendPdf("حل x^2=4 بي دي إف", "on_request"), true);
 });
 
+function seedLevel() {
+  resetLevelPickStoresForTests();
+  rememberThreadLevel("96176532421", "secondary");
+  rememberThreadLevel("961", "secondary");
+}
 function fakeDeps(overrides = {}) {
+  seedLevel();
   const log = { replies: [], solves: [], fallbacks: [], logs: [] };
   const deps = {
     download: async () => ({ ok: true, bytes: Buffer.from("x"), mimeType: "image/jpeg", category: "image", sizeBytes: 1 }),

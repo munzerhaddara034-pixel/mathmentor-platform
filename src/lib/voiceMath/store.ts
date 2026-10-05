@@ -1,4 +1,4 @@
-import { readJsonFile, writeJsonFile, withStoreLock } from "@/lib/dataDir";
+import { readJsonFile, writeJsonFile, withDocumentLock } from "@/lib/dataDir";
 import { createId } from "@/lib/ids";
 import type { StoredAudio, VoiceMathJob } from "./types";
 
@@ -20,7 +20,9 @@ function audioKey(id: string) {
 }
 
 export async function saveVoiceAudio(id: string, audio: StoredAudio) {
-  await writeJsonFile(audioKey(id), audio);
+  return withDocumentLock(audioKey(id), async () => {
+    await writeJsonFile(audioKey(id), audio);
+  });
 }
 
 export async function getVoiceAudio(id: string): Promise<StoredAudio | undefined> {
@@ -30,7 +32,7 @@ export async function getVoiceAudio(id: string): Promise<StoredAudio | undefined
 }
 
 export async function saveVoiceJob(record: Omit<VoiceMathJob, "id" | "createdAt" | "updatedAt"> & { id?: string }) {
-  return withStoreLock(JOBS_FILE, async () => {
+  return withDocumentLock(JOBS_FILE, async () => {
     const store = await readStore();
     const now = new Date().toISOString();
     const next: VoiceMathJob = {
@@ -58,7 +60,7 @@ export async function listVoiceJobs(filter?: { userId?: string; limit?: number }
 }
 
 export async function patchVoiceJob(id: string, patch: Partial<VoiceMathJob>) {
-  return withStoreLock(JOBS_FILE, async () => {
+  return withDocumentLock(JOBS_FILE, async () => {
     const store = await readStore();
     const index = store.jobs.findIndex((item) => item.id === id);
     if (index < 0) return undefined;

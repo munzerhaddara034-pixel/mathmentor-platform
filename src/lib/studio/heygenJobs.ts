@@ -1,4 +1,4 @@
-import { readJsonFile, writeJsonFile } from "../dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "../dataDir";
 import { createId } from "../ids";
 import { getSampleLesson } from "./sampleLessons";
 import { officialExamFourPhaseLesson } from "./seedLesson";
@@ -124,7 +124,18 @@ function enableLesson(store: HeyGenJobStore, job: HeyGenJobRecord) {
   };
 }
 
+function mockJobChanged(job: HeyGenJobRecord) {
+  const next = advanceMockJob(job);
+  return next !== job && (next.status !== job.status || next.videoUrl !== job.videoUrl);
+}
+
 export async function listHeyGenJobs(): Promise<HeyGenJobRecord[]> {
+  const peek = await readJobStore();
+  if (!peek.jobs.some(mockJobChanged)) return peek.jobs.map(publicJob);
+  return withDocumentLock(JOBS_FILE, advanceAndListLocked);
+}
+
+async function advanceAndListLocked(): Promise<HeyGenJobRecord[]> {
   const store = await readJobStore();
   let dirty = false;
   store.jobs = store.jobs.map((job) => {
@@ -140,6 +151,14 @@ export async function listHeyGenJobs(): Promise<HeyGenJobRecord[]> {
 }
 
 export async function getHeyGenJob(id: string): Promise<HeyGenJobRecord | undefined> {
+  const peek = await readJobStore();
+  const found = peek.jobs.find((job) => job.id === id || job.heygenVideoId === id);
+  if (!found) return undefined;
+  if (!mockJobChanged(found)) return publicJob(found);
+  return withDocumentLock(JOBS_FILE, () => advanceOneLocked(id));
+}
+
+async function advanceOneLocked(id: string): Promise<HeyGenJobRecord | undefined> {
   const store = await readJobStore();
   const index = store.jobs.findIndex((job) => job.id === id || job.heygenVideoId === id);
   if (index < 0) return undefined;
@@ -158,53 +177,57 @@ export async function getLessonOverlay(lessonId: string): Promise<StudioLessonOv
 }
 
 export async function upsertHeyGenJob(input: Omit<HeyGenJobRecord, "createdAt" | "updatedAt"> & { id?: string }): Promise<HeyGenJobRecord> {
-  const store = await readJobStore();
-  const now = new Date().toISOString();
-  const existing = input.id ? store.jobs.find((job) => job.id === input.id) : undefined;
-  if (existing) {
-    const next: HeyGenJobRecord = {
-      ...existing,
+  return withDocumentLock(JOBS_FILE, async () => {
+    const store = await readJobStore();
+    const now = new Date().toISOString();
+    const existing = input.id ? store.jobs.find((job) => job.id === input.id) : undefined;
+    if (existing) {
+      const next: HeyGenJobRecord = {
+        ...existing,
+        ...input,
+        id: existing.id,
+        createdAt: existing.createdAt,
+        updatedAt: now,
+      };
+      const index = store.jobs.findIndex((job) => job.id === existing.id);
+      store.jobs[index] = next;
+      if (next.status === "completed") enableLesson(store, next);
+      await writeJobStore(store);
+      return publicJob(next);
+    }
+    const record: HeyGenJobRecord = {
       ...input,
-      id: existing.id,
-      createdAt: existing.createdAt,
+      id: input.id || createId("heygen"),
+      createdAt: now,
       updatedAt: now,
     };
-    const index = store.jobs.findIndex((job) => job.id === existing.id);
-    store.jobs[index] = next;
-    if (next.status === "completed") enableLesson(store, next);
+    store.jobs.unshift(record);
+    if (record.status === "completed") enableLesson(store, record);
     await writeJobStore(store);
-    return publicJob(next);
-  }
-  const record: HeyGenJobRecord = {
-    ...input,
-    id: input.id || createId("heygen"),
-    createdAt: now,
-    updatedAt: now,
-  };
-  store.jobs.unshift(record);
-  if (record.status === "completed") enableLesson(store, record);
-  await writeJobStore(store);
-  return publicJob(record);
+    return publicJob(record);
+  });
 }
 
 export async function patchHeyGenJob(id: string, patch: Partial<HeyGenJobRecord>): Promise<HeyGenJobRecord | undefined> {
-  const store = await readJobStore();
-  const index = store.jobs.findIndex((job) => job.id === id || job.heygenVideoId === id);
-  if (index < 0) return undefined;
-  const next: HeyGenJobRecord = {
-    ...store.jobs[index],
-    ...patch,
-    id: store.jobs[index].id,
-    updatedAt: new Date().toISOString(),
-  };
-  store.jobs[index] = next;
-  if (next.status === "completed") {
-    next.studentEnabled = patch.studentEnabled ?? true;
+  return withDocumentLock(JOBS_FILE, async () => {
+    const store = await readJobStore();
+    const index = store.jobs.findIndex((job) => job.id === id || job.heygenVideoId === id);
+    if (index < 0) return undefined;
+    const next: HeyGenJobRecord = {
+      ...store.jobs[index],
+      ...patch,
+      id: store.jobs[index].id,
+      updatedAt: new Date().toISOString(),
+    };
     store.jobs[index] = next;
-    enableLesson(store, next);
-  }
-  await writeJobStore(store);
-  return publicJob(next);
+    if (next.status === "completed") {
+      next.studentEnabled = patch.studentEnabled ?? true;
+      store.jobs[index] = next;
+      enableLesson(store, next);
+    }
+    await writeJobStore(store);
+    return publicJob(next);
+  });
 }
 
 export function newQueuedJob(input: {

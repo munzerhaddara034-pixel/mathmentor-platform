@@ -4,7 +4,7 @@
  */
 
 import { createId } from "@/lib/ids";
-import { readJsonFile, writeJsonFile } from "@/lib/dataDir";
+import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { notifyStaff } from "@/lib/notifications/store";
 import { whishTransferNameAr, whishTransferPhone } from "@/lib/whish/client";
 
@@ -81,9 +81,11 @@ export async function recordB2bWhishPayment(input: {
     updatedAt: now,
   };
 
-  const store = await readStore();
-  store.payments.unshift(payment);
-  await writeStore(store);
+  await withDocumentLock(FILE, async () => {
+    const store = await readStore();
+    store.payments.unshift(payment);
+    await writeStore(store);
+  });
 
   await notifyStaff({
     kind: "whish_payment",

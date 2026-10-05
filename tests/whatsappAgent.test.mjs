@@ -19,6 +19,7 @@ import {
   whatsappPersonaText,
 } from "../src/lib/whatsapp/agentCore.ts";
 import { MEDIA_SIGNATURE_AR } from "../src/lib/whatsapp/media/errorsAr.ts";
+import { rememberThreadLevel, resetLevelPickStoresForTests } from "../src/lib/whatsapp/levelPick.ts";
 import { isMetaMediaHost, providerMediaAuthHeaders } from "../src/lib/whatsapp/mediaHosts.ts";
 
 const TOKEN = "test-token-not-a-secret";
@@ -34,6 +35,10 @@ function recorder(handler) {
 }
 
 function fakeDeps(overrides = {}) {
+  // These unit tests exercise the solve path; seed a remembered secondary level so the
+  // ambiguous-level picker (added for production WhatsApp) does not intercept them.
+  resetLevelPickStoresForTests();
+  for (const phone of ["96176532421", "961", "96170000001"]) rememberThreadLevel(phone, "secondary");
   const log = { replies: [], acks: [], fallbacks: [], solves: [], logs: [] };
   const deps = {
     download: async () => ({ ok: true, bytes: Buffer.from("OggS-fake-voice"), mimeType: "audio/ogg", category: "audio", sizeBytes: 15 }),
@@ -186,10 +191,14 @@ test("persona: WhatsApp renames the website tutor to محمد, keeps the real te
   assert.equal(whatsappPersonaText("تصحيح — يوسف (معلّم بالذكاء الاصطناعي)، تحقّق ثانٍ"), "تصحيح — محمد، تحقّق ثانٍ");
   assert.equal(whatsappPersonaText("Correction — Youssef (AI tutor), second check", { latin: true }), "Correction — Mohamed, second check");
   assert.equal(whatsappPersonaText("Correction — Youssef (tuteur IA), seconde vérification", { latin: true }), "Correction — Mohamed, seconde vérification");
-  // A "Youssef" inside a word problem (no AI-tutor badge) is left alone.
+  assert.equal(whatsappPersonaText("تصحيح — الدكتور محمد · مساعد منذر (معلّم بالذكاء الاصطناعي)، تحقّق ثانٍ"), "تصحيح — محمد، تحقّق ثانٍ");
+  assert.equal(whatsappPersonaText("Correction — Dr. Mohamed · Munzer's assistant (AI tutor), second check", { latin: true }), "Correction — Mohamed, second check");
+  assert.equal(whatsappPersonaText("Correction — Dr Mohamed · assistant de Munzer (tuteur IA), seconde vérification", { latin: true }), "Correction — Mohamed, seconde vérification");
+  // A bare given name inside a word problem (no tutor badge) is left alone.
   assert.equal(whatsappPersonaText("Youssef buys 3 pens at $2 each."), "Youssef buys 3 pens at $2 each.");
   assert.equal(whatsappPersonaText("اشترى يوسف 3 أقلام"), "اشترى يوسف 3 أقلام");
-  assert.match(whatsappPersonaText(MEDIA_SIGNATURE_AR), /الأستاذ منذر حداره/);
+  assert.match(whatsappPersonaText(MEDIA_SIGNATURE_AR), /منذر حداره · MathMentor/);
+  assert.match(whatsappPersonaText(MEDIA_SIGNATURE_AR), /محمد/);
 });
 
 test("Graph download: GET /{media-id} then GET url, Bearer on both, only to Meta hosts", async () => {

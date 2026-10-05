@@ -1,5 +1,5 @@
 /**
- * Visible "AI tutor" label next to every appearance of the Youssef AI-tutor persona, so students always
+ * Visible "AI tutor" label next to every appearance of the Dr. Mohamed · Munzer's assistant AI-tutor persona, so students always
  * know they are talking to an AI tutor (not the human teacher). Server-safe: no hooks, label passed in.
  */
 export function AiTutorBadge({ label, onDark = false }: { label: string; onDark?: boolean }) {

@@ -3,8 +3,14 @@ import { executeCodeEvolution } from "@/lib/agent/codeEvolutionAgent";
 import { canRunCodeEvolution, looksLikeCodeChange } from "@/lib/agent/codeEvolutionGate";
 import { generate, type GeminiPart } from "@/lib/solver/gemini/client";
 import { TUTOR_PERSONA_EN } from "@/lib/tutor/persona";
+import { authorizeAiCaller } from "@/lib/security/aiCaller";
+import { BlockedFetchError, safeFetchBytes } from "@/lib/security/safeFetch";
 
 export const dynamic = "force-dynamic";
+
+/** Inline / fetched audio cap (WhatsApp voice notes are far smaller). */
+const MAX_AUDIO_BYTES = 16 * 1024 * 1024;
+const MAX_MESSAGE_CHARS = 4000;
 
 type BotJsonBody = {
   message?: unknown;
@@ -23,18 +29,18 @@ type BotJsonBody = {
 
 type ReplyLocale = "en" | "ar" | "fr";
 
-/** Canned widget replies, in the visitor's site language. Persona: Youssef, disclosed as an AI tutor. */
+/** Canned widget replies, in the visitor's site language. Persona: Dr. Mohamed · Munzer's assistant, disclosed as an AI tutor. */
 const CANNED: Record<ReplyLocale, { noKey: string; failed: string }> = {
   en: {
-    noKey: "Hi! I'm Youssef, MathMentor's AI tutor. AI replies aren't switched on yet — please try again soon.",
+    noKey: "Hi! I'm Dr. Mohamed · Munzer's assistant, MathMentor's AI tutor. AI replies aren't switched on yet — please try again soon.",
     failed: "I got your message but can't reply right now. Please try again shortly.",
   },
   ar: {
-    noKey: "أهلاً بك! أنا يوسف، المعلّم بالذكاء الاصطناعي في MathMentor. الردود الذكية غير مفعّلة بعد — جرّب مجدداً قريباً.",
+    noKey: "أهلاً بك! أنا الدكتور محمد · مساعد منذر، المعلّم بالذكاء الاصطناعي في MathMentor. الردود الذكية غير مفعّلة بعد — جرّب مجدداً قريباً.",
     failed: "وصلتني رسالتك لكن لا أستطيع الرد الآن. جرّب مجدداً بعد قليل.",
   },
   fr: {
-    noKey: "Bonjour ! Je suis Youssef, le tuteur IA de MathMentor. Les réponses IA ne sont pas encore activées — réessayez bientôt.",
+    noKey: "Bonjour ! Je suis Dr. Mohamed · Munzer's assistant, le tuteur IA de MathMentor. Les réponses IA ne sont pas encore activées — réessayez bientôt.",
     failed: "J’ai bien reçu votre message, mais je ne peux pas répondre pour le moment. Réessayez dans un instant.",
   },
 };
@@ -74,6 +80,10 @@ async function geminiReply(parts: GeminiPart[]): Promise<string> {
 }
 
 export async function POST(request: Request) {
+  // Gemini costs money and the widget used to be open to anyone: signed-in AI users, staff or the
+  // agent secret only. Logged-out visitors get a 401 with a sign-in hint (ChatWidget shows it).
+  const caller = await authorizeAiCaller(request);
+  if (!caller.ok) return caller.response;
   try {
     const contentType = request.headers.get("content-type") || "";
     let message = "";
@@ -87,6 +97,9 @@ export async function POST(request: Request) {
       message = firstString(formData.get("message"), formData.get("text"));
       const audioFile = formData.get("audio") || formData.get("file") || formData.get("voice");
       if (audioFile instanceof Blob) {
+        if (audioFile.size > MAX_AUDIO_BYTES) {
+          return NextResponse.json({ reply: "الملف الصوتي كبير جداً." }, { status: 413 });
+        }
         const buffer = Buffer.from(await audioFile.arrayBuffer());
         base64Audio = buffer.toString("base64");
         mimeType = audioFile.type || "audio/ogg";
@@ -100,18 +113,25 @@ export async function POST(request: Request) {
       const inlineAudio = firstString(body.audio, body.base64, body.voice);
       const mediaUrl = firstString(body.audioUrl, body.mediaUrl, body.url);
       if (inlineAudio) {
+        if (inlineAudio.length > Math.ceil((MAX_AUDIO_BYTES * 4) / 3) + 8) {
+          return NextResponse.json({ reply: "الملف الصوتي كبير جداً." }, { status: 413 });
+        }
         base64Audio = inlineAudio;
         const hinted = firstString(body.mimeType);
         if (hinted) mimeType = hinted;
       } else if (mediaUrl) {
         // تنزيل ملف الصوت في حال إرساله كرابط من وسيط واتساب
+        // SSRF guard: https + allow-listed provider/platform hosts only, public IPs only, size-capped.
         try {
-          const fetchRes = await fetch(mediaUrl);
-          const arrayBuffer = await fetchRes.arrayBuffer();
-          base64Audio = Buffer.from(arrayBuffer).toString("base64");
-          mimeType = fetchRes.headers.get("content-type") || "audio/ogg";
+          const fetched = await safeFetchBytes(mediaUrl, { maxBytes: MAX_AUDIO_BYTES });
+          base64Audio = fetched.bytes.toString("base64");
+          mimeType = fetched.contentType || "audio/ogg";
         } catch (fetchErr) {
-          console.error("Failed to fetch media url:", fetchErr);
+          if (fetchErr instanceof BlockedFetchError) {
+            console.warn(`bot: media URL refused (${fetchErr.reason})`);
+            return NextResponse.json({ reply: "رابط الوسائط غير مسموح." , error: "media_url_not_allowed" }, { status: 400 });
+          }
+          console.error("Failed to fetch media url:", fetchErr instanceof Error ? fetchErr.message : "unknown");
         }
       }
     }
@@ -136,6 +156,7 @@ export async function POST(request: Request) {
       }
     }
 
+    message = message.slice(0, MAX_MESSAGE_CHARS);
     if (!message) {
       return NextResponse.json({ reply: "تعذر قراءة الرسالة أو تفريغ المقطع الصوتي، يرجى إعادة المحاولة." }, { status: 400 });
     }

@@ -4,7 +4,7 @@
  * Now: AI-access auth required, shared model list (no retired ids), no provider error details.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { apiRequireAiAccess } from "@/lib/auth/guards";
+import { apiRequireAiAccess, apiRequireStaff } from "@/lib/auth/guards";
 import { extractJson } from "@/lib/solver/llm";
 import { generate, geminiKey } from "@/lib/solver/gemini/client";
 import { TUTOR_PERSONA_EN } from "@/lib/tutor/persona";
@@ -64,11 +64,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Health check (no secrets).
+// Health check (no secrets). Whether a provider key is configured is staff-only detail.
 export async function GET() {
-  return NextResponse.json({
-    status: "ok",
-    service: "MathMentor Math Solver Engine",
-    geminiConfigured: geminiKey().length > 0,
-  });
+  const guard = await apiRequireStaff();
+  const body: Record<string, unknown> = { status: "ok", service: "MathMentor Math Solver Engine" };
+  if (!guard.error) body.geminiConfigured = geminiKey().length > 0;
+  return NextResponse.json(body);
 }
