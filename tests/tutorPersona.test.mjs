@@ -62,6 +62,8 @@ test("UI strings: full Dr. Mohamed presentation + AI-tutor label in en/ar/fr; hu
     assert.equal(m.persona.ai, ai);
     assert.equal(m.persona.label, label);
     assert.equal(m.persona.teacher, teacher);
+    assert.ok(m.persona.role, "persona.role required for SolverHeader");
+    assert.ok(m.persona.label.includes(m.persona.role));
     assert.equal(m.assistant.name, name);
     assert.ok(m.assistant.greeting.includes(name.split(" · ")[0]) || m.assistant.greeting.includes(name));
     assert.equal(m.solver.title, name);

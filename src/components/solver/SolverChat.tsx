@@ -162,6 +162,7 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
         ) : null}
       </div>
 
+      <section className="v2-solver-ask glass" aria-label={s.inputLabel}>
       <div className="v2-solver-style">
         <label className="mm-field">
           <span>{s.styleLabel}</span>
@@ -187,7 +188,7 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
       </div>
 
       <form
-        className="v2-dock glass"
+        className="v2-dock"
         onSubmit={(event) => {
           event.preventDefault();
           void submit();
@@ -256,6 +257,7 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={(event) => pickFile(event.target.files?.[0] ?? null)} />
         <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={(event) => pickFile(event.target.files?.[0] ?? null)} />
       </form>
+      </section>
     </MotionProvider>
   );
 }

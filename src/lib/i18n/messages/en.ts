@@ -10,7 +10,7 @@ export const en = {
       "Munzer Haddara's math platform (MathMentor): an AI tutor that explains step by step, whiteboard lessons and live 1:1 sessions — Lebanese Brevet & Terminale, IB, Cambridge, SAT and AP.",
   },
   brand: { name: "Munzer Haddara", sub: "MathMentor", aria: "Munzer Haddara · MathMentor" },
-  persona: { name: "Dr. Mohamed · Munzer's assistant", teacher: "Prof. Munzer Haddara", ai: "AI tutor", label: "Dr. Mohamed · Munzer's assistant · AI tutor" },
+  persona: { name: "Dr. Mohamed · Munzer's assistant", role: "Munzer's assistant", teacher: "Prof. Munzer Haddara", ai: "AI tutor", label: "Dr. Mohamed · Munzer's assistant · AI tutor" },
   common: {
     notifications: "Notifications",
     markAllRead: "Mark all as read",

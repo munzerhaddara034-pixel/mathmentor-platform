@@ -8,7 +8,7 @@ export const fr: Messages = {
       "La plateforme de maths de Munzer Haddara (MathMentor) : un tuteur IA qui explique pas à pas, des leçons au tableau et des cours particuliers en direct — Brevet et Terminale libanais, IB, Cambridge, SAT et AP.",
   },
   brand: { name: "Munzer Haddara", sub: "MathMentor", aria: "Munzer Haddara · MathMentor" },
-  persona: { name: "Dr Mohamed · assistant de Munzer", teacher: "Prof. Munzer Haddara", ai: "Tuteur IA", label: "Dr Mohamed · assistant de Munzer · tuteur IA" },
+  persona: { name: "Dr Mohamed · assistant de Munzer", role: "assistant de Munzer", teacher: "Prof. Munzer Haddara", ai: "Tuteur IA", label: "Dr Mohamed · assistant de Munzer · tuteur IA" },
   common: {
     notifications: "Notifications",
     markAllRead: "Tout marquer comme lu",
