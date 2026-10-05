@@ -9,7 +9,7 @@ import type { Messages } from "@/lib/i18n/messages/en";
 import { pickTitle } from "@/lib/i18n/pick";
 import { nextLesson } from "./ContinueLesson";
 
-/** Youssef's (AI tutor) nudge, built only from real data: nearest exam → unfinished lesson → "snap a problem". */
+/** Dr. Mohamed's (AI tutor) nudge, built only from real data: nearest exam → unfinished lesson → "snap a problem". */
 function buildNudge(reminder: DashboardReminder | undefined, courses: DashboardCourse[], m: Messages, locale: Locale) {
   const t = m.dashboard;
   if (reminder && reminder.href) {

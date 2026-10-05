@@ -220,7 +220,7 @@ ${METHODOLOGY_BODY}`;
 export const SOLVER_TRACKS = ["brevet", "ls", "se", "gs", "lh", "sat", "university"] as const;
 
 /**
- * Student solver prompt. The «يوسف» / Youssef AI-tutor persona (doctor-level rigour, never the human teacher) comes first; the per-curriculum style block and
+ * Student solver prompt. The Dr. Mohamed / «الدكتور محمد» AI-tutor persona (doctor-level rigour, never the human teacher) comes first; the per-curriculum style block and
  * the solution language are appended per request (see src/lib/solver/prompt.ts).
  */
 export const SOLVER_SYSTEM_PROMPT = `${TUTOR_PERSONA_EN}

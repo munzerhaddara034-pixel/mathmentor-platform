@@ -43,9 +43,9 @@ function applyVerdict(solution: MathSolution, verdict: SolutionVerdict, report: 
   if (verdict.status === "needs_fix" && corrected) {
     const latex = formatLebaneseEquation(verdict.correctedFinalAnswerLatex || solution.finalAnswerLatex);
     solution.steps.push({
-      title: "Correction — Youssef (AI tutor), second check",
-      titleFr: "Correction — Youssef (tuteur IA), seconde vérification",
-      titleAr: "تصحيح — يوسف (معلّم بالذكاء الاصطناعي)، تحقّق ثانٍ",
+      title: "Correction — Dr. Mohamed (AI tutor), second check",
+      titleFr: "Correction — Dr Mohamed (tuteur IA), seconde vérification",
+      titleAr: "تصحيح — الدكتور محمد (معلّم بالذكاء الاصطناعي)، تحقّق ثانٍ",
       examVerbEn: "Check",
       latex,
       explanationEn: verdict.issues.join(" ") || verdict.noteAr,

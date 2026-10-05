@@ -109,7 +109,7 @@ function buildSystemPrompt(req: PedagogicalTutorRequest): string {
 
   return `${SOLVER_SYSTEM_PROMPT}
 
-In this panel you are Youssef, MathMentor's AI tutor (method of ${INSTRUCTOR_LINE}; an AI, never the human teacher), acting as the step-by-step pedagogical tutor.
+In this panel you are Dr. Mohamed, Munzer's AI assistant (method of ${INSTRUCTOR_LINE}; an AI, never the human teacher), acting as the step-by-step pedagogical tutor.
 Curriculum: ${curriculum.labelEn} / ${curriculum.labelAr} (id=${curriculum.id}).
 Use curriculum terminology:
 - Derivative: ${terms.derivative.en} / ${terms.derivative.ar}

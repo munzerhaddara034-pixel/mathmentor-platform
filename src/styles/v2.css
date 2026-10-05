@@ -1,5 +1,5 @@
 /*
- * redesign-v2 · A, AI tutor «يوسف» — shared primitives: aurora page, glass, gradient text, chips, orb, teacher slot.
+ * redesign-v2 · A, AI tutor Dr. Mohamed — shared primitives: aurora page, glass, gradient text, chips, orb, teacher slot.
  * Motion is CSS-only here (transform / opacity / box-shadow) and every loop is off under prefers-reduced-motion.
  * Low-end / data-saver / no backdrop-filter → glass becomes an opaque surface (html.lowend, @supports, reduced transparency).
  */
@@ -120,7 +120,7 @@ button.v2-chip { font: inherit; font-size: 13px; font-weight: 600; cursor: point
 .v2-bub.ai { justify-self: start; background: rgb(var(--primary) / .16); border: 1px solid rgb(var(--primary) / .35); border-end-start-radius: 6px; }
 .v2-ai-head { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 600; justify-self: start; }
 
-/* ---------- tutor orb «يوسف» (CSS radial gradient = default + fallback) ---------- */
+/* ---------- tutor orb (Dr. Mohamed) (CSS radial gradient = default + fallback) ---------- */
 .v2-orb-wrap { position: relative; display: grid; place-items: center; }
 .v2-orb {
   position: relative; border-radius: 50%; width: var(--orb, 170px); height: var(--orb, 170px); flex: none;
@@ -230,7 +230,7 @@ html.data-saver .v2-tslot .v2-cap-saver { display: block; }
 @keyframes v2-reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .v2-reveal { animation: none; } }
 
-/* ---------- AI tutor badge (shown wherever the Youssef AI-tutor persona appears) ---------- */
+/* ---------- AI tutor badge (shown wherever the Dr. Mohamed AI-tutor persona appears) ---------- */
 .v2-ai-badge {
   display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px;
   font-size: 11.5px; font-weight: 700; line-height: 1.5; white-space: nowrap; vertical-align: middle;

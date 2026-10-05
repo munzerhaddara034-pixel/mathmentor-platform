@@ -1,9 +1,37 @@
-/* Solver — redesign-v2 A chat with Youssef (AI tutor) (mobile-first, logical properties). */
+/* Solver — redesign-v2 A: Dr. Mohamed · Munzer's assistant (AI tutor). Mobile-first, logical properties. */
 .shell.mm-solver { max-width: 820px; }
 .v2-solver { display: grid; gap: 12px; padding-top: 12px; padding-bottom: 24px; }
-.v2-solver-head { display: flex; align-items: center; gap: 12px; }
-.v2-solver-head h1 { margin: 0; font-size: 20px; color: var(--heading); }
-.v2-solver-head p { display: flex; align-items: center; gap: 6px; }
+/* ترويسة: brand + locale + tutor */
+.v2-solver-masthead {
+  display: grid; gap: 14px; padding: 14px 16px; border-radius: 22px;
+}
+.v2-solver-masthead-top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 14px;
+}
+.v2-solver-masthead-top .mm-brand { min-inline-size: 0; }
+.v2-solver-masthead-top .mm-locale-inline { flex: none; }
+.v2-solver-head { display: flex; align-items: center; gap: 14px; }
+.v2-solver-head-copy { display: grid; gap: 2px; min-inline-size: 0; }
+.v2-solver-head h1 { margin: 0; font-size: 20px; color: var(--heading); line-height: 1.25; }
+.v2-solver-role {
+  margin: 0; font-size: 14px; font-weight: 650; color: var(--violet-ink, var(--muted));
+}
+.v2-solver-head .v2-muted { display: flex; align-items: center; gap: 6px; margin: 2px 0 0; }
+.v2-solver-intro { display: grid; gap: 10px; padding: 12px 14px; border-radius: 18px; }
+.v2-solver-ask { display: grid; gap: 12px; padding: 12px; border-radius: 22px; }
+.v2-solver-ask .v2-dock {
+  position: static; bottom: auto; padding: 0; border: 0; background: transparent;
+  box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.v2-solver-ask .v2-dock:focus-within { box-shadow: none; }
+.v2-solver-ask .v2-dock-row {
+  padding: 6px; border-radius: 16px; border: 1px solid var(--line);
+  background: rgb(var(--glass-lo) / .55);
+}
+.v2-solver-ask .v2-dock-row:focus-within {
+  box-shadow: 0 0 0 2px rgb(var(--primary) / .55);
+  border-color: rgb(var(--primary) / .45);
+}
 .v2-solver > .v2-bub, .v2-thread > .v2-bub { justify-self: start; }
 .v2-solver .v2-bub p { margin: 0; }
 .v2-solver .v2-bub p + p { margin-top: 6px; }
@@ -80,7 +108,9 @@ html.theme-light .v2-keyidea-label, [data-theme="light"] .v2-keyidea-label { col
 
 @media (min-width: 960px) {
   .v2-dock { bottom: 16px; }
-  .v2-solver-head h1 { font-size: 24px; }
+  .v2-solver-head h1 { font-size: 26px; }
+  .v2-solver-masthead { padding: 18px 20px; }
+  .v2-solver-ask { padding: 16px; }
 }
 
 /* solver-doctor port: exam-style picker, answer-style chip, needs-review state */

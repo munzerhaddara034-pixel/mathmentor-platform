@@ -345,16 +345,17 @@ export const MOCK_EXAM_ACK_AR = "⏳ عم حضّرلك امتحان تجريبي
 
 /**
  * WhatsApp answers stay personified as «محمد» (owner decision): the website tutor persona
- * (Youssef / يوسف, AI tutor) that the shared solver writes into correction steps is renamed on this
- * channel. Only the badge form ("Youssef (AI tutor)", "Youssef · AI tutor", …) is renamed, so a "Youssef"
- * inside a word problem stays as written. «الأستاذ منذر حداره» (the real teacher, in the signature) is untouched.
+ * (Dr. Mohamed / الدكتور محمد, Munzer's AI assistant) that the shared solver writes into correction
+ * steps is renamed on this channel to the short WhatsApp voice «محمد». Badge / label forms are mapped;
+ * a bare "Mohamed" / «محمد» already matching the channel voice is left alone. «الأستاذ منذر حداره» is untouched.
  */
 export function whatsappPersonaText(text: string, options?: { latin?: boolean }): string {
   if (!text) return text;
   const en = options?.latin ? "Mohamed" : "محمد";
   return text
+    .replace(/Dr\.?\s*Mohamed(?:\s*·\s*(?:Munzer's assistant|assistant de Munzer)|\s*\((?:AI tutor|tuteur IA)\)|\s*·\s*(?:AI tutor|tuteur IA))?/gi, en)
+    .replace(/«?الدكتور محمد»?(?:\s*·\s*مساعد منذر|\s*\(معلّم بالذكاء الاصطناعي\)|\s*·\s*معلّم بالذكاء الاصطناعي)?/g, "محمد")
     .replace(/Youssef\s*(?:\(AI tutor\)|·\s*AI tutor)/g, en)
-    .replace(/Youssef\s*(?:\(tuteur IA\)|·\s*tuteur IA)/gi, en)
     .replace(/«?يوسف»?\s*(?:\(معلّم بالذكاء الاصطناعي\)|·\s*معلّم بالذكاء الاصطناعي)/g, "محمد");
 }
 

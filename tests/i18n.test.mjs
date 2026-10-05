@@ -36,9 +36,12 @@ test("brand spelling: «حداره» (with ha), never the ta-marbuta form", () =
   const all = JSON.stringify([en, ar, fr]);
   assert.ok(!all.includes(WRONG_BRAND));
   assert.equal(ar.brand.name, "منذر حداره");
-  assert.equal(en.persona.name, "Youssef");
-  assert.equal(ar.persona.name, "يوسف");
-  assert.equal(fr.persona.name, "Youssef");
+  assert.equal(en.persona.name, "Dr. Mohamed");
+  assert.equal(ar.persona.name, "الدكتور محمد");
+  assert.equal(fr.persona.name, "Dr Mohamed");
+  assert.equal(en.persona.label, "Dr. Mohamed · Munzer's assistant");
+  assert.equal(ar.persona.label, "الدكتور محمد · مساعد منذر");
+  assert.equal(fr.persona.label, "Dr Mohamed · assistant de Munzer");
 });
 
 // ---------------------------------------------------------------------------------------------

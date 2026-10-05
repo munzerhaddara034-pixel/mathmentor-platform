@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PedagogicalTutorPanel } from "@/components/curriculum/PedagogicalTutorPanel";
 import { SolverCurriculumBanner } from "@/components/curriculum/SolverCurriculumBanner";
 import { SolverChat, type SolverSample } from "@/components/solver/SolverChat";
+import { SolverHeader } from "@/components/solver/SolverHeader";
 import { MathServer } from "@/components/ui/MathServer";
 import { AiTutorBadge } from "@/components/v2/AiTutorBadge";
 import { TutorOrb } from "@/components/v2/TutorOrb";
@@ -13,7 +14,7 @@ import "@/styles/solver.css";
 
 export const dynamic = "force-dynamic";
 
-/** Solver — chat with Youssef, the AI tutor (redesign-v2 A). Samples are server-rendered KaTeX. */
+/** Solver — chat with Dr. Mohamed, Munzer's AI assistant (redesign-v2 A). Samples are server-rendered KaTeX. */
 export default async function MathSolverPage({ searchParams }: { searchParams: Promise<{ q?: string; photo?: string }> }) {
   const [user, { m }, params] = await Promise.all([getSession(), getI18n(), searchParams]);
   const staff = user?.role === "teacher";
@@ -22,27 +23,18 @@ export default async function MathSolverPage({ searchParams }: { searchParams: P
   const initialQuestion = typeof params.q === "string" ? params.q.slice(0, 500) : "";
   return (
     <main className="shell mm-solver v2-solver">
-      <header className="v2-solver-head">
-        <TutorOrb size={44} />
-        <div>
-          <div className="v2-persona-line">
-            <h1>{s.title}</h1>
-            <AiTutorBadge label={m.persona.ai} />
-          </div>
-          <p className="v2-muted v2-small">
-            <span className="v2-dot" aria-hidden="true" /> {s.subtitle}
-          </p>
-        </div>
-      </header>
+      <SolverHeader m={m} />
       <SolverCurriculumBanner />
-      <p className="v2-ai-head">
-        <TutorOrb mini /> {m.persona.name} <AiTutorBadge label={m.persona.ai} />
-      </p>
-      <div className="v2-bub ai">
-        <p>{s.greeting}</p>
-        <p className="v2-muted v2-small">{s.retakeNote}</p>
-        <p className="v2-muted v2-small">{s.aiNote}</p>
-      </div>
+      <section className="v2-solver-intro glass-lite" aria-label={m.persona.label}>
+        <p className="v2-ai-head">
+          <TutorOrb mini /> {m.persona.label} <AiTutorBadge label={m.persona.ai} />
+        </p>
+        <div className="v2-bub ai">
+          <p>{s.greeting}</p>
+          <p className="v2-muted v2-small">{s.retakeNote}</p>
+          <p className="v2-muted v2-small">{s.aiNote}</p>
+        </div>
+      </section>
       <SolverChat samples={samples} initialQuestion={initialQuestion} focusPhoto={params.photo === "1"} />
       <PedagogicalTutorPanel />
       <p className="v2-muted mm-solver-more">
