@@ -110,7 +110,10 @@ describe("payments on Postgres", { skip }, () => {
   });
 
   after(async () => {
-    await pool?.end().catch(() => undefined);
+    if (pool) {
+      pool.on("error", () => undefined); // DROP FORCE can terminate idle clients after end()
+      await pool.end().catch(() => undefined);
+    }
     if (admin && dbName) {
       await admin.query(`DROP DATABASE IF EXISTS ${dbName} WITH (FORCE)`).catch(() => undefined);
       await admin.query("DROP ROLE IF EXISTS mm_finance_ro").catch(() => undefined);
@@ -275,6 +278,28 @@ describe("payments on Postgres", { skip }, () => {
     assert.equal(purged.purged, true);
     assert.equal(purged.bytes, null);
     assert.equal((await db.getReceipt(pool, p2.id)).purged, false, "pending receipts are never purged");
+  });
+
+  test("getFinanceSummary: aggregates by status / finance_status with no PII fields", async () => {
+    const summary = await db.getFinanceSummary(pool);
+    assert.equal(summary.currency, "USD");
+    for (const status of ["pending", "confirmed", "rejected"]) {
+      assert.ok(status in summary.mm_payments);
+      assert.equal(typeof summary.mm_payments[status].count, "number");
+      assert.equal(typeof summary.mm_payments[status].sum_amount, "number");
+    }
+    for (const status of ["never_paid", "overdue", "expiring_soon", "active"]) {
+      assert.equal(typeof summary.mm_finance_subscriptions[status], "number");
+    }
+    assert.equal(summary.totals.lifetime_confirmed_usd, summary.mm_payments.confirmed.sum_amount);
+    assert.equal(summary.totals.subscriber_count, summary.mm_finance_subscriptions.active);
+    assert.ok(summary.mm_payments.confirmed.count >= 1, "seeded confirms exist from earlier tests");
+    assert.ok(summary.totals.lifetime_confirmed_usd >= 40);
+    assert.ok(summary.mm_finance_subscriptions.active >= 1);
+    assert.ok(summary.mm_finance_subscriptions.never_paid >= 0);
+    // Shape must stay aggregate-only (no accidental row dumps).
+    assert.deepEqual(Object.keys(summary).sort(), ["currency", "mm_finance_subscriptions", "mm_payments", "totals"]);
+    assert.ok(!("payments" in summary) && !("receipts" in summary));
   });
 
   test("finance role: mm_finance_ro reads the view and mm_payments only (read-only)", async () => {

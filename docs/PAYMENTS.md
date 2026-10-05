@@ -58,6 +58,16 @@ routes answer 503), `RESEND_API_KEY` + `EMAIL_FROM` (e-mail), the WhatsApp provi
   `pending_count`, `lifetime_paid_usd`, `expires_at`, `finance_status` (`never_paid` / `overdue` /
   `expiring_soon` (≤ 7 days) / `active`).
 
+## Admin finance summary API
+
+`GET /api/admin/finance/summary` — same **admin session** auth as `/api/admin/payments`
+(`apiRequireAdmin`: signed-in role `admin` + verified e-mail). Returns **aggregates only**
+(no receipts, no payment rows, no payer PII):
+
+- `mm_payments`: `count` + `sum_amount` by status (`pending` / `confirmed` / `rejected`)
+- `mm_finance_subscriptions`: counts by `finance_status`
+- `totals.lifetime_confirmed_usd` (USD) and `totals.subscriber_count` (students with `finance_status = active`)
+
 ## Read-only finance role (manual, Neon)
 
 Migrations never create roles or passwords. Once, in the Neon SQL editor (as the database owner):

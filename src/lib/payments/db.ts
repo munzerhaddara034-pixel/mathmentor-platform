@@ -10,7 +10,7 @@ import { withStoreLock } from "@/lib/dataDir";
 import { AUTH_DOCUMENT_KEY, aiExpiryFromAuthDoc, applyPaidEntitlementToAuthDoc, type PublicUser } from "@/lib/auth/store";
 import { planIdToSubscriptionType } from "@/lib/auth/tiers";
 import { appendAuditLogTx } from "@/lib/security/audit";
-import { computePeriod } from "./expiry";
+import { computePeriod, type FinanceStatus } from "./expiry";
 import type { ReceiptMime } from "./receipt";
 import type { AdminPaymentRow, PaymentRecord, PaymentStatus } from "./types";
 import type { ValidClaim } from "./validation";
@@ -368,4 +368,75 @@ export async function rejectPayment(
     });
     return { payment: rowToPayment(updated.rows[0] as Row), alreadyRejected: false };
   });
+}
+
+/** Aggregate-only finance dashboard (no receipt bytes, no payment rows, no PII). */
+export type PaymentStatusBucket = { count: number; sum_amount: number };
+
+export type FinanceSummary = {
+  currency: "USD";
+  mm_payments: Record<PaymentStatus, PaymentStatusBucket>;
+  mm_finance_subscriptions: Record<FinanceStatus, number>;
+  totals: {
+    lifetime_confirmed_usd: number;
+    subscriber_count: number;
+  };
+};
+
+const EMPTY_PAYMENT_BUCKETS = (): Record<PaymentStatus, PaymentStatusBucket> => ({
+  pending: { count: 0, sum_amount: 0 },
+  confirmed: { count: 0, sum_amount: 0 },
+  rejected: { count: 0, sum_amount: 0 },
+});
+
+const EMPTY_FINANCE_COUNTS = (): Record<FinanceStatus, number> => ({
+  never_paid: 0,
+  overdue: 0,
+  expiring_soon: 0,
+  active: 0,
+});
+
+/**
+ * Read-only aggregates for /api/admin/finance/summary.
+ * Queries mm_payments by status and mm_finance_subscriptions by finance_status only.
+ */
+export async function getFinanceSummary(pool: TxPool): Promise<FinanceSummary> {
+  const [payments, subscriptions] = await Promise.all([
+    pool.query<{ status: PaymentStatus; count: number; sum_amount: string | number }>(
+      `SELECT status,
+              count(*)::int AS count,
+              COALESCE(sum(amount), 0)::float8 AS sum_amount
+       FROM mm_payments
+       GROUP BY status`,
+    ),
+    pool.query<{ finance_status: FinanceStatus; count: number }>(
+      `SELECT finance_status, count(*)::int AS count
+       FROM mm_finance_subscriptions
+       GROUP BY finance_status`,
+    ),
+  ]);
+
+  const mm_payments = EMPTY_PAYMENT_BUCKETS();
+  for (const row of payments.rows) {
+    if (row.status in mm_payments) {
+      mm_payments[row.status] = { count: Number(row.count) || 0, sum_amount: Number(row.sum_amount) || 0 };
+    }
+  }
+
+  const mm_finance_subscriptions = EMPTY_FINANCE_COUNTS();
+  for (const row of subscriptions.rows) {
+    if (row.finance_status in mm_finance_subscriptions) {
+      mm_finance_subscriptions[row.finance_status] = Number(row.count) || 0;
+    }
+  }
+
+  const lifetime_confirmed_usd = mm_payments.confirmed.sum_amount;
+  const subscriber_count = mm_finance_subscriptions.active;
+
+  return {
+    currency: "USD",
+    mm_payments,
+    mm_finance_subscriptions,
+    totals: { lifetime_confirmed_usd, subscriber_count },
+  };
 }
