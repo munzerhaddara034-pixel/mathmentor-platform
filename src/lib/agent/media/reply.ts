@@ -26,6 +26,7 @@ export type MediaReplyInput = {
   /** Status line added above the signature once the attachment is delivered. */
   attachmentSentNoteAr?: string;
   replyToMessageId?: string;
+  interactiveButtons?: ReadonlyArray<{ id: string; title: string }>;
 };
 
 /** Delivered (or, without a configured provider, logged to the outbox). */
@@ -143,6 +144,11 @@ export async function replyToMediaMessage(input: MediaReplyInput): Promise<Media
     createdAt: now,
     updatedAt: now,
   };
-  const { outbound, task: saved } = await sendAgentWhatsAppConfirmation({ to: input.to, task });
+  const { outbound, task: saved } = await sendAgentWhatsAppConfirmation({
+    to: input.to,
+    task,
+    bodyOverrideAr: replyText,
+    interactiveButtons: input.interactiveButtons,
+  });
   return { task: saved, outbound, attachment };
 }

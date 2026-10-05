@@ -22,7 +22,7 @@ import {
   type ActionOutcome,
   type FileForAction,
 } from "./actions";
-import { detectMediaAction, shouldSendPdf, type MediaAction } from "./captionIntent";
+import { detectMediaAction, shouldSendPdfForInboundFile, type MediaAction } from "./captionIntent";
 import { rememberLastPdf } from "./lastPdf";
 import { replyToMediaMessage, sendMediaAck, type MediaReplyResult } from "./reply";
 
@@ -95,7 +95,7 @@ function storedReplyAr(record: WhatsAppMediaRecord, kindAr: string): string {
 
 async function runAction(action: MediaAction, file: FileForAction, from: string, caption?: string): Promise<ActionOutcome> {
   try {
-    if (action === "solve") return await solveFileAction(file, from, shouldSendPdf(caption));
+    if (action === "solve") return await solveFileAction(file, from, shouldSendPdfForInboundFile());
     if (action === "summarize") return await summarizeFileAction(file);
     if (action === "verify_exam") return await verifyExamFileAction(file);
     return { ok: true, replyAr: "", relatedIds: [] };

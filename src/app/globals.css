@@ -1,5 +1,5 @@
 /*
- * Design tokens · منذر حداره / MathMentor — redesign-v2, direction A (AI tutor «يوسف»).
+ * Design tokens · منذر حداره / MathMentor — redesign-v2, direction A (AI tutor «الدكتور محمد · مساعد منذر»).
  * Dark-first: :root IS the dark theme; html.theme-light / [data-theme="light"] is the tokenised light variant.
  * Two layers:
  *   1. A tokens as RGB channels (shadcn convention: rgb(var(--x) / <alpha>)), straight from the v2 README.

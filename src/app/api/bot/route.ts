@@ -29,18 +29,18 @@ type BotJsonBody = {
 
 type ReplyLocale = "en" | "ar" | "fr";
 
-/** Canned widget replies, in the visitor's site language. Persona: Youssef, disclosed as an AI tutor. */
+/** Canned widget replies, in the visitor's site language. Persona: Dr. Mohamed · Munzer's assistant, disclosed as an AI tutor. */
 const CANNED: Record<ReplyLocale, { noKey: string; failed: string }> = {
   en: {
-    noKey: "Hi! I'm Youssef, MathMentor's AI tutor. AI replies aren't switched on yet — please try again soon.",
+    noKey: "Hi! I'm Dr. Mohamed · Munzer's assistant, MathMentor's AI tutor. AI replies aren't switched on yet — please try again soon.",
     failed: "I got your message but can't reply right now. Please try again shortly.",
   },
   ar: {
-    noKey: "أهلاً بك! أنا يوسف، المعلّم بالذكاء الاصطناعي في MathMentor. الردود الذكية غير مفعّلة بعد — جرّب مجدداً قريباً.",
+    noKey: "أهلاً بك! أنا الدكتور محمد · مساعد منذر، المعلّم بالذكاء الاصطناعي في MathMentor. الردود الذكية غير مفعّلة بعد — جرّب مجدداً قريباً.",
     failed: "وصلتني رسالتك لكن لا أستطيع الرد الآن. جرّب مجدداً بعد قليل.",
   },
   fr: {
-    noKey: "Bonjour ! Je suis Youssef, le tuteur IA de MathMentor. Les réponses IA ne sont pas encore activées — réessayez bientôt.",
+    noKey: "Bonjour ! Je suis Dr. Mohamed · Munzer's assistant, le tuteur IA de MathMentor. Les réponses IA ne sont pas encore activées — réessayez bientôt.",
     failed: "J’ai bien reçu votre message, mais je ne peux pas répondre pour le moment. Réessayez dans un instant.",
   },
 };

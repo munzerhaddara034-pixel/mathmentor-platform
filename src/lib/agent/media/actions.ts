@@ -4,10 +4,12 @@
  */
 import { AGENT_PERSONA_AR, SOLUTION_VERIFIER_RULES_AR } from "@/lib/agent/persona";
 import { solveAndVerify } from "@/lib/solver/pipeline";
+import { detectCurriculum } from "@/lib/solver/curriculum/detect";
 import { hasGeminiKey } from "@/lib/solver/llm";
 import { patchMathQuery, saveMathQuery } from "@/lib/solver/store";
 import { verifySolution, type SolutionVerdict } from "@/lib/solver/verify";
 import type { MathQueryRecord, MathSolution } from "@/lib/solver/types";
+import type { CertificateTrack } from "@/lib/studio/timeline";
 import { mediaErrorReplyAr, MEDIA_SIGNATURE_AR } from "@/lib/whatsapp/media/errorsAr";
 import { isPdfMime } from "@/lib/whatsapp/media/policy";
 import { geminiReadFile } from "./geminiFile";
@@ -122,6 +124,10 @@ export async function solveForWhatsApp(request: MathSolveRequest): Promise<MathS
       imageBase64: request.imageBase64,
       mimeType: request.imageBase64 ? request.mimeType : undefined,
       imageName: request.imageBase64 ? file.filename : undefined,
+      track: request.track as CertificateTrack | undefined,
+      decision: request.level
+        ? detectCurriculum({ question: request.question, track: request.track, level: request.level })
+        : undefined,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "solver failed";
@@ -205,14 +211,22 @@ export async function solveForWhatsApp(request: MathSolveRequest): Promise<MathS
   };
 }
 
-/** Image / PDF of a math problem → upgraded solver (+ verification) → reply (+ optional PDF). */
-export async function solveFileAction(file: FileForAction, from: string, wantPdf: boolean): Promise<ActionOutcome> {
+/**
+ * Image / PDF of a math problem → upgraded solver (+ verification) → reply + branded solution PDF.
+ * PDF homework pages are sent to Gemini as application/pdf; extracted text is added to the question
+ * as a fallback so text-only pages still solve when multimodal PDF fails.
+ */
+export async function solveFileAction(file: FileForAction, from: string, wantPdf: boolean = true): Promise<ActionOutcome> {
+  const extracted = isPdfMime(file.mimeType) ? await extractPdfText(file.bytes) : "";
+  const question = [file.caption?.trim(), extracted ? `النص المستخرج من الملف:\n${extracted}` : ""]
+    .filter(Boolean)
+    .join("\n\n");
   const outcome = await solveForWhatsApp({
-    question: file.caption || "",
+    question: question || (isPdfMime(file.mimeType) ? "حل المسألة في ملف PDF المرفق." : "حل المسألة في الصورة."),
     imageBase64: file.bytes.toString("base64"),
     mimeType: file.mimeType,
     imageName: file.filename,
-    wantPdf,
+    wantPdf: true,
     from,
   });
   if (outcome.ok) {
@@ -221,7 +235,7 @@ export async function solveFileAction(file: FileForAction, from: string, wantPdf
       replyAr: outcome.textAr,
       relatedIds: outcome.relatedIds ?? [],
       pdf: outcome.pdf ? { bytes: outcome.pdf.bytes, filename: outcome.pdf.filename, caption: outcome.pdf.caption } : undefined,
-      pdfError: wantPdf && !outcome.pdf ? outcome.pdfError ?? "pdf_missing" : undefined,
+      pdfError: !outcome.pdf ? outcome.pdfError ?? "pdf_missing" : undefined,
     };
   }
   if (outcome.reason === "quota") {

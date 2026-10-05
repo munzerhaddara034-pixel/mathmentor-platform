@@ -6,7 +6,7 @@ import { ar } from "../src/lib/i18n/messages/ar.ts";
 import { fr } from "../src/lib/i18n/messages/fr.ts";
 import { TUTOR_LABEL, TUTOR_NAME } from "../src/lib/tutor/persona.ts";
 
-const STAFF_AGENT = /Mohamed|Mohammad|Muhammad|محمد|دكتور الرياضيات|Dr\.\s*M/;
+const RETIRED_SITE_TUTOR = /\bYoussef\b|يوسف/;
 
 test("UI persona strings match the tutor persona and carry the AI label", () => {
   for (const [locale, m] of Object.entries({ en, ar, fr })) {
@@ -14,6 +14,10 @@ test("UI persona strings match the tutor persona and carry the AI label", () => 
     assert.equal(m.persona.label, TUTOR_LABEL[locale], locale);
     assert.ok(m.persona.label.toLowerCase().includes(m.persona.ai.toLowerCase()), locale);
     assert.equal(m.assistant.name, m.persona.name, locale);
-    for (const text of [m.assistant.greeting, m.solver.aiNote, m.result.reviewBody]) assert.doesNotMatch(text, STAFF_AGENT, locale);
+    assert.match(m.persona.name, /Mohamed|محمد/);
+    assert.match(m.persona.name, /Munzer|منذر/);
+    for (const text of [m.assistant.greeting, m.solver.aiNote, m.result.reviewBody, m.persona.name, m.persona.label]) {
+      assert.doesNotMatch(text, RETIRED_SITE_TUTOR, locale);
+    }
   }
 });

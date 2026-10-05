@@ -17,13 +17,13 @@ export type AiCaller = { ok: true; mode: "user" | "staff" | "secret"; userId: st
 export const aiCallerLimiter = createRateLimiter({ windowMs: 10 * 60_000, max: 60 });
 
 export const SIGN_IN_REPLY = {
-  en: "Please sign in to chat with Youssef, MathMentor's AI tutor.",
-  ar: "سجّل الدخول للدردشة مع يوسف، المعلّم بالذكاء الاصطناعي في MathMentor.",
+  en: "Please sign in to chat with Dr. Mohamed · Munzer's assistant, MathMentor's AI tutor.",
+  ar: "سجّل الدخول للدردشة مع الدكتور محمد · مساعد منذر، المعلّم بالذكاء الاصطناعي في MathMentor.",
 };
 
 export const UPGRADE_REPLY = {
-  en: "Youssef's AI chat is part of the AI subscription. Activate a card or subscribe to continue.",
-  ar: "دردشة يوسف الذكية ضمن اشتراك الذكاء الاصطناعي. فعّل بطاقة أو اشترك للمتابعة.",
+  en: "AI chat with Dr. Mohamed · Munzer's assistant is part of the AI subscription. Activate a card or subscribe to continue.",
+  ar: "دردشة الدكتور محمد · مساعد منذر الذكية ضمن اشتراك الذكاء الاصطناعي. فعّل بطاقة أو اشترك للمتابعة.",
 };
 
 function nextPathFrom(request: Request) {

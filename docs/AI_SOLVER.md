@@ -58,7 +58,7 @@ npm run dev
 
 1. Sign in with a student account that has AI access (redeem a staff-issued code). See [AUTH.md](./AUTH.md).
 2. Open `/math-solver`. Tap **x² − 5x + 6 = 0** (or type a limit / `f(x)=(x-1)e^x` / a 2×2 system / 3-4-5 triangle).
-3. **Solve with Youssef (AI tutor)** → `/math-solver/result/[id]`.
+3. **Solve with Dr. Mohamed · Munzer's assistant (AI tutor)** → `/math-solver/result/[id]`.
    - `source: "demo"` when `GEMINI_API_KEY` and `OPENAI_API_KEY` are empty.
    - JSON includes `given`, `examTip`, `steps[].theoremEn`, `finalAnswerLatex`, `needsRetake`, `topicTag`.
    - Demo `f(x)=(x-1)e^x` is Domain → Limits (`y=0`) → f' / variation table → min (0,−1), with a Key Idea before the algebra.

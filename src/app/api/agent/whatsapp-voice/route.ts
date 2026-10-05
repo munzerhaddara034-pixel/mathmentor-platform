@@ -188,8 +188,15 @@ function parseMetaPayload(body: Record<string, unknown>): InboundParsed | null {
           };
         }
         const textObj = asRecord(m.text);
+        const interactiveObj = asRecord(m.interactive);
+        const buttonReply = asRecord(interactiveObj?.button_reply) || asRecord(interactiveObj?.list_reply);
         const audioObj = asRecord(m.audio) || asRecord(m.voice) || asRecord(m.document);
-        const textBody = pickString(textObj?.body, m.body);
+        // Interactive reply buttons: prefer the button id (level_middle) so parseLevelChoice can match it.
+        const textBody = pickString(
+          buttonReply ? pickString(buttonReply.id, buttonReply.title) : undefined,
+          textObj?.body,
+          m.body,
+        );
         const mediaId = pickString(audioObj?.id);
         const mimeType = pickString(audioObj?.mime_type, audioObj?.mimeType);
         const isAudio =

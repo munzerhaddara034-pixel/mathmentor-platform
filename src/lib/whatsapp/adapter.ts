@@ -1,4 +1,4 @@
-import { metaDownloadMedia, metaSendMessage, metaTextPayload } from "./agentCore";
+import { metaDownloadMedia, metaInteractiveButtonsPayload, metaSendMessage, metaTextPayload } from "./agentCore";
 import { graphUrl } from "./graphBase";
 import { providerMediaAuthHeaders } from "./mediaHosts";
 import { appendWhatsAppMessage } from "./store";
@@ -96,10 +96,18 @@ async function sendUltraMsg(to: string, body: string) {
   }
 }
 
-async function sendMeta(to: string, body: string) {
+async function sendMeta(
+  to: string,
+  body: string,
+  buttons?: ReadonlyArray<{ id: string; title: string }>,
+) {
   const token = metaAccessToken();
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID!.trim();
-  await metaSendMessage({ cfg: { token, phoneNumberId, graphUrl }, payload: metaTextPayload(to, body), fetchImpl: fetch });
+  const payload =
+    buttons && buttons.length
+      ? metaInteractiveButtonsPayload(to, body, buttons)
+      : metaTextPayload(to, body);
+  await metaSendMessage({ cfg: { token, phoneNumberId, graphUrl }, payload, fetchImpl: fetch });
 }
 
 export async function sendWhatsApp(input: {
@@ -108,6 +116,8 @@ export async function sendWhatsApp(input: {
   bodyAr?: string;
   kind: WhatsAppKind;
   relatedId?: string;
+  /** Meta interactive reply buttons; other providers keep the numbered text in `body`. */
+  interactiveButtons?: ReadonlyArray<{ id: string; title: string }>;
 }): Promise<WhatsAppMessage> {
   const to = toE164(input.to);
   const text =
@@ -132,7 +142,7 @@ export async function sendWhatsApp(input: {
   try {
     if (provider === "twilio") await sendTwilio(to, text);
     else if (provider === "ultramsg") await sendUltraMsg(to, text);
-    else if (provider === "meta") await sendMeta(to, text);
+    else if (provider === "meta") await sendMeta(to, text, input.interactiveButtons);
     return appendWhatsAppMessage({
       to,
       body: text,

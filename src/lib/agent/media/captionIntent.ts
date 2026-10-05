@@ -21,7 +21,7 @@ const PDF_RE =
 /**
  * Caption wins when present. Defaults:
  * - image → solve (a photographed math problem)
- * - PDF / text → summarize
+ * - readable PDF / document → solve (homework page) unless the caption asks to summarize / verify / store
  * - other documents / video → store
  */
 export function detectMediaAction(input: {
@@ -39,8 +39,9 @@ export function detectMediaAction(input: {
     if (SUMMARIZE_RE.test(caption)) return "summarize";
     if (SOLVE_RE.test(caption)) return "solve";
   }
-  if (input.category === "image") return "solve";
-  return caption ? "solve" : "summarize";
+  // Photos and homework PDFs are solved by default (branded solution PDF always attached).
+  if (input.category === "image" || input.category === "document") return "solve";
+  return "store";
 }
 
 /** Caption asks for the answer as a PDF document. */
@@ -64,6 +65,14 @@ export function pdfReplyMode(env: Record<string, string | undefined> = process.e
 /** Attach the solution PDF to this maths answer? */
 export function shouldSendPdf(text: string | undefined, mode: PdfReplyMode = pdfReplyMode()): boolean {
   return mode === "always" || wantsPdfReply(text);
+}
+
+/**
+ * Inbound image / PDF of a problem: always attach the branded solution PDF
+ * (owner decision — independent of WHATSAPP_PDF_REPLY=on_request).
+ */
+export function shouldSendPdfForInboundFile(): boolean {
+  return true;
 }
 
 /** Text command asking محمد for a mock exam PDF. */

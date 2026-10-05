@@ -21,12 +21,24 @@ export function languageBlock(language: LessonLanguage): string {
 
 function levelBlock(decision: CurriculumDecision): string {
   if (decision.level === "middle") {
-    return "LEVEL: middle school. Short, clear steps a Grade 7–9 student can copy; 3 to 6 steps; units in every final answer.";
+    return [
+      "LEVEL: middle school (Brevet / Grades 7–9) ONLY.",
+      "Simple language a Grade 7–9 student can copy; 3 to 6 short numbered steps; units in every final answer.",
+      "HARD RULE: never write secondary/Bac function-study tables, Terminale barème phrasing, IB command-term essays, or university proofs in this answer. One level only — do not mix.",
+    ].join(" ");
   }
   if (decision.level === "university") {
-    return "LEVEL: university. Full rigour: every claim justified, theorems stated with hypotheses, computations shown (kernel systems, constants from initial conditions).";
+    return [
+      "LEVEL: university ONLY.",
+      "Full proof-level rigour: every claim justified, theorems stated with hypotheses, computations shown (kernel systems, constants from initial conditions).",
+      "HARD RULE: never simplify to middle-school steps or secondary barème shortcuts. One level only — do not mix.",
+    ].join(" ");
   }
-  return "LEVEL: secondary / Bac. Official-exam rigour with the mark scheme of the curriculum.";
+  return [
+    "LEVEL: secondary / Bac ONLY.",
+    "Official-exam rigour with the mark scheme (Barème / markscheme) of the curriculum above.",
+    "HARD RULE: never drop to middle-school oversimplification, and never switch into abstract university proof tone unless this curriculum's secondary paper asks for it. One level only — do not mix.",
+  ].join(" ");
 }
 
 export type PromptRequest = {

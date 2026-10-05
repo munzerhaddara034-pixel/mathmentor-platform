@@ -66,7 +66,7 @@ test("Arabic error replies", () => {
 
 test("caption intent", () => {
   assert.equal(detectMediaAction({ category: "image", readable: true }), "solve");
-  assert.equal(detectMediaAction({ category: "document", readable: true }), "summarize");
+  assert.equal(detectMediaAction({ category: "document", readable: true }), "solve");
   assert.equal(detectMediaAction({ category: "document", readable: true, caption: "صحح هالامتحان" }), "verify_exam");
   assert.equal(detectMediaAction({ category: "document", readable: true, caption: "لخصلي ياه" }), "summarize");
   assert.equal(detectMediaAction({ category: "document", readable: true, caption: "حل التمرين 2" }), "solve");

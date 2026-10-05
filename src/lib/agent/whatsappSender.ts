@@ -217,8 +217,12 @@ export async function sendAgentWhatsAppConfirmation(input: {
   campaign?: MarketingCampaign;
   schoolReport?: SchoolReport;
   health?: PlatformHealthSnapshot | null;
+  /** When set, Meta gets interactive reply buttons; other providers keep the text body as-is. */
+  interactiveButtons?: ReadonlyArray<{ id: string; title: string }>;
+  /** Override the formatted reply body (e.g. level-ask text). */
+  bodyOverrideAr?: string;
 }): Promise<{ replyAr: string; outbound: AgentOutboundStatus; message?: WhatsAppMessage; task: WhatsAppVoiceTask }> {
-  const replyAr = formatAgentWhatsAppReplyAr(input);
+  const replyAr = input.bodyOverrideAr ?? formatAgentWhatsAppReplyAr(input);
   const toRaw = input.to?.trim() || instructorWhatsAppNumber();
   const at = new Date().toISOString();
 
@@ -240,6 +244,7 @@ export async function sendAgentWhatsAppConfirmation(input: {
       kind: "agent_ops",
       relatedId: input.task.id,
       body: replyAr,
+      interactiveButtons: input.interactiveButtons,
     });
 
     const outbound: AgentOutboundStatus = {

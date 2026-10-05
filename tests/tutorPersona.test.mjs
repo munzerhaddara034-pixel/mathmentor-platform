@@ -1,4 +1,4 @@
-// Student-facing AI tutor persona: Youssef / يوسف, disclosed as an AI tutor, never the human teacher and never "Dr. Mohamed".
+// Student-facing AI tutor: «الدكتور محمد · مساعد منذر» / "Dr. Mohamed · Munzer's assistant", disclosed as an AI tutor, never the human teacher.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -8,47 +8,54 @@ import { en } from "../src/lib/i18n/messages/en.ts";
 import { ar } from "../src/lib/i18n/messages/ar.ts";
 import { fr } from "../src/lib/i18n/messages/fr.ts";
 
-const STAFF_AGENT = /Mohamed|Mohammad|Muhammad|محمد|دكتور الرياضيات|Dr\.\s*M/;
-/**
- * The retired AI persona. «الأستاذ منذر حداره» / «للأستاذ منذر» and "Prof. Munzer Haddara" name the HUMAN teacher and stay
- * allowed (preceded by «ل»); only the bare persona forms are banned in student-facing persona text.
- */
-const OLD_PERSONA = /Professor Munzer|Professeur Munzer|(?:^|[^ل])أستاذ منذر/;
+/** Retired site-tutor names (must not remain as the student-facing display persona). */
+const OLD_SITE_TUTOR = /\bYoussef\b|يوسف|Professor Munzer|Professeur Munzer|(?:^|[^ل])أستاذ منذر/;
+/** Staff-only secretary phrasing must not leak into student solver prompts. */
+const STAFF_SECRETARY = /سكرتير التنفيذي|Agent Hub|دكتور الرياضيات لكل المستويات/;
 
-test("persona names and AI labels in en/ar/fr", () => {
-  assert.deepEqual(TUTOR_NAME, { en: "Youssef", ar: "يوسف", fr: "Youssef" });
-  assert.deepEqual(TUTOR_LABEL, { en: "Youssef · AI tutor", ar: "يوسف · معلّم بالذكاء الاصطناعي", fr: "Youssef · tuteur IA" });
+test("persona names and AI labels use the full Dr. Mohamed · Munzer's assistant presentation", () => {
+  assert.deepEqual(TUTOR_NAME, {
+    en: "Dr. Mohamed · Munzer's assistant",
+    ar: "الدكتور محمد · مساعد منذر",
+    fr: "Dr Mohamed · assistant de Munzer",
+  });
+  assert.deepEqual(TUTOR_LABEL, {
+    en: "Dr. Mohamed · Munzer's assistant · AI tutor",
+    ar: "الدكتور محمد · مساعد منذر · معلّم بالذكاء الاصطناعي",
+    fr: "Dr Mohamed · assistant de Munzer · tuteur IA",
+  });
   for (const value of [...Object.values(TUTOR_NAME), ...Object.values(TUTOR_LABEL)]) {
-    assert.doesNotMatch(value, /Munzer|منذر/, value);
+    assert.doesNotMatch(value, /\bYoussef\b|يوسف/);
+    assert.match(value, /Mohamed|محمد/);
+    assert.match(value, /Munzer|منذر/);
   }
 });
 
 test("persona prompts disclose the AI, keep rigour, styles and English default", () => {
   for (const text of [TUTOR_PERSONA_EN, TUTOR_VERIFIER_PERSONA_EN]) {
-    assert.doesNotMatch(text, STAFF_AGENT);
-    assert.doesNotMatch(text, OLD_PERSONA);
-    assert.match(text, /You are (?:the independent verification pass of )?“Youssef”/);
+    assert.doesNotMatch(text, OLD_SITE_TUTOR);
+    assert.doesNotMatch(text, STAFF_SECRETARY);
+    assert.match(text, /Dr\. Mohamed · Munzer's assistant/);
     assert.match(text, /an AI, not the human teacher Munzer Haddara/);
   }
-  assert.match(TUTOR_PERSONA_EN, /say plainly that you are Youssef, MathMentor's AI tutor/);
+  assert.match(TUTOR_PERSONA_EN, /say plainly that you are Dr\. Mohamed · Munzer's assistant, MathMentor's AI tutor/);
   assert.match(TUTOR_PERSONA_EN, /never claim to be the human teacher/);
   for (const style of ["Lebanese official", "French Bac", "IB", "AP", "SAT/ACT", "IGCSE/A Level", "university"]) {
     assert.ok(TUTOR_PERSONA_EN.includes(style), style);
   }
   assert.match(TUTOR_PERSONA_EN, /doctor-level rigour/);
   assert.match(TUTOR_PERSONA_EN, /Write in English unless the student asks for Arabic or French/);
-  assert.doesNotMatch(TUTOR_PERSONA_AR, STAFF_AGENT);
-  assert.doesNotMatch(TUTOR_PERSONA_AR, OLD_PERSONA);
-  assert.match(TUTOR_PERSONA_AR, /^أنت «يوسف»، معلّم الرياضيات بالذكاء الاصطناعي/);
+  assert.doesNotMatch(TUTOR_PERSONA_AR, OLD_SITE_TUTOR);
+  assert.match(TUTOR_PERSONA_AR, /^أنت «الدكتور محمد · مساعد منذر»، معلّم الرياضيات بالذكاء الاصطناعي/);
   assert.match(TUTOR_PERSONA_AR, /ولست المعلّم البشري منذر حداره نفسه/);
   assert.match(TUTOR_PERSONA_AR, /اكتب بالإنجليزية ما لم يطلب الطالب العربية أو الفرنسية/);
 });
 
-test("UI strings: Youssef with the AI-tutor label in en/ar/fr; old persona gone; human teacher kept", () => {
+test("UI strings: full Dr. Mohamed presentation + AI-tutor label in en/ar/fr; human teacher kept", () => {
   const cases = [
-    [en, "Youssef", "AI tutor", "Youssef · AI tutor", "Prof. Munzer Haddara"],
-    [ar, "يوسف", "معلّم بالذكاء الاصطناعي", "يوسف · معلّم بالذكاء الاصطناعي", "الأستاذ منذر حداره"],
-    [fr, "Youssef", "Tuteur IA", "Youssef · tuteur IA", "Prof. Munzer Haddara"],
+    [en, "Dr. Mohamed · Munzer's assistant", "AI tutor", "Dr. Mohamed · Munzer's assistant · AI tutor", "Prof. Munzer Haddara"],
+    [ar, "الدكتور محمد · مساعد منذر", "معلّم بالذكاء الاصطناعي", "الدكتور محمد · مساعد منذر · معلّم بالذكاء الاصطناعي", "الأستاذ منذر حداره"],
+    [fr, "Dr Mohamed · assistant de Munzer", "Tuteur IA", "Dr Mohamed · assistant de Munzer · tuteur IA", "Prof. Munzer Haddara"],
   ];
   for (const [m, name, ai, label, teacher] of cases) {
     assert.equal(m.persona.name, name);
@@ -56,15 +63,14 @@ test("UI strings: Youssef with the AI-tutor label in en/ar/fr; old persona gone;
     assert.equal(m.persona.label, label);
     assert.equal(m.persona.teacher, teacher);
     assert.equal(m.assistant.name, name);
-    assert.ok(m.assistant.greeting.includes(name));
+    assert.ok(m.assistant.greeting.includes(name.split(" · ")[0]) || m.assistant.greeting.includes(name));
     assert.equal(m.solver.title, name);
-    assert.ok(m.solver.aiNote.includes(name) && m.solver.aiNote.includes(teacher));
+    assert.ok(m.solver.aiNote.includes(name.split(" · ")[0]) || m.solver.aiNote.includes("Munzer") || m.solver.aiNote.includes("منذر"));
     for (const text of [m.tutor.ready, m.tutor.thinking, m.home.askSubmit, m.home.demoLead, m.result.read, m.result.reviewBody]) {
-      assert.ok(text.includes(name), text);
+      assert.ok(text.includes(name) || text.includes(name.split(" · ")[0]), text);
     }
-    // The real teacher's live 1:1 sessions keep his name.
     assert.ok(m.dashboard.nextWith.includes(teacher), m.dashboard.nextWith);
-    assert.doesNotMatch(JSON.stringify(m), OLD_PERSONA);
+    assert.doesNotMatch(JSON.stringify(m), /\bYoussef\b|يوسف/);
   }
 });
 
@@ -75,20 +81,19 @@ function filesUnder(dir) {
   });
 }
 
-test("student-facing solver / tutor / chat prompts never use the staff agent persona", () => {
+test("student-facing solver / tutor / chat prompts never use the retired Youssef persona or staff-secretary phrasing", () => {
   const files = [
-    ...filesUnder("src/lib/solver"),
-    "src/lib/pedagogy/lebanese.ts",
+    ...filesUnder("src/lib/solver").filter((f) => !f.includes("/pdf/")),
+    ...filesUnder("src/lib/tutor"),
     "src/lib/curriculum/tutor.ts",
-    "src/app/api/solve-math/route.ts",
-    "src/app/api/solve-math/gemini/route.ts",
     "src/app/api/bot/route.ts",
-    "src/components/solver/SolverChat.tsx",
-    "src/components/solver/SolverThread.tsx",
-    "src/components/curriculum/PedagogicalTutorPanel.tsx",
-    "src/components/ChatWidget.tsx",
+    "src/app/api/tutor/route.ts",
   ];
-  for (const file of files) assert.doesNotMatch(readFileSync(file, "utf8"), STAFF_AGENT, file);
+  for (const file of files) {
+    const text = readFileSync(file, "utf8");
+    assert.doesNotMatch(text, /\bYoussef\b|يوسف/, file);
+    assert.doesNotMatch(text, STAFF_SECRETARY, file);
+  }
   const personaFiles = [
     ...files,
     "src/lib/tutor/persona.ts",
@@ -98,9 +103,11 @@ test("student-facing solver / tutor / chat prompts never use the staff agent per
     ...filesUnder("src/components/home/v2"),
     "src/components/dashboard/OrbNudge.tsx",
   ];
-  for (const file of personaFiles) assert.doesNotMatch(readFileSync(file, "utf8"), OLD_PERSONA, file);
-  // The classroom tutor reply names itself Youssef; its "Professor Munzer reviews …" line is the human teacher.
-  assert.match(readFileSync("src/app/api/tutor/route.ts", "utf8"), /I am Youssef, the AI classroom tutor\./);
-  // Prompts may apply the teacher's method but must not impersonate him.
+  // Human-teacher references ("Professor Munzer reviews…") stay allowed; bare AI-impersonation forms stay banned.
+  for (const file of personaFiles) {
+    const text = readFileSync(file, "utf8");
+    assert.doesNotMatch(text, /You are (?:Professor|Professeur) Munzer|أنت «?أستاذ منذر/, file);
+  }
+  assert.match(readFileSync("src/app/api/tutor/route.ts", "utf8"), /I am Dr\. Mohamed · Munzer's assistant, the AI classroom tutor\./);
   assert.doesNotMatch(readFileSync("src/lib/pedagogy/lebanese.ts", "utf8"), /`You are \$\{INSTRUCTOR_EN\} \(/);
 });

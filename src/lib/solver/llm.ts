@@ -216,6 +216,8 @@ export type GeminiSolveRequest = SolveRequest & {
   curriculum?: string;
   /** Platform curriculum id (fallback for detection). */
   platformCurriculum?: string;
+  /** Explicit WhatsApp / form level (PRIMARY — never overridden by text heuristics). */
+  level?: CurriculumDecision["level"];
   /** Precomputed decision (repair pass reuses it). */
   decision?: CurriculumDecision;
   /** CAS failures from a previous attempt: triggers a repair solve. */
@@ -240,6 +242,7 @@ export function decideFor(request: GeminiSolveRequest): CurriculumDecision {
       track: request.track,
       selected: request.curriculum,
       platform: request.platformCurriculum,
+      level: request.level,
     })
   );
 }

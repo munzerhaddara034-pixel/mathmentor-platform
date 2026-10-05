@@ -93,11 +93,11 @@ export function solutionWhatsAppTextAr(
 
 function verdictLineEn(verdict: SolutionVerdict | undefined): string {
   if (!verdict) return "Verification: not run";
-  if (verdict.status === "verified") return "Verification (Mohamed): verified";
+  if (verdict.status === "verified") return "Verification (Dr. Mohamed · Munzer's assistant, AI): verified";
   if (verdict.status === "needs_fix") {
-    return `Verification (Mohamed): NEEDS REVIEW${verdict.correctedFinalAnswer ? ` - suggested fix: ${verdict.correctedFinalAnswer}` : ""}`;
+    return `Verification (Dr. Mohamed · Munzer's assistant, AI): NEEDS REVIEW${verdict.correctedFinalAnswer ? ` - suggested fix: ${verdict.correctedFinalAnswer}` : ""}`;
   }
-  return "Verification (Mohamed): uncertain - needs teacher review";
+  return "Verification (Dr. Mohamed · Munzer's assistant, AI): uncertain - needs teacher review";
 }
 
 /** WhatsApp file name of every solution PDF (platform brand, never a generic name). */
@@ -135,6 +135,11 @@ export function solutionPdfBlocks(solution: MathSolution, options?: SolutionPdfO
     {
       kind: "subtitle",
       text: `${solution.track} · ${whatsappPersonaText(solution.topic, { latin: true })} · ${beirutDate(created)}`,
+    },
+    {
+      kind: "paragraph",
+      text: "الدكتور محمد · مساعد منذر · معلّم بالذكاء الاصطناعي",
+      muted: true,
     },
   ];
   const question = (options?.question || "").trim();
@@ -180,7 +185,7 @@ export function solutionPdfBlocks(solution: MathSolution, options?: SolutionPdfO
 /** Latin-only fallback (Helvetica) used when the embedded fonts cannot be loaded. */
 export function solutionPdfLatin(solution: MathSolution, options?: SolutionPdfOptions): Buffer {
   const lines: string[] = [
-    `${MATHMENTOR_BRAND.headerLatin} - solution by Mohamed (AI assistant)`,
+    `${MATHMENTOR_BRAND.headerLatin} — Dr. Mohamed · Munzer's assistant (AI tutor)`,
     `Track: ${solution.track}   Topic: ${asciiForPdf(solution.topic)}`,
     "",
   ];

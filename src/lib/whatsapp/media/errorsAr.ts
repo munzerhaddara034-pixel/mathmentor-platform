@@ -13,7 +13,7 @@ export type MediaErrorReason =
   | "send_failed"
   | "ai_busy";
 
-export const MEDIA_SIGNATURE_AR = "— محمد · مساعد الأستاذ منذر حداره / MathMentor";
+export const MEDIA_SIGNATURE_AR = "— محمد — منذر حداره · MathMentor";
 
 export const SUPPORTED_MEDIA_HINT_AR =
   "بقدر إستلم: صور (JPG / PNG / WEBP)، ملفات PDF، Word أو نص، وفيديو MP4، ومذكرات صوتية.";
