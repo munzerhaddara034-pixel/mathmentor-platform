@@ -2,7 +2,6 @@ import { createId } from "@/lib/ids";
 import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { setUserEntitlement } from "@/lib/auth/store";
 import { liveCreditsForPlan, planIdToSubscriptionType } from "@/lib/auth/tiers";
-import { readStore } from "@/lib/store";
 import { addLedger } from "@/lib/billing/store";
 import { priceFromUsd, whishTransferInstructionsForAmount } from "@/lib/whish/client";
 import {
@@ -102,27 +101,15 @@ export async function resolvePlanAmount(
     };
   }
 
-  const store = await readStore();
-  const plan = store.settings.plans.find((item) => item.id === planId);
-  if (!plan) return { ok: false as const, error: "Unknown plan.", errorAr: "باقة غير معروفة." };
-  const amount = period === "monthly" ? plan.usdMonthly : plan.usdTerm;
-  if (!(typeof amount === "number" && Number.isFinite(amount) && amount > 0)) {
-    return { ok: false as const, error: "Plan price not configured.", errorAr: "سعر الباقة غير مضبوط." };
+  // Single price source: only REGIONAL_PRICING (src/lib/pricing/plans.ts) can price a checkout.
+  // The old settings.ts plans (29–99 USD) are no longer sold; their ids only drive activation codes.
+  if (isRegionalPlanId(planId)) {
+    return { ok: false as const, error: "Choose a pricing region.", errorAr: "اختر المنطقة أولاً." };
   }
   return {
-    ok: true as const,
-    plan,
-    amount,
-    region,
-    price: priceFromUsd(amount, {
-      labelEn: `${plan.name} · ${period}`,
-      labelAr: `${plan.arabicName} · ${period === "monthly" ? "شهري" : "فصل"}`,
-    }),
-    transfer: whishTransferInstructionsForAmount(amount, {
-      labelEn: `${plan.name} · ${period}`,
-      labelAr: `${plan.arabicName} · ${period === "monthly" ? "شهري" : "فصل"}`,
-      context: "subscription",
-    }),
+    ok: false as const,
+    error: "This plan is no longer sold. Choose a plan on /subscribe.",
+    errorAr: "هذه الباقة لم تعد متاحة. اختر باقة من صفحة الاشتراك.",
   };
 }
 

@@ -2,18 +2,30 @@
 
 **Brand:** Prof. Munzer Haddara / الأستاذ منذر حداره only — never Al-Tarah / الطارة.
 
-**Updated:** 23 Sep 2026 (Asia/Beirut) — USD bands + `defaultChargeUSD` (midpoint) for checkout.
+**Updated:** 6 Oct 2026 (Asia/Beirut) — **pricing v2** approved by Munzer.
+
+**Single price source:** `src/lib/pricing/plans.ts` (`REGIONAL_PRICING`). Checkout (`resolvePlanAmount`), the
+"I paid" form, `/subscribe`, the student page, the home plan cards, live-booking defaults and the activation-code
+revenue estimate all read from it. `src/lib/settings.ts` keeps only the legacy activation-code plan ids / names /
+access tier, **without prices**; checkout refuses those legacy ids.
+
+**Principle:** a live session with Prof. Munzer is sold on its own. Platform subscribers pay less per session than
+outside students. **Platform + 4 sessions** (`liveHybrid`) = 4 × subscriber session price, so the platform is free
+inside the bundle.
 
 ## Regions (`src/lib/pricing/plans.ts` · `REGIONAL_PRICING`)
 
-| Region | Digital Core | Live Hybrid | Private hour | Notes |
-|---|---|---|---|---|
-| **Lebanon** | $15 / mo (fixed) | $35 / mo (الأكثر طلباً) | $25 | Official Lebanese curriculum |
-| **GCC** (دول الخليج · SA/AE/QA/KW) | **$42** / mo (midpoint of $35–50) ≈130–190 SAR | **$110** / mo ≈340–490 SAR | **$50** / hr | Fixed midpoint checkout; قدرات / تحصيلي / مسارات الثانوي / مناهج الوزارة |
-| **International** (IB DP Math HL/SL, Cambridge IGCSE/A-Level) | $60–85 (default **72**) | $150–220 (default **185**) | $70–100 (default **85**) | KaTeX / academic precision value |
-| **US Admissions** (SAT / ACT Math / AP Calculus) | $45–65 (default **55**) | $110–160 (default **135**) | $50–75 (default **62**) | Intensive speed / strategies / math justification |
+| Region | Digital subscription / mo | Subscriber session | Platform + 4 sessions / mo | Outside-student session | Notes |
+|---|---|---|---|---|---|
+| **Lebanon** | $15 | $15 | **$60** (was $35) | $25 | Official Lebanese curriculum |
+| **GCC** (SA/AE/QA/KW) | $42 ≈130–190 SAR | $30 | **$120** (was $110) ≈450 SAR | $50 | قدرات / تحصيلي / مسارات الثانوي / مناهج الوزارة |
+| **International** (IB / Cambridge) | $60–85 (charge **72**) | $50 | **$200** (was $185) | $70–100 (charge **85**) | KaTeX / academic precision |
+| **US Admissions** (SAT / ACT / AP) | $45–65 (charge **55**) | $37 | **$148** (was $135) | $50–75 (charge **62**) | Speed / strategies / justification |
 
-Cards on `/subscribe`: **Lebanon & GCC** show fixed USD (GCC = policy midpoint). **International & US Admissions** show USD bands with checkout at `defaultChargeUSD` (midpoint). GCC still shows SAR approx ranges. Term = monthly charge × 2.5 (rounded).
+Fields: `plans[digitalCore]`, `subscriberSessionUsd`, `plans[liveHybrid]` (fixed, no band), `privateTutoringHour*`
+(outside-student session). Term = monthly charge × 2.5 (rounded). `/subscribe` shows the four options per region
+(`PricingOptions`). Live booking (`/live`, Lebanon) defaults to `subscriberSessionUsd` / `outsideSessionUsd`;
+`LIVE_SESSION_PRICE_USD` / `LIVE_SESSION_PRICE_EXTERNAL_USD` env vars can still override them.
 
 ### Curriculum → pricing region
 

@@ -6,6 +6,7 @@ import { getMathQuery, listMathQueries, patchMathQuery } from "@/lib/solver/stor
 import type { MathQueryRecord } from "@/lib/solver/types";
 import { getHeyGenJob } from "@/lib/studio/heygenJobs";
 import { resolvePaymentSettings } from "@/lib/payments/config";
+import { externalSessionAmountUsd, memberSessionAmountUsd } from "@/lib/whish/client";
 import { sendWhatsApp, teacherWhatsApp } from "./adapter";
 
 /** Whish number shown in booking / subscription messages (PAYMENTS_WHISH_NUMBER, default 70772968). */
@@ -82,9 +83,7 @@ export async function notifyLiveBooked(booking: LiveBooking) {
   const amount =
     booking.paymentAmount != null
       ? `${booking.paymentAmount} ${booking.paymentCurrency || "USD"}`
-      : booking.pricingTier === "external"
-        ? "25 USD"
-        : "15 USD";
+      : `${booking.pricingTier === "external" ? externalSessionAmountUsd() : memberSessionAmountUsd()} USD`;
 
   const body = `${TEACHER_AR} · MathMentor
 ${TEACHER_EN} · MathMentor

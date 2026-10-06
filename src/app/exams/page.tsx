@@ -22,6 +22,10 @@ import { fmt } from "@/lib/i18n/format";
 import { examsMessages, type ExamsMessages } from "@/lib/i18n/ns/exams";
 import { rich } from "@/lib/i18n/rich";
 import { getI18n } from "@/lib/i18n/server";
+import { formatUsdBand, getRegionalPlan } from "@/lib/pricing/plans";
+
+const SAT_DIGITAL_PLAN = getRegionalPlan("admissions_us", "digitalCore");
+const satDigitalPrice = formatUsdBand(SAT_DIGITAL_PLAN.usdMonthlyMin, SAT_DIGITAL_PLAN.usdMonthlyMax);
 
 export const dynamic = "force-dynamic";
 
@@ -174,7 +178,7 @@ export default async function ExamsHubPage({
       {satPapers.length > 0 ? (
         <section style={{ marginBottom: 28 }}>
           <h2>{t.platformSat}</h2>
-          <p className="muted">{rich(t.platformSatLead, { plan: <code dir="ltr">sat</code> })}</p>
+          <p className="muted">{rich(t.platformSatLead, { plan: <code dir="ltr">sat</code>, price: <span dir="ltr">{satDigitalPrice}</span> })}</p>
           <div className="grid two">
             {satPapers.map((paper) => (
               <article className="card" key={paper.id}>

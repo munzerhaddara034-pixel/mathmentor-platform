@@ -6,10 +6,11 @@
  * Optional WHISH_* merchant env vars are documented only for a future API path.
  *
  * All money (subscriptions + live sessions) goes through Whish only.
- * Dual live pricing:
- * - member (platform) — logged-in with AI_TIER | LIVE_TIER | BOTH → $15
- * - external — guest or no active plan → $25
+ * Dual live pricing (defaults from src/lib/pricing/plans.ts, Lebanon; env vars may override):
+ * - member (platform) — logged-in with AI_TIER | LIVE_TIER | BOTH → subscriberSessionUsd()
+ * - external — guest or no active plan → outsideSessionUsd()
  */
+import { outsideSessionUsd, subscriberSessionUsd } from "@/lib/pricing/plans";
 
 export type WhishCurrency = "USD" | "LBP";
 
@@ -72,27 +73,27 @@ export function whishTransferNameEn() {
   return "Munzer Ahmad Haddara";
 }
 
-/** Member / platform price (default 15). Reads LIVE_SESSION_PRICE_USD each call. */
+/** Member / platform price (default: plans.ts subscriber session). Reads LIVE_SESSION_PRICE_USD each call. */
 export function memberSessionAmountUsd() {
   return parsePositiveAmount(
     trimEnv("LIVE_SESSION_PRICE_USD") || trimEnv("NEXT_PUBLIC_LIVE_SESSION_PRICE_USD"),
-    15,
+    subscriberSessionUsd(),
   );
 }
 
-/** External / guest price (default 25). */
+/** External / guest price (default: plans.ts outside-student session). */
 export function externalSessionAmountUsd() {
   return parsePositiveAmount(
     trimEnv("LIVE_SESSION_PRICE_EXTERNAL_USD") ||
       trimEnv("NEXT_PUBLIC_LIVE_SESSION_PRICE_EXTERNAL_USD"),
-    25,
+    outsideSessionUsd(),
   );
 }
 
 /**
  * Price for a live session by audience.
- * `kind` "member" → LIVE_SESSION_PRICE_USD (default 15)
- * `kind` "external" → LIVE_SESSION_PRICE_EXTERNAL_USD (default 25)
+ * `kind` "member" → LIVE_SESSION_PRICE_USD (default plans.ts subscriberSessionUsd)
+ * `kind` "external" → LIVE_SESSION_PRICE_EXTERNAL_USD (default plans.ts outsideSessionUsd)
  */
 export function liveSessionPriceFor(kind: PricingTier = "member"): LiveSessionPrice {
   const lbpRaw = trimEnv("LIVE_SESSION_PRICE_LBP");

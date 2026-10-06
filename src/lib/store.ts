@@ -96,17 +96,15 @@ function normalizeStore(parsed: StoreData): StoreData {
   for (const plan of defaultSettings.plans) {
     if (!planIds.has(plan.id)) parsed.settings.plans.push(plan);
   }
-  // Keep subscription marketing labels in sync with defaultSettings (ids/prices stay stable).
+  // Keep activation-plan labels in sync with defaultSettings. Prices are NOT stored here any more
+  // (single source: src/lib/pricing/plans.ts), so legacy usdMonthly / usdTerm fields are dropped on read.
   parsed.settings.plans = parsed.settings.plans.map((plan) => {
-    const fresh = defaultSettings.plans.find((item) => item.id === plan.id);
-    if (!fresh) return plan;
+    const fresh = defaultSettings.plans.find((item) => item.id === plan.id) ?? plan;
     return {
-      ...plan,
+      id: plan.id,
       name: fresh.name,
       arabicName: fresh.arabicName,
       includes: fresh.includes,
-      usdMonthly: fresh.usdMonthly,
-      usdTerm: fresh.usdTerm,
       tier: fresh.tier,
       liveCredits: fresh.liveCredits,
     };

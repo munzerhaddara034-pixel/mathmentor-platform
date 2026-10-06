@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ManualTransferCheckout } from "@/components/billing/ManualTransferCheckout";
+import { PricingOptions } from "@/components/billing/PricingOptions";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
 import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
 import { useI18n } from "@/components/i18n/I18nProvider";
@@ -12,7 +13,6 @@ import { pickLang } from "@/lib/i18n/pick";
 import { rich } from "@/lib/i18n/rich";
 import {
   PRICING_REGIONS,
-  formatPrivateHourBand,
   formatRegionalPrice,
   formatUsdBand,
   planShowsPriceBand,
@@ -295,6 +295,10 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         ) : null}
       </div>
 
+      <div style={{ marginBottom: 16 }}>
+        <PricingOptions region={region} />
+      </div>
+
       <div className="card" style={{ marginBottom: 16 }}>
         <p className="eyebrow">{t.method}</p>
         <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
@@ -456,20 +460,6 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
             ) : null}
           </article>
         ))}
-      </div>
-
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>{t.privateTitle}</h3>
-        <p>
-          {rich(t.privateLine, {
-            band: <strong>{formatPrivateHourBand(pricing)}</strong>,
-            region: isAr ? pricing.labelAr : pricing.labelEn,
-          })}
-          {pricing.privateTutoringHourMinUsd !== pricing.privateTutoringHourMaxUsd
-            ? fmt(t.privateDefault, { n: pricing.privateTutoringHourUsd })
-            : ""}
-        </p>
-        <p className="muted">{rich(t.privateBook, { link: <Link href="/live">/live</Link> })}</p>
       </div>
 
       <div className="row" style={{ marginTop: 24 }}>
