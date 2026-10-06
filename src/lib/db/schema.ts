@@ -257,6 +257,32 @@ export const SCHEMA_MIGRATIONS: SchemaMigration[] = [
       $grant$;
     `,
   },
+  {
+    id: "009_hamza_tasks",
+    description: "Hamza v2 background tasks + step log (team chat developer agent); proposal status index for CI polling",
+    sql: `
+      CREATE TABLE IF NOT EXISTS mm_hamza_tasks (
+        id TEXT PRIMARY KEY,
+        channel TEXT NOT NULL,
+        status TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL,
+        locked_until TIMESTAMPTZ,
+        cost_usd NUMERIC(12, 6) NOT NULL DEFAULT 0,
+        data JSONB NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS mm_hamza_tasks_status_idx ON mm_hamza_tasks (status, created_at);
+      CREATE INDEX IF NOT EXISTS mm_hamza_tasks_channel_idx ON mm_hamza_tasks (channel, created_at DESC);
+      CREATE TABLE IF NOT EXISTS mm_hamza_steps (
+        id BIGSERIAL PRIMARY KEY,
+        task_id TEXT NOT NULL,
+        at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        data JSONB NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS mm_hamza_steps_task_idx ON mm_hamza_steps (task_id, id);
+      CREATE INDEX IF NOT EXISTS mm_team_proposals_status_idx ON mm_team_proposals (status, updated_at DESC);
+    `,
+  },
 ];
 
 export const MIGRATIONS_TABLE_SQL = `

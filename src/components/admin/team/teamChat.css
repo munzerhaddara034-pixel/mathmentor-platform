@@ -225,3 +225,77 @@
 .team-rich .katex-display { max-width: 100%; }
 .team-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; }
 .team-hint { font-size: 0.78rem; color: var(--muted); margin: 0; }
+
+/* ---- Hamza v2: header strip, timeline chips, code box, diff viewer (mobile-first) ---- */
+.team-strip { display: flex; flex-wrap: wrap; gap: 4px 8px; list-style: none; padding: 0; margin: 6px 0; font-size: 0.78rem; color: var(--muted); }
+.team-strip li { border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; background: var(--card); }
+.team-risk.is-high { border-color: #b02a2a; color: #7a1f1f; }
+.team-risk.is-medium { border-color: #b7791f; }
+.team-chips { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; padding: 0; margin: 6px 0; }
+.team-chip { display: inline-flex; gap: 4px; align-items: center; font-size: 0.75rem; border-radius: 999px; padding: 2px 8px; border: 1px solid var(--line); color: var(--muted); }
+.team-chip time { opacity: 0.8; }
+.team-chip.is-done { background: #dff3e4; color: #1d4d27; border-color: #9fd3ab; }
+.team-chip.is-active { background: var(--gold-soft); color: var(--ink); border-color: var(--gold); }
+.team-chip.is-failed { background: #fbe3e3; color: #7a1f1f; border-color: #e7a3a3; }
+.team-chip.is-reverted { background: #ede7f6; color: #4a2a7a; }
+.team-status.is-merged, .team-status.is-ci_passed { background: #dff3e4; color: #1d4d27; }
+.team-status.is-ci_failed { background: #fbe3e3; color: #7a1f1f; }
+.team-proposal.is-merged { border-color: #2f6b3a; }
+.team-code-box { display: grid; gap: 4px; }
+.team-code { font-size: 1.15rem; letter-spacing: 0.12em; padding: 2px 8px; border-radius: 8px; background: var(--card); border: 1px dashed var(--gold); user-select: all; }
+.team-code-input { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+.team-sticky-actions { position: sticky; inset-block-end: 0; background: var(--input-bg); padding-block: 6px; z-index: 1; }
+.team-proposal-actions a.btn { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
+.team-error-text { color: #7a1f1f; font-size: 0.85rem; }
+
+.team-diff-view { margin: 6px 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #1e2430; }
+.team-diff-toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: space-between; padding: 6px; background: var(--card); }
+.team-diff-tabs { display: flex; gap: 4px; overflow-x: auto; max-inline-size: 100%; -webkit-overflow-scrolling: touch; }
+.team-diff-tab { display: inline-flex; gap: 4px; align-items: center; min-height: 44px; white-space: nowrap; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; background: var(--input-bg); color: var(--ink); font-size: 0.78rem; }
+.team-diff-tab.is-active { border-color: var(--gold); background: var(--gold-soft); }
+.team-diff-modes { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.team-diff-mode { min-height: 44px; min-inline-size: 44px; padding: 0 10px; border: 0; background: var(--input-bg); color: var(--ink); font-size: 0.8rem; }
+.team-diff-mode.is-active { background: var(--gold-soft); font-weight: 700; }
+.team-diff-path { margin: 0; padding: 4px 8px; font-size: 0.78rem; color: #dee2e6; text-align: left; overflow-wrap: anywhere; }
+.team-diff-body { overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.75rem; line-height: 1.45; color: #e9ecef; text-align: left; }
+.team-diff-row { display: flex; gap: 6px; white-space: pre; padding-inline-end: 8px; min-inline-size: max-content; }
+.team-diff-row.is-add { background: rgba(64, 192, 87, 0.16); }
+.team-diff-row.is-del { background: rgba(250, 82, 82, 0.16); }
+.team-diff-row.is-hunk { color: #74c0fc; background: rgba(116, 192, 252, 0.08); padding: 2px 8px; }
+.team-diff-row.is-empty { background: rgba(255, 255, 255, 0.03); }
+.team-diff-num { display: inline-block; inline-size: 3.2em; flex: none; text-align: right; color: #868e96; user-select: none; }
+.team-diff-mark { flex: none; inline-size: 1em; color: #adb5bd; user-select: none; }
+.team-diff-split { display: grid; grid-template-columns: 1fr; }
+.team-diff-gap { display: block; inline-size: 100%; min-height: 44px; border: 0; background: rgba(255, 255, 255, 0.05); color: #adb5bd; font-size: 0.75rem; cursor: pointer; }
+.team-diff-expand { margin: 6px; }
+.tok-kw { color: #c792ea; }
+.tok-str { color: #c3e88d; }
+.tok-com { color: #7f8c98; font-style: italic; }
+.tok-num { color: #f78c6c; }
+@media (min-width: 900px) {
+  .team-diff-split { grid-template-columns: 1fr 1fr; }
+  .team-diff-split .team-diff-row { min-inline-size: 0; overflow: hidden; }
+}
+
+/* Hamza v2 — background task card, revise box, activity panel (mobile-first, logical properties) */
+.team-task { border: 1px solid var(--line); border-radius: 12px; padding-block: 8px; padding-inline: 10px; margin-block-start: 8px; display: grid; gap: 4px; background: var(--surface); }
+.team-task-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.85rem; }
+.team-task-pill { display: inline-block; border-radius: 999px; padding-inline: 8px; font-size: 0.72rem; font-weight: 700; border: 1px solid var(--line); }
+.team-task-pill.is-running, .team-task-pill.is-queued { background: #eef4ff; border-color: #9db8f5; }
+.team-task-pill.is-done { background: #eaf7ee; border-color: #8fd0a2; }
+.team-task-pill.is-failed { background: #fdecec; border-color: #f0a3a3; }
+.team-task-pill.is-budget_paused { background: #fff6e5; border-color: #f2c66d; }
+.team-task-cost { font-weight: 700; }
+.team-task-line { margin: 0; font-size: 0.82rem; overflow-wrap: anywhere; }
+.team-task-bar { block-size: 4px; border-radius: 4px; background: linear-gradient(90deg, transparent, #9db8f5, transparent); background-size: 200% 100%; animation: team-task-slide 1.4s linear infinite; }
+@keyframes team-task-slide { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .team-task-bar { animation: none; background: #9db8f5; } }
+.team-revise-input { inline-size: 100%; min-block-size: 88px; border: 1px solid var(--line); border-radius: 10px; padding: 8px; font: inherit; }
+.team-activity { border-block-end: 1px solid var(--line); padding-block: 6px; padding-inline: 12px; }
+.team-activity > summary { cursor: pointer; min-block-size: 44px; display: flex; align-items: center; font-weight: 700; }
+.team-activity-body { display: grid; gap: 6px; padding-block-end: 8px; max-block-size: 60vh; overflow: auto; }
+.team-activity-meter { block-size: 8px; border-radius: 8px; background: var(--line); overflow: hidden; }
+.team-activity-meter > span { display: block; block-size: 100%; background: #4f7be8; }
+.team-activity-h { font-size: 0.9rem; margin-block: 6px 0; }
+.team-activity-list { margin: 0; padding-inline-start: 18px; display: grid; gap: 4px; font-size: 0.82rem; overflow-wrap: anywhere; }
+.team-activity-events code { font-size: 0.78rem; }

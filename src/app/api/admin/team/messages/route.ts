@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createId } from "@/lib/ids";
+import { publicProposals } from "@/lib/hamza/publicProposal";
+import { hamzaTaskRepo } from "@/lib/hamza/tasks/store";
+import { publicTask, type PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import { handleHumanMessage } from "@/lib/team/agents";
 import { requireTeamStaff, teamError } from "@/lib/team/guard";
 import { teamRepo } from "@/lib/team/store";
@@ -24,7 +27,13 @@ export async function GET(request: Request) {
     const messages = await repo.listMessages(channel, 120);
     const ids = [...new Set(messages.map((message) => message.proposalId).filter((id): id is string => Boolean(id)))];
     const proposals = await repo.listProposals(ids);
-    const body: TeamThreadResponse = { ok: true, channel, messages, proposals, storage: repo.kind };
+    let tasks: PublicHamzaTask[] = [];
+    try {
+      tasks = (await hamzaTaskRepo().listByChannel(channel, 20)).map(publicTask);
+    } catch (error) {
+      console.error("team/messages GET tasks", error);
+    }
+    const body: TeamThreadResponse = { ok: true, channel, messages, proposals: publicProposals(proposals), tasks, storage: repo.kind };
     return NextResponse.json(body);
   } catch (error) {
     console.error("team/messages GET", error);
@@ -66,7 +75,7 @@ export async function POST(request: Request) {
       attachments.push(ref);
     }
     const result = await handleHumanMessage({ channel, text, attachments, actor: gate.actor });
-    const body: TeamSendResponse = { ok: true, ...result };
+    const body: TeamSendResponse = { ok: true, ...result, proposals: publicProposals(result.proposals) };
     return NextResponse.json(body);
   } catch (error) {
     console.error("team/messages POST", error);

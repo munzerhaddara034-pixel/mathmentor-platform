@@ -1,19 +1,18 @@
 /**
- * GitHub access for the developer agent: read files/tree, and — ONLY after an explicit approval click —
- * create a feature branch and commit the approved files atomically (single commit, no force).
- * Built on the same Octokit + env contract as src/lib/agent/githubCommit.ts.
+ * Read-only GitHub access for the developer agent (tree + files of the base branch) and the shared repo
+ * config. Built on the same Octokit + env contract as src/lib/agent/githubCommit.ts.
  */
-import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { promisify } from "node:util";
 import { Octokit } from "@octokit/rest";
 import { githubCommitConfig } from "@/lib/agent/githubCommit";
+import { hamzaBaseBranch, hamzaLiveBranches } from "@/lib/hamza/config";
 
 export type TeamGithubConfig = {
   owner: string;
   repo: string;
-  /** Base / live branch (Render builds it). */
+  /** Base / live branch (Render builds it): HAMZA_BASE_BRANCH, legacy fallback GITHUB_BRANCH. */
   baseBranch: string;
   tokenPresent: boolean;
 };
@@ -32,13 +31,18 @@ export function teamGithubConfig(): TeamGithubConfig {
   return {
     owner: process.env.GITHUB_OWNER?.trim() || base.owner || "munzerhaddara034-pixel",
     repo: process.env.GITHUB_REPO?.trim() || base.repo || "mathmentor-platform",
-    baseBranch: process.env.GITHUB_BRANCH?.trim() || "agent-hub-latest",
+    baseBranch: hamzaBaseBranch().branch,
     tokenPresent: Boolean(token()),
   };
 }
 
 export function isProtectedBranch(branch: string, config = teamGithubConfig()): boolean {
-  return branch === config.baseBranch || LEGACY_PROTECTED_BRANCHES.includes(branch) || FORBIDDEN_BRANCHES.includes(branch);
+  return (
+    branch === config.baseBranch ||
+    hamzaLiveBranches().includes(branch) ||
+    LEGACY_PROTECTED_BRANCHES.includes(branch) ||
+    FORBIDDEN_BRANCHES.includes(branch)
+  );
 }
 
 const BRANCH_RE = /^(?!.*\.\.)(?!.*\/\/)[A-Za-z0-9][A-Za-z0-9._\/-]{1,80}$/;
@@ -118,78 +122,5 @@ export async function readRepoFile(path: string, config = teamGithubConfig()): P
   }
 }
 
-export type CommitFilesInput = {
-  branch: string;
-  createFromBase: boolean;
-  message: string;
-  files: Array<{ path: string; content: string; baseSha: string | null }>;
-};
-
-export type CommitFilesResult =
-  | { ok: true; sha: string; url: string; branch: string; branchCreated: boolean }
-  | { ok: false; error: string };
-
-/** Single atomic commit on `branch` (fast-forward only — never force). Verifies files did not change since the diff. */
-export async function commitFilesToBranch(input: CommitFilesInput, config = teamGithubConfig()): Promise<CommitFilesResult> {
-  if (!token()) return { ok: false, error: "GITHUB_TOKEN غير معرّف في متغيرات البيئة على Render." };
-  if (FORBIDDEN_BRANCHES.includes(input.branch)) return { ok: false, error: `الكتابة على ${input.branch} ممنوعة من داخل المنصة.` };
-  // Hamza only ever commits to a fresh feat/*-style branch — never the live branch or main.
-  const allowed = agentCommitBranchCheck(input.branch, { liveBranch: config.baseBranch });
-  if (!allowed.ok) return { ok: false, error: allowed.reasonAr };
-  const kit = new Octokit({ auth: token() });
-  const { owner, repo } = config;
-  try {
-    const baseRef = await kit.git.getRef({ owner, repo, ref: `heads/${config.baseBranch}` });
-    let branchCreated = false;
-    let parentSha: string;
-    try {
-      const existing = await kit.git.getRef({ owner, repo, ref: `heads/${input.branch}` });
-      parentSha = existing.data.object.sha;
-    } catch {
-      if (!input.createFromBase) return { ok: false, error: `الفرع ${input.branch} غير موجود.` };
-      await kit.git.createRef({ owner, repo, ref: `refs/heads/${input.branch}`, sha: baseRef.data.object.sha });
-      parentSha = baseRef.data.object.sha;
-      branchCreated = true;
-    }
-    // Conflict guard: each file must still match the blob the diff was computed against.
-    for (const file of input.files) {
-      let currentSha: string | null = null;
-      try {
-        const res = await kit.repos.getContent({ owner, repo, path: file.path, ref: input.branch });
-        if (!Array.isArray(res.data) && res.data.type === "file") currentSha = res.data.sha;
-      } catch {
-        currentSha = null;
-      }
-      if (currentSha !== file.baseSha) {
-        return {
-          ok: false,
-          error: `الملف ${file.path} تغيّر على ${input.branch} منذ اقتراح الـ Diff — اطلب Diff جديداً.`,
-        };
-      }
-    }
-    const parent = await kit.git.getCommit({ owner, repo, commit_sha: parentSha });
-    const tree = await kit.git.createTree({
-      owner,
-      repo,
-      base_tree: parent.data.tree.sha,
-      tree: input.files.map((file) => ({ path: file.path, mode: "100644", type: "blob", content: file.content })),
-    });
-    const commit = await kit.git.createCommit({
-      owner,
-      repo,
-      message: input.message,
-      tree: tree.data.sha,
-      parents: [parentSha],
-    });
-    await kit.git.updateRef({ owner, repo, ref: `heads/${input.branch}`, sha: commit.data.sha, force: false });
-    return {
-      ok: true,
-      sha: commit.data.sha,
-      url: commit.data.html_url || `https://github.com/${owner}/${repo}/commit/${commit.data.sha}`,
-      branch: input.branch,
-      branchCreated,
-    };
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message.slice(0, 300) : "فشل الـ Commit على GitHub." };
-  }
-}
+// Writes (branch, commit, PR, merge) live in src/lib/hamza/github/octokit.ts and are reached only through
+// the approval pipeline (src/lib/hamza/pipeline) after an in-app approval code.

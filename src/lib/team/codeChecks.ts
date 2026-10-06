@@ -8,7 +8,8 @@ export const MAX_FILES_PER_PROPOSAL = 4;
 export const MAX_FILE_BYTES = 60_000;
 export const MAX_CHANGED_LINES = 600;
 
-const ALLOWED_PREFIXES = ["src/", "docs/", "content/", "scripts/", "public/"];
+// tests/ so Hamza can follow the "every new module gets a test" rule (tests run only in CI, without secrets).
+const ALLOWED_PREFIXES = ["src/", "docs/", "content/", "scripts/", "public/", "tests/"];
 const ALLOWED_ROOT_FILES = ["README.md"];
 const DENIED = [
   /(^|\/)\.env/i,

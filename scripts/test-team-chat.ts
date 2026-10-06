@@ -1,7 +1,8 @@
 /**
  * Team chat acceptance/unit tests (routing, loop guard, secrets, approval gate, diff, storage).
- *   npx tsx scripts/test-team-chat.ts                 → file storage (temp data dir)
- *   DATABASE_URL=postgres://… npx tsx scripts/test-team-chat.ts → Postgres storage
+ *   npm run test:team                                  → file storage (temp data dir)
+ *   DATABASE_URL=postgres://… npm run test:team        → Postgres storage
+ *   (npx tsx scripts/test-team-chat.ts also works.)
  * The LLM is replaced by a deterministic fake HERE ONLY (setTeamLlmOverride); production code always calls Gemini.
  * GITHUB_TOKEN is removed for this process so no commit can ever happen from the tests.
  */
@@ -32,6 +33,7 @@ async function main() {
   const types = await import("../src/lib/team/types");
 
   const actor = { id: "user-test-staff", name: "Prof. Munzer Haddara", email: "staff.test@example.invalid", role: "teacher" };
+  process.env.TEAM_APPROVER_EMAILS = actor.email;
 
   test("§2.2 test 5: multi-topic team message → محمد alone", () => {
     const r = routing.routeHumanMessage("team", "بدنا نطلق دورة G12 SE الشهر الجاي: بدنا صفحة تسجيل، وبوستر، ونموذج امتحان تجريبي.");
@@ -99,6 +101,8 @@ async function main() {
     assert.equal(checks.staticFindings([{ path: "src/ok.tsx", content: "export const a = 1;\n", addedLines: ["export const a = 1;"] }]).length, 0);
     assert.equal(checks.isAllowedPath("src/components/BookSessionButton.tsx"), true);
     assert.equal(checks.isAllowedPath("../etc/passwd"), false);
+    assert.equal(checks.isAllowedPath("tests/newModule.test.mjs"), true);
+    assert.equal(checks.isAllowedPath(".github/workflows/hamza-ci.yml"), false);
   });
   test("constants guard: full numbers, brand, Barème quarter marks", () => {
     assert.equal(constants.enforceConstants("Whish 70772968 · واتساب 76 532 421"), "Whish 96170772968 · واتساب 96176532421");
@@ -230,8 +234,22 @@ async function main() {
       branch: "agent-hub-latest",
       actor,
     });
-    assert.ok(!liveNoType.ok && liveNoType.status === 400);
-    const noToken = await approval.decideProposal({ proposalId: proposal.id, action: "approve", confirm: true, actor });
+    // The typed live-branch override is gone: the live branch is refused like main (403).
+    assert.ok(!liveNoType.ok && liveNoType.status === 403);
+    // Hamza v2: the button alone is not enough — Approval #1 needs the in-app code bound to this diff.
+    const noCode = await approval.decideProposal({ proposalId: proposal.id, action: "approve", confirm: true, reviewed: true, actor });
+    assert.ok(!noCode.ok && noCode.status === 403);
+    const issued = await approval.decideProposal({ proposalId: proposal.id, action: "issue_code", step: "open_pr", confirm: true, actor });
+    assert.ok(issued.ok && /^HMZ-/.test(issued.code ?? ""));
+    assert.ok(issued.ok && !JSON.stringify(issued.proposal).includes(String(issued.proposal.hamza?.codes.open_pr?.hash ?? "§")));
+    const noToken = await approval.decideProposal({
+      proposalId: proposal.id,
+      action: "approve",
+      confirm: true,
+      reviewed: true,
+      code: issued.ok ? issued.code : "",
+      actor,
+    });
     assert.ok(noToken.ok && noToken.proposal.status === "failed" && /GITHUB_TOKEN/.test(noToken.proposal.error ?? ""));
     const rejected = await approval.decideProposal({ proposalId: proposal.id, action: "reject", confirm: true, actor });
     assert.ok(rejected.ok && rejected.proposal.status === "rejected");

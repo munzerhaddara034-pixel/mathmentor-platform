@@ -93,6 +93,13 @@ export const fileTeamRepo: TeamRepo = {
     const store = await readStore();
     return store.proposals.filter((item) => ids.includes(item.id));
   },
+  async listProposalsByStatus(statuses, limit) {
+    const store = await readStore();
+    return store.proposals
+      .filter((item) => statuses.includes(item.status))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .slice(0, limit);
+  },
   async transitionProposal(id, from, patch) {
     return mutate((store) => {
       const index = store.proposals.findIndex((item) => item.id === id);

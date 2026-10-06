@@ -83,15 +83,23 @@ test("agent branch policy: only feat/fix/chore/docs, never main / master / agent
 test("Hamza (/admin/team): no typed live-branch override; server enforces the branch policy", () => {
   const card = src("components/admin/team/ProposalCard.tsx");
   assert.doesNotMatch(card, /confirmBranch|target === "live"|typeLiveBranch/);
-  assert.match(card, /agentCommitBranchCheck/);
+  // Hamza v2: the feature-branch field lives in the Approval #1 panel.
+  const approvePanel = src("components/admin/team/ApprovePanel.tsx");
+  assert.doesNotMatch(approvePanel, /confirmBranch|target === "live"|typeLiveBranch/);
+  assert.match(approvePanel, /agentCommitBranchCheck/);
   const approval = src("lib/team/approval.ts");
   assert.doesNotMatch(approval, /confirmBranch/);
   assert.match(approval, /agentCommitBranchCheck\(branch, \{ liveBranch: config\.baseBranch \}\)/);
-  assert.match(approval, /createFromBase: true/);
   const route = src("app/api/admin/team/proposals/[id]/route.ts");
   assert.doesNotMatch(route, /confirmBranch/);
-  const github = src("lib/team/github.ts");
-  assert.match(github, /agentCommitBranchCheck\(input\.branch, \{ liveBranch: config\.baseBranch \}\)/);
+  // Hamza v2: writes moved to the pipeline's Octokit writer, which re-checks the policy on every write
+  // (branch creation, commit, PR) and the pipeline checks it again before the code is accepted.
+  const writer = src("lib/hamza/github/octokit.ts");
+  assert.match(writer, /agentCommitBranchCheck\(branch, \{ liveBranch: config\.baseBranch\.branch \}\)/);
+  assert.equal(writer.match(/assertAgentWritableBranch\((branch|head|pr\.headRef)\)/g)?.length, 4);
+  const openPr = src("lib/hamza/pipeline/openPr.ts");
+  assert.match(openPr, /agentCommitBranchCheck\(branch, \{ liveBranch: base \}\)/);
+  assert.doesNotMatch(src("lib/team/github.ts"), /createRef|createCommit|updateRef/);
 });
 
 test("WhatsApp approvals need a verified webhook", () => {

@@ -3,6 +3,8 @@
 import { teamAuthorDisplayName, type TeamMessage, type TeamProposal } from "@/lib/team/types";
 import { AttachmentView } from "./AttachmentView";
 import { ProposalCard } from "./ProposalCard";
+import { TaskCard } from "./TaskCard";
+import type { PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import { RichText } from "./RichText";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { INTL_LOCALE, type Locale } from "@/lib/i18n/config";
@@ -12,8 +14,10 @@ import { teamMessages } from "@/lib/i18n/ns/team";
 type Props = {
   message: TeamMessage;
   proposal?: TeamProposal;
+  task?: PublicHamzaTask;
   referredByName?: string;
-  onDecided: (proposal: TeamProposal, message: TeamMessage) => void;
+  onDecided: (proposal: TeamProposal, message?: TeamMessage) => void;
+  onTaskUpdated: (task: PublicHamzaTask) => void;
 };
 
 function timeLabel(iso: string, locale: Locale) {
@@ -24,7 +28,7 @@ function timeLabel(iso: string, locale: Locale) {
   }
 }
 
-export function MessageBubble({ message, proposal, referredByName, onDecided }: Props) {
+export function MessageBubble({ message, proposal, task, referredByName, onDecided, onTaskUpdated }: Props) {
   const { locale } = useI18n();
   const t = teamMessages[locale];
   const authorName = teamAuthorDisplayName(message, t.agents);
@@ -52,6 +56,7 @@ export function MessageBubble({ message, proposal, referredByName, onDecided }: 
           </details>
         ) : null}
         {message.notice ? <p className="team-notice">{message.notice}</p> : null}
+        {task ? <TaskCard task={task} onUpdated={onTaskUpdated} /> : null}
         {proposal && message.authorKind === "agent" ? <ProposalCard proposal={proposal} onDecided={onDecided} /> : null}
       </div>
     </article>
