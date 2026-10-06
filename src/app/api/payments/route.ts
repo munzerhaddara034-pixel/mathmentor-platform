@@ -9,7 +9,8 @@ import { apiSession } from "@/lib/auth/guards";
 import { clientIpFrom, paymentRateLimits, tooManyRequestsBody } from "@/lib/security/rateLimit";
 import { isSameOriginRequest } from "@/lib/security/origin";
 import { RECEIPT_MAX_BYTES, validateReceipt } from "@/lib/payments/receipt";
-import { validatePaymentClaim } from "@/lib/payments/validation";
+import { normalizePhone, validatePaymentClaim } from "@/lib/payments/validation";
+import { resolveRegionForRequest } from "@/lib/pricing/regionSignals";
 import { listUserPayments, type NewReceipt } from "@/lib/payments/db";
 import { paymentsAvailable, paymentsPool, submitPaymentClaim } from "@/lib/payments/service";
 import { forbiddenOriginResponse, paymentErrorResponse, unavailableResponse } from "@/lib/payments/http";
@@ -19,7 +20,8 @@ export const dynamic = "force-dynamic";
 
 /** Receipt (5 MB) + form fields + multipart overhead. */
 const MAX_BODY_BYTES = RECEIPT_MAX_BYTES + 256 * 1024;
-const FIELDS = ["payerName", "payerEmail", "payerPhone", "plan", "period", "region", "amount", "currency", "method", "reference", "transferDate", "orderId"];
+// "region" is accepted for old clients but ignored; "locationRegion" is the geolocation claim (one signal).
+const FIELDS = ["payerName", "payerEmail", "payerPhone", "plan", "period", "region", "locationRegion", "amount", "currency", "method", "reference", "transferDate", "orderId"];
 
 export async function GET() {
   const guard = await apiSession();
@@ -97,7 +99,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const outcome = await submitPaymentClaim({ user, claim: validation.value, receipt, ip });
+    // Region is decided HERE from server-side signals: location claim + trusted IP country + phone on file.
+    const region = resolveRegionForRequest({
+      location: validation.value.locationRegion,
+      headers: request.headers,
+      phone: normalizePhone(user.contactPhone),
+    });
+    const outcome = await submitPaymentClaim({ user, claim: validation.value, region, receipt, ip });
     if (!outcome.ok) return NextResponse.json({ ok: false, field: outcome.field, error: outcome.error, errorAr: outcome.errorAr }, { status: outcome.status });
     return NextResponse.json(
       {

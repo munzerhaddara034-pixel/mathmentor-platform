@@ -26,6 +26,12 @@ export function beirutDay(isoValue: string | null | undefined): string {
   return new Date(isoValue).toLocaleDateString("en-GB", { timeZone: "Asia/Beirut", dateStyle: "medium" });
 }
 
+/** "gcc (location: gcc, ip: lebanon)" — region names + sources only. */
+export function regionLine(p: Pick<PaymentRecord, "pricingRegion" | "regionSources">): string {
+  const sources = Object.entries(p.regionSources ?? {}).map(([source, region]) => `${source}: ${region}`);
+  return `${p.pricingRegion ?? "—"}${sources.length ? ` (${sources.join(", ")})` : ""}`;
+}
+
 function detailLines(p: PaymentRecord, flags: string[]): Array<[string, string]> {
   return [
     ["Student", p.payerName],
@@ -33,6 +39,7 @@ function detailLines(p: PaymentRecord, flags: string[]): Array<[string, string]>
     ["Phone", p.payerPhone || "—"],
     ["Plan", `${p.plan} (${p.period})`],
     ["Amount", `${formatUsd(p.amount)} (expected ${formatUsd(p.expectedAmountUsd)})`],
+    ["Region", regionLine(p)],
     ["Method", methodLabel(p.method)],
     ["Reference", p.reference],
     ["Transfer date", p.transferDate],
@@ -47,6 +54,7 @@ export function paymentFlags(p: PaymentRecord, extra?: { duplicateReceipt?: bool
   const flags: string[] = [];
   if (Math.abs(p.amount - p.expectedAmountUsd) >= 0.01) flags.push("AMOUNT MISMATCH");
   if (extra?.duplicateReceipt) flags.push("RECEIPT IMAGE USED BEFORE");
+  if (p.regionMismatch) flags.push("REGION SIGNALS DISAGREE (charged the most expensive)");
   return flags;
 }
 

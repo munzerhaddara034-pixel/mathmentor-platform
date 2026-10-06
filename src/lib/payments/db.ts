@@ -14,6 +14,8 @@ import { computePeriod } from "./expiry";
 import type { ReceiptMime } from "./receipt";
 import type { AdminPaymentRow, PaymentRecord, PaymentStatus } from "./types";
 import type { ValidClaim } from "./validation";
+import { sanitizeRegionSignals, type RegionSignals } from "@/lib/pricing/regionSignals";
+import type { PricingRegion } from "@/lib/pricing/plans";
 
 export type TxPool = { connect(): Promise<PoolClient>; query: PoolClient["query"] };
 
@@ -62,7 +64,7 @@ const COLUMNS = `p.id, p.user_id, p.payer_name, p.payer_email, p.payer_phone, p.
   p.expected_amount_usd::float8 AS expected_amount_usd, p.amount::float8 AS amount, p.currency, p.method,
   p.reference, p.reference_raw, to_char(p.transfer_date, 'YYYY-MM-DD') AS transfer_date, p.receipt_url, p.order_id,
   p.status, p.submitted_at, p.reviewed_at, p.reviewed_by, p.note, p.period_start, p.period_end,
-  p.owner_notified_at, p.student_notified_at`;
+  p.owner_notified_at, p.student_notified_at, p.region_sources, p.region_mismatch`;
 
 type Row = Record<string, unknown>;
 
@@ -78,6 +80,8 @@ export function rowToPayment(row: Row): PaymentRecord {
     plan: String(row.plan),
     period: row.period === "term" ? "term" : "monthly",
     pricingRegion: (row.pricing_region as string | null) ?? null,
+    regionSources: sanitizeRegionSignals(row.region_sources),
+    regionMismatch: row.region_mismatch === true,
     expectedAmountUsd: Number(row.expected_amount_usd),
     amount: Number(row.amount),
     currency: "USD",
@@ -108,7 +112,18 @@ export type NewReceipt = { mimeType: ReceiptMime; sizeBytes: number; sha256: str
 
 export async function insertPayment(
   pool: TxPool,
-  input: { id: string; userId: string; claim: ValidClaim; expectedAmountUsd: number; plan: string; receipt?: NewReceipt | null; actor: Actor; ip?: string | null },
+  input: {
+    id: string;
+    userId: string;
+    claim: ValidClaim;
+    expectedAmountUsd: number;
+    plan: string;
+    /** Server-resolved region (regionSignals.ts). Only region names + source names + the flag are stored. */
+    region?: { region: PricingRegion; sources: RegionSignals; mismatch: boolean } | null;
+    receipt?: NewReceipt | null;
+    actor: Actor;
+    ip?: string | null;
+  },
 ): Promise<PaymentRecord> {
   const { claim } = input;
   try {
@@ -122,8 +137,9 @@ export async function insertPayment(
       if ((open.rows[0]?.n ?? 0) >= MAX_PENDING_PER_USER) throw new PaymentError("too_many_pending", 429);
       const inserted = await client.query(
         `INSERT INTO mm_payments (id, user_id, payer_name, payer_email, payer_phone, plan, period, pricing_region,
-           expected_amount_usd, amount, currency, method, reference, reference_raw, transfer_date, receipt_url, order_id, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'USD', $11, $12, $13, $14::date, $15, $16, 'pending')
+           expected_amount_usd, amount, currency, method, reference, reference_raw, transfer_date, receipt_url, order_id, status,
+           region_sources, region_mismatch)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'USD', $11, $12, $13, $14::date, $15, $16, 'pending', $17::jsonb, $18)
          RETURNING ${COLUMNS.replace(/\bp\./g, "")}`,
         [
           input.id,
@@ -133,7 +149,7 @@ export async function insertPayment(
           claim.payerPhone,
           input.plan,
           claim.period,
-          claim.region,
+          input.region?.region ?? null,
           input.expectedAmountUsd,
           claim.amount,
           claim.method,
@@ -142,6 +158,8 @@ export async function insertPayment(
           claim.transferDate,
           input.receipt ? `/api/payments/${encodeURIComponent(input.id)}/receipt` : null,
           claim.orderId,
+          JSON.stringify(sanitizeRegionSignals(input.region?.sources)),
+          input.region?.mismatch === true,
         ],
       );
       if (input.receipt) {

@@ -13,6 +13,7 @@ import {
   type PricingRegion,
 } from "@/lib/pricing/plans";
 import { buildManualTransferInstructions, toCheckoutTransfer } from "@/lib/pricing/transfers";
+import type { RegionResolution, RegionSignals } from "@/lib/pricing/regionSignals";
 
 const FILE = "whish-orders.json";
 
@@ -35,7 +36,12 @@ export type WhishSubscriptionOrder = {
   status: WhishOrderStatus;
   paymentProvider: "manual";
   paymentMethod: PaymentMethod;
+  /** Resolved server-side (regionSignals.ts) — never the browser's choice. */
   pricingRegion?: PricingRegion;
+  /** Which signal named which region (region names only, never coordinates / IP). */
+  regionSources?: RegionSignals;
+  /** Signals disagreed → most expensive region charged; flagged for the owner's review. */
+  regionMismatch?: boolean;
   studentMarkedPaidAt?: string;
   paidAt?: string;
   confirmedBy?: string;
@@ -119,14 +125,23 @@ export async function createSubscribeOrder(input: {
   studentPhone: string;
   planId: string;
   period: SubscribePeriod;
-  region?: PricingRegion;
+  /** Server-side resolution (resolveRegionForRequest). There is deliberately no client "region" input. */
+  region: RegionResolution;
   paymentMethod?: PaymentMethod;
 }) {
+  if (!input.region.ok) {
+    return {
+      ok: false as const,
+      error: "Enable location so we can apply your country's prices.",
+      errorAr: "فعّل الموقع لنطبّق أسعار بلدك.",
+    };
+  }
+  const region = input.region;
   return withDocumentLock(FILE, async () => {
     const paymentMethod: PaymentMethod = isPaymentMethod(input.paymentMethod)
       ? input.paymentMethod
       : "whish";
-    const resolved = await resolvePlanAmount(input.planId, input.period, { region: input.region });
+    const resolved = await resolvePlanAmount(input.planId, input.period, { region: region.region });
     if (!resolved.ok) return resolved;
 
     const now = new Date().toISOString();
@@ -146,6 +161,8 @@ export async function createSubscribeOrder(input: {
       paymentProvider: "manual",
       paymentMethod,
       pricingRegion: resolved.region,
+      regionSources: region.sources,
+      regionMismatch: region.mismatch,
       createdAt: now,
       updatedAt: now,
     };
