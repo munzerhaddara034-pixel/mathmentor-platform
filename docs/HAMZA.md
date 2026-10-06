@@ -93,7 +93,11 @@ missing variable names. Values are never logged or sent to the browser.
    the PAT from a separate collaborator account with the Write role.
    Note: "require a pull request" also blocks today's direct merge-pushes to `agent-hub-latest`; releases then go
    through PRs too.
-3. **Actions:** `.github/workflows/hamza-ci.yml` runs on PRs to the live branch with `permissions: contents: read` and no secrets. If the repo is private, CI uses Actions minutes.
+3. **Add the CI workflow (one time, by Munzer).** The automation token has no `workflow` scope, so GitHub refused to
+   push `.github/workflows/hamza-ci.yml`. Its exact content is kept in `docs/hamza/hamza-ci.workflow.yml`: copy it to
+   `.github/workflows/hamza-ci.yml` with the GitHub web editor (or a token that has the `workflow` scope). Until it
+   exists, Hamza's PRs show "no CI check started" and Approval #2 (merge) stays blocked, which fails safe.
+   **Actions:** `.github/workflows/hamza-ci.yml` runs on PRs to the live branch with `permissions: contents: read` and no secrets. If the repo is private, CI uses Actions minutes.
 
 ## Rollback runbook
 1. Preferred: on the merged card press «تراجع». It opens `fix/revert-<sha7>`, runs CI, and asks for Approval #2. Render redeploys after the merge.

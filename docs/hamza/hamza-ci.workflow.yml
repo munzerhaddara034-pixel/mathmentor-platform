@@ -1,0 +1,45 @@
+# Hamza CI — runs on every pull request (Hamza's feat/* PRs and human PRs alike).
+# The job id/name `hamza-ci` is the required status check: Hamza's merge approval (#2) stays disabled
+# until it is green on the exact PR head, and the branch ruleset should require it too (docs/HAMZA.md).
+# No production secrets here, ever. Hamza cannot edit .github/ (path denylist), so humans own this file.
+name: hamza-ci
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hamza-ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hamza-ci:
+    name: hamza-ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      HAMZA_STANDARDS_BASE: origin/${{ github.base_ref || 'agent-hub-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Project standards (added lines vs base)
+        run: npm run check:standards
+      - name: Typecheck (tsc --noEmit)
+        run: npx tsc --noEmit
+      - name: Unit tests (npm test)
+        run: npm test
+      - name: Team chat suite
+        run: npm run test:team
+      - name: Next.js build (one retry — next/font/google fetches are flaky)
+        run: npm run build || (sleep 20 && npm run build)
