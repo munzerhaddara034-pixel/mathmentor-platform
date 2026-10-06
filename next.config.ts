@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders() }];
   },
+  // Lesson-player manifests are read with fs at request time; keep them in the standalone bundle.
+  outputFileTracingIncludes: {
+    "/lessons/preview/[id]": ["./content/lessons/*/lesson.json"],
+  },
   serverExternalPackages: ["pdf-parse", "@netlify/blobs", "livekit-server-sdk", "pg", "typescript"],
 };
 

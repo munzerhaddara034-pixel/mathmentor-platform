@@ -30,3 +30,5 @@ public/uploads
 *.zip
 .DS_Store
 *.tsbuildinfo
+# Generated lesson-player demo media (scripts/make-lesson-demo.sh)
+public/lesson-media/
