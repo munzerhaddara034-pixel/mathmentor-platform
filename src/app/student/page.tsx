@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { academyLessons } from "@/lib/academyLessons";
 import { defaultSettings } from "@/lib/settings";
+import { RegionLockedPrices } from "@/components/billing/RegionLockedPrices";
 import { useNs } from "@/components/i18n/useNs";
 import { fmt } from "@/lib/i18n/format";
 import { accountMessages } from "@/lib/i18n/ns/account";
@@ -138,17 +139,12 @@ export default function StudentPage() {
         </article>
       </div>
       <h2>{t.plans}</h2>
-      <div className="grid two">
-        {settings.plans.map((plan) => (
-          <article className="card" key={plan.id}>
-            <h3>{plan.arabicName}</h3>
-            <p>{fmt(t.planPrice, { monthly: plan.usdMonthly, term: plan.usdTerm })}</p>
-            <p className="muted">{plan.includes}</p>
-            <Link className="btn dark" href="/subscribe">
-              {t.payWhish}
-            </Link>
-          </article>
-        ))}
+      {/* Region-locked (pricing v2): prices from plans.ts only, after location is enabled. */}
+      <RegionLockedPrices showBookLink={false} />
+      <div className="row" style={{ marginTop: 12 }}>
+        <Link className="btn dark" href="/subscribe">
+          {t.payWhish}
+        </Link>
       </div>
     </main>
   );

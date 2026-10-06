@@ -61,7 +61,10 @@ export const paymentClaimSchema = z
     payerPhone: optionalText(32),
     plan: z.string().trim().min(1).max(40),
     period: z.enum(PAYMENT_PERIODS),
+    /** Ignored (kept so older clients still validate): the browser never chooses the pricing region. */
     region: z.enum(["lebanon", "gcc", "international", "admissions_us"]).optional(),
+    /** Region the browser computed from geolocation: ONE signal for the server-side resolver, not authoritative. */
+    locationRegion: z.enum(["lebanon", "gcc", "international", "admissions_us"]).optional(),
     amount: z.coerce.number().positive().max(100_000).refine((n) => Math.abs(n * 100 - Math.round(n * 100)) < 1e-6, "max 2 decimals"),
     currency: z.literal(PAYMENT_CURRENCY).default(PAYMENT_CURRENCY),
     method: z.enum(PAYMENT_METHODS),
@@ -79,7 +82,8 @@ export type ValidClaim = {
   payerPhone: string | null;
   plan: string;
   period: (typeof PAYMENT_PERIODS)[number];
-  region: "lebanon" | "gcc" | "international" | "admissions_us" | null;
+  /** Client location claim (see src/lib/pricing/regionSignals.ts); the stored region is resolved server-side. */
+  locationRegion: "lebanon" | "gcc" | "international" | "admissions_us" | null;
   amount: number;
   currency: typeof PAYMENT_CURRENCY;
   method: (typeof PAYMENT_METHODS)[number];
@@ -113,7 +117,7 @@ export function validatePaymentClaim(input: unknown, now = new Date()): ClaimVal
       payerPhone: phone,
       plan: data.plan,
       period: data.period,
-      region: data.region ?? null,
+      locationRegion: data.locationRegion ?? null,
       amount: Math.round(data.amount * 100) / 100,
       currency: PAYMENT_CURRENCY,
       method: data.method,

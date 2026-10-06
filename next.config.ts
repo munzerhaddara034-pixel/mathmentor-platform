@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders() }];
   },
-  serverExternalPackages: ["pdf-parse", "@netlify/blobs", "livekit-server-sdk", "pg", "typescript"],
+  serverExternalPackages: ["pdf-parse", "@netlify/blobs", "livekit-server-sdk", "pg", "typescript", "geoip-country"],
+  // geoip-country reads its bundled GeoLite2 .dat files at runtime: keep them in the standalone output.
+  outputFileTracingIncludes: { "/api/**": ["./node_modules/geoip-country/data/*.dat"] },
 };
 
 export default nextConfig;

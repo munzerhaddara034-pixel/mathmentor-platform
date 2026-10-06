@@ -1,4 +1,5 @@
 /** Manual payment claims (mm_payments). Pure types, shared by server code and client components. */
+import type { RegionSignals } from "@/lib/pricing/regionSignals";
 
 export const PAYMENT_METHODS = ["whish", "omt"] as const;
 export type PaymentMethodId = (typeof PAYMENT_METHODS)[number];
@@ -20,7 +21,12 @@ export type PaymentRecord = {
   payerPhone: string | null;
   plan: string;
   period: PaymentPeriod;
+  /** Region resolved SERVER-side at submission (never taken from the browser). */
   pricingRegion: string | null;
+  /** Which signal named which region (location / ip / phone) — region names only, never coordinates. */
+  regionSources: RegionSignals;
+  /** Signals disagreed: the most expensive region was charged and the claim needs the owner's review. */
+  regionMismatch: boolean;
   expectedAmountUsd: number;
   amount: number;
   currency: typeof PAYMENT_CURRENCY;

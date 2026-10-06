@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { LocationGate, RegionNotice } from "@/components/billing/LocationGate";
 import { ManualTransferCheckout } from "@/components/billing/ManualTransferCheckout";
+import { PricingOptions } from "@/components/billing/PricingOptions";
+import { useGeoRegion } from "@/components/billing/useGeoRegion";
 import { ApiErrorBanner, SkeletonBlock } from "@/components/ui/Skeleton";
 import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
 import { useI18n } from "@/components/i18n/I18nProvider";
@@ -11,19 +14,17 @@ import { billingMessages } from "@/lib/i18n/ns/billing";
 import { pickLang } from "@/lib/i18n/pick";
 import { rich } from "@/lib/i18n/rich";
 import {
-  PRICING_REGIONS,
-  formatPrivateHourBand,
   formatRegionalPrice,
   formatUsdBand,
   planShowsPriceBand,
   getRegionalPricing,
   isPaymentMethod,
   isPricingRegion,
-  pricingRegionFromCurriculumId,
   type PaymentMethod,
   type PricingRegion,
   type RegionalPlan,
 } from "@/lib/pricing/plans";
+import type { RegionSignals } from "@/lib/pricing/regionSignals";
 import { paymentMethodLabel, type ManualTransferInstructions } from "@/lib/pricing/transfers";
 
 type Period = "monthly" | "term";
@@ -41,6 +42,8 @@ type Order = {
   studentMarkedPaidAt?: string;
   paymentMethod?: PaymentMethod;
   pricingRegion?: PricingRegion;
+  regionSources?: RegionSignals;
+  regionMismatch?: boolean;
 };
 
 type PriceInfo = {
@@ -57,11 +60,16 @@ type Props = {
 };
 
 export function SubscribePlans({ contactPhone, contactNote }: Props) {
-  const { curriculumId, curriculum, ready: curriculumReady } = useCurriculum();
+  const { curriculum } = useCurriculum();
   const { locale } = useI18n();
   const t = billingMessages[locale].plans;
+  const tGeo = billingMessages[locale].geo;
   const isAr = locale === "ar";
-  const [region, setRegion] = useState<PricingRegion>("lebanon");
+  // Region-locked pricing: no region buttons. Prices appear only after geolocation, for the region the
+  // SERVER resolved (location claim + IP country + phone). Checkout re-resolves on the server again.
+  const geo = useGeoRegion();
+  const region: PricingRegion | null = geo.state.status === "ready" ? geo.state.region : null;
+  const locationRegion = geo.state.status === "ready" ? geo.state.locationRegion : null;
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("whish");
   const [authenticated, setAuthenticated] = useState(false);
   const [staff, setStaff] = useState(false);
@@ -76,13 +84,10 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
   const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    if (!curriculumReady) return;
-    const next = pricingRegionFromCurriculumId(curriculumId);
-    setRegion(next);
-    setPaymentMethod(getRegionalPricing(next).defaultPaymentMethod);
-  }, [curriculumId, curriculumReady]);
+    if (region) setPaymentMethod(getRegionalPricing(region).defaultPaymentMethod);
+  }, [region]);
 
-  const pricing = useMemo(() => getRegionalPricing(region), [region]);
+  const pricing = useMemo(() => (region ? getRegionalPricing(region) : null), [region]);
 
   const loadSessionAndOrders = useCallback(async (opts?: { seedActive?: boolean }) => {
     setLoading(true);
@@ -123,11 +128,6 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
     void loadSessionAndOrders({ seedActive: true });
   }, [loadSessionAndOrders]);
 
-  function changeRegion(next: PricingRegion) {
-    setRegion(next);
-    setPaymentMethod(getRegionalPricing(next).defaultPaymentMethod);
-  }
-
   async function startPayment(plan: RegionalPlan, period: Period) {
     setBusy(true);
     setError(undefined);
@@ -142,10 +142,11 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
+        // No region / price from the browser: only the geolocation claim, one signal the server weighs.
         body: JSON.stringify({
           planId: plan.id,
           period,
-          region,
+          locationRegion,
           paymentMethod,
         }),
       });
@@ -270,49 +271,43 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         {contactNote ? <p className="muted">{contactNote}</p> : null}
       </div>
 
-      <div className="card" style={{ marginBottom: 16 }}>
-        <p className="eyebrow">{t.region}</p>
-        <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
-          {PRICING_REGIONS.map((id) => {
-            const pack = getRegionalPricing(id);
-            return (
-              <button
-                key={id}
-                type="button"
-                className={region === id ? "btn dark" : "btn"}
-                onClick={() => changeRegion(id)}
-              >
-                {isAr ? pack.selectorAr : pack.selectorEn}
-              </button>
-            );
-          })}
+      {!region || !pricing || geo.state.status !== "ready" ? (
+        <div style={{ marginBottom: 16 }}>
+          <LocationGate state={geo.state} onEnable={geo.request} />
         </div>
-        <p className="muted" style={{ marginTop: 8 }}>
-          {fmt(t.linked, { curriculum: isAr ? curriculum.shortAr : curriculum.shortEn })}
-        </p>
-        {(isAr ? pricing.notesAr : pricing.notesEn) ? (
-          <p style={{ marginTop: 8 }}>{isAr ? pricing.notesAr : pricing.notesEn}</p>
-        ) : null}
-      </div>
+      ) : (
+        <>
+          <div className="card" style={{ marginBottom: 16 }}>
+            <RegionNotice region={region} sources={geo.state.sources} mismatch={geo.state.mismatch} />
+            {(isAr ? pricing.notesAr : pricing.notesEn) ? (
+              <p style={{ marginTop: 8 }}>{isAr ? pricing.notesAr : pricing.notesEn}</p>
+            ) : null}
+          </div>
 
-      <div className="card" style={{ marginBottom: 16 }}>
-        <p className="eyebrow">{t.method}</p>
-        <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
-          {(["whish", "western_union", "omt"] as const).map((method) => {
-            const label = paymentMethodLabel(method);
-            return (
-              <button
-                key={method}
-                type="button"
-                className={paymentMethod === method ? "btn dark" : "btn"}
-                onClick={() => setPaymentMethod(method)}
-              >
-                {isAr ? label.ar : label.en}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+          <div style={{ marginBottom: 16 }}>
+            <PricingOptions region={region} />
+          </div>
+
+          <div className="card" style={{ marginBottom: 16 }}>
+            <p className="eyebrow">{t.method}</p>
+            <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
+              {(["whish", "western_union", "omt"] as const).map((method) => {
+                const label = paymentMethodLabel(method);
+                return (
+                  <button
+                    key={method}
+                    type="button"
+                    className={paymentMethod === method ? "btn dark" : "btn"}
+                    onClick={() => setPaymentMethod(method)}
+                  >
+                    {isAr ? label.ar : label.en}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {loading ? <SkeletonBlock lines={4} label={t.loading} /> : null}
       {busy ? <SkeletonBlock lines={2} label={t.updating} /> : null}
@@ -365,6 +360,14 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
                   {regionLabel ? ` · ${isAr ? regionLabel.labelAr : regionLabel.labelEn}` : ""}
                   {order.status === "transfer_claimed" || order.studentMarkedPaidAt ? t.studentMarked : t.pendingState}
                 </p>
+                {staff && order.regionSources && Object.keys(order.regionSources).length ? (
+                  <p className="muted" dir="ltr" data-testid="order-region-sources">
+                    {Object.entries(order.regionSources)
+                      .map(([source, value]) => `${source}: ${value}`)
+                      .join(" · ")}
+                  </p>
+                ) : null}
+                {staff && order.regionMismatch ? <span className="badge mm-review-badge">{tGeo.review}</span> : null}
                 <p className="muted">{fmt(t.order, { id: order.id })}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {!staff && order.status !== "transfer_claimed" ? (
@@ -394,6 +397,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
         </div>
       ) : null}
 
+      {pricing ? (
       <div className="grid two">
         {pricing.plans.map((plan) => (
           <article className="card" key={plan.id}>
@@ -457,20 +461,7 @@ export function SubscribePlans({ contactPhone, contactNote }: Props) {
           </article>
         ))}
       </div>
-
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>{t.privateTitle}</h3>
-        <p>
-          {rich(t.privateLine, {
-            band: <strong>{formatPrivateHourBand(pricing)}</strong>,
-            region: isAr ? pricing.labelAr : pricing.labelEn,
-          })}
-          {pricing.privateTutoringHourMinUsd !== pricing.privateTutoringHourMaxUsd
-            ? fmt(t.privateDefault, { n: pricing.privateTutoringHourUsd })
-            : ""}
-        </p>
-        <p className="muted">{rich(t.privateBook, { link: <Link href="/live">/live</Link> })}</p>
-      </div>
+      ) : null}
 
       <div className="row" style={{ marginTop: 24 }}>
         <Link className="btn" href="/redeem">

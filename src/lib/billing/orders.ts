@@ -2,7 +2,6 @@ import { createId } from "@/lib/ids";
 import { readJsonFile, withDocumentLock, writeJsonFile } from "@/lib/dataDir";
 import { setUserEntitlement } from "@/lib/auth/store";
 import { liveCreditsForPlan, planIdToSubscriptionType } from "@/lib/auth/tiers";
-import { readStore } from "@/lib/store";
 import { addLedger } from "@/lib/billing/store";
 import { priceFromUsd, whishTransferInstructionsForAmount } from "@/lib/whish/client";
 import {
@@ -14,6 +13,7 @@ import {
   type PricingRegion,
 } from "@/lib/pricing/plans";
 import { buildManualTransferInstructions, toCheckoutTransfer } from "@/lib/pricing/transfers";
+import type { RegionResolution, RegionSignals } from "@/lib/pricing/regionSignals";
 
 const FILE = "whish-orders.json";
 
@@ -36,7 +36,12 @@ export type WhishSubscriptionOrder = {
   status: WhishOrderStatus;
   paymentProvider: "manual";
   paymentMethod: PaymentMethod;
+  /** Resolved server-side (regionSignals.ts) — never the browser's choice. */
   pricingRegion?: PricingRegion;
+  /** Which signal named which region (region names only, never coordinates / IP). */
+  regionSources?: RegionSignals;
+  /** Signals disagreed → most expensive region charged; flagged for the owner's review. */
+  regionMismatch?: boolean;
   studentMarkedPaidAt?: string;
   paidAt?: string;
   confirmedBy?: string;
@@ -102,27 +107,15 @@ export async function resolvePlanAmount(
     };
   }
 
-  const store = await readStore();
-  const plan = store.settings.plans.find((item) => item.id === planId);
-  if (!plan) return { ok: false as const, error: "Unknown plan.", errorAr: "باقة غير معروفة." };
-  const amount = period === "monthly" ? plan.usdMonthly : plan.usdTerm;
-  if (!(typeof amount === "number" && Number.isFinite(amount) && amount > 0)) {
-    return { ok: false as const, error: "Plan price not configured.", errorAr: "سعر الباقة غير مضبوط." };
+  // Single price source: only REGIONAL_PRICING (src/lib/pricing/plans.ts) can price a checkout.
+  // The old settings.ts plans (29–99 USD) are no longer sold; their ids only drive activation codes.
+  if (isRegionalPlanId(planId)) {
+    return { ok: false as const, error: "Choose a pricing region.", errorAr: "اختر المنطقة أولاً." };
   }
   return {
-    ok: true as const,
-    plan,
-    amount,
-    region,
-    price: priceFromUsd(amount, {
-      labelEn: `${plan.name} · ${period}`,
-      labelAr: `${plan.arabicName} · ${period === "monthly" ? "شهري" : "فصل"}`,
-    }),
-    transfer: whishTransferInstructionsForAmount(amount, {
-      labelEn: `${plan.name} · ${period}`,
-      labelAr: `${plan.arabicName} · ${period === "monthly" ? "شهري" : "فصل"}`,
-      context: "subscription",
-    }),
+    ok: false as const,
+    error: "This plan is no longer sold. Choose a plan on /subscribe.",
+    errorAr: "هذه الباقة لم تعد متاحة. اختر باقة من صفحة الاشتراك.",
   };
 }
 
@@ -132,14 +125,23 @@ export async function createSubscribeOrder(input: {
   studentPhone: string;
   planId: string;
   period: SubscribePeriod;
-  region?: PricingRegion;
+  /** Server-side resolution (resolveRegionForRequest). There is deliberately no client "region" input. */
+  region: RegionResolution;
   paymentMethod?: PaymentMethod;
 }) {
+  if (!input.region.ok) {
+    return {
+      ok: false as const,
+      error: "Enable location so we can apply your country's prices.",
+      errorAr: "فعّل الموقع لنطبّق أسعار بلدك.",
+    };
+  }
+  const region = input.region;
   return withDocumentLock(FILE, async () => {
     const paymentMethod: PaymentMethod = isPaymentMethod(input.paymentMethod)
       ? input.paymentMethod
       : "whish";
-    const resolved = await resolvePlanAmount(input.planId, input.period, { region: input.region });
+    const resolved = await resolvePlanAmount(input.planId, input.period, { region: region.region });
     if (!resolved.ok) return resolved;
 
     const now = new Date().toISOString();
@@ -159,6 +161,8 @@ export async function createSubscribeOrder(input: {
       paymentProvider: "manual",
       paymentMethod,
       pricingRegion: resolved.region,
+      regionSources: region.sources,
+      regionMismatch: region.mismatch,
       createdAt: now,
       updatedAt: now,
     };

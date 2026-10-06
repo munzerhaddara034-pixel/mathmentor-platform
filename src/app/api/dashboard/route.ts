@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { activationCodeValueUsd } from "@/lib/pricing/plans";
 import { academyLessons } from "@/lib/academyLessons";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
@@ -25,7 +26,10 @@ export async function GET() {
   const avg = store.quizAttempts.length
     ? Math.round(store.quizAttempts.reduce((sum, item) => item.score + sum, 0) / store.quizAttempts.length)
     : 0;
-  const usedCards = store.scratchCards.filter((item) => item.used).length;
+  const usedCardList = store.scratchCards.filter((item) => item.used);
+  const usedCards = usedCardList.length;
+  // Card value = matching regional plan price from plans.ts (single price source), not a hard-coded 39.
+  const cardRevenueUsd = usedCardList.reduce((sum, card) => sum + activationCodeValueUsd(card.planId), 0);
   const devices = await listUserSessions(guard.live.user.id);
   const notifications = await listNotifications(guard.live.user.id);
   const deviceAlerts = notifications.filter((item) => item.kind === "device_login").slice(0, 12);
@@ -37,7 +41,8 @@ export async function GET() {
     cardsSold: usedCards,
     cardsLeft: store.scratchCards.filter((item) => !item.used).length,
     financials: {
-      estimatedUsd: usedCards * 39 + store.progress.length * 5,
+      // Only priced items (activation codes valued from plans.ts). The old "$5 per lesson viewed" guess is gone.
+      estimatedUsd: cardRevenueUsd,
       currency: "USD",
     },
     attempts: store.quizAttempts.slice(0, 12),

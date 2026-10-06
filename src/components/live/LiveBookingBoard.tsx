@@ -1,5 +1,6 @@
 "use client";
 
+import { outsideSessionUsd, subscriberSessionUsd } from "@/lib/pricing/plans";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { LiveBooking, LiveSlot, TeacherAvailability } from "@/lib/live/types";
 import { SkeletonBlock } from "@/components/ui/Skeleton";
@@ -59,15 +60,9 @@ function classroomHref(booking: LiveBooking) {
   return booking.classroomUrl || `/live/classroom/${encodeURIComponent(booking.id)}`;
 }
 
+/** Fallback before /api prices load: plans.ts (single price source; no env overrides). */
 function envFallbackAmount(tier: PricingTier) {
-  const key =
-    tier === "member"
-      ? "NEXT_PUBLIC_LIVE_SESSION_PRICE_USD"
-      : "NEXT_PUBLIC_LIVE_SESSION_PRICE_EXTERNAL_USD";
-  const raw = process.env[key];
-  const n = raw ? Number(raw) : NaN;
-  if (Number.isFinite(n) && n > 0) return n;
-  return tier === "member" ? 15 : 25;
+  return tier === "member" ? subscriberSessionUsd() : outsideSessionUsd();
 }
 
 export function LiveBookingBoard({ staff = false }: { staff?: boolean }) {

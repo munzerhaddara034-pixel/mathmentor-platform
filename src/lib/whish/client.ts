@@ -6,10 +6,11 @@
  * Optional WHISH_* merchant env vars are documented only for a future API path.
  *
  * All money (subscriptions + live sessions) goes through Whish only.
- * Dual live pricing:
- * - member (platform) — logged-in with AI_TIER | LIVE_TIER | BOTH → $15
- * - external — guest or no active plan → $25
+ * Dual live pricing (defaults from src/lib/pricing/plans.ts, Lebanon; env vars may override):
+ * - member (platform) — logged-in with AI_TIER | LIVE_TIER | BOTH → subscriberSessionUsd()
+ * - external — guest or no active plan → outsideSessionUsd()
  */
+import { outsideSessionUsd, subscriberSessionUsd } from "@/lib/pricing/plans";
 
 export type WhishCurrency = "USD" | "LBP";
 
@@ -39,12 +40,6 @@ function trimEnv(name: string) {
   return process.env[name]?.trim() || "";
 }
 
-function parsePositiveAmount(raw: string, fallback: number): number {
-  if (!raw) return fallback;
-  const n = Number(raw);
-  return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : fallback;
-}
-
 function formatUsd(amount: number) {
   return amount % 1 === 0 ? amount.toFixed(0) : amount.toFixed(2);
 }
@@ -72,27 +67,22 @@ export function whishTransferNameEn() {
   return "Munzer Ahmad Haddara";
 }
 
-/** Member / platform price (default 15). Reads LIVE_SESSION_PRICE_USD each call. */
+/**
+ * Member / platform live-session price. SINGLE PRICE SOURCE: plans.ts only. The old
+ * LIVE_SESSION_PRICE_USD / LIVE_SESSION_PRICE_EXTERNAL_USD (+ NEXT_PUBLIC_*) env overrides are ignored.
+ */
 export function memberSessionAmountUsd() {
-  return parsePositiveAmount(
-    trimEnv("LIVE_SESSION_PRICE_USD") || trimEnv("NEXT_PUBLIC_LIVE_SESSION_PRICE_USD"),
-    15,
-  );
+  return subscriberSessionUsd();
 }
 
-/** External / guest price (default 25). */
+/** External / guest price (plans.ts outside-student session). */
 export function externalSessionAmountUsd() {
-  return parsePositiveAmount(
-    trimEnv("LIVE_SESSION_PRICE_EXTERNAL_USD") ||
-      trimEnv("NEXT_PUBLIC_LIVE_SESSION_PRICE_EXTERNAL_USD"),
-    25,
-  );
+  return outsideSessionUsd();
 }
 
 /**
  * Price for a live session by audience.
- * `kind` "member" → LIVE_SESSION_PRICE_USD (default 15)
- * `kind` "external" → LIVE_SESSION_PRICE_EXTERNAL_USD (default 25)
+ * `kind` "member" → plans.ts subscriberSessionUsd; "external" → plans.ts outsideSessionUsd.
  */
 export function liveSessionPriceFor(kind: PricingTier = "member"): LiveSessionPrice {
   const lbpRaw = trimEnv("LIVE_SESSION_PRICE_LBP");

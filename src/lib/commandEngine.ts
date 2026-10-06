@@ -36,12 +36,9 @@ export function runEmployeeCommand(input: string, settings: PlatformSettings): C
 
   const price = text.match(/(\d+)\s*(usd|\$|دولار)/i);
   if ((lower.includes("price") || lower.includes("سعر") || lower.includes("اشتراك")) && price) {
-    const usdMonthly = Number(price[1]);
+    // Prices have one source (src/lib/pricing/plans.ts) and change only through a reviewed code change.
     return {
-      reply: `تم تحديث سعر الاشتراك الشهري إلى ${usdMonthly}$.`,
-      settingsPatch: {
-        plans: settings.plans.map((plan) => (plan.id === "all" ? { ...plan, usdMonthly } : plan)),
-      },
+      reply: "الأسعار تُحدَّد في ملف واحد (src/lib/pricing/plans.ts) ولا تتغيّر من هنا. اطلب التعديل من الفريق التقني.",
     };
   }
 

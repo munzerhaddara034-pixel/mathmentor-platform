@@ -120,7 +120,7 @@ describe("payments on Postgres", { skip }, () => {
 
   test("migrations apply on an empty DB and re-run cleanly (every boot)", async () => {
     const first = await migrate();
-    assert.ok(first.includes("007_payments") && first.includes("008_finance_views"), first.join(","));
+    assert.ok(first.includes("007_payments") && first.includes("008_finance_views") && first.includes("010_payment_region_signals"), first.join(","));
     const second = await migrate();
     assert.deepEqual(second, [], "second run applies nothing new and does not fail");
     const columns = await pool.query(
@@ -132,11 +132,43 @@ describe("payments on Postgres", { skip }, () => {
         "id", "user_id", "payer_name", "payer_email", "payer_phone", "plan", "period", "pricing_region",
         "expected_amount_usd", "amount", "currency", "method", "reference", "reference_raw", "transfer_date",
         "receipt_url", "order_id", "status", "submitted_at", "reviewed_at", "reviewed_by", "note",
-        "period_start", "period_end", "owner_notified_at", "student_notified_at",
+        "period_start", "period_end", "owner_notified_at", "student_notified_at", "region_sources", "region_mismatch",
       ],
     );
     const idx = await pool.query("SELECT indexdef FROM pg_indexes WHERE indexname = 'mm_payments_method_reference_active'");
     assert.match(idx.rows[0].indexdef, /UNIQUE INDEX .* WHERE \(status = ANY \(ARRAY\['pending'::text, 'confirmed'::text\]\)\)/);
+  });
+
+  test("010: server-resolved region, sources and review flag are stored (region names only)", async () => {
+    await migrate();
+    const applied = (await pool.query("SELECT id FROM mm_schema_migrations ORDER BY id")).rows.map((r) => r.id);
+    assert.ok(applied.includes("010_payment_region_signals"), applied.join(","));
+    const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Beirut" }).format(new Date());
+    const check = validatePaymentClaim({
+      payerName: "Region Student", payerEmail: "r@example.com", plan: "digitalCore", period: "monthly", amount: "15",
+      method: "whish", reference: `REG${randomBytes(3).toString("hex")}`, transferDate: today, region: "lebanon", locationRegion: "lebanon",
+    });
+    assert.equal(check.ok, true, JSON.stringify(check));
+    const row = await db.insertPayment(pool, {
+      id: `pay_region_${randomBytes(4).toString("hex")}`,
+      userId: "u-region",
+      claim: check.value,
+      expectedAmountUsd: 42,
+      plan: "digitalCore",
+      region: { region: "gcc", sources: { location: "lebanon", ip: "gcc" }, mismatch: true },
+      actor: { id: "u-region", role: "student" },
+    });
+    assert.equal(row.pricingRegion, "gcc", "browser said lebanon; the server decided gcc");
+    assert.equal(row.expectedAmountUsd, 42);
+    assert.deepEqual(row.regionSources, { location: "lebanon", ip: "gcc" });
+    assert.equal(row.regionMismatch, true);
+    const list = await db.listPaymentsForAdmin(pool, { status: "pending" });
+    assert.ok(list.some((p) => p.id === row.id && p.regionMismatch === true));
+    await assert.rejects(
+      pool.query("UPDATE mm_payments SET region_sources = '{\"lat\": 33.9}'::jsonb WHERE id = $1", [row.id]),
+      /mm_payments_region_sources_chk/,
+      "coordinates can never be stored",
+    );
   });
 
   test("currency CHECK rejects LBP at the database level", async () => {
@@ -188,7 +220,7 @@ describe("payments on Postgres", { skip }, () => {
     const fresh = results.filter((r) => !r.value.alreadyConfirmed);
     assert.equal(fresh.length, 1, "exactly one confirm did the work");
     const user = await authUser("u-par");
-    assert.equal(user.liveCredits, 8, "both plan adds 8 live hours once");
+    assert.equal(user.liveCredits, 4, "both plan adds 4 live credits once (was 8)");
     const expiry = Date.parse(user.aiExpiresAt);
     assert.ok(Math.abs(expiry - (started + 30 * DAY)) < 60_000, "monthly = 30 days from now");
     assert.equal(await auditCount("payment.confirm", payment.id), 1);

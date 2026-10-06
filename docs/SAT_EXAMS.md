@@ -33,7 +33,7 @@ Hub UI (`/exams?track=sat`) shows section **«النموذج الرسمي Colleg
 | **تدريب المنصة** `sat-math-practice-1` | Platform Algebra + Advanced Math demo |
 | **تدريب المنصة** `sat-math-practice-2` | Platform PSD + Geometry/Trig demo |
 
-Track: `sat` · Plan id: `sat` ($45/mo) · Access: same AI gate as `/exams` (`requireAiAccess` — `sat` / `AI_TIER` / `BOTH` / `all`).
+Track: `sat` · Plan id: `sat` (activation code; paid price = US Admissions digital plan in `src/lib/pricing/plans.ts`) · Access: same AI gate as `/exams` (`requireAiAccess` — `sat` / `AI_TIER` / `BOTH` / `all`).
 
 ### Public Digital SAT Math blueprint (pedagogy)
 

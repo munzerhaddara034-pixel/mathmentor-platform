@@ -2,20 +2,18 @@ import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
 import { createSubscribeOrder, type SubscribePeriod } from "@/lib/billing/orders";
 import { whishEnabled } from "@/lib/whish/client";
-import {
-  isPaymentMethod,
-  isPricingRegion,
-  type PaymentMethod,
-  type PricingRegion,
-} from "@/lib/pricing/plans";
+import { getRegionalPricing, isPaymentMethod, type PaymentMethod } from "@/lib/pricing/plans";
 import { paymentMethodLabel } from "@/lib/pricing/transfers";
+import { resolveRegionForRequest } from "@/lib/pricing/regionServer";
+import { normalizePhone } from "@/lib/payments/validation";
 
 export const runtime = "nodejs";
 
 type Body = {
   planId?: string;
   period?: SubscribePeriod;
-  region?: PricingRegion;
+  /** Region the browser computed from geolocation: one signal only. A "region" field is ignored. */
+  locationRegion?: string;
   paymentMethod?: PaymentMethod;
 };
 
@@ -34,12 +32,26 @@ export async function POST(request: Request) {
 
     const planId = body.planId?.trim();
     const period = body.period;
-    const region = isPricingRegion(body.region) ? body.region : undefined;
+    // Price lock: the server resolves the region (location claim + offline IP country + phone on file)
+    // and prices from plans.ts. Nothing region- or price-related from the body is authoritative.
+    const region = resolveRegionForRequest({
+      location: body.locationRegion,
+      headers: request.headers,
+      phone: normalizePhone(user.contactPhone),
+    });
+    if (!region.ok) {
+      return NextResponse.json(
+        {
+          error: "Enable location so we can apply your country's prices.",
+          errorAr: "فعّل الموقع لنطبّق أسعار بلدك.",
+          reason: region.reason,
+        },
+        { status: 400 },
+      );
+    }
     const paymentMethod: PaymentMethod = isPaymentMethod(body.paymentMethod)
       ? body.paymentMethod
-      : region === "lebanon" || !region
-        ? "whish"
-        : "western_union";
+      : getRegionalPricing(region.region).defaultPaymentMethod;
 
     if (!planId) {
       return NextResponse.json({ error: "planId required.", errorAr: "معرّف الباقة مطلوب." }, { status: 400 });
@@ -79,8 +91,8 @@ export async function POST(request: Request) {
         kind: "live_booked",
         title: `${user.name} requested ${result.order.planName} (${period}) · $${result.order.amount} via ${methodLabel.en}`,
         titleAr: `${user.name} طلب ${result.order.planNameAr} (${period === "monthly" ? "شهري" : "فصل"}) · $${result.order.amount} عبر ${methodLabel.ar}`,
-        body: `${methodLabel.en} order ${result.order.id} — awaiting transfer.`,
-        bodyAr: `طلب ${methodLabel.ar} ${result.order.id} — بانتظار التحويل.`,
+        body: `${methodLabel.en} order ${result.order.id} — awaiting transfer. Region: ${region.region}${region.mismatch ? " — REVIEW: region signals disagree (charged the most expensive)" : ""}.`,
+        bodyAr: `طلب ${methodLabel.ar} ${result.order.id} — بانتظار التحويل. المنطقة: ${region.region}${region.mismatch ? " — للمراجعة: مؤشرات المنطقة غير متطابقة" : ""}.`,
         href: "/subscribe",
         relatedId: result.order.id,
       });

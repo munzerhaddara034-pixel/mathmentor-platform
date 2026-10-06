@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { LocationGate, RegionNotice } from "@/components/billing/LocationGate";
+import { useGeoRegion } from "@/components/billing/useGeoRegion";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { useNs } from "@/components/i18n/useNs";
 import { fmt } from "@/lib/i18n/format";
@@ -14,7 +16,6 @@ type Props = {
   blockedReason: "parent" | "role" | "unavailable" | null;
   settings: PaymentSettings;
   plans: PlanOption[];
-  defaultRegion: string;
   prefill: { name: string; email: string; phone: string };
 };
 
@@ -43,14 +44,15 @@ async function downscale(file: File): Promise<Blob> {
   }
 }
 
-export function PaymentClaimForm({ canSubmit, blockedReason, settings, plans, defaultRegion, prefill }: Props) {
+export function PaymentClaimForm({ canSubmit, blockedReason, settings, plans, prefill }: Props) {
   const { locale } = useI18n();
   const t = useNs(paymentsMessages).form;
   const isAr = locale === "ar";
   const methods = (Object.keys(settings) as PaymentMethodId[]).filter((id) => settings[id].enabled);
-  const regions = useMemo(() => Array.from(new Set(plans.map((plan) => plan.region))), [plans]);
-
-  const [region, setRegion] = useState<string>(regions.includes(defaultRegion as PlanOption["region"]) ? defaultRegion : regions[0] ?? "");
+  // Region-locked: no manual region choice. The server resolves it (location claim + IP country + phone)
+  // and recomputes the price at submit; this view only mirrors that decision.
+  const geo = useGeoRegion();
+  const region: string = geo.state.status === "ready" ? geo.state.region : "";
   const regionPlans = plans.filter((plan) => plan.region === region);
   const [planId, setPlanId] = useState<string>(regionPlans[0]?.planId ?? "");
   const [period, setPeriod] = useState<PaymentPeriod>("monthly");
@@ -96,7 +98,7 @@ export function PaymentClaimForm({ canSubmit, blockedReason, settings, plans, de
     form.set("payerName", name);
     if (email.trim()) form.set("payerEmail", email.trim());
     if (phone.trim()) form.set("payerPhone", phone.trim());
-    form.set("region", region);
+    if (geo.state.status === "ready") form.set("locationRegion", geo.state.locationRegion);
     form.set("plan", selected.planId);
     form.set("period", period);
     form.set("amount", amount);
@@ -145,6 +147,8 @@ export function PaymentClaimForm({ canSubmit, blockedReason, settings, plans, de
         <p className="studio-teacher-error" role="status">
           {t.noMethods}
         </p>
+      ) : geo.state.status !== "ready" ? (
+        <LocationGate state={geo.state} onEnable={geo.request} />
       ) : (
         <div className="grid two">
           <section className="card">
@@ -178,16 +182,10 @@ export function PaymentClaimForm({ canSubmit, blockedReason, settings, plans, de
           </section>
 
           <form className="card" onSubmit={(event) => void submit(event)}>
-            <label>
-              {t.region}
-              <select value={region} onChange={(event) => setRegion(event.target.value)}>
-                {regions.map((id) => (
-                  <option key={id} value={id}>
-                    {t.regions[id as keyof typeof t.regions] ?? id}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <RegionNotice region={geo.state.region} sources={geo.state.sources} mismatch={geo.state.mismatch} />
+            <p>
+              {t.region}: <strong>{t.regions[geo.state.region as keyof typeof t.regions] ?? geo.state.region}</strong>
+            </p>
             <label>
               {t.plan}
               <select value={selected?.planId ?? ""} onChange={(event) => setPlanId(event.target.value)}>

@@ -283,6 +283,28 @@ export const SCHEMA_MIGRATIONS: SchemaMigration[] = [
       CREATE INDEX IF NOT EXISTS mm_team_proposals_status_idx ON mm_team_proposals (status, updated_at DESC);
     `,
   },
+  {
+    // After 007_payments, 008_finance_views, 009_hamza_tasks. Additive + idempotent.
+    id: "010_payment_region_signals",
+    description: "Server-resolved pricing region on payment claims: which signals named which region + mismatch flag (never coordinates / IP)",
+    sql: `
+      ALTER TABLE mm_payments ADD COLUMN IF NOT EXISTS region_sources JSONB NOT NULL DEFAULT '{}'::jsonb;
+      ALTER TABLE mm_payments ADD COLUMN IF NOT EXISTS region_mismatch BOOLEAN NOT NULL DEFAULT false;
+      DO $chk$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'mm_payments_region_sources_chk') THEN
+          ALTER TABLE mm_payments ADD CONSTRAINT mm_payments_region_sources_chk CHECK (
+            jsonb_typeof(region_sources) = 'object'
+            AND (region_sources - ARRAY['location', 'ip', 'phone']) = '{}'::jsonb
+            AND (region_sources->>'location' IS NULL OR region_sources->>'location' IN ('lebanon', 'gcc', 'international', 'admissions_us'))
+            AND (region_sources->>'ip' IS NULL OR region_sources->>'ip' IN ('lebanon', 'gcc', 'international', 'admissions_us'))
+            AND (region_sources->>'phone' IS NULL OR region_sources->>'phone' IN ('lebanon', 'gcc', 'international', 'admissions_us')));
+        END IF;
+      END
+      $chk$;
+      CREATE INDEX IF NOT EXISTS mm_payments_region_review_idx ON mm_payments (submitted_at) WHERE region_mismatch;
+    `,
+  },
 ];
 
 export const MIGRATIONS_TABLE_SQL = `

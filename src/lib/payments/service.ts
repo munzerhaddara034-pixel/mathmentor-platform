@@ -28,6 +28,7 @@ import {
 import { notifyOwnerOfSubmission, notifyStudentOfReview } from "./notify";
 import type { PaymentRecord } from "./types";
 import type { ValidClaim } from "./validation";
+import type { RegionResolution } from "@/lib/pricing/regionSignals";
 
 const SETTINGS_DOC = "payment-settings.json";
 
@@ -95,10 +96,20 @@ export type SubmitOutcome =
   | { ok: true; payment: PaymentRecord }
   | { ok: false; status: number; error: string; errorAr: string; field?: string };
 
-/** Inserts a PENDING claim (never activates anything), then alerts the owner. */
+export const LOCATION_REQUIRED_ERROR = {
+  error: "Enable location so we can apply your country's prices.",
+  errorAr: "فعّل الموقع لنطبّق أسعار بلدك.",
+} as const;
+
+/**
+ * Inserts a PENDING claim (never activates anything), then alerts the owner.
+ * `region` is resolved by the caller from server-side signals (regionSignals.ts); the claim's own
+ * `region` field is ignored, so the browser can never pick the price.
+ */
 export async function submitPaymentClaim(input: {
   user: PublicUser;
   claim: ValidClaim;
+  region: RegionResolution;
   receipt?: NewReceipt | null;
   ip?: string | null;
 }): Promise<SubmitOutcome> {
@@ -106,7 +117,9 @@ export async function submitPaymentClaim(input: {
   if (!settings[input.claim.method].enabled) {
     return { ok: false, status: 400, field: "method", error: "This payment method is not available.", errorAr: "طريقة الدفع هذه غير متاحة." };
   }
-  const resolved = await resolvePlanAmount(input.claim.plan, input.claim.period, { region: input.claim.region ?? undefined });
+  if (!input.region.ok) return { ok: false, status: 400, field: "location", ...LOCATION_REQUIRED_ERROR };
+  const region = input.region;
+  const resolved = await resolvePlanAmount(input.claim.plan, input.claim.period, { region: region.region });
   if (!resolved.ok) return { ok: false, status: 400, field: "plan", error: resolved.error, errorAr: resolved.errorAr };
 
   const pool = await paymentsPool();
@@ -116,6 +129,7 @@ export async function submitPaymentClaim(input: {
     claim: input.claim,
     plan: resolved.plan.id,
     expectedAmountUsd: resolved.amount,
+    region: { region: region.region, sources: region.sources, mismatch: region.mismatch },
     receipt: input.receipt ?? null,
     actor: { id: input.user.id, email: input.user.email, role: input.user.role },
     ip: input.ip,

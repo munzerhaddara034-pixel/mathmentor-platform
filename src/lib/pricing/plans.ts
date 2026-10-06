@@ -2,7 +2,13 @@
  * Multi-region subscription pricing for MathMentor.
  * Brand: Prof. Munzer Haddara / الأستاذ منذر حداره — never Al-Tarah / الطارة.
  * Updated: 2026-09-23 — ranges + defaultChargeUSD (midpoint) for checkout.
+ * Updated: 2026-10-06 — pricing v2 (approved by Munzer): a live session is sold on its own;
+ *   platform subscribers pay `subscriberSessionUsd`, outside students pay `privateTutoringHourUsd`;
+ *   liveHybrid ("platform + 4 sessions") = 4 × subscriberSessionUsd, so the platform is free inside it.
+ *
+ * SINGLE PRICE SOURCE: every USD price shown or charged anywhere in the app must come from this file.
  */
+import { planIdToSubscriptionType } from "@/lib/auth/tiers";
 
 import type { CurriculumFamily, CurriculumId } from "@/lib/curriculum/types";
 import { getCurriculum } from "@/lib/curriculum/catalogs";
@@ -46,8 +52,10 @@ export type RegionalPricing = {
   selectorAr: string;
   privateTutoringHourMinUsd: number;
   privateTutoringHourMaxUsd: number;
-  /** Checkout default for private hour (midpoint). */
+  /** Checkout default for private hour (midpoint). Also the live-session price for students outside the platform. */
   privateTutoringHourUsd: number;
+  /** Live session price for platform subscribers (fixed). liveHybrid = LIVE_HYBRID_SESSIONS × this. */
+  subscriberSessionUsd: number;
   notesEn?: string;
   notesAr?: string;
   plans: RegionalPlan[];
@@ -109,7 +117,24 @@ const DIGITAL_FEATURES_AR = [
   "متابعة تقدّم الطالب وولي الأمر",
 ] as const;
 
+/** Sessions included in the liveHybrid bundle each month. */
+export const LIVE_HYBRID_SESSIONS = 4;
+
+/** Feature line for the bundle (EN / AR / FR). FR is used by the pricing options card. */
+export const PLATFORM_FREE_FEATURE = {
+  en: "Platform free with 4 sessions",
+  ar: "المنصة مجاناً مع 4 حصص",
+  fr: "Plateforme offerte avec 4 séances",
+} as const;
+
+/** liveHybrid monthly charge: 4 × subscriber session price (fixed, no band). */
+function hybridBand(subscriberSessionUsd: number, sar?: number) {
+  const charge = LIVE_HYBRID_SESSIONS * subscriberSessionUsd;
+  return { min: charge, max: charge, defaultCharge: charge, sarMin: sar, sarMax: sar };
+}
+
 const LIVE_FEATURES_EN_BASE = [
+  PLATFORM_FREE_FEATURE.en,
   "Everything in Digital Core",
   "4 live sessions / month with Prof. Munzer Haddara",
   "Booking credits for 1-on-1 live tutoring",
@@ -117,6 +142,7 @@ const LIVE_FEATURES_EN_BASE = [
 ] as const;
 
 const LIVE_FEATURES_AR_BASE = [
+  PLATFORM_FREE_FEATURE.ar,
   "كل مزايا الباقة الرقمية الكاملة",
   "4 حصص لايف شهرياً مع الأستاذ منذر حداره",
   "أرصدة حجز للحصص المباشرة فردية",
@@ -133,6 +159,21 @@ const HYBRID_NAMES = {
   nameAr: "منصة + 4 حصص لايف",
 } as const;
 
+/** Subscriber live-session price per region (USD, fixed) — approved 2026-10-06. */
+const SUBSCRIBER_SESSION_USD: Record<PricingRegion, number> = {
+  lebanon: 15,
+  gcc: 30,
+  international: 50,
+  admissions_us: 37,
+};
+
+/** GCC display only: 1 USD ≈ 3.75 SAR (pegged). */
+const SAR_PER_USD = 3.75;
+/** USD → approximate whole SAR for display (42 USD → 157 SAR). Checkout is always USD. */
+function sarApprox(usd: number): number {
+  return Math.floor(usd * SAR_PER_USD);
+}
+
 export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
   lebanon: {
     region: "lebanon",
@@ -143,6 +184,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
     privateTutoringHourMinUsd: 25,
     privateTutoringHourMaxUsd: 25,
     privateTutoringHourUsd: 25,
+    subscriberSessionUsd: SUBSCRIBER_SESSION_USD.lebanon,
     notesEn: "Lebanon official curriculum (Brevet / Terminale).",
     notesAr: "المنهج اللبناني الرسمي (المتوسطة / الثانوية).",
     defaultPaymentMethod: "whish",
@@ -153,7 +195,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
         tier: "AI_TIER",
         liveCredits: 0,
       }),
-      planBand("liveHybrid", HYBRID_NAMES, { min: 35, max: 35, defaultCharge: 35 }, {
+      planBand("liveHybrid", HYBRID_NAMES, hybridBand(SUBSCRIBER_SESSION_USD.lebanon), {
         badgeEn: "Most requested",
         badgeAr: "الأكثر طلباً",
         featuresEn: [...LIVE_FEATURES_EN_BASE],
@@ -172,8 +214,9 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
     privateTutoringHourMinUsd: 50,
     privateTutoringHourMaxUsd: 50,
     privateTutoringHourUsd: 50,
+    subscriberSessionUsd: SUBSCRIBER_SESSION_USD.gcc,
     notesEn:
-      "Government curricula & secondary tracks (SA, AE, QA, KW): Qudurat, Tahsili, and ministry-approved pathways. Checkout uses fixed midpoint USD (Digital $42 · Hybrid $110 · Private $50/hr); SAR figures are approximate.",
+      "Government curricula & secondary tracks (SA, AE, QA, KW): Qudurat, Tahsili, and ministry-approved pathways. Checkout is in fixed USD; SAR figures are approximate.",
     notesAr:
       "تشمل اختبارات القدرات والتحصيلي ومسارات الثانوي ومناهج الوزارة المعتمدة.",
     defaultPaymentMethod: "western_union",
@@ -181,7 +224,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
       planBand(
         "digitalCore",
         DIGITAL_NAMES,
-        { min: 42, max: 42, defaultCharge: 42, sarMin: 130, sarMax: 190 },
+        { min: 42, max: 42, defaultCharge: 42, sarMin: sarApprox(42), sarMax: sarApprox(42) },
         {
           featuresEn: [
             ...DIGITAL_FEATURES_EN,
@@ -200,7 +243,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
       planBand(
         "liveHybrid",
         HYBRID_NAMES,
-        { min: 110, max: 110, defaultCharge: 110, sarMin: 340, sarMax: 490 },
+        hybridBand(SUBSCRIBER_SESSION_USD.gcc, LIVE_HYBRID_SESSIONS * SUBSCRIBER_SESSION_USD.gcc * SAR_PER_USD),
         {
           badgeEn: "Includes Qudurat & Tahsili",
           badgeAr: "شامل القدرات والتحصيلي",
@@ -229,6 +272,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
     privateTutoringHourMinUsd: 70,
     privateTutoringHourMaxUsd: 100,
     privateTutoringHourUsd: 85,
+    subscriberSessionUsd: SUBSCRIBER_SESSION_USD.international,
     notesEn:
       "IB DP Math HL/SL and Cambridge IGCSE/A-Level — KaTeX-precise notation and academic rigor valued worldwide (Gulf & beyond).",
     notesAr:
@@ -249,7 +293,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
         tier: "AI_TIER",
         liveCredits: 0,
       }),
-      planBand("liveHybrid", HYBRID_NAMES, { min: 150, max: 220, defaultCharge: 185 }, {
+      planBand("liveHybrid", HYBRID_NAMES, hybridBand(SUBSCRIBER_SESSION_USD.international), {
         badgeEn: "Elite Preparation",
         badgeAr: "Elite Preparation",
         featuresEn: [
@@ -276,6 +320,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
     privateTutoringHourMinUsd: 50,
     privateTutoringHourMaxUsd: 75,
     privateTutoringHourUsd: 62,
+    subscriberSessionUsd: SUBSCRIBER_SESSION_USD.admissions_us,
     notesEn:
       "SAT / ACT Math and AP Calculus — intensive speed, strategies, and math justification.",
     notesAr:
@@ -296,7 +341,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
         tier: "AI_TIER",
         liveCredits: 0,
       }),
-      planBand("liveHybrid", HYBRID_NAMES, { min: 110, max: 160, defaultCharge: 135 }, {
+      planBand("liveHybrid", HYBRID_NAMES, hybridBand(SUBSCRIBER_SESSION_USD.admissions_us), {
         badgeEn: "Admissions boost",
         badgeAr: "دفعة قبول",
         featuresEn: [
@@ -393,4 +438,82 @@ export function formatRegionalPrice(plan: RegionalPlan, period: "monthly" | "ter
 
 export function formatPrivateHourBand(pack: RegionalPricing): string {
   return formatUsdBand(pack.privateTutoringHourMinUsd, pack.privateTutoringHourMaxUsd);
+}
+
+/** Default region for prices shown without a region (Lebanon: Whish scratch cards, live booking board). */
+export const DEFAULT_PRICING_REGION: PricingRegion = "lebanon";
+
+/** Live session price for a platform subscriber in `region` (fixed USD). */
+export function subscriberSessionUsd(region: PricingRegion = DEFAULT_PRICING_REGION): number {
+  return REGIONAL_PRICING[region].subscriberSessionUsd;
+}
+
+/** Live session price for a student outside the platform in `region` (checkout default USD). */
+export function outsideSessionUsd(region: PricingRegion = DEFAULT_PRICING_REGION): number {
+  return REGIONAL_PRICING[region].privateTutoringHourUsd;
+}
+
+export type PricingOptionId = "subscription" | "subscriberSession" | "bundle" | "outsideSession";
+
+export type PricingOption = {
+  id: PricingOptionId;
+  /** Display price ("$15" or "$60–85"). */
+  display: string;
+  /** Amount charged at checkout (USD). */
+  chargeUsd: number;
+  unit: "month" | "session";
+  /** True when `display` is a band and `chargeUsd` is its checkout default. */
+  banded: boolean;
+};
+
+/** The four ways to buy, per region, in display order (pricing page + student page). */
+export function pricingOptions(region: PricingRegion): PricingOption[] {
+  const pack = REGIONAL_PRICING[region];
+  const digital = getRegionalPlan(region, "digitalCore");
+  const hybrid = getRegionalPlan(region, "liveHybrid");
+  const outsideBanded = pack.privateTutoringHourMinUsd !== pack.privateTutoringHourMaxUsd;
+  return [
+    {
+      id: "subscription",
+      display: formatUsdBand(digital.usdMonthlyMin, digital.usdMonthlyMax),
+      chargeUsd: digital.defaultChargeUSD,
+      unit: "month",
+      banded: planShowsPriceBand(digital),
+    },
+    {
+      id: "subscriberSession",
+      display: `$${pack.subscriberSessionUsd}`,
+      chargeUsd: pack.subscriberSessionUsd,
+      unit: "session",
+      banded: false,
+    },
+    {
+      id: "bundle",
+      display: `$${hybrid.defaultChargeUSD}`,
+      chargeUsd: hybrid.defaultChargeUSD,
+      unit: "month",
+      banded: false,
+    },
+    {
+      id: "outsideSession",
+      display: formatPrivateHourBand(pack),
+      chargeUsd: pack.privateTutoringHourUsd,
+      unit: "session",
+      banded: outsideBanded,
+    },
+  ];
+}
+
+/**
+ * Legacy activation-code plan ids (ai, g7-9, sat, all, live, both …) carry no price of their own.
+ * Their value is the matching regional plan: AI-only → digitalCore, anything with live → liveHybrid.
+ */
+export function regionalPlanIdForLegacyPlan(planId: string): RegionalPlanId {
+  const tier = planIdToSubscriptionType(planId);
+  return tier === "BOTH" || tier === "LIVE_TIER" ? "liveHybrid" : "digitalCore";
+}
+
+/** Monthly USD value of one activation code (used for revenue estimates; Lebanon cards by default). */
+export function activationCodeValueUsd(planId: string, region: PricingRegion = DEFAULT_PRICING_REGION): number {
+  return getRegionalPlan(region, regionalPlanIdForLegacyPlan(planId)).usdMonthly;
 }

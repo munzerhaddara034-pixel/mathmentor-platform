@@ -35,8 +35,8 @@ export function securityHeaders(): HeaderPair[] {
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     // Browsers ignore HSTS on plain-http localhost, so this is safe for `next start` too.
     { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
-    // Live classroom needs camera + microphone on our own origin only.
-    { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=(), payment=()" },
+    // Live classroom needs camera + microphone; region-locked pricing needs geolocation (region computed on device). Own origin only.
+    { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=(self), payment=()" },
     { key: "X-DNS-Prefetch-Control", value: "on" },
   ];
 }

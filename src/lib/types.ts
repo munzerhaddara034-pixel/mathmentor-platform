@@ -161,12 +161,14 @@ export type ResourceFile = {
   href: string;
 };
 
+/**
+ * Legacy activation-code plan (scratch cards / redeem). Carries NO price: every USD price comes from
+ * `src/lib/pricing/plans.ts` (see `activationCodeValueUsd`).
+ */
 export type SubscriptionPlan = {
   id: string;
   name: string;
   arabicName: string;
-  usdMonthly: number;
-  usdTerm: number;
   includes: string;
   tier?: "AI_TIER" | "LIVE_TIER" | "BOTH";
   liveCredits?: number;
