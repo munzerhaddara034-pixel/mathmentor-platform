@@ -2,7 +2,7 @@
  * Keeps a hidden narration <audio> element locked to a silent master <video>.
  *
  * The video is the clock. Audio follows play / pause / seek / rate / buffering, and drift is corrected on every
- * `timeupdate`: small drift is absorbed by nudging the audio playbackRate (inaudible ±5 %), large drift by a hard seek.
+ * `timeupdate`: drift under 80 ms (about two video frames, below what a viewer notices) is ignored; more is absorbed by nudging the audio playbackRate (inaudible ±5 %), large drift by a hard seek.
  * If the AUDIO stalls, the video is held (paused without changing the user's play intent) until audio can play again.
  * Switching language swaps the audio source while the video holds its frame, then resumes at the same position and
  * play state. Swapping the video rendition works the same way. DOM-free (works against `MediaLike`) so it is unit-tested.
@@ -34,7 +34,7 @@ export type DriftOptions = {
   maxNudge: number;
 };
 
-export const DEFAULT_DRIFT: DriftOptions = { hardSeek: 0.3, tolerance: 0.04, gain: 0.5, maxNudge: 0.05 };
+export const DEFAULT_DRIFT: DriftOptions = { hardSeek: 0.3, tolerance: 0.08, gain: 0.5, maxNudge: 0.05 };
 
 export type DriftAction = { kind: "none"; rate: number } | { kind: "nudge"; rate: number; drift: number } | { kind: "seek"; time: number; drift: number };
 

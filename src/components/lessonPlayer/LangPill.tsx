@@ -6,6 +6,15 @@ import type { LessonLang } from "@/lib/lessonPlayer/manifest";
 /** Visible labels are endonyms (EN / العربية / FR); aria-labels are localised full names. */
 const SHORT: Record<LessonLang, string> = { en: "EN", ar: "العربية", fr: "FR" };
 
+/** Roving radio group: arrows move the selection; horizontal arrows follow the visual (RTL-aware) order. */
+function arrowStep(key: string, rtl: boolean): number {
+  if (key === "ArrowRight") return rtl ? -1 : 1;
+  if (key === "ArrowLeft") return rtl ? 1 : -1;
+  if (key === "ArrowDown") return 1;
+  if (key === "ArrowUp") return -1;
+  return 0;
+}
+
 export function LangPill({
   langs,
   value,
@@ -25,13 +34,7 @@ export function LangPill({
   const index = Math.max(0, langs.indexOf(value));
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    // Roving radio group: arrows move the selection (visual order follows the document direction).
-    const rtl = getComputedStyle(event.currentTarget).direction === "rtl";
-    let step = 0;
-    if (event.key === "ArrowRight") step = rtl ? -1 : 1;
-    else if (event.key === "ArrowLeft") step = rtl ? 1 : -1;
-    else if (event.key === "ArrowDown") step = 1;
-    else if (event.key === "ArrowUp") step = -1;
+    const step = arrowStep(event.key, getComputedStyle(event.currentTarget).direction === "rtl");
     if (!step) return;
     event.preventDefault();
     event.stopPropagation();

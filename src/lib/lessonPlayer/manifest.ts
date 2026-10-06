@@ -124,6 +124,32 @@ function renditionKey(key: string): Rendition | null {
   return (RENDITIONS as readonly string[]).includes(match[1]) ? (match[1] as Rendition) : null;
 }
 
+function parseVideo(raw: unknown, base: string, warnings: string[]): Partial<Record<Rendition, string>> {
+  const video: Partial<Record<Rendition, string>> = {};
+  if (typeof raw === "string") {
+    const single = resolveMediaUrl(raw, base);
+    if (single) video["720"] = single;
+  } else if (isRecord(raw)) {
+    for (const [key, value] of Object.entries(raw)) {
+      const rendition = renditionKey(key);
+      const resolved = resolveMediaUrl(value, base);
+      if (rendition && resolved) video[rendition] = resolved;
+      else warnings.push(`video.${key}: ignored`);
+    }
+  }
+  return video;
+}
+
+function parseChapters(raw: unknown, base: string, warnings: string[]): ChaptersSource | undefined {
+  if (typeof raw === "string") {
+    const all = resolveMediaUrl(raw, base);
+    return all ? { all, byLang: {} } : undefined;
+  }
+  if (!isRecord(raw)) return undefined;
+  const byLang = langMap(raw, base, "chapters", warnings);
+  return Object.keys(byLang).length ? { byLang } : undefined;
+}
+
 export function parseLessonManifest(input: unknown, options: { mediaBase: string; expectedId?: string }): ManifestResult {
   let raw: unknown = input;
   if (typeof raw === "string") {
@@ -145,32 +171,12 @@ export function parseLessonManifest(input: unknown, options: { mediaBase: string
   if (typeof raw.title === "string") title = { en: raw.title.trim() };
   else title = langMap(raw.title, null, "title", warnings);
 
-  const video: Partial<Record<Rendition, string>> = {};
-  if (typeof raw.video === "string") {
-    const single = resolveMediaUrl(raw.video, base);
-    if (single) video["720"] = single;
-  } else if (isRecord(raw.video)) {
-    for (const [key, value] of Object.entries(raw.video)) {
-      const rendition = renditionKey(key);
-      const resolved = resolveMediaUrl(value, base);
-      if (rendition && resolved) video[rendition] = resolved;
-      else warnings.push(`video.${key}: ignored`);
-    }
-  }
-
+  const video = parseVideo(raw.video, base, warnings);
   const audio = langMap(raw.audio, base, "audio", warnings);
   const subtitles = langMap(raw.subtitles, base, "subtitles", warnings);
   const muxed = langMap(raw.muxed, base, "muxed", warnings);
 
-  let chapters: ChaptersSource | undefined;
-  if (typeof raw.chapters === "string") {
-    const all = resolveMediaUrl(raw.chapters, base);
-    if (all) chapters = { all, byLang: {} };
-  } else if (isRecord(raw.chapters)) {
-    const byLang = langMap(raw.chapters, base, "chapters", warnings);
-    if (Object.keys(byLang).length) chapters = { byLang };
-  }
-
+  const chapters = parseChapters(raw.chapters, base, warnings);
   const reviewMp4 = resolveMediaUrl(raw.review_mp4 ?? raw.reviewMp4, base) ?? undefined;
   const poster = resolveMediaUrl(raw.poster, base) ?? undefined;
 
