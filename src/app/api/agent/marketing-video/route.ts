@@ -16,7 +16,9 @@ const bodySchema = z.object({
   title: z.string().optional(),
 });
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await authorizeAgentRequest(request);
+  if (!auth.ok) return auth.error;
   try {
     const campaigns = await listCampaigns(12);
     return NextResponse.json({ ok: true, campaigns });

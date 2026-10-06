@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
 import { listVoiceJobs, recordVoiceJob, runVoiceMath } from "@/lib/voiceMath";
+import { readUploadFile } from "@/lib/security/uploads";
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
 
 export const runtime = "nodejs";
@@ -83,9 +84,13 @@ export async function POST(request: Request) {
     }
     const file = form.get("audio") ?? form.get("file");
     if (file instanceof File && file.size > 0) {
-      bytes = Buffer.from(await file.arrayBuffer());
-      filename = file.name;
-      mimeType = file.type || "audio/webm";
+      const read = await readUploadFile(file, ["audio"]);
+      if (!read.ok) {
+        return NextResponse.json({ error: read.error, errorAr: read.errorAr }, { status: read.status });
+      }
+      bytes = read.bytes;
+      filename = read.originalName;
+      mimeType = read.mime;
     }
   } else {
     let json: {

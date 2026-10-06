@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
+import { safeEqual } from "@/lib/security/webhookSignature";
 
 /**
  * HeyGen write routes prefer a logged-in teacher/admin session.
@@ -68,7 +69,15 @@ export async function requireHeyGenStaff(request: Request, { write }: { write: b
 
 export function webhookSecretOk(request: Request, body: unknown): boolean {
   const secret = process.env.HEYGEN_WEBHOOK_SECRET?.trim();
-  if (!secret) return true;
+  if (!secret) {
+    // Fail closed in production: this webhook flips job status and what a student can watch.
+    // A deployment that genuinely cannot set the secret opts in with HEYGEN_ALLOW_UNSIGNED_WEBHOOK=1.
+    if (process.env.NODE_ENV === "production" && process.env.HEYGEN_ALLOW_UNSIGNED_WEBHOOK !== "1") {
+      console.warn("[mathmentor] heygen: HEYGEN_WEBHOOK_SECRET is not set — refusing an unsigned webhook");
+      return false;
+    }
+    return true;
+  }
   const url = new URL(request.url);
   const bodySecret =
     body && typeof body === "object" && "secret" in body ? String((body as { secret?: unknown }).secret ?? "") : "";
@@ -79,5 +88,5 @@ export function webhookSecretOk(request: Request, body: unknown): boolean {
     url.searchParams.get("secret"),
     bodySecret,
   ];
-  return candidates.some((value) => Boolean(value) && value === secret);
+  return candidates.some((value) => Boolean(value) && safeEqual(String(value), secret));
 }

@@ -13,6 +13,7 @@ import { saveMathQuery } from "./store";
 import { scheduleSolutionVerification } from "./verify";
 import type { MathQueryRecord, MathSolution } from "./types";
 import type { PublicUser } from "@/lib/auth/store";
+import { readUploadFile, uploadFileName, type UploadRejection } from "@/lib/security/uploads";
 
 export type EngineInput = SolveRequest & {
   imageBase64?: string;
@@ -24,17 +25,32 @@ export type EngineInput = SolveRequest & {
   platformCurriculum?: string;
 };
 
-export async function persistUploadedImage(file: File) {
+/** Stored notebook photo. The extension comes from the sniffed type, never from the client name. */
+export type SavedImage = {
+  ok: true;
+  imageUrl: string;
+  imageName: string;
+  mimeType: string;
+  imageBase64: string;
+};
+
+/**
+ * Store a notebook photo after the shared upload policy (byte cap, magic bytes, our extension).
+ * Rejections are returned, not thrown, so the route can answer 413/415 without storing anything.
+ */
+export async function persistUploadedImage(file: File): Promise<SavedImage | UploadRejection> {
+  const read = await readUploadFile(file, ["image"]);
+  if (!read.ok) return read;
   const dir = path.join(process.cwd(), "public", "uploads", "math");
   await mkdir(dir, { recursive: true });
-  const safe = `${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
-  const bytes = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(dir, safe), bytes);
+  const name = uploadFileName(read.ext);
+  await writeFile(path.join(dir, name), read.bytes);
   return {
-    imageUrl: `/uploads/math/${safe}`,
-    imageName: file.name,
-    mimeType: file.type || "image/jpeg",
-    imageBase64: bytes.toString("base64"),
+    ok: true,
+    imageUrl: `/uploads/math/${name}`,
+    imageName: read.originalName,
+    mimeType: read.mime,
+    imageBase64: read.bytes.toString("base64"),
   };
 }
 

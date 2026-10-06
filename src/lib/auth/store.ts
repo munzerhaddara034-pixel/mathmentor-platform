@@ -311,6 +311,24 @@ export async function adjustLiveCredits(userId: string, delta: number) {
 }
 
 /**
+ * Spend one live hour atomically: the balance is checked and decremented inside the same locked
+ * mutation, so two parallel bookings can no longer both take the last hour (no lost update and no
+ * negative balance). Refuses when the balance is empty.
+ */
+export async function consumeLiveCredit(
+  userId: string,
+): Promise<{ ok: true; user: PublicUser } | { ok: false; reason: "not_found" | "no_credits" }> {
+  return mutateAuth((store) => {
+    const user = store.users.find((item) => item.id === userId);
+    if (!user) return { ok: false as const, reason: "not_found" as const };
+    const balance = user.liveCredits ?? 0;
+    if (balance < 1) return { ok: false as const, reason: "no_credits" as const };
+    user.liveCredits = balance - 1;
+    return { ok: true as const, user: toPublic(user) };
+  });
+}
+
+/**
  * Mirror an account that authenticated against the profile DB (`/signup`, SQLite or Postgres)
  * into this session store, so one exclusive-session cookie covers both.
  * Existing users (matched by email) are returned unchanged — no password or role overwrite.

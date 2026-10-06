@@ -5,6 +5,7 @@ import { apiRequireAiAccess } from "@/lib/auth/guards";
 import { createId } from "@/lib/ids";
 import { addStudentChat, readStore } from "@/lib/store";
 import { academyLessons } from "@/lib/academyLessons";
+import { readUploadFile, uploadFileName } from "@/lib/security/uploads";
 
 export const runtime = "nodejs";
 
@@ -36,13 +37,16 @@ export async function POST(request: Request) {
   let fileName: string | undefined;
   let fileUrl: string | undefined;
   if (file instanceof File && file.size > 0) {
+    const read = await readUploadFile(file, ["image", "document"]);
+    if (!read.ok) {
+      return NextResponse.json({ error: read.error, errorAr: read.errorAr }, { status: read.status });
+    }
     const dir = path.join(process.cwd(), "public", "uploads");
     await mkdir(dir, { recursive: true });
-    const safe = `${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
-    const bytes = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(dir, safe), bytes);
-    fileName = file.name;
-    fileUrl = `/uploads/${safe}`;
+    const name = uploadFileName(read.ext);
+    await writeFile(path.join(dir, name), read.bytes);
+    fileName = read.originalName;
+    fileUrl = `/uploads/${name}`;
   }
   if (!body && !fileName) {
     return NextResponse.json({ error: "Write a question or attach a file." }, { status: 400 });

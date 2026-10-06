@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { apiRequireAiAccess, apiSession } from "@/lib/auth/guards";
 import { isStaffRole } from "@/lib/auth/paths";
 import { listMathQueries, persistUploadedImage, recordSolution, runMathSolver } from "@/lib/solver";
+import { readInlineUpload } from "@/lib/security/uploads";
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
 
 export const runtime = "nodejs";
@@ -59,6 +60,9 @@ export async function POST(request: Request) {
     const file = form.get("image");
     if (file instanceof File && file.size > 0) {
       const saved = await persistUploadedImage(file);
+      if (!saved.ok) {
+        return NextResponse.json({ error: saved.error, errorAr: saved.errorAr }, { status: saved.status });
+      }
       imageUrl = saved.imageUrl;
       imageName = saved.imageName;
       imageBase64 = saved.imageBase64;
@@ -92,6 +96,16 @@ export async function POST(request: Request) {
     imageName = json.imageName;
     curriculum = asText(json.curriculum);
     platformCurriculum = asText(json.platformCurriculum);
+  }
+
+  if (imageBase64) {
+    const inline = readInlineUpload(imageBase64, ["image"]);
+    if (!inline.ok) {
+      return NextResponse.json({ error: inline.error, errorAr: inline.errorAr }, { status: inline.status });
+    }
+    imageBase64 = inline.bytes.toString("base64");
+    mimeType = inline.mime;
+    imageName = imageName || inline.originalName;
   }
 
   if (!question && !latex && !imageBase64) {

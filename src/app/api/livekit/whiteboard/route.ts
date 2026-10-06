@@ -4,6 +4,7 @@ import { classroomGuard, sanitizeRoomName } from "@/lib/livekit/rooms";
 import { boardDelta, parseSince, roomEtag, sinceFromEtag, type BoardOp } from "@/lib/livekit/roomState";
 import { appendBoardOp, getClassroomRoom } from "@/lib/livekit/store";
 import { sanitizeStroke } from "@/lib/livekit/strokeCodec";
+import { parseSafeExpression } from "@/lib/math/safeExpression";
 import type { WhiteboardEquation, WhiteboardPlot } from "@/lib/livekit/protocol";
 
 export const runtime = "nodejs";
@@ -43,6 +44,16 @@ function isString(value: unknown, max: number): value is string {
   return typeof value === "string" && value.length > 0 && value.length <= max;
 }
 
+/** Board graphs render in every participant's browser: only the maths grammar may be stored. */
+function isSafePlotExpression(expression: string): boolean {
+  try {
+    parseSafeExpression(expression);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function parseOp(body: OpBody, authorId: string): BoardOp | null {
   const op = body.op;
   if (!op || typeof op.kind !== "string") return null;
@@ -59,6 +70,7 @@ function parseOp(body: OpBody, authorId: string): BoardOp | null {
   if (op.kind === "plot" && typeof op.plot === "object" && op.plot !== null) {
     const raw = op.plot as Partial<WhiteboardPlot>;
     if (!isString(raw.id, 80) || !isString(raw.expression, 200)) return null;
+    if (!isSafePlotExpression(raw.expression)) return null;
     const xMin = typeof raw.xMin === "number" && Number.isFinite(raw.xMin) ? raw.xMin : -5;
     const xMax = typeof raw.xMax === "number" && Number.isFinite(raw.xMax) ? raw.xMax : 5;
     return { kind: "plot", plot: { id: raw.id, expression: raw.expression, xMin, xMax, authorId, createdAt: new Date().toISOString() } };

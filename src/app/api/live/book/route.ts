@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getLiveSession } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/auth/paths";
-import { adjustLiveCredits, userAccess, userHasLiveAccess } from "@/lib/auth/store";
+import { consumeLiveCredit, userAccess, userHasLiveAccess } from "@/lib/auth/store";
 import { createId } from "@/lib/ids";
 import { bookSlot, patchBooking } from "@/lib/live/store";
 import {
@@ -200,14 +200,23 @@ export async function POST(request: Request) {
     }
 
     if (!staff && user) {
-      await adjustLiveCredits(user.id, -1);
-      try {
-        const { recordLiveBookingDebit } = await import("@/lib/billing/store");
-        await recordLiveBookingDebit(user.id, result.booking.id, user.name);
-      } catch {
-        /* optional */
+      // Atomic spend: two parallel bookings can no longer both take the last remaining hour.
+      const spent = await consumeLiveCredit(user.id);
+      if (spent.ok) {
+        try {
+          const { recordLiveBookingDebit } = await import("@/lib/billing/store");
+          await recordLiveBookingDebit(user.id, result.booking.id, user.name);
+        } catch {
+          /* optional */
+        }
+        await patchBooking(result.booking.id, { creditDeducted: true });
+      } else {
+        console.warn("[mathmentor] live booking without a live credit", {
+          userId: user.id,
+          bookingId: result.booking.id,
+          reason: spent.reason,
+        });
       }
-      await patchBooking(result.booking.id, { creditDeducted: true });
     }
 
     try {

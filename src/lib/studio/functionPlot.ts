@@ -1,4 +1,5 @@
 import type { GraphPayload } from "./timeline";
+import { parseSafeExpression } from "@/lib/math/safeExpression";
 
 /**
  * Lightweight function-plot engine used by the Math Canvas.
@@ -12,35 +13,27 @@ import type { GraphPayload } from "./timeline";
  */
 export type CompiledFn = (x: number) => number;
 
+/**
+ * Compile an expression with the safe grammar parser (`src/lib/math/safeExpression.ts`).
+ *
+ * Board graphs are drawn inside every participant's browser, so this deliberately avoids
+ * `new Function`: anything that is not plain maths (statements, property access, calls to
+ * identifiers that are not maths functions) throws and the graph is skipped instead of running.
+ * `log(` keeps the historical natural-log meaning used by the authored lesson JSON.
+ */
 export function compileFunction(expression: string): CompiledFn {
-  const trimmed = expression.trim();
-  if (!trimmed) {
-    return () => Number.NaN;
-  }
-  const normalized = trimmed
-    .replace(/\^/g, "**")
-    .replace(/\be\b/g, "Math.E")
-    .replace(/\bpi\b/gi, "Math.PI")
-    .replace(/\bexp\s*\(/gi, "Math.exp(")
-    .replace(/\bln\s*\(/gi, "Math.log(")
-    .replace(/\blog\s*\(/gi, "Math.log(")
-    .replace(/\bsin\s*\(/gi, "Math.sin(")
-    .replace(/\bcos\s*\(/gi, "Math.cos(")
-    .replace(/\btan\s*\(/gi, "Math.tan(")
-    .replace(/\babs\s*\(/gi, "Math.abs(")
-    .replace(/\bsqrt\s*\(/gi, "Math.sqrt(");
-
+  const normalized = expression.trim().replace(/\blog\s*\(/gi, "ln(");
+  if (!normalized) return () => Number.NaN;
+  let fn: (x: number) => number;
   try {
-    // Limited math scope — expressions come from teacher-authored lesson JSON.
-    const body = `"use strict"; const { abs, exp, log, sin, cos, tan, sqrt, pow, E, PI } = Math; return (${normalized});`;
-    const fn = new Function("x", body) as CompiledFn;
-    return (x: number) => {
-      const y = fn(x);
-      return typeof y === "number" && Number.isFinite(y) ? y : Number.NaN;
-    };
+    fn = parseSafeExpression(normalized);
   } catch {
     return () => Number.NaN;
   }
+  return (x: number) => {
+    const y = fn(x);
+    return Number.isFinite(y) ? y : Number.NaN;
+  };
 }
 
 export type SampledPoint = { x: number; y: number };
