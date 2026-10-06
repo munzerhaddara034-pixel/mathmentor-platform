@@ -1,9 +1,10 @@
 /**
- * Server-side pricing-region resolution (pure; unit-tested). The browser NEVER decides the price:
+ * Pricing-region decision (pure; unit-tested; safe to import from client code for its types).
+ * The browser NEVER decides the price. The server (regionServer.ts) feeds three signals in:
  *
- *   (a) location — the region the browser computed from geolocation (a client CLAIM; see geoRegion.ts).
- *       Required: prices are shown / sold only after the student enabled location.
- *   (b) ip       — the visitor's IP country from a TRUSTED edge header (see ipCountryFromHeaders).
+ *   (a) location — the region the browser computed from geolocation (geoRegion.ts runs on the device;
+ *       raw coordinates never leave it). A client CLAIM. Required: no prices are shown / sold without it.
+ *   (b) ip       — the visitor's IP country from the bundled offline GeoIP database (ipCountry.ts).
  *   (c) phone    — the country calling code of the phone on file (+961, GCC codes, +1 …).
  *
  * All available signals must agree. If they do not, the MOST EXPENSIVE region among them wins and the
@@ -32,30 +33,6 @@ export function regionFromCountry(code: string | null | undefined): PricingRegio
   if ((GCC_COUNTRIES as readonly string[]).includes(cc)) return "gcc";
   if (cc === "US") return "admissions_us";
   return "international";
-}
-
-/**
- * Which request header carries a trustworthy IP country:
- *  - MM_IP_COUNTRY_HEADER set → that header ("off" / "none" disables the IP signal);
- *  - else on Render (RENDER=true) → "cf-ipcountry": every Render service sits behind Cloudflare, which
- *    overwrites CF-IPCountry at its edge, so a client cannot inject it;
- *  - else none (local dev / unknown hosts): a client-sent country header would be spoofable.
- */
-export function trustedCountryHeader(env: Record<string, string | undefined> = process.env): string | null {
-  const configured = env.MM_IP_COUNTRY_HEADER?.trim().toLowerCase();
-  if (configured) return configured === "off" || configured === "none" ? null : configured;
-  if (env.RENDER === "true") return "cf-ipcountry";
-  return null;
-}
-
-export function ipCountryFromHeaders(
-  headers: { get(name: string): string | null },
-  env: Record<string, string | undefined> = process.env,
-): string | null {
-  const name = trustedCountryHeader(env);
-  if (!name) return null;
-  const value = headers.get(name)?.trim().toUpperCase() ?? "";
-  return /^[A-Z]{2}$/.test(value) ? value : null;
 }
 
 /**
@@ -132,18 +109,4 @@ export function sanitizeRegionSignals(value: unknown): RegionSignals {
     if (isPricingRegion(region)) out[source] = region;
   }
   return out;
-}
-
-/** Convenience for route handlers: signals from the request + the signed-in user's phone on file. */
-export function resolveRegionForRequest(input: {
-  location: unknown;
-  headers: { get(name: string): string | null };
-  phone?: string | null;
-  env?: Record<string, string | undefined>;
-}): RegionResolution {
-  return resolvePricingRegion({
-    location: input.location,
-    ipCountry: ipCountryFromHeaders(input.headers, input.env),
-    phone: input.phone ?? null,
-  });
 }

@@ -1,14 +1,15 @@
 /**
  * POST { location: "lebanon" | "gcc" | "international" | "admissions_us" } → the region whose prices this visitor may see.
  * `location` is the region the BROWSER computed from geolocation (geoRegion.ts); coordinates are never
- * sent here. The server cross-checks it with the trusted IP country and the phone on file and returns
+ * sent here. The server cross-checks it with the offline IP country (ipCountry.ts) and the phone on file and returns
  * only the resolved region, the names of the sources it used and the mismatch flag. Nothing is stored
  * or logged. Public (prices are public); a signed-in user's phone adds a signal.
  */
 import { NextResponse } from "next/server";
 import { getLiveSession } from "@/lib/auth/session";
 import { normalizePhone } from "@/lib/payments/validation";
-import { regionSourceList, resolveRegionForRequest } from "@/lib/pricing/regionSignals";
+import { regionSourceList } from "@/lib/pricing/regionSignals";
+import { resolveRegionForRequest } from "@/lib/pricing/regionServer";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

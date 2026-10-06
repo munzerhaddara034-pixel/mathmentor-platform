@@ -4,7 +4,7 @@ import { createSubscribeOrder, type SubscribePeriod } from "@/lib/billing/orders
 import { whishEnabled } from "@/lib/whish/client";
 import { getRegionalPricing, isPaymentMethod, type PaymentMethod } from "@/lib/pricing/plans";
 import { paymentMethodLabel } from "@/lib/pricing/transfers";
-import { resolveRegionForRequest } from "@/lib/pricing/regionSignals";
+import { resolveRegionForRequest } from "@/lib/pricing/regionServer";
 import { normalizePhone } from "@/lib/payments/validation";
 
 export const runtime = "nodejs";
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     const planId = body.planId?.trim();
     const period = body.period;
-    // Price lock: the server resolves the region (location claim + trusted IP country + phone on file)
+    // Price lock: the server resolves the region (location claim + offline IP country + phone on file)
     // and prices from plans.ts. Nothing region- or price-related from the body is authoritative.
     const region = resolveRegionForRequest({
       location: body.locationRegion,

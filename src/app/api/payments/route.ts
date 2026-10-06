@@ -10,7 +10,7 @@ import { clientIpFrom, paymentRateLimits, tooManyRequestsBody } from "@/lib/secu
 import { isSameOriginRequest } from "@/lib/security/origin";
 import { RECEIPT_MAX_BYTES, validateReceipt } from "@/lib/payments/receipt";
 import { normalizePhone, validatePaymentClaim } from "@/lib/payments/validation";
-import { resolveRegionForRequest } from "@/lib/pricing/regionSignals";
+import { resolveRegionForRequest } from "@/lib/pricing/regionServer";
 import { listUserPayments, type NewReceipt } from "@/lib/payments/db";
 import { paymentsAvailable, paymentsPool, submitPaymentClaim } from "@/lib/payments/service";
 import { forbiddenOriginResponse, paymentErrorResponse, unavailableResponse } from "@/lib/payments/http";
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Region is decided HERE from server-side signals: location claim + trusted IP country + phone on file.
+    // Region is decided HERE from server-side signals: location claim + offline IP country + phone on file.
     const region = resolveRegionForRequest({
       location: validation.value.locationRegion,
       headers: request.headers,
