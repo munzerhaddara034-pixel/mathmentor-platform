@@ -1,0 +1,18 @@
+{
+  "id": "demo-sine",
+  "title": {
+    "en": "Demo · The sine function (player test fixture)",
+    "ar": "عرض تجريبي · دالة الجيب (ملف اختبار المشغّل)",
+    "fr": "Démo · La fonction sinus (fichier de test du lecteur)"
+  },
+  "level": "Grade 11",
+  "curriculum": "Lebanese",
+  "duration": 8,
+  "ai_voice": true,
+  "poster": "poster.jpg",
+  "video": { "1080": "video.1080.mp4", "720": "video.720.mp4", "480": "video.480.mp4" },
+  "audio": { "en": "audio.en.m4a", "ar": "audio.ar.m4a", "fr": "audio.fr.m4a" },
+  "subtitles": { "en": "subtitles.en.vtt", "ar": "subtitles.ar.vtt", "fr": "subtitles.fr.vtt" },
+  "chapters": "chapters.vtt",
+  "review_mp4": "lesson-en.mp4"
+}
