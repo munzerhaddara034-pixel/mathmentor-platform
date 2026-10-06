@@ -13,6 +13,8 @@ export interface TeamRepo {
   saveProposal(proposal: TeamProposal): Promise<void>;
   getProposal(id: string): Promise<TeamProposal | undefined>;
   listProposals(ids: string[]): Promise<TeamProposal[]>;
+  /** Most recently updated proposals in these statuses (Hamza worker: CI polling). */
+  listProposalsByStatus(statuses: TeamProposalStatus[], limit: number): Promise<TeamProposal[]>;
   /** Atomic compare-and-set on status; returns the updated proposal or undefined if the status did not match. */
   transitionProposal(
     id: string,

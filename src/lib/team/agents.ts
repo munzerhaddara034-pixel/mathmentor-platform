@@ -6,7 +6,11 @@ import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { createId } from "@/lib/ids";
 import { baremeQuarterIssues, enforceConstants } from "./constants";
 import { MOHAMED_ACTIONS_PROTOCOL_AR, beirutNowAr, mohamedDataContext } from "./context";
-import { looksLikeApprovalText, namedBranch, runDeveloperAgent } from "./developer";
+import { hamzaNotConfiguredTextAr, hamzaReadiness } from "@/lib/hamza/readiness";
+import { enqueueHamzaTask } from "@/lib/hamza/tasks/enqueue";
+import { taskDeps } from "@/lib/hamza/tasks/deps";
+import { toRouterTurns } from "@/lib/hamza/tasks/turns";
+import { looksLikeApprovalText, namedBranch } from "./developer";
 import { TeamLlmUnavailableError, callTeamLlm, parseJsonObject, stringField, type LlmPart, type LlmTurn } from "./gemini";
 import { FORBIDDEN_BRANCHES, isProtectedBranch, isValidBranchName, teamGithubConfig } from "./github";
 import { generateImage, imageProviderAvailable } from "./images";
@@ -264,28 +268,31 @@ async function runAgent(input: {
   }
   if (agent === "sami") return runSami(turns, ctx, channel, human.id, extra);
 
+  // Hamza is OFF unless fully configured: a fixed notice, no model call, no task, no GitHub.
+  const readiness = hamzaReadiness();
+  if (!readiness.ready) {
+    return { message: agentMessage(channel, "developer", hamzaNotConfiguredTextAr(readiness), { replyToId: human.id, ...extra }) };
+  }
   if (!referral && looksLikeApprovalText(human.text)) {
     const pending = (await pendingProposals(channel)).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     if (pending) return approvalByTextReply(channel, human, pending);
   }
-  const messageId = createId("tmsg");
-  const result = await runDeveloperAgent({
-    turns,
-    humanText: referral ? `${human.text}\n${referral.task}` : human.text,
-    requestedBy: actor.name,
+  // Hamza v2: the work runs in the background worker (explore → patch → prechecks); this reply is immediate.
+  const queued = await enqueueHamzaTask(taskDeps(), {
     channel,
-    messageId,
+    kind: "new",
+    requestText: referral ? `${human.text}\n${referral.task}` : human.text,
+    actor,
+    turns: toRouterTurns(turns),
+    replyToId: human.id,
     extraContext: ctx,
   });
-  const message = agentMessage(channel, "developer", result.text, {
-    id: messageId,
+  const message = agentMessage(channel, "developer", queued.text, {
     replyToId: human.id,
-    proposalId: result.proposal?.id,
-    notice: result.notice,
+    taskId: queued.ok ? queued.task.id : queued.task?.id,
     ...extra,
   });
-  if (result.proposal) await teamRepo().saveProposal(result.proposal);
-  return { message, proposal: result.proposal };
+  return { message };
 }
 
 function llmFailureMessage(channel: TeamChannelId, agent: TeamAgentId, human: TeamMessage, error: unknown): TeamMessage {
