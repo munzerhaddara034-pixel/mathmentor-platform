@@ -36,7 +36,7 @@ test("no auto-activation: the student submit route never touches activation code
 test("insertPayment can only ever insert status 'pending'", () => {
   const db = read("src/lib/payments/db.ts");
   const insert = db.slice(db.indexOf("export async function insertPayment"), db.indexOf("export async function getPayment"));
-  assert.match(insert, /INSERT INTO mm_payments[\s\S]*'pending'\)/);
+  assert.match(insert, /INSERT INTO mm_payments[\s\S]*VALUES \([^)]*'pending'[^)]*\)/);
   assert.ok(!/'confirmed'/.test(insert));
   assert.ok(!/mm_documents/.test(insert), "submitting never writes the auth document");
 });

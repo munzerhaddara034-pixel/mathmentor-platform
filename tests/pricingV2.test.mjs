@@ -133,7 +133,8 @@ test("single price source: no hard-coded plan prices outside plans.ts", () => {
 
   const student = read("src/app/student/page.tsx");
   assert.ok(!/usdMonthly|usdTerm|settings\.plans/.test(student));
-  assert.match(student, /<PricingOptions/);
+  assert.match(student, /<RegionLockedPrices/, "student prices are region-locked");
+  assert.match(read("src/components/billing/RegionLockedPrices.tsx"), /<PricingOptions region=\{geo\.state\.region\}/);
 
   const dashboard = read("src/app/api/dashboard/route.ts");
   assert.ok(!/\*\s*39\b/.test(dashboard), "activation-code value is not a hard-coded 39");
