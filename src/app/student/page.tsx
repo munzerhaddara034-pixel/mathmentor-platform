@@ -4,9 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { academyLessons } from "@/lib/academyLessons";
 import { defaultSettings } from "@/lib/settings";
-import { PricingOptions } from "@/components/billing/PricingOptions";
-import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
-import { pricingRegionFromCurriculumId } from "@/lib/pricing/plans";
+import { RegionLockedPrices } from "@/components/billing/RegionLockedPrices";
 import { useNs } from "@/components/i18n/useNs";
 import { fmt } from "@/lib/i18n/format";
 import { accountMessages } from "@/lib/i18n/ns/account";
@@ -14,7 +12,6 @@ import type { PlatformSettings, ProgressEntry, StoreData, StudentChatMessage } f
 
 export default function StudentPage() {
   const t = useNs(accountMessages).student;
-  const { curriculumId } = useCurriculum();
   const [settings, setSettings] = useState<PlatformSettings>(defaultSettings);
   const [progress, setProgress] = useState<ProgressEntry[]>([]);
   const [messages, setMessages] = useState<StudentChatMessage[]>([]);
@@ -142,8 +139,8 @@ export default function StudentPage() {
         </article>
       </div>
       <h2>{t.plans}</h2>
-      {/* Prices come from plans.ts only (pricing v2), for the student's curriculum region. */}
-      <PricingOptions region={pricingRegionFromCurriculumId(curriculumId)} showBookLink={false} />
+      {/* Region-locked (pricing v2): prices from plans.ts only, after location is enabled. */}
+      <RegionLockedPrices showBookLink={false} />
       <div className="row" style={{ marginTop: 12 }}>
         <Link className="btn dark" href="/subscribe">
           {t.payWhish}
