@@ -12,6 +12,8 @@ export async function SiteFooter() {
         <Link href="/subscribe">{m.nav.subscribe}</Link>
         <Link href="/live">{m.nav.live}</Link>
         <Link href="/lessons">{m.nav.lessons}</Link>
+        <Link href="/privacy">{m.footer.privacy}</Link>
+        <Link href="/terms">{m.footer.terms}</Link>
       </nav>
     </footer>
   );

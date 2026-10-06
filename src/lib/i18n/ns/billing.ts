@@ -11,6 +11,7 @@ const en = {
     eyebrow: "Subscription · Regional pricing",
     title: "Subscription fees · Whish / Western Union / OMT",
     lead: "Prices by region (Lebanon / GCC / International) follow the curriculum switcher. Pay by manual transfer via Whish to {phone} in the name of {name}, or by Western Union / OMT to the same beneficiary. The academy WhatsApp ({support}) is for support only, not payment. The subscription is activated once Professor Munzer Haddara confirms it; redeem cards on /redeem stay optional.",
+    legalNote: "By paying you accept the {terms} and the {privacy}.",
   },
   plans: {
     eyebrow: "Professor Munzer Haddara",
@@ -80,6 +81,7 @@ const ar: BillingMessages = {
     eyebrow: "الاشتراك · أسعار حسب المنطقة",
     title: "رسوم الاشتراك · Whish / Western Union / OMT",
     lead: "أسعار حسب المنطقة (لبنان / الخليج / دولي) مرتبطة بالمنهج. التحويل اليدوي عبر Whish إلى {phone} باسم {name}، أو Western Union / OMT للمستفيد نفسه. واتساب الأكاديمية ({support}) للدعم فقط وليس للدفع. بعد تأكيد الأستاذ منذر حداره يُفعَّل الاشتراك، وتبقى بطاقات /redeem اختيارية.",
+    legalNote: "بالدفع فإنك توافق على {terms} و{privacy}.",
   },
   plans: {
     eyebrow: "الأستاذ منذر حداره",
@@ -147,6 +149,7 @@ const fr: BillingMessages = {
     eyebrow: "Abonnement · Tarifs par région",
     title: "Frais d'abonnement · Whish / Western Union / OMT",
     lead: "Les prix par région (Liban / Golfe / International) suivent le sélecteur de programme. Payez par virement manuel via Whish au {phone} au nom de {name}, ou par Western Union / OMT au même bénéficiaire. Le WhatsApp de l'académie ({support}) sert uniquement au support, pas au paiement. L'abonnement est activé dès que le Professeur Munzer Haddara le confirme ; les cartes /redeem restent facultatives.",
+    legalNote: "En payant, vous acceptez les {terms} et la {privacy}.",
   },
   plans: {
     eyebrow: "Professeur Munzer Haddara",

@@ -92,6 +92,8 @@ export const en = {
   footer: {
     tagline: "Math for Lebanese Brevet & Terminale, IB, Cambridge, SAT and AP",
     links: "Footer links",
+    privacy: "Privacy",
+    terms: "Terms",
   },
   assistant: {
     name: "Dr. Mohamed · Munzer's assistant",

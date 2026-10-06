@@ -90,6 +90,8 @@ export const ar: Messages = {
   footer: {
     tagline: "رياضيات الشهادة المتوسطة والثانوية اللبنانية، IB، كامبريدج، SAT وAP",
     links: "روابط التذييل",
+    privacy: "الخصوصية",
+    terms: "الشروط",
   },
   assistant: {
     name: "الدكتور محمد · مساعد منذر",

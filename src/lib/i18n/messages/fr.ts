@@ -90,6 +90,8 @@ export const fr: Messages = {
   footer: {
     tagline: "Maths pour le Brevet et la Terminale libanais, l’IB, Cambridge, le SAT et l’AP",
     links: "Liens de pied de page",
+    privacy: "Confidentialité",
+    terms: "Conditions",
   },
   assistant: {
     name: "Dr Mohamed · assistant de Munzer",

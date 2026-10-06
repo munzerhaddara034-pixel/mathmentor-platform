@@ -24,6 +24,9 @@ export const PUBLIC_PATHS = [
   "/live",
   /** Guest solver trial: a visitor may solve a few problems per day without an account. */
   "/math-solver",
+  /** Legal pages: reachable and indexable for visitors, payment providers and app stores. */
+  "/privacy",
+  "/terms",
 ];
 
 const PUBLIC_PREFIXES = [

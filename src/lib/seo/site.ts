@@ -26,6 +26,8 @@ export const PUBLIC_ROUTES: PublicRoute[] = [
   { path: "/live", priority: 0.7, changeFrequency: "daily" },
   { path: "/signup", priority: 0.5, changeFrequency: "monthly" },
   { path: "/login", priority: 0.3, changeFrequency: "monthly" },
+  { path: "/privacy", priority: 0.3, changeFrequency: "monthly" },
+  { path: "/terms", priority: 0.3, changeFrequency: "monthly" },
 ];
 
 /** Paths that must never be crawled even though they are reachable without a session. */
