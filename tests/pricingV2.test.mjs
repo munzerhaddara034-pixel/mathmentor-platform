@@ -177,7 +177,7 @@ test("checkout: regional plans priced from plans.ts; legacy ids and missing regi
   assert.match(noRegion.error, /region/i);
 });
 
-test("live booking defaults come from plans.ts (Lebanon) unless env overrides", async () => {
+test("live booking prices come only from plans.ts (env overrides ignored)", async () => {
   const saved = {};
   const keys = ["LIVE_SESSION_PRICE_USD", "NEXT_PUBLIC_LIVE_SESSION_PRICE_USD", "LIVE_SESSION_PRICE_EXTERNAL_USD", "NEXT_PUBLIC_LIVE_SESSION_PRICE_EXTERNAL_USD"];
   for (const key of keys) {
@@ -189,7 +189,9 @@ test("live booking defaults come from plans.ts (Lebanon) unless env overrides", 
     assert.equal(memberSessionAmountUsd(), subscriberSessionUsd("lebanon"));
     assert.equal(externalSessionAmountUsd(), outsideSessionUsd("lebanon"));
     process.env.LIVE_SESSION_PRICE_USD = "18";
-    assert.equal(memberSessionAmountUsd(), 18, "env override still works");
+    process.env.LIVE_SESSION_PRICE_EXTERNAL_USD = "5";
+    assert.equal(memberSessionAmountUsd(), subscriberSessionUsd("lebanon"), "env override ignored");
+    assert.equal(externalSessionAmountUsd(), outsideSessionUsd("lebanon"), "env override ignored");
   } finally {
     for (const key of keys) {
       if (saved[key] === undefined) delete process.env[key];

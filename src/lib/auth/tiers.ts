@@ -29,8 +29,8 @@ export function planIdToSubscriptionType(planId?: string | null): SubscriptionTy
 export function liveCreditsForPlan(planId?: string | null): number {
   if (!planId) return 0;
   const id = planId.trim().toLowerCase();
-  if (id === "both") return 8;
-  if (id === "live" || id === "livehybrid") return 4;
+  // "both" = platform + 4 live sessions (same as the liveHybrid bundle; was 8 before pricing v2).
+  if (id === "both" || id === "live" || id === "livehybrid") return 4;
   return 0;
 }
 

@@ -41,7 +41,8 @@ export async function GET() {
     cardsSold: usedCards,
     cardsLeft: store.scratchCards.filter((item) => !item.used).length,
     financials: {
-      estimatedUsd: cardRevenueUsd + store.progress.length * 5,
+      // Only priced items (activation codes valued from plans.ts). The old "$5 per lesson viewed" guess is gone.
+      estimatedUsd: cardRevenueUsd,
       currency: "USD",
     },
     attempts: store.quizAttempts.slice(0, 12),

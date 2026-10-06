@@ -40,12 +40,6 @@ function trimEnv(name: string) {
   return process.env[name]?.trim() || "";
 }
 
-function parsePositiveAmount(raw: string, fallback: number): number {
-  if (!raw) return fallback;
-  const n = Number(raw);
-  return typeof n === "number" && Number.isFinite(n) && n > 0 ? n : fallback;
-}
-
 function formatUsd(amount: number) {
   return amount % 1 === 0 ? amount.toFixed(0) : amount.toFixed(2);
 }
@@ -73,27 +67,22 @@ export function whishTransferNameEn() {
   return "Munzer Ahmad Haddara";
 }
 
-/** Member / platform price (default: plans.ts subscriber session). Reads LIVE_SESSION_PRICE_USD each call. */
+/**
+ * Member / platform live-session price. SINGLE PRICE SOURCE: plans.ts only. The old
+ * LIVE_SESSION_PRICE_USD / LIVE_SESSION_PRICE_EXTERNAL_USD (+ NEXT_PUBLIC_*) env overrides are ignored.
+ */
 export function memberSessionAmountUsd() {
-  return parsePositiveAmount(
-    trimEnv("LIVE_SESSION_PRICE_USD") || trimEnv("NEXT_PUBLIC_LIVE_SESSION_PRICE_USD"),
-    subscriberSessionUsd(),
-  );
+  return subscriberSessionUsd();
 }
 
-/** External / guest price (default: plans.ts outside-student session). */
+/** External / guest price (plans.ts outside-student session). */
 export function externalSessionAmountUsd() {
-  return parsePositiveAmount(
-    trimEnv("LIVE_SESSION_PRICE_EXTERNAL_USD") ||
-      trimEnv("NEXT_PUBLIC_LIVE_SESSION_PRICE_EXTERNAL_USD"),
-    outsideSessionUsd(),
-  );
+  return outsideSessionUsd();
 }
 
 /**
  * Price for a live session by audience.
- * `kind` "member" → LIVE_SESSION_PRICE_USD (default plans.ts subscriberSessionUsd)
- * `kind` "external" → LIVE_SESSION_PRICE_EXTERNAL_USD (default plans.ts outsideSessionUsd)
+ * `kind` "member" → plans.ts subscriberSessionUsd; "external" → plans.ts outsideSessionUsd.
  */
 export function liveSessionPriceFor(kind: PricingTier = "member"): LiveSessionPrice {
   const lbpRaw = trimEnv("LIVE_SESSION_PRICE_LBP");

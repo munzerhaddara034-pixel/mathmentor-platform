@@ -169,6 +169,10 @@ const SUBSCRIBER_SESSION_USD: Record<PricingRegion, number> = {
 
 /** GCC display only: 1 USD ≈ 3.75 SAR (pegged). */
 const SAR_PER_USD = 3.75;
+/** USD → approximate whole SAR for display (42 USD → 157 SAR). Checkout is always USD. */
+function sarApprox(usd: number): number {
+  return Math.floor(usd * SAR_PER_USD);
+}
 
 export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
   lebanon: {
@@ -220,7 +224,7 @@ export const REGIONAL_PRICING: Record<PricingRegion, RegionalPricing> = {
       planBand(
         "digitalCore",
         DIGITAL_NAMES,
-        { min: 42, max: 42, defaultCharge: 42, sarMin: 130, sarMax: 190 },
+        { min: 42, max: 42, defaultCharge: 42, sarMin: sarApprox(42), sarMax: sarApprox(42) },
         {
           featuresEn: [
             ...DIGITAL_FEATURES_EN,
