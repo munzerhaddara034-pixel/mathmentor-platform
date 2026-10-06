@@ -351,6 +351,9 @@ export const ar: Messages = {
     latexLabel: "صيغة LaTeX (اختياري)",
     failed: "تعذّر حل المسألة الآن. حاول مجدداً بعد قليل.",
     network: "تعذّر الاتصال. تحقّق من الإنترنت وحاول مجدداً.",
+    guestNote: "جرّب الحلّال مجاناً: ٣ مسائل يومياً بدون حساب.",
+    guestSignUp: "أنشئ حساباً مجانياً",
+    guestSubscribe: "اشترك للمتابعة",
     staffLinks: "للموظفين",
     more: "بعد الحل يمكنك متابعة الشرح على {board} أو {live} مع الأستاذ منذر حداره.",
     moreBoard: "السبورة التفاعلية",
@@ -399,6 +402,7 @@ export const ar: Messages = {
     staffVideo: "الفيديو: {status}",
     staffFailed: "تعذّر الطلب. حاول مجدداً.",
     watermarkGuest: "طالب المنصة",
+    guestCta: "أفادك الحل؟ أنشئ حساباً مجانياً لحفظ الحلول وتتبّع تقدّمك.",
     boxed: "إجابة مؤطّرة",
   },
 };

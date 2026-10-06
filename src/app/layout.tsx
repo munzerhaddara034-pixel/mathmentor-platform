@@ -12,6 +12,7 @@ import { CurriculumProvider } from "@/components/curriculum/CurriculumProvider";
 import { getSession } from "@/lib/auth/server";
 import { getI18n } from "@/lib/i18n/server";
 import { I18nProvider } from "@/components/i18n/I18nProvider";
+import { OG_IMAGE, siteUrl } from "@/lib/seo/site";
 
 /*
  * Fonts (redesign-v2 A). Latin pairing for the default `en`/`fr` locales: Sora 800 (geometric display, matches
@@ -51,9 +52,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const { m } = await getI18n();
   return {
     ...baseMetadata,
+    metadataBase: new URL(siteUrl()),
     title: m.meta.title,
     description: m.meta.description,
     appleWebApp: { capable: true, title: m.meta.title, statusBarStyle: "black-translucent" },
+    openGraph: {
+      type: "website",
+      siteName: "MathMentor",
+      title: m.meta.title,
+      description: m.meta.description,
+      url: "/",
+      images: [OG_IMAGE],
+    },
+    twitter: { card: "summary", title: m.meta.title, description: m.meta.description, images: [OG_IMAGE.url] },
+    robots: { index: true, follow: true },
   };
 }
 

@@ -2,6 +2,7 @@
 
 import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useCurriculum } from "@/components/curriculum/CurriculumProvider";
@@ -17,7 +18,18 @@ import { SOLVER_CURRICULUM_CHOICES, type SolverCurriculumChoice } from "./curric
 /** KaTeX JS only loads if the student opens the LaTeX option (samples are server-rendered). */
 const Katex = dynamic(() => import("@/components/studio/Katex").then((mod) => mod.Katex), { ssr: false });
 
-type SolveMathResponse = { ok?: boolean; id?: string; resultPath?: string; error?: string; errorAr?: string };
+type SolveMathResponse = {
+  ok?: boolean;
+  id?: string;
+  resultPath?: string;
+  error?: string;
+  errorAr?: string;
+  /** Guest trial exhausted, or the visitor must sign in: the chat answers with a sign-up card. */
+  guestLimitReached?: boolean;
+  needSignIn?: boolean;
+  signUpUrl?: string;
+  subscribeUrl?: string;
+};
 
 export type SolverSample = { id: string; label: string; tex: string; question: string; track: CertificateTrack; math: ReactNode };
 
@@ -60,6 +72,7 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
   const [preview, setPreview] = useState<string | null>(null);
   const [sent, setSent] = useState<Sent | null>(null);
   const [error, setError] = useState("");
+  const [gate, setGate] = useState<{ message: string; signUp: string; subscribe: string } | null>(null);
 
   useEffect(() => {
     if (!ready) return;
@@ -80,12 +93,13 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
     setPreview(next ? URL.createObjectURL(next) : null);
   };
 
-  const busy = sent !== null && !error;
+  const busy = sent !== null && !error && !gate;
   const empty = !question.trim() && !latex.trim() && !file;
 
   const submit = async () => {
     if (empty || busy) return;
     setError("");
+    setGate(null);
     setSent({ text: question.trim() || latex.trim(), photo: preview });
     try {
       const form = new FormData();
@@ -99,7 +113,16 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
       const response = await fetch("/api/solve-math", { method: "POST", body: form, credentials: "same-origin" });
       const payload = (await response.json()) as SolveMathResponse;
       if (!response.ok || !payload.ok || !payload.id) {
-        setError((locale === "ar" && payload.errorAr) || s.failed);
+        const message = (locale === "ar" && payload.errorAr) || payload.error || s.failed;
+        if (payload.guestLimitReached || payload.needSignIn) {
+          setGate({
+            message,
+            signUp: payload.signUpUrl || "/signup?next=%2Fmath-solver",
+            subscribe: payload.subscribeUrl || "/subscribe",
+          });
+        } else {
+          setError(message);
+        }
         return;
       }
       router.push(payload.resultPath || `/math-solver/result/${payload.id}`);
@@ -159,6 +182,19 @@ export function SolverChat({ samples, initialQuestion, focusPhoto }: { samples: 
           <p className="mm-widget-error" role="alert">
             {error}
           </p>
+        ) : null}
+        {gate ? (
+          <m.div className="v2-bub ai mm-guest-gate" role="alert" {...fade}>
+            <p>{gate.message}</p>
+            <div className="v2-chip-row">
+              <Link className="v2-chip v2-chip-btn" href={gate.signUp}>
+                {s.guestSignUp}
+              </Link>
+              <Link className="v2-chip v2-chip-btn" href={gate.subscribe}>
+                {s.guestSubscribe}
+              </Link>
+            </div>
+          </m.div>
         ) : null}
       </div>
 

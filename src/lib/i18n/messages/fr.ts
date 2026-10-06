@@ -352,6 +352,9 @@ export const fr: Messages = {
     latexLabel: "LaTeX (facultatif)",
     failed: "Impossible de résoudre pour le moment. Réessayez bientôt.",
     network: "Connexion impossible. Vérifiez Internet et réessayez.",
+    guestNote: "Essayez gratuitement : 3 problèmes par jour, sans compte.",
+    guestSignUp: "Créer un compte gratuit",
+    guestSubscribe: "S’abonner pour continuer",
     staffLinks: "Équipe",
     more: "Après la solution, continuez sur le {board} ou {live} avec le Prof. Munzer Haddara.",
     moreBoard: "tableau interactif",
@@ -400,6 +403,7 @@ export const fr: Messages = {
     staffVideo: "Vidéo : {status}",
     staffFailed: "Échec de la requête. Réessayez.",
     watermarkGuest: "Élève de la plateforme",
+    guestCta: "Utile ? Créez un compte gratuit pour enregistrer vos solutions et suivre vos progrès.",
     boxed: "Réponse encadrée",
   },
 };

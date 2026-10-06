@@ -22,6 +22,8 @@ export const PUBLIC_PATHS = [
   "/signup",
   "/subscribe",
   "/live",
+  /** Guest solver trial: a visitor may solve a few problems per day without an account. */
+  "/math-solver",
 ];
 
 const PUBLIC_PREFIXES = [
@@ -34,6 +36,8 @@ const PUBLIC_PREFIXES = [
   "/classroom/students",
   "/studio/demo-avatar",
   "/videos/",
+  /** Shareable solver result (random id); the page watermarks guest views and shows a sign-up banner. */
+  "/math-solver/result",
 ];
 
 const PRIVATE_PREFIXES = [

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InteractiveLessonPlayer } from "@/components/studio/InteractiveLessonPlayer";
 import { SolverResultActions } from "@/components/solver/SolverResultActions";
@@ -15,6 +16,8 @@ import { getHeyGenJob } from "@/lib/studio/heygenJobs";
 import "@/styles/solver.css";
 
 export const dynamic = "force-dynamic";
+/** A shared result link is private by nature: reachable without a session, never indexed. */
+export const metadata = { robots: { index: false, follow: false } };
 
 export default async function SolverResultPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -42,6 +45,19 @@ export default async function SolverResultPage({ params }: { params: Promise<{ i
         </div>
       </header>
       <SolverThread query={query} m={m} locale={locale} />
+      {live.ok ? null : (
+        <section className="v2-bub ai mm-guest-gate" aria-label={m.result.guestCta}>
+          <p>{m.result.guestCta}</p>
+          <div className="v2-chip-row">
+            <Link className="v2-chip v2-chip-btn" href="/signup?next=%2Fmath-solver">
+              {m.solver.guestSignUp}
+            </Link>
+            <Link className="v2-chip v2-chip-btn" href="/subscribe">
+              {m.solver.guestSubscribe}
+            </Link>
+          </div>
+        </section>
+      )}
       <SolverResultActions
         initial={{ id: query.id, rating: query.rating, needsRetake: query.needsRetake, videoStatus: query.videoStatus, heygenJobId: query.heygenJobId, track: query.track }}
         canTeach={Boolean(staff)}

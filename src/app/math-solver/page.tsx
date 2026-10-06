@@ -31,6 +31,7 @@ export default async function MathSolverPage({ searchParams }: { searchParams: P
         </p>
         <div className="v2-bub ai">
           <p>{s.greeting}</p>
+          {user ? null : <p className="v2-muted v2-small">{s.guestNote}</p>}
           <p className="v2-muted v2-small">{s.retakeNote}</p>
           <p className="v2-muted v2-small">{s.aiNote}</p>
         </div>

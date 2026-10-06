@@ -354,6 +354,9 @@ export const en = {
     latexLabel: "LaTeX (optional)",
     failed: "Couldn't solve it right now. Please try again shortly.",
     network: "Couldn't connect. Check your internet and try again.",
+    guestNote: "Try it free: 3 problems a day, no account needed.",
+    guestSignUp: "Create a free account",
+    guestSubscribe: "Subscribe to continue",
     staffLinks: "Staff",
     more: "After the solution you can continue on the {board} or {live} with Prof. Munzer Haddara.",
     moreBoard: "interactive whiteboard",
@@ -402,6 +405,7 @@ export const en = {
     staffVideo: "Video: {status}",
     staffFailed: "Request failed. Try again.",
     watermarkGuest: "Platform student",
+    guestCta: "Found this useful? Create a free account to save your solutions and track your progress.",
     boxed: "Boxed final answer",
   },
 } as const;

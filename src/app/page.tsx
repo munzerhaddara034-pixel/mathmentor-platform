@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth/server";
 import { getI18n } from "@/lib/i18n/server";
 import { WHISH_NUMBER } from "@/lib/team/constants";
 import { dualLiveSessionPrices } from "@/lib/whish/client";
+import { homeJsonLd } from "@/lib/seo/site";
 import "@/styles/home.css";
 
 /** Home — redesign-v2 A, AI tutor «الدكتور محمد · مساعد منذر» / Dr. Mohamed · Munzer's assistant. Server-rendered; no KaTeX or motion JS. */
@@ -17,6 +18,19 @@ export default async function HomePage() {
   const showPrices = prices.member.amount > 0 && prices.external.amount > 0;
   return (
     <main className="shell mm-home v2-home">
+      {/* Structured data so Google shows the academy, the course and the subscription price. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            homeJsonLd({
+              description: m.meta.description,
+              priceFrom: prices.member.amount || prices.external.amount || undefined,
+              currency: prices.member.currency,
+            }),
+          ),
+        }}
+      />
       <HomeHeroV2 m={m} signedIn={Boolean(user)} />
       <TrackChips t={m.home} />
       <DemoConversation m={m} />

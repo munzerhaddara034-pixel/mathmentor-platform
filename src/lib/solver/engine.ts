@@ -123,7 +123,12 @@ function syncedAudit(solution: MathSolution): MathQueryRecord["auditStatus"] {
   return verification.status;
 }
 
-export async function recordSolution(user: PublicUser, input: EngineInput, solution: MathSolution): Promise<MathQueryRecord> {
+/** `user` may be the guest trial identity (id/name/email only) — guests have no account record. */
+export async function recordSolution(
+  user: Pick<PublicUser, "id" | "name" | "email">,
+  input: EngineInput,
+  solution: MathSolution,
+): Promise<MathQueryRecord> {
   const demoVideo = !hasHeyGenKey() && !solution.needsRetake;
   const timeline = attachDemoMedia(solution.timeline, demoVideo ? DEMO_AVATAR_VIDEO : solution.timeline.media?.videoUrl);
   let heygenJobId: string | undefined;
