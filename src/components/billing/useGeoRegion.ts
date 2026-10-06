@@ -106,5 +106,8 @@ export function useGeoRegion() {
       .catch(() => undefined);
   }, [request]);
 
-  return { state, request };
+  // "locating" covers both the geolocation prompt and the /api/pricing/region fetch: callers render a
+  // Skeleton (aria-busy) while loading so prices never flash before the server has decided.
+  const loading = state.status === "locating";
+  return { state, request, loading };
 }
