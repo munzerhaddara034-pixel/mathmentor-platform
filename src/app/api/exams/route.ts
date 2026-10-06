@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
-import { apiRequireStaff } from "@/lib/auth/guards";
+import { apiRequireStaff, apiSession } from "@/lib/auth/guards";
 import { addExam, readStore } from "@/lib/store";
 import { createId } from "@/lib/ids";
 import type { GradeTrack } from "@/lib/types";
 
 export async function GET() {
+  // Exam metadata (titles, tracks, question references, pass marks) is for signed-in students only:
+  // the /bank and /practice pages that read it are already behind the paywall.
+  const guard = await apiSession();
+  if (guard.error) return guard.error;
   const store = await readStore();
   return NextResponse.json({ exams: store.exams });
 }

@@ -12,6 +12,9 @@ function slugFromId(id: string) {
   return `${compact.slice(0, 3)}-${compact.slice(3, 7)}-${compact.slice(7, 10)}`;
 }
 
+/** Hard deadline for both Zoom calls: the booking flow falls back to an in-app room on failure. */
+const ZOOM_TIMEOUT_MS = 15_000;
+
 async function createZoomMeeting(input: {
   topic: string;
   startsAt: string;
@@ -27,6 +30,7 @@ async function createZoomMeeting(input: {
     `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${encodeURIComponent(accountId)}`,
     {
       method: "POST",
+      signal: AbortSignal.timeout(ZOOM_TIMEOUT_MS),
       headers: {
         Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
       },
@@ -39,6 +43,7 @@ async function createZoomMeeting(input: {
   if (!tokenJson.access_token) throw new Error("Zoom token missing.");
   const meetRes = await fetch("https://api.zoom.us/v2/users/me/meetings", {
     method: "POST",
+    signal: AbortSignal.timeout(ZOOM_TIMEOUT_MS),
     headers: {
       Authorization: `Bearer ${tokenJson.access_token}`,
       "Content-Type": "application/json",

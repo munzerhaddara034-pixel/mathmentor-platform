@@ -16,11 +16,17 @@ export type EmailMessage = { to: string; subject: string; text: string; html?: s
 export type EmailSendResult = { ok: boolean; provider: "resend" | "log" | "none"; error?: string; id?: string };
 
 type Env = Record<string, string | undefined>;
-type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{
+type FetchLike = (
+  url: string,
+  init: { method: string; headers: Record<string, string>; body: string; signal?: AbortSignal },
+) => Promise<{
   ok: boolean;
   status: number;
   json(): Promise<unknown>;
 }>;
+
+/** Hard deadline for the provider call: a stalled send must not hold the request open. */
+const RESEND_TIMEOUT_MS = 15_000;
 
 export function emailProvider(env: Env = process.env): EmailSendResult["provider"] {
   if (env.RESEND_API_KEY?.trim()) return "resend";
@@ -40,6 +46,7 @@ export async function sendEmail(
     try {
       const res = await doFetch("https://api.resend.com/emails", {
         method: "POST",
+        signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
         headers: {
           Authorization: `Bearer ${env.RESEND_API_KEY!.trim()}`,
           "Content-Type": "application/json",

@@ -548,11 +548,21 @@ export async function listUserSessions(userId: string) {
     .map(toPublicSession);
 }
 
+/** Absolute session lifetime: the cookie lasts 30 days, but a leaked token must not live forever. */
+export const SESSION_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
+/** Pure: a session past its absolute lifetime is refused. Legacy records without a usable date stay valid. */
+export function isSessionExpired(session: Pick<AuthSession, "createdAt">, now = Date.now()): boolean {
+  const created = Date.parse(session.createdAt);
+  if (!Number.isFinite(created)) return false;
+  return now - created > SESSION_TTL_MS;
+}
+
 export async function findSessionByToken(token: string) {
   if (!token) return undefined;
   const store = await readAuthStore();
   const tokenHash = hashToken(token);
-  const session = store.sessions.find((item) => item.tokenHash === tokenHash);
+  const session = store.sessions.find((item) => item.tokenHash === tokenHash && !isSessionExpired(item));
   if (!session) return undefined;
   const user = store.users.find((item) => item.id === session.userId);
   if (!user) return undefined;

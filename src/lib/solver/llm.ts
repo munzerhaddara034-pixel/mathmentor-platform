@@ -298,12 +298,16 @@ export async function solveWithGemini(request: GeminiSolveRequest): Promise<Math
   }
 }
 
+/** Hard deadline: without it a stalled provider holds the route until the platform timeout. */
+const OPENAI_TIMEOUT_MS = 60_000;
+
 export async function solveWithOpenAI(request: SolveRequest): Promise<MathSolution> {
   const key = openaiSolverKey();
   if (!key) throw new Error("OPENAI_API_KEY is not set.");
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
+    signal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",

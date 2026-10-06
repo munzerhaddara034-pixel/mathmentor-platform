@@ -60,6 +60,9 @@ export function normalizeWhatsAppDigits(phone: string): string {
   return e164.replace(/^\+/, "");
 }
 
+/** Hard deadline for provider sends (Meta has its own in agentCore): no request may hang forever. */
+const WHATSAPP_SEND_TIMEOUT_MS = 20_000;
+
 async function sendTwilio(to: string, body: string) {
   const sid = process.env.TWILIO_ACCOUNT_SID!.trim();
   const token = process.env.TWILIO_AUTH_TOKEN!.trim();
@@ -72,6 +75,7 @@ async function sendTwilio(to: string, body: string) {
   });
   const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(sid)}/Messages.json`, {
     method: "POST",
+    signal: AbortSignal.timeout(WHATSAPP_SEND_TIMEOUT_MS),
     headers: {
       Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`,
       "Content-Type": "application/x-www-form-urlencoded",
@@ -88,6 +92,7 @@ async function sendUltraMsg(to: string, body: string) {
   const token = process.env.ULTRAMSG_TOKEN!.trim();
   const response = await fetch(`https://api.ultramsg.com/${encodeURIComponent(instance)}/messages/chat`, {
     method: "POST",
+    signal: AbortSignal.timeout(WHATSAPP_SEND_TIMEOUT_MS),
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, to, body }),
   });
