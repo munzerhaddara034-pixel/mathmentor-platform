@@ -18,14 +18,25 @@ inside the bundle.
 | Region | Digital subscription / mo | Subscriber session | Platform + 4 sessions / mo | Outside-student session | Notes |
 |---|---|---|---|---|---|
 | **Lebanon** | $15 | $15 | **$60** (was $35) | $25 | Official Lebanese curriculum |
-| **GCC** (SA/AE/QA/KW) | $42 ≈130–190 SAR | $30 | **$120** (was $110) ≈450 SAR | $50 | قدرات / تحصيلي / مسارات الثانوي / مناهج الوزارة |
+| **GCC** (SA/AE/QA/KW) | $42 ≈157 SAR | $30 | **$120** (was $110) ≈450 SAR | $50 | قدرات / تحصيلي / مسارات الثانوي / مناهج الوزارة |
 | **International** (IB / Cambridge) | $60–85 (charge **72**) | $50 | **$200** (was $185) | $70–100 (charge **85**) | KaTeX / academic precision |
 | **US Admissions** (SAT / ACT / AP) | $45–65 (charge **55**) | $37 | **$148** (was $135) | $50–75 (charge **62**) | Speed / strategies / justification |
 
 Fields: `plans[digitalCore]`, `subscriberSessionUsd`, `plans[liveHybrid]` (fixed, no band), `privateTutoringHour*`
 (outside-student session). Term = monthly charge × 2.5 (rounded). `/subscribe` shows the four options per region
 (`PricingOptions`). Live booking (`/live`, Lebanon) defaults to `subscriberSessionUsd` / `outsideSessionUsd`;
-`LIVE_SESSION_PRICE_USD` / `LIVE_SESSION_PRICE_EXTERNAL_USD` env vars can still override them.
+`LIVE_SESSION_PRICE_USD` / `LIVE_SESSION_PRICE_EXTERNAL_USD` (+ `NEXT_PUBLIC_*`) are **ignored**: plans.ts is the only
+price source. Remove them from Render.
+
+### Region lock (server decides)
+
+Prices are hidden until the student enables location. The browser maps coordinates → region on the device
+(`geoRegion.ts`) and sends only the region name; the server (`regionServer.ts` / `regionSignals.ts`) combines it with
+the offline IP country (`ipCountry.ts`, `geoip-country` with bundled MaxMind GeoLite2-Country data, CC BY-SA 4.0 —
+"This product includes GeoLite2 Data created by MaxMind, available from https://www.maxmind.com") and the phone code.
+Signals disagree → the most expensive candidate region is charged and the order/payment is flagged for review
+(`region_mismatch`, migration `010_payment_region_signals`). A browser-sent region or price is never used.
+Refresh the GeoIP data by bumping the pinned `geoip-country` version (monthly upstream releases).
 
 ### Curriculum → pricing region
 
