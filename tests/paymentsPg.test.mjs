@@ -302,6 +302,28 @@ describe("payments on Postgres", { skip }, () => {
     assert.ok(!("payments" in summary) && !("receipts" in summary));
   });
 
+  test("GET /api/finance/summary handler: Bearer token → same payload as getFinanceSummary on Postgres", async () => {
+    const { handleFinanceSummaryRequest } = await import("../src/lib/finance/readToken.ts");
+    const { createRateLimiter } = await import("../src/lib/security/rateLimit.ts");
+    const token = `test-${randomBytes(24).toString("hex")}`;
+    const deps = {
+      env: { MM_FINANCE_READ_TOKEN: token },
+      databaseAvailable: () => true,
+      loadSummary: () => db.getFinanceSummary(pool),
+      limiter: createRateLimiter({ windowMs: 60_000, max: 30 }),
+    };
+    const call = (auth) =>
+      handleFinanceSummaryRequest(
+        new Request("https://mathmentor.test/api/finance/summary", { headers: auth ? { authorization: auth } : {} }),
+        deps,
+      );
+    assert.equal((await call(null)).status, 401);
+    assert.equal((await call("Bearer wrong")).status, 401);
+    const res = await call(`Bearer ${token}`);
+    assert.equal(res.status, 200);
+    assert.deepEqual(await res.json(), { ok: true, ...(await db.getFinanceSummary(pool)) });
+  });
+
   test("finance role: mm_finance_ro reads the view and mm_payments only (read-only)", async () => {
     await admin.query("DROP ROLE IF EXISTS mm_finance_ro").catch(() => undefined);
     await admin.query("CREATE ROLE mm_finance_ro LOGIN CONNECTION LIMIT 3");

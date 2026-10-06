@@ -68,6 +68,8 @@ routes answer 503), `RESEND_API_KEY` + `EMAIL_FROM` (e-mail), the WhatsApp provi
 - `mm_finance_subscriptions`: counts by `finance_status`
 - `totals.lifetime_confirmed_usd` (USD) and `totals.subscriber_count` (students with `finance_status = active`)
 
+`GET /api/finance/summary` — same aggregate payload for the CFO agent, authenticated with `Authorization: Bearer <token>` matched in constant time against env var `MM_FINANCE_READ_TOKEN` (unset → 503, missing/wrong → 401, non-GET → 405, 30 req/min per IP, `Cache-Control: no-store`).
+
 ## Read-only finance role (manual, Neon)
 
 Migrations never create roles or passwords. Once, in the Neon SQL editor (as the database owner):
