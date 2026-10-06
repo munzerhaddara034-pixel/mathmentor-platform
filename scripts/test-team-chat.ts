@@ -31,9 +31,15 @@ async function main() {
   const store = await import("../src/lib/team/store");
   const constants = await import("../src/lib/team/constants");
   const types = await import("../src/lib/team/types");
+  const readiness = await import("../src/lib/hamza/readiness");
+  const taskStore = await import("../src/lib/hamza/tasks/store");
 
   const actor = { id: "user-test-staff", name: "Prof. Munzer Haddara", email: "staff.test@example.invalid", role: "teacher" };
   process.env.TEAM_APPROVER_EMAILS = actor.email;
+  // Hamza is disabled by default (no GITHUB_TOKEN here). The pipeline cases below run with the readiness gate
+  // forced open via the test hook; GITHUB_TOKEN stays deleted so every GitHub write still fails closed.
+  readiness.setHamzaReadinessOverride({ ready: true, missing: [] });
+
 
   test("§2.2 test 5: multi-topic team message → محمد alone", () => {
     const r = routing.routeHumanMessage("team", "بدنا نطلق دورة G12 SE الشهر الجاي: بدنا صفحة تسجيل، وبوستر، ونموذج امتحان تجريبي.");
@@ -255,6 +261,54 @@ async function main() {
     assert.ok(rejected.ok && rejected.proposal.status === "rejected");
     const again = await approval.decideProposal({ proposalId: proposal.id, action: "approve", confirm: true, actor });
     assert.ok(!again.ok && again.status === 409);
+  });
+
+  test("Hamza disabled by default: no token / HAMZA_* → fixed notice, no task, no model call, actions 503, reject ok", async () => {
+    readiness.setHamzaReadinessOverride(null);
+    const llmCalls: string[] = [];
+    gemini.setTeamLlmOverride(async (req: { agent: string }) => {
+      llmCalls.push(req.agent);
+      return "{}";
+    });
+    try {
+      const state = readiness.hamzaReadiness();
+      assert.equal(state.ready, false);
+      assert.ok(state.missing.includes("GITHUB_TOKEN"));
+      const before = (await taskStore.hamzaTaskRepo().listByChannel("developer", 50)).length;
+      const res = await agents.handleHumanMessage({ channel: "developer", text: "@حمزة أضف زر حجز في الصفحة الرئيسية", attachments: [], actor });
+      assert.equal(res.replies.length, 1);
+      assert.equal(res.replies[0].authorId, "developer");
+      assert.match(res.replies[0].text, /غير مفعّل/);
+      assert.ok(res.replies[0].text.includes("GITHUB_TOKEN"));
+      assert.equal(res.replies[0].taskId, undefined);
+      assert.deepEqual(llmCalls, [], "no model call");
+      assert.equal((await taskStore.hamzaTaskRepo().listByChannel("developer", 50)).length, before, "no task created");
+      const repo = store.teamRepo();
+      const now = new Date().toISOString();
+      const proposal = {
+        id: `prop-off-${Date.now()}`,
+        channel: "developer" as const,
+        messageId: `tmsg-off-${Date.now()}`,
+        status: "pending" as const,
+        summary: "x",
+        commitMessage: "feat: off test",
+        baseBranch: "agent-hub-latest",
+        targetBranch: "feat/off-test",
+        files: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      await repo.saveProposal(proposal as unknown as Parameters<typeof repo.saveProposal>[0]);
+      for (const action of ["issue_code", "approve", "merge", "refresh_ci", "revise", "revert"] as const) {
+        const r = await approval.decideProposal({ proposalId: proposal.id, action, confirm: true, actor });
+        assert.ok(!r.ok && r.status === 503, `${action} must be 503 while Hamza is not configured`);
+      }
+      const rejected = await approval.decideProposal({ proposalId: proposal.id, action: "reject", confirm: true, actor });
+      assert.ok(rejected.ok && rejected.proposal.status === "rejected", "reject (cleanup) still works");
+    } finally {
+      gemini.setTeamLlmOverride(null); // registered last: no case runs after this one
+      readiness.setHamzaReadinessOverride({ ready: true, missing: [] });
+    }
   });
 
   let failed = 0;

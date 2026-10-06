@@ -9,6 +9,7 @@ import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { publicProposal } from "@/lib/hamza/publicProposal";
 import { approveMerge, approveOpenPr, issueCode, refreshCi, rejectProposal, type PipelineResult } from "@/lib/hamza/pipeline";
 import { pipelineDeps } from "@/lib/hamza/pipeline/deps";
+import { hamzaReadiness } from "@/lib/hamza/readiness";
 import { requestRevert } from "@/lib/hamza/revert";
 import { requestRevision } from "@/lib/hamza/revise";
 import { taskDeps } from "@/lib/hamza/tasks/deps";
@@ -63,6 +64,15 @@ function branchProblem(branch: string): DecisionResult | null {
 
 export async function decideProposal(input: DecisionInput): Promise<DecisionResult> {
   if (!input.confirm) return fail(400, "Explicit confirmation required.", "يلزم تأكيد صريح.");
+  // Disabled by default: until Hamza is fully configured only «reject» (a safe cleanup) is allowed.
+  const readiness = hamzaReadiness();
+  if (!readiness.ready && input.action !== "reject") {
+    return fail(
+      503,
+      `Hamza is not configured on this server (missing: ${readiness.missing.join(", ")}).`,
+      `حمزة غير مُعدّ على هذا الخادم (ناقص: ${readiness.missing.join("، ")}). لا موافقات ولا PR ولا دمج قبل التفعيل.`,
+    );
+  }
   const deps = pipelineDeps();
   const actor = input.actor;
   const branch = input.branch?.trim();

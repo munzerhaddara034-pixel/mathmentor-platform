@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { readHamzaAudit, summarizeActivity, type HamzaActivityEvent } from "@/lib/hamza/activity";
 import { hamzaConfig } from "@/lib/hamza/config";
 import { beirutMonth } from "@/lib/hamza/cost";
+import { hamzaReadiness } from "@/lib/hamza/readiness";
 import { hamzaTaskRepo } from "@/lib/hamza/tasks/store";
 import { publicTask } from "@/lib/hamza/tasks/types";
 import { requireTeamStaff, teamError } from "@/lib/team/guard";
@@ -30,7 +31,7 @@ export async function GET() {
       events,
       caps: { monthCapUsd: config.budgets.monthlyUsd, taskCapUsd: config.budgets.taskUsd, taskMaxUsd: config.budgets.taskMaxUsd },
     });
-    return NextResponse.json({ ok: true, activity }, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ ok: true, activity, hamza: hamzaReadiness() }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     console.error("team/hamza/activity GET", error);
     return teamError(500, "Could not load Hamza activity.", "تعذّر تحميل نشاط حمزة.");

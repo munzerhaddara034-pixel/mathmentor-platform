@@ -6,6 +6,7 @@
 import { Octokit } from "@octokit/rest";
 import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { hamzaConfig } from "../config";
+import { hamzaReadiness } from "../readiness";
 import type { CheckRunInfo, HamzaGithubReader, HamzaGithubWriter, PrInfo } from "./types";
 
 export type GithubRepoRef = { owner: string; repo: string };
@@ -138,6 +139,9 @@ export function octokitReader(ref: GithubRepoRef): HamzaGithubReader {
 /** Writer for the approval pipeline only. */
 export function octokitWriter(ref: GithubRepoRef): HamzaGithubWriter {
   if (!token()) throw new Error("GITHUB_TOKEN is not set on the server.");
+  // Defence in depth: no GitHub writes unless Hamza is fully configured (HAMZA_ENABLED=1 etc.; names only).
+  const readiness = hamzaReadiness();
+  if (!readiness.ready) throw new Error(`Hamza is not configured (missing: ${readiness.missing.join(", ")}).`);
   const kit = new Octokit({ auth: token() });
   const { owner, repo } = ref;
   const base = reader(kit, ref);

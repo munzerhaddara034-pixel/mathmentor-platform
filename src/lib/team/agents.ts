@@ -6,6 +6,7 @@ import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { createId } from "@/lib/ids";
 import { baremeQuarterIssues, enforceConstants } from "./constants";
 import { MOHAMED_ACTIONS_PROTOCOL_AR, beirutNowAr, mohamedDataContext } from "./context";
+import { hamzaNotConfiguredTextAr, hamzaReadiness } from "@/lib/hamza/readiness";
 import { enqueueHamzaTask } from "@/lib/hamza/tasks/enqueue";
 import { taskDeps } from "@/lib/hamza/tasks/deps";
 import { toRouterTurns } from "@/lib/hamza/tasks/turns";
@@ -267,6 +268,11 @@ async function runAgent(input: {
   }
   if (agent === "sami") return runSami(turns, ctx, channel, human.id, extra);
 
+  // Hamza is OFF unless fully configured: a fixed notice, no model call, no task, no GitHub.
+  const readiness = hamzaReadiness();
+  if (!readiness.ready) {
+    return { message: agentMessage(channel, "developer", hamzaNotConfiguredTextAr(readiness), { replyToId: human.id, ...extra }) };
+  }
   if (!referral && looksLikeApprovalText(human.text)) {
     const pending = (await pendingProposals(channel)).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     if (pending) return approvalByTextReply(channel, human, pending);

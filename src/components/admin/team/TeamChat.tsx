@@ -19,6 +19,7 @@ import { fetchThread, sendTeamMessage, teamErrorText } from "./teamApi";
 import { EMPTY_THREAD as EMPTY, hasActiveWork, indexById, taskCardOwners, threadFrom, type Thread } from "./threadState";
 import { useThreadPolling } from "./useThreadPolling";
 import type { PublicHamzaTask } from "@/lib/hamza/tasks/types";
+import type { HamzaReadiness } from "@/lib/hamza/readiness";
 import { useI18n } from "@/components/i18n/I18nProvider";
 import { fmt } from "@/lib/i18n/format";
 import { teamMessages } from "@/lib/i18n/ns/team";
@@ -34,6 +35,7 @@ export function TeamChat({ staffName }: { staffName: string }) {
   const [typingNames, setTypingNames] = useState("");
   const [errorText, setErrorText] = useState("");
   const [storage, setStorage] = useState<"postgres" | "file" | null>(null);
+  const [hamza, setHamza] = useState<HamzaReadiness | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
   const thread = threads[channel] ?? EMPTY;
@@ -51,6 +53,7 @@ export function TeamChat({ staffName }: { staffName: string }) {
       return;
     }
     setStorage(result.data.storage);
+    if (result.data.hamza) setHamza(result.data.hamza);
     setThreads((current) => ({ ...current, [target]: threadFrom(result.data) }));
   }, [locale, t]);
   const refresh = useCallback(() => void load(channel, true), [channel, load]);
@@ -159,6 +162,12 @@ export function TeamChat({ staffName }: { staffName: string }) {
             </span>
           ) : null}
         </header>
+        {channel === "developer" && hamza && !hamza.ready ? (
+          <div className="team-hamza-off" role="status">
+            <strong>{t.hamzaOffTitle}</strong>
+            <p>{fmt(t.hamzaOffBody, { missing: hamza.missing.join(", ") })}</p>
+          </div>
+        ) : null}
         {channel === "developer" ? <HamzaActivityPanel /> : null}
         <div className="team-messages" aria-live="polite">
           {loading && !thread.loaded ? <TeamThreadSkeleton /> : null}

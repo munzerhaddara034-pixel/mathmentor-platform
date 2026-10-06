@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hamzaReadiness } from "@/lib/hamza/readiness";
 import { isSameOriginRequest } from "@/lib/hamza/sameOrigin";
 import { cancelHamzaTask, continueHamzaTask } from "@/lib/hamza/tasks/enqueue";
 import { taskDeps } from "@/lib/hamza/tasks/deps";
@@ -32,6 +33,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return teamError(400, "Invalid JSON.", "طلب غير صالح.");
   }
   if (action !== "cancel" && action !== "continue") return teamError(400, "Unknown action.", "الإجراء غير صالح.");
+  if (action === "continue" && !hamzaReadiness().ready) return teamError(503, "Hamza is not configured on this server.", "حمزة غير مُعدّ على هذا الخادم.");
   if (action === "continue" && !canApprove(gate.actor)) return teamError(403, "Not an approver.", "رفع حد الإنفاق يحتاج حساباً مخوّلاً بالموافقة.");
   const { id } = await context.params;
   const actor = { ...gate.actor, ip: clientIpFrom(request.headers) };

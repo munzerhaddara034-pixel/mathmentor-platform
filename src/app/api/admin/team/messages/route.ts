@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createId } from "@/lib/ids";
 import { publicProposals } from "@/lib/hamza/publicProposal";
+import { hamzaReadiness } from "@/lib/hamza/readiness";
 import { hamzaTaskRepo } from "@/lib/hamza/tasks/store";
 import { publicTask, type PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import { handleHumanMessage } from "@/lib/team/agents";
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
     } catch (error) {
       console.error("team/messages GET tasks", error);
     }
-    const body: TeamThreadResponse = { ok: true, channel, messages, proposals: publicProposals(proposals), tasks, storage: repo.kind };
+    const body: TeamThreadResponse = { ok: true, channel, messages, proposals: publicProposals(proposals), tasks, storage: repo.kind, hamza: hamzaReadiness() };
     return NextResponse.json(body);
   } catch (error) {
     console.error("team/messages GET", error);

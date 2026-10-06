@@ -4,7 +4,8 @@ import { callTeamLlm, teamModels } from "@/lib/team/gemini";
 import { DEVELOPER_SYSTEM_PROMPT_AR } from "@/lib/team/prompts";
 import { teamRepo } from "@/lib/team/store";
 import { hamzaAudit } from "../audit";
-import { hamzaConfig, type ModelSpec } from "../config";
+import type { ModelSpec } from "../config";
+import { hamzaRuntimeConfig } from "../readiness";
 import { githubTokenPresent, octokitReader, octokitWriter } from "../github/octokit";
 import { modelChain, routeModelCall } from "../models/router";
 import { httpTransport, type RouterRequest, type Transport } from "../models/providers";
@@ -42,7 +43,7 @@ async function openSnapshot(ref: string): Promise<RepoSnapshot> {
 }
 
 export function runnerDeps(): RunnerDeps {
-  const config = hamzaConfig();
+  const config = hamzaRuntimeConfig();
   const repo = teamGithubConfig();
   const chain = modelChain(config, "primary", teamModels());
   return {
@@ -65,7 +66,7 @@ export function runnerDeps(): RunnerDeps {
 
 export function workerDeps(): WorkerDeps {
   return {
-    config: hamzaConfig(),
+    config: hamzaRuntimeConfig(),
     tasks: hamzaTaskRepo(),
     teamRepo: teamRepo(),
     now: () => new Date(),

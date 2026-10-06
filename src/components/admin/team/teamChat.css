@@ -299,3 +299,6 @@
 .team-activity-h { font-size: 0.9rem; margin-block: 6px 0; }
 .team-activity-list { margin: 0; padding-inline-start: 18px; display: grid; gap: 4px; font-size: 0.82rem; overflow-wrap: anywhere; }
 .team-activity-events code { font-size: 0.78rem; }
+
+.team-hamza-off { margin: 8px 12px; padding: 10px 12px; border: 1px solid #b7791f; border-radius: 10px; background: #fffaf0; color: #744210; font-size: 0.85rem; overflow-wrap: anywhere; }
+.team-hamza-off p { margin: 4px 0 0; }

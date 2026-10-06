@@ -30,12 +30,29 @@ WhatsApp, voice and Agent Hub cannot approve code. A text "approved" in the chat
 | Ops view | `activity.ts` + `/api/admin/team/hamza/activity` (spend, tasks, models, audit events) |
 | Evals | `docs/hamza/evals.json` (12 cases) + `evals.ts` (pure scorer) |
 
+## Disabled by default (readiness gate)
+Hamza is **off** unless every one of these is set (`src/lib/hamza/readiness.ts`):
+
+| Required | Why |
+|---|---|
+| `HAMZA_ENABLED=1` | Explicit opt-in (unset, `0` or anything else = off). |
+| `GITHUB_TOKEN` | Fine-grained PAT (below). |
+| `GITHUB_OWNER`, `GITHUB_REPO` | The one repo Hamza works on. |
+| `HAMZA_BASE_BRANCH` | PR target = branch Render deploys (must be set explicitly for the gate). |
+| `HAMZA_MODEL_PRIMARY` | Primary model id. |
+| `HAMZA_GEMINI_API_KEY` or `GEMINI_API_KEY` (Gemini primary) / `OPENAI_API_KEY` (`openai:` primary) | Key for the primary model. |
+
+While anything is missing: the worker does not start (startup logs `Hamza disabled (not configured; missing: …)`, names only),
+messages to حمزة get a fixed "not configured" reply (no model call, no task, no GitHub), every proposal action except
+«reject» returns 503, «continue» returns 503, and `/admin/team` (Hamza channel) shows a "not configured" banner listing the
+missing variable names. Values are never logged or sent to the browser.
+
 ## Environment (Render)
 | Variable | Default | Meaning |
 |---|---|---|
-| `HAMZA_ENABLED` | on | `0` stops new tasks (the kill switch). Existing PRs are untouched. |
+| `HAMZA_ENABLED` | **off** | Must be `1` to turn Hamza on (see the gate above). `0` is the kill switch: stops new tasks and the worker. Existing PRs are untouched. |
 | `HAMZA_WORKER` | on | `0` = this instance does not run the in-process worker. |
-| `HAMZA_BASE_BRANCH` | `agent-hub-latest` | The **only** branch setting: PR target = branch Render deploys. Falls back to `GITHUB_BRANCH` with a warning. |
+| `HAMZA_BASE_BRANCH` | required | The **only** branch setting: PR target = branch Render deploys. Required by the gate (the code still falls back to `GITHUB_BRANCH` / `agent-hub-latest` for branch protection checks). |
 | `HAMZA_CI_CHECKS` | `hamza-ci` | Required check-run names (comma list). |
 | `HAMZA_CODE_TTL_MINUTES` | 30 (5–120) | Approval-code lifetime. |
 | `HAMZA_CODE_MAX_ATTEMPTS` | 5 (1–10) | Wrong attempts before a code is burned. |
@@ -70,13 +87,18 @@ WhatsApp, voice and Agent Hub cannot approve code. A text "approved" in the chat
    - require status check **`hamza-ci`** (strict, up to date);
    - block force pushes and deletions;
    - allow squash merges.
-   The bypass list should hold only Munzer's own account, never the PAT's.
+   The bypass list must not contain the account that owns the PAT. A fine-grained PAT always acts as the user who
+   created it: if it is Munzer's own token and Munzer (or "Repository admin") is on the bypass list, the token bypasses
+   the ruleset too, and only the app-side guards stop a direct push. Safest: leave the bypass list empty, or create
+   the PAT from a separate collaborator account with the Write role.
+   Note: "require a pull request" also blocks today's direct merge-pushes to `agent-hub-latest`; releases then go
+   through PRs too.
 3. **Actions:** `.github/workflows/hamza-ci.yml` runs on PRs to the live branch with `permissions: contents: read` and no secrets. If the repo is private, CI uses Actions minutes.
 
 ## Rollback runbook
 1. Preferred: on the merged card press «تراجع». It opens `fix/revert-<sha7>`, runs CI, and asks for Approval #2. Render redeploys after the merge.
 2. If the site is down right now: in the Render dashboard → service → **Events / Deploys**, choose **Rollback** to the previous deploy. It takes effect immediately. Then do step 1 so the branch matches.
-3. Stop Hamza: set `HAMZA_ENABLED=0`, and `HAMZA_WORKER=0` if needed, then redeploy. Open PRs stay on GitHub and can be closed there.
+3. Stop Hamza: set `HAMZA_ENABLED=0` (or remove it), and `HAMZA_WORKER=0` if needed, then redeploy. Open PRs stay on GitHub and can be closed there.
 4. If a code is suspected leaked: codes expire in `HAMZA_CODE_TTL_MINUTES`, are single-use and bound to one diff. Reject the proposal to burn the code.
 
 ## Local testing

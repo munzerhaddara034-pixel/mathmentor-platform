@@ -28,7 +28,7 @@ export type EnqueueResult =
 
 export async function enqueueHamzaTask(deps: TaskDeps, input: EnqueueInput): Promise<EnqueueResult> {
   const { config } = deps;
-  if (!config.enabled) return { ok: false, reason: "disabled", text: "حمزة متوقف حالياً (HAMZA_ENABLED=0). لم تُنشأ أي مهمة." };
+  if (!config.enabled) return { ok: false, reason: "disabled", text: "حمزة متوقف أو غير مُعدّ على هذا الخادم (HAMZA_ENABLED أو إعدادات ناقصة — docs/HAMZA.md). لم تُنشأ أي مهمة." };
   const busy = (await deps.tasks.listActive()).find((task) => task.channel === input.channel);
   if (busy) {
     return { ok: false, reason: "busy", task: busy, text: `عندي مهمة قيد التنفيذ في هذه القناة («${busy.requestText.slice(0, 60)}»). انتظرها أو ألغِها من بطاقتها ثم أعد الطلب.` };
@@ -78,6 +78,7 @@ export async function cancelHamzaTask(deps: TaskDeps, taskId: string, actor: Tas
 
 /** «Continue up to $5»: a budget-paused task goes back to the queue with the raised cap. */
 export async function continueHamzaTask(deps: TaskDeps, taskId: string, actor: TaskActor): Promise<HamzaTask | undefined> {
+  if (!deps.config.enabled) return undefined;
   const task = await deps.tasks.get(taskId);
   if (!task || task.status !== "budget_paused" || task.pauseReason !== "task_budget") return undefined;
   if (task.capUsd >= deps.config.budgets.taskMaxUsd) return undefined;

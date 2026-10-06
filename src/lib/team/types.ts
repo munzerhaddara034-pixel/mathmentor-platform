@@ -2,6 +2,7 @@
  * Shared (client + server) types for the /admin/team chat.
  * Channel ids follow docs/TEAM_CHAT_SPEC.md §0.1.
  */
+import type { HamzaReadiness } from "@/lib/hamza/readiness";
 import type { PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import type { HamzaPipelineState } from "@/lib/hamza/types";
 
@@ -173,6 +174,8 @@ export type TeamThreadResponse = {
   /** Hamza background tasks of this channel (newest last; server-only fields stripped). */
   tasks: PublicHamzaTask[];
   storage: "postgres" | "file";
+  /** Hamza readiness (env variable NAMES only, never values). Hamza is disabled unless ready. */
+  hamza?: HamzaReadiness;
 };
 
 export type TeamSendResponse = {

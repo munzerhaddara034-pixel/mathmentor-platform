@@ -3,7 +3,7 @@ import { isTeamApproverEmail } from "@/lib/auth/adminAllowlist";
 import { teamGithubConfig } from "@/lib/team/github";
 import { teamRepo } from "@/lib/team/store";
 import { hamzaAudit } from "../audit";
-import { hamzaConfig } from "../config";
+import { hamzaRuntimeConfig } from "../readiness";
 import { githubTokenPresent, octokitReader, octokitWriter } from "../github/octokit";
 import type { PipelineActor, PipelineDeps } from "./shared";
 
@@ -20,14 +20,14 @@ export function setCiFailedHandler(handler: PipelineDeps["onCiFailed"]): void {
   globalForDeps.mmHamzaCiFailed = handler;
 }
 
-export function canMergeToLive(actor: Pick<PipelineActor, "email">, mergeApprovers = hamzaConfig().mergeApproverEmails): boolean {
+export function canMergeToLive(actor: Pick<PipelineActor, "email">, mergeApprovers = hamzaRuntimeConfig().mergeApproverEmails): boolean {
   const email = actor.email.trim().toLowerCase();
   if (!isTeamApproverEmail(email)) return false;
   return mergeApprovers.length ? mergeApprovers.includes(email) : true;
 }
 
 export function pipelineDeps(): PipelineDeps {
-  const config = hamzaConfig();
+  const config = hamzaRuntimeConfig();
   const ref = teamGithubConfig();
   const repoRef = { owner: ref.owner, repo: ref.repo };
   const base: PipelineDeps = {
