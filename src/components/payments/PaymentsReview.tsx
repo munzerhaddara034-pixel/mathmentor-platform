@@ -7,6 +7,7 @@ import { fmt } from "@/lib/i18n/format";
 import { paymentsMessages } from "@/lib/i18n/ns/payments";
 import type { MethodSettings, PaymentSettings } from "@/lib/payments/config";
 import type { AdminPaymentRow, PaymentMethodId, PaymentStatus } from "@/lib/payments/types";
+import { REGION_SOURCES as REGION_SOURCE_ORDER, type RegionSource } from "@/lib/pricing/regionSignals";
 
 type Row = AdminPaymentRow & { currentAiExpiresAt: string | null };
 type ApiBody = { ok?: boolean; error?: string; errorAr?: string; message?: string; messageAr?: string };
@@ -43,6 +44,8 @@ async function postJson(url: string, body: unknown, method = "POST"): Promise<{ 
 export function PaymentsReview() {
   const { locale } = useI18n();
   const t = useNs(paymentsMessages).admin;
+  const regionNames = useNs(paymentsMessages).form.regions;
+  const sourceLabel: Record<RegionSource, string> = { location: t.sourceLocation, ip: t.sourceIp, phone: t.sourcePhone };
   const isAr = locale === "ar";
   const [status, setStatus] = useState<PaymentStatus>("pending");
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -142,6 +145,7 @@ export function PaymentsReview() {
                 <th>{t.student}</th>
                 <th>{t.plan}</th>
                 <th>{t.amount}</th>
+                <th>{t.regionCol}</th>
                 <th>{t.method}</th>
                 <th>{t.reference}</th>
                 <th>{t.transferDate}</th>
@@ -171,6 +175,24 @@ export function PaymentsReview() {
                       <>
                         <br />
                         <strong className="studio-teacher-error">{t.mismatch}</strong>
+                      </>
+                    ) : null}
+                  </td>
+                  <td data-region={row.pricingRegion ?? ""} data-region-review={row.regionMismatch ? "1" : "0"}>
+                    <strong>{row.pricingRegion ? (regionNames[row.pricingRegion as keyof typeof regionNames] ?? row.pricingRegion) : t.regionUnknown}</strong>
+                    {REGION_SOURCE_ORDER.filter((source) => row.regionSources?.[source]).map((source) => (
+                      <span key={source} className="muted" style={{ display: "block" }}>
+                        {sourceLabel[source]}: {regionNames[row.regionSources[source] as keyof typeof regionNames] ?? row.regionSources[source]}
+                      </span>
+                    ))}
+                    {row.regionMismatch ? (
+                      <>
+                        <span className="badge rejected mm-review-badge" title={t.regionReviewHint}>
+                          {t.regionReview}
+                        </span>
+                        <span className="muted" style={{ display: "block" }}>
+                          {t.regionReviewHint}
+                        </span>
                       </>
                     ) : null}
                   </td>
