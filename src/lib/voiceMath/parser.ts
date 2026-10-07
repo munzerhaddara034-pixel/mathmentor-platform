@@ -2,6 +2,7 @@ import { z } from "zod";
 import { OFFICIAL_METHODOLOGY_PROMPT, INSTRUCTOR_EN, INSTRUCTOR_AR, ACADEMY_LINE } from "@/lib/pedagogy/lebanese";
 import { assembleSolution } from "@/lib/solver/assemble";
 import { geminiApiKey, geminiModels, openaiSolverKey } from "@/lib/solver/llm";
+import { studyKindSchema } from "@/lib/solver/studyKindSchema";
 import type { MathSolution, SolverStep, StudyKind } from "@/lib/solver/types";
 import type { CertificateTrack, LessonLanguage } from "@/lib/studio/timeline";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
@@ -20,9 +21,8 @@ const parseJsonSchema = z.object({
       ar: z.string().optional(),
     })
     .optional(),
-  studyKind: z
-    .enum(["real_function", "geometry", "complex", "probability", "algebra", "limits", "general"])
-    .optional(),
+  // Coerced, never rejecting: a model label like "integrals" must not discard a valid solution.
+  studyKind: studyKindSchema,
   given: z
     .object({
       latex: z.string(),
@@ -39,10 +39,12 @@ const parseJsonSchema = z.object({
   graph: z
     .object({
       fn: z.string(),
-      domain: z.tuple([z.number(), z.number()]).optional(),
+      // An awkward window is an enrichment, not the answer: drop it instead of failing the parse.
+      domain: z.tuple([z.number(), z.number()]).optional().catch(undefined),
       highlights: z.unknown().optional(),
     })
-    .optional(),
+    .optional()
+    .catch(undefined),
   trap: z
     .object({
       wrong: z.string(),

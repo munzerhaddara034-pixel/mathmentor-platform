@@ -8,6 +8,7 @@ import { generate, GeminiError, type CallRecord, type GeminiPart } from "./gemin
 import { tierForLevel, type ModelTier } from "./gemini/models";
 import { buildSolverPrompt } from "./prompt";
 import { retakeSolution } from "./retake";
+import { asymptotesSchema, studyKindSchema } from "./studyKindSchema";
 import type { MathSolution, SolverStep, StudyKind } from "./types";
 
 export { geminiModels } from "./gemini/models";
@@ -41,17 +42,9 @@ const geminiJsonSchema = z.object({
       ar: z.string().optional(),
     })
     .optional(),
-  studyKind: z
-    .enum(["real_function", "geometry", "complex", "probability", "algebra", "limits", "general"])
-    .optional(),
-  asymptotes: z
-    .array(
-      z.object({
-        kind: z.enum(["vertical", "horizontal", "oblique"]),
-        equation: z.string(),
-      }),
-    )
-    .optional(),
+  // Coerced, never rejecting: a model label like "integrals" must not discard a valid solution.
+  studyKind: studyKindSchema,
+  asymptotes: asymptotesSchema,
   finalAnswer: z.string().optional(),
   finalAnswerLatex: z.string().optional(),
   topic: z.string().optional(),
@@ -71,8 +64,9 @@ const geminiJsonSchema = z.object({
   graph: z
     .object({
       fn: z.string(),
-      domain: z.tuple([z.number(), z.number()]).optional(),
-      yDomain: z.tuple([z.number(), z.number()]).optional(),
+      // An awkward window is an enrichment, not the answer: drop it instead of failing the solution.
+      domain: z.tuple([z.number(), z.number()]).optional().catch(undefined),
+      yDomain: z.tuple([z.number(), z.number()]).optional().catch(undefined),
       highlights: z.unknown().optional(),
     })
     .optional()
