@@ -28,8 +28,11 @@ export function getPool(): Pool {
   const pool = new Pool({
     connectionString: databaseUrl(),
     max: Number(process.env.PG_POOL_MAX || 5),
-    idleTimeoutMillis: 30_000,
+    // A sleeping Neon compute drops idle sockets; recycling ours sooner avoids handing a dead
+    // connection to the first request after a quiet period.
+    idleTimeoutMillis: Number(process.env.PG_IDLE_TIMEOUT_MS || 20_000),
     connectionTimeoutMillis: 15_000,
+    keepAlive: true,
   });
   pool.on("error", (error) => {
     console.error("[mathmentor] Postgres pool error:", error.message);
@@ -59,19 +62,68 @@ export async function runMigrations(client: PoolClient): Promise<string[]> {
   return applied;
 }
 
+/**
+ * Connection-class failures worth another try: a sleeping database, a socket the server closed while
+ * we were idle, or a cold start that refused the very first connection. Statement-level errors (bad
+ * SQL, constraint violations, aborted transactions) are never retried.
+ */
+const RETRYABLE_CONNECTION_ERROR = /ECONNRESET|ETIMEDOUT|ECONNREFUSED|EPIPE|ENOTFOUND|Connection terminated|Connection ended|server closed the connection|Client has encountered a connection error|timeout exceeded when trying to connect|terminating connection due to administrator command/i;
+
+export function isRetryableConnectionError(error: unknown): boolean {
+  const code = typeof error === "object" && error !== null ? String((error as { code?: unknown }).code ?? "") : "";
+  const message = error instanceof Error ? error.message : String(error);
+  return RETRYABLE_CONNECTION_ERROR.test(`${code} ${message}`);
+}
+
+/** Delays between connection attempts: short first, then longer, so a cold database has time to wake. */
+function retryDelays(): number[] {
+  const raw = process.env.PG_CONNECT_DELAYS_MS;
+  const parsed = raw ? raw.split(",").map((value) => Number(value.trim())) : [];
+  const delays = parsed.filter((value) => Number.isFinite(value) && value >= 0);
+  return delays.length ? delays : [400, 1_500, 4_000];
+}
+
+/**
+ * Runs `attempt` until it succeeds, retrying connection-class failures only. Used for the first
+ * connection (cold Neon) and wherever a transient socket failure must not reach a visitor.
+ */
+export async function retryConnection<T>(
+  attempt: () => Promise<T>,
+  opts: { delaysMs?: number[]; onRetry?: (error: unknown, attemptNumber: number) => void } = {},
+): Promise<T> {
+  const delays = opts.delaysMs ?? retryDelays();
+  for (let index = 0; ; index += 1) {
+    try {
+      return await attempt();
+    } catch (error) {
+      const delay = delays[index];
+      if (delay === undefined || !isRetryableConnectionError(error)) throw error;
+      opts.onRetry?.(error, index + 1);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+async function connectAndMigrate(): Promise<void> {
+  const client = await getPool().connect();
+  try {
+    const applied = await runMigrations(client);
+    if (applied.length) console.info(`[mathmentor] Postgres migrations applied: ${applied.join(", ")}`);
+  } finally {
+    client.release();
+  }
+}
+
 /** Runs migrations once per process; later calls await the same promise. */
 export function ensureDatabaseReady(): Promise<void> {
   if (!isPostgresEnabled()) return Promise.resolve();
   if (!globalForPg.mmPgReady) {
-    globalForPg.mmPgReady = (async () => {
-      const client = await getPool().connect();
-      try {
-        const applied = await runMigrations(client);
-        if (applied.length) console.info(`[mathmentor] Postgres migrations applied: ${applied.join(", ")}`);
-      } finally {
-        client.release();
-      }
-    })().catch((error: unknown) => {
+    globalForPg.mmPgReady = retryConnection(connectAndMigrate, {
+      onRetry: (error, attemptNumber) => {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(`[mathmentor] Postgres connect attempt ${attemptNumber} failed, retrying: ${message}`);
+      },
+    }).catch((error: unknown) => {
       globalForPg.mmPgReady = undefined;
       throw error;
     });
@@ -81,13 +133,23 @@ export function ensureDatabaseReady(): Promise<void> {
 
 export async function dbQuery<Row extends QueryResultRow>(sql: string, params: unknown[] = []): Promise<Row[]> {
   await ensureDatabaseReady();
-  const result = await getPool().query<Row>(sql, params);
-  return result.rows;
+  try {
+    const result = await getPool().query<Row>(sql, params);
+    return result.rows;
+  } catch (error) {
+    // One retry for a connection-class failure only. Statement errors keep their meaning, and the
+    // document stores write idempotent upserts, so replaying a single statement is safe.
+    if (!isRetryableConnectionError(error)) throw error;
+    const result = await retryConnection(() => getPool().query<Row>(sql, params), { delaysMs: [0] });
+    return result.rows;
+  }
 }
 
 export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
   await ensureDatabaseReady();
-  const client = await getPool().connect();
+  // Only acquiring the connection is retried: once BEGIN has run, replaying the transaction could
+  // double-apply a payment, so a failure inside it is surfaced to the caller instead.
+  const client = await retryConnection(() => getPool().connect(), { delaysMs: [300, 1_500] });
   try {
     await client.query("BEGIN");
     const value = await fn(client);
