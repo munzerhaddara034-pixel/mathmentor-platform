@@ -121,3 +121,29 @@ Migration `009_hamza_tasks` creates `mm_hamza_tasks` / `mm_hamza_steps`. The app
 - Revision diffs are incremental against the PR head.
 - The task store's file fallback is single-instance only. Postgres claims are safe across instances.
 - A revert that restores code with `any` is blocked by the prechecks like any other patch; fix it forward instead.
+
+## How Hamza thinks now (engineering playbook)
+
+Hamza's prompt carries an engineering playbook assembled from `src/lib/hamza/playbook.ts` and injected by
+`agentProtocol()` on every task:
+
+- **Workflow**: restate the request and its definition of done -> explore (`list_tree`, `grep`, `read_file`, `tests_for`,
+  `project_rules`) -> plan 3-6 bullets -> minimal complete patch -> self-review (types, edge cases, guards, i18n, test) ->
+  engineer-grade report (`testPlanAr` executable, `risksAr` top three failure modes) -> fix CI failures at the cause.
+- **Lessons**: the failures this platform already paid for (a stray classification label discarding a correct solution,
+  hanging providers, SSRF on user-supplied media URLs, non-atomic credit spend, open demo paths when a secret is missing,
+  cold database after idle). Each lesson is symptom -> rule.
+- **Anti-patterns**: weakening a guard, deleting an assertion, skipping a test, editing `.github/`, `.env*`, `data/` or
+  `package-lock.json`, `any`/`ts-ignore`, silent catches, hardcoded secrets, placeholder code, or editing a file that was
+  never read.
+- **Test recipes**: `tests/*.test.mjs`, `node:test`, the register hook, cover the failure path, prefer pure functions and
+  in-memory fakes.
+- **Budget**: the brief is capped at 9,000 characters; workflow and "never" rules are always complete, lessons and test
+  recipes degrade first.
+
+New tool: `tests_for {"path":"src/lib/solver/llm.ts"}` returns the tests that reference a path (or states that a test must
+be added), so a behaviour change ships with its regression test.
+
+Human mirror and the process for adding a rule: `docs/hamza/PLAYBOOK.md`. The eval set grew to 15 cases
+(`E13-tolerant-parse`, `E14-exam-list-session`, `E15-outbound-deadline`), and `tests/hamzaPlaybook.test.mjs` guards the
+playbook itself.

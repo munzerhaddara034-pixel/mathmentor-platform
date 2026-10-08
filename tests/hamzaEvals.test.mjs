@@ -11,9 +11,9 @@ const file = (path, content, extra = {}) => {
   return { path, baseSha: null, isNew: true, newContent: content, diff: d.text, additions: d.additions, deletions: d.deletions, change: "add", ...extra };
 };
 
-test("eval set: 12 well-formed cases with unique ids", () => {
-  assert.equal(evals.length, 12);
-  assert.equal(new Set(evals.map((e) => e.id)).size, 12);
+test("eval set: 15 well-formed cases with unique ids", () => {
+  assert.equal(evals.length, 15);
+  assert.equal(new Set(evals.map((e) => e.id)).size, 15);
   const brand = String.fromCharCode(0x062d, 0x062f, 0x0627, 0x0631, 0x0629);
   assert.ok(!readFileSync(new URL("../docs/hamza/evals.json", import.meta.url), "utf8").includes(brand));
 });
