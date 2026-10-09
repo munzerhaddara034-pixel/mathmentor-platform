@@ -191,7 +191,7 @@ const en = {
   web: {
     disabled: "Web research is disabled by the server setting; no search or page fetch was performed.",
     rateLimited: "The web-research budget for this agent has been reached; no request was sent.",
-    failed: "Could not reach the web source; no web result is being claimed.",
+    failed: "Could not reach any search provider; no search or results are being claimed.",
     emptyQuery: "The web query was empty after safety scrubbing; no request was sent.",
     citationRequired: "Web evidence was consulted, but the answer did not cite a source URL.",
     citationLine: "Sources: {urls}",
@@ -394,7 +394,7 @@ const ar: TeamMessages = {
   web: {
     disabled: "البحث على الويب متوقف بإعداد الخادم؛ لم يُنفّذ أي بحث أو جلب صفحة.",
     rateLimited: "تم بلوغ ميزانية البحث على الويب لهذا الوكيل؛ لم يُرسل أي طلب.",
-    failed: "تعذّر الوصول إلى المصدر على الويب؛ لا أدّعي وجود نتيجة ويب.",
+    failed: "تعذّر الوصول إلى أيّ مزوّد بحث؛ لا أدّعي إجراء البحث أو وجود نتائج.",
     emptyQuery: "أصبح استعلام الويب فارغاً بعد التنظيف الأمني؛ لم يُرسل أي طلب.",
     citationRequired: "تمت الاستعانة بدليل ويب، لكن الجواب لم يتضمن رابط مصدر.",
     citationLine: "المصادر: {urls}",
@@ -595,7 +595,7 @@ const fr: TeamMessages = {
   web: {
     disabled: "La recherche web est désactivée par le serveur ; aucune recherche ni page n’a été récupérée.",
     rateLimited: "Le budget de recherche web de cet agent est atteint ; aucune requête n’a été envoyée.",
-    failed: "Impossible d’atteindre la source web ; aucun résultat web n’est revendiqué.",
+    failed: "Aucun fournisseur de recherche n’est accessible ; aucune recherche ni aucun résultat n’est revendiqué.",
     emptyQuery: "La requête web était vide après le nettoyage de sécurité ; aucune requête n’a été envoyée.",
     citationRequired: "Des éléments web ont été consultés, mais la réponse ne cite aucune URL source.",
     citationLine: "Sources : {urls}",

@@ -46,6 +46,7 @@ export type TeamWebAuditRecord = {
   durationMs: number;
   ok: boolean;
   failureReason?: string;
+  provider?: "wikipedia_ar" | "wikipedia_en" | "mojeek" | "duckduckgo";
   createdAt: string;
 };
 
@@ -117,6 +118,7 @@ function cleanWebAudit(value: unknown): TeamWebAuditRecord | null {
     durationMs: Number.isFinite(item.durationMs) ? Math.max(0, Math.min(900_000, Number(item.durationMs))) : 0,
     ok: item.ok === true,
     failureReason: typeof item.failureReason === "string" ? clean(item.failureReason, 180) : undefined,
+    provider: ["wikipedia_ar", "wikipedia_en", "mojeek", "duckduckgo"].includes(item.provider ?? "") ? item.provider : undefined,
     createdAt: clean(typeof item.createdAt === "string" ? item.createdAt : new Date(0).toISOString(), 40),
   };
 }
@@ -187,6 +189,7 @@ export async function recordTeamWebAudit(record: Omit<TeamWebAuditRecord, "id" |
     durationMs: Number.isFinite(record.durationMs) ? Math.max(0, Math.min(900_000, record.durationMs)) : 0,
     ok: record.ok === true,
     failureReason: record.failureReason ? clean(record.failureReason, 180) : undefined,
+    provider: record.provider,
     createdAt: new Date().toISOString(),
   };
   await updateJsonFile<{ records: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[] }>(TEAM_HEALTH_DOCUMENT, { records: [], webCalls: [] }, (current) => ({

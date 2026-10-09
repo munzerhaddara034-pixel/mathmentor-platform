@@ -5,9 +5,11 @@ import { teamMessages } from "@/lib/i18n/ns/team";
 import type { TeamAgentId } from "./types";
 
 export type WebSearchResult = { title: string; url: string; snippet: string };
+export type WebSearchProvider = "wikipedia_ar" | "wikipedia_en" | "mojeek" | "duckduckgo";
 export type WebSearchResponse = {
   ok: boolean;
   results: WebSearchResult[];
+  provider?: WebSearchProvider;
   cached?: boolean;
   failureReason?: string;
   notice?: string;
@@ -26,10 +28,12 @@ export type WebToolOptions = {
   nowMs?: () => number;
 };
 
-type CacheEntry = { expiresAt: number; results: WebSearchResult[] };
+type CacheEntry = { expiresAt: number; results: WebSearchResult[]; provider: WebSearchProvider };
 type BudgetEntry = { calls: number[] };
 
-const SEARCH_ENDPOINT = "https://html.duckduckgo.com/html/";
+const DDG_SEARCH_ENDPOINT = "https://html.duckduckgo.com/html/";
+const MOJEEK_SEARCH_ENDPOINT = "https://www.mojeek.com/search";
+const WIKIPEDIA_API_ENDPOINT = (lang: "ar" | "en") => `https://${lang}.wikipedia.org/w/api.php`;
 const SEARCH_TIMEOUT_MS = 8_000;
 const SEARCH_MAX_BYTES = 512 * 1024;
 const PAGE_MAX_BYTES = 2 * 1024 * 1024;
@@ -94,7 +98,7 @@ const SECRET_QUERY_PATTERNS = [
 ];
 const INTERNAL_HOST_PATTERN = /(?:https?:\/\/)?(?:localhost|mathmentor-platform\.onrender\.com|[^\s/]+\.(?:local|internal|corp|lan|intranet)|127\.\d{1,3}\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(?::\d+)?(?:\/[^\s]*)?/gi;
 
-/** Redact credentials, PII, internal hosts, paths, and multiline/file-content-shaped input before DDG sees it. */
+/** Redact credentials, PII, internal hosts, paths, and multiline/file-content-shaped input before any provider sees it. */
 export function scrubWebQuery(input: string): string {
   let query = String(input ?? "").replace(/```[\s\S]*?```/g, " ").split(/\r?\n/, 1)[0] ?? "";
   query = redactSecrets(query).text;
@@ -148,6 +152,7 @@ async function audit(input: {
   now: number;
   ok: boolean;
   failureReason?: string;
+  provider?: WebSearchProvider;
 }): Promise<void> {
   const knownAgent = ["mohamed", "sami", "developer", "finance"].includes(input.agent) ? (input.agent as TeamAgentId) : "unknown";
   try {
@@ -158,6 +163,7 @@ async function audit(input: {
       durationMs: Math.max(0, Math.min(900_000, input.now - input.started)),
       ok: input.ok,
       failureReason: input.failureReason ? redactedText(input.failureReason, 180) : undefined,
+      provider: input.provider,
     });
   } catch {
     // A health-store outage must not turn a read-only research result into a false claim.
@@ -202,7 +208,7 @@ function plainFragment(value: string, max: number): string {
 function resultUrl(raw: string): string | null {
   try {
     const decoded = decodeHtmlEntities(raw);
-    const candidate = new URL(decoded.startsWith("//") ? `https:${decoded}` : decoded, SEARCH_ENDPOINT);
+    const candidate = new URL(decoded.startsWith("//") ? `https:${decoded}` : decoded, DDG_SEARCH_ENDPOINT);
     const uddg = candidate.searchParams.get("uddg");
     const target = uddg ? new URL(uddg) : candidate;
     if (target.protocol !== "http:" && target.protocol !== "https:") return null;
@@ -233,6 +239,46 @@ function parseSearchResults(html: string): WebSearchResult[] {
   return results;
 }
 
+function parseMojeekResults(html: string): WebSearchResult[] {
+  const results: WebSearchResult[] = [];
+  const item = /<li\b[^>]*>([\s\S]*?)<\/li>/gi;
+  let match: RegExpExecArray | null;
+  while (results.length < 5 && (match = item.exec(html))) {
+    const block = match[1];
+    const heading = /<h[1-6]\b[^>]*>[\s\S]*?<a\b([^>]*)>([\s\S]*?)<\/a>[\s\S]*?<\/h[1-6]>/i.exec(block);
+    const anchor = heading ?? /<a\b([^>]*)>([\s\S]*?)<\/a>/i.exec(block);
+    if (!anchor) continue;
+    const href = /\bhref=["']([^"']+)["']/i.exec(anchor[1]);
+    const url = resultUrl(href?.[1] ?? "");
+    if (!url) continue;
+    const snippetMatch = /<(?:p|div)\b([^>]*)>([\s\S]*?)<\/(?:p|div)>/i.exec(block);
+    const snippet = snippetMatch && /(?:snippet|description|s\b)/i.test(snippetMatch[1])
+      ? snippetMatch[2]
+      : snippetMatch?.[2] ?? "";
+    results.push({ title: plainFragment(anchor[2], 300), url, snippet: plainFragment(snippet, 700) });
+  }
+  return results;
+}
+
+function parseWikipediaResults(body: string, lang: "ar" | "en"): WebSearchResult[] {
+  const parsed: unknown = JSON.parse(body);
+  if (!parsed || typeof parsed !== "object") return [];
+  const query = (parsed as { query?: { search?: unknown } }).query;
+  if (!query || !Array.isArray(query.search)) return [];
+  return query.search.slice(0, 5).flatMap((value): WebSearchResult[] => {
+    if (!value || typeof value !== "object") return [];
+    const hit = value as { title?: unknown; snippet?: unknown };
+    if (typeof hit.title !== "string" || !hit.title.trim()) return [];
+    const title = plainFragment(hit.title, 300);
+    const pathTitle = encodeURIComponent(hit.title.replace(/ /g, "_")).replace(/%3A/gi, ":");
+    return [{
+      title,
+      url: `https://${lang}.wikipedia.org/wiki/${pathTitle}`,
+      snippet: plainFragment(typeof hit.snippet === "string" ? hit.snippet : "", 700),
+    }];
+  });
+}
+
 function responseNotice(reason: string): string {
   if (reason === "disabled") return teamMessages.ar.web.disabled;
   if (reason === "rate_limit_hour" || reason === "rate_limit_day") return teamMessages.ar.web.rateLimited;
@@ -242,6 +288,53 @@ function responseNotice(reason: string): string {
 
 function disabledSearch(agent: string, query: string, started: number, now: number): Promise<WebSearchResponse> {
   return audit({ agent, query, resultCount: 0, started, now, ok: false, failureReason: "disabled" }).then(() => ({ ok: false, results: [], failureReason: "disabled", notice: responseNotice("disabled") }));
+}
+
+async function searchProviders(scrubbed: string, key: string, options: WebToolOptions, agent: string, started: number): Promise<WebSearchResponse> {
+  const fetchSearch = async (url: string, accept: string) => safeWebFetchBytes(url, {
+    maxBytes: SEARCH_MAX_BYTES,
+    timeoutMs: SEARCH_TIMEOUT_MS,
+    truncate: true,
+    lookup: options.lookup ?? testOverrides.lookup,
+    fetchImpl: options.fetchImpl ?? testOverrides.fetchImpl,
+    headers: { "user-agent": NORMAL_BROWSER_UA, accept },
+  });
+  let lastFailure = "network_error";
+  const acceptResults = async (results: WebSearchResult[], provider: WebSearchProvider): Promise<WebSearchResponse | null> => {
+    if (!results.length) return null;
+    cache.set(key, { expiresAt: nowMs(options) + CACHE_TTL_MS, results: resultClone(results), provider });
+    while (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value as string);
+    await audit({ agent, query: scrubbed, resultCount: results.length, started, now: nowMs(options), ok: true, provider });
+    return { ok: true, results, provider };
+  };
+  for (const lang of ["ar", "en"] as const) {
+    const endpoint = new URL(WIKIPEDIA_API_ENDPOINT(lang));
+    for (const [name, value] of Object.entries({ action: "query", list: "search", srsearch: scrubbed, format: "json", srlimit: "5" })) endpoint.searchParams.set(name, value);
+    try {
+      const fetched = await fetchSearch(endpoint.toString(), "application/json");
+      const response = await acceptResults(parseWikipediaResults(fetched.bytes.toString("utf8"), lang), `wikipedia_${lang}`);
+      if (response) return response;
+    } catch (error) {
+      lastFailure = failureReason(error);
+    }
+  }
+  const providers: Array<{ provider: WebSearchProvider; endpoint: URL; parse: (body: string) => WebSearchResult[] }> = [
+    { provider: "mojeek", endpoint: new URL(MOJEEK_SEARCH_ENDPOINT), parse: parseMojeekResults },
+    { provider: "duckduckgo", endpoint: new URL(DDG_SEARCH_ENDPOINT), parse: parseSearchResults },
+  ];
+  for (const item of providers) {
+    item.endpoint.searchParams.set("q", scrubbed);
+    try {
+      const fetched = await fetchSearch(item.endpoint.toString(), "text/html");
+      const response = await acceptResults(item.parse(fetched.bytes.toString("utf8")), item.provider);
+      if (response) return response;
+    } catch (error) {
+      lastFailure = failureReason(error);
+    }
+  }
+  const reason = lastFailure === "network_error" ? "providers_unavailable" : lastFailure;
+  await audit({ agent, query: scrubbed, resultCount: 0, started, now: nowMs(options), ok: false, failureReason: reason });
+  return { ok: false, results: [], failureReason: "providers_unavailable", notice: responseNotice("providers_unavailable") };
 }
 
 export async function searchWeb(query: string, options: WebToolOptions = {}): Promise<WebSearchResponse> {
@@ -264,30 +357,11 @@ export async function searchWeb(query: string, options: WebToolOptions = {}): Pr
     cache.delete(key);
     cache.set(key, cached);
     const results = resultClone(cached.results);
-    await audit({ agent, query: scrubbed, resultCount: results.length, started, now: nowMs(options), ok: true });
-    return { ok: true, results, cached: true };
+    await audit({ agent, query: scrubbed, resultCount: results.length, started, now: nowMs(options), ok: true, provider: cached.provider });
+    return { ok: true, results, provider: cached.provider, cached: true };
   }
   if (cached) cache.delete(key);
-  try {
-    const endpoint = `${SEARCH_ENDPOINT}?q=${encodeURIComponent(scrubbed)}`;
-    const fetched = await safeWebFetchBytes(endpoint, {
-      maxBytes: SEARCH_MAX_BYTES,
-      timeoutMs: SEARCH_TIMEOUT_MS,
-      truncate: true,
-      lookup: options.lookup ?? testOverrides.lookup,
-      fetchImpl: options.fetchImpl ?? testOverrides.fetchImpl,
-      headers: { "user-agent": NORMAL_BROWSER_UA, accept: "text/html" },
-    });
-    const results = parseSearchResults(fetched.bytes.toString("utf8"));
-    cache.set(key, { expiresAt: nowMs(options) + CACHE_TTL_MS, results: resultClone(results) });
-    while (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value as string);
-    await audit({ agent, query: scrubbed, resultCount: results.length, started, now: nowMs(options), ok: true });
-    return { ok: true, results };
-  } catch (error) {
-    const reason = failureReason(error);
-    await audit({ agent, query: scrubbed, resultCount: 0, started, now: nowMs(options), ok: false, failureReason: reason });
-    return { ok: false, results: [], failureReason: reason, notice: responseNotice(reason) };
-  }
+  return searchProviders(scrubbed, key, options, agent, started);
 }
 
 function pageText(html: string, contentType: string): string {

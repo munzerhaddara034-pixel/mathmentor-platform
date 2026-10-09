@@ -42,6 +42,22 @@ function stubFetch(body, calls = []) {
   };
 }
 
+function sequenceFetch(responses, calls = []) {
+  return async (url, init) => {
+    calls.push({ url: String(url), init });
+    const next = responses[calls.length - 1];
+    if (next instanceof Error) throw next;
+    const body = typeof next === "string" ? next : JSON.stringify(next);
+    const contentType = new URL(String(url)).hostname.endsWith("wikipedia.org") ? "application/json" : "text/html";
+    return new Response(body, { status: 200, headers: { "content-type": contentType } });
+  };
+}
+
+const emptyWiki = { query: { search: [] } };
+function mojeekResult(url = "https://example.com/mojeek") {
+  return `<ul><li class="default"><h2><a href="${url}">Mojeek result</a></h2><p class="s">A Mojeek snippet.</p></li></ul>`;
+}
+
 after(() => {
   restoreEnv();
   setPersistentStoreOverride(null);
@@ -67,7 +83,7 @@ test("oversize search response is truncated at the hard 512KB cap", async () => 
   const result = await searchWeb("bounded oversize response", { agent: "sami", lookup: publicLookup, fetchImpl: stubFetch(body, calls) });
   assert.equal(result.ok, true);
   assert.equal(result.results.length, 1);
-  assert.equal(calls.length, 1);
+  assert.equal(calls.length, 4);
 });
 
 test("secret-shaped and PII query content is scrubbed before the request", async () => {
@@ -79,7 +95,8 @@ test("secret-shaped and PII query content is scrubbed before the request", async
     fetchImpl: stubFetch(htmlResult(), calls),
   });
   assert.equal(result.ok, true);
-  const sent = decodeURIComponent(new URL(calls[0].url).searchParams.get("q"));
+  const requestUrl = new URL(calls[0].url);
+  const sent = requestUrl.searchParams.get("srsearch") ?? requestUrl.searchParams.get("q");
   assert.doesNotMatch(sent, /gsk_|me@example\.com|localhost|10\.0\.0\.2/);
   assert.match(sent, /redacted/);
 });
@@ -93,7 +110,7 @@ test("per-agent hourly rate limit returns a clear failure without another reques
   const second = await searchWeb("second budget call", options);
   assert.equal(second.ok, false);
   assert.equal(second.failureReason, "rate_limit_hour");
-  assert.equal(calls.length, 1);
+  assert.equal(calls.length, 4);
 });
 
 test("identical scrubbed query is served from the bounded cache", async () => {
@@ -105,7 +122,83 @@ test("identical scrubbed query is served from the bounded cache", async () => {
   assert.equal(first.ok, true);
   assert.equal(second.ok, true);
   assert.equal(second.cached, true);
-  assert.equal(calls.length, 1);
+  assert.equal(calls.length, 4);
+});
+
+test("Wikipedia search hits after Arabic is empty and returns canonical English article URLs", async () => {
+  restoreEnv();
+  const calls = [];
+  const result = await searchWeb("wikipedia topic", {
+    agent: "sami",
+    lookup: publicLookup,
+    fetchImpl: sequenceFetch([emptyWiki, { query: { search: [{ title: "Ada Lovelace", snippet: "<span>Early <b>programmer</b></span>" }] } }], calls),
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.provider, "wikipedia_en");
+  assert.equal(result.results[0].url, "https://en.wikipedia.org/wiki/Ada_Lovelace");
+  assert.equal(result.results[0].snippet, "Early programmer");
+  assert.match(new URL(calls[0].url).hostname, /^ar\.wikipedia\.org$/);
+  assert.match(new URL(calls[1].url).hostname, /^en\.wikipedia\.org$/);
+  assert.equal(calls.length, 2);
+});
+
+test("empty Wikipedia results fall back to Mojeek and record the answering provider", async () => {
+  restoreEnv();
+  const calls = [];
+  const result = await searchWeb("mojeek fallback", {
+    agent: "sami",
+    lookup: publicLookup,
+    fetchImpl: sequenceFetch([emptyWiki, emptyWiki, mojeekResult()], calls),
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.provider, "mojeek");
+  assert.equal(result.results[0].title, "Mojeek result");
+  assert.equal(result.results[0].snippet, "A Mojeek snippet.");
+  assert.equal(new URL(calls[2].url).hostname, "www.mojeek.com");
+  assert.equal(calls.length, 3);
+  assert.equal(values.get("team-agent-health.json").webCalls.at(-1).provider, "mojeek");
+});
+
+test("empty Wikipedia and Mojeek results fall back to DuckDuckGo last", async () => {
+  restoreEnv();
+  const calls = [];
+  const result = await searchWeb("duckduckgo fallback", {
+    agent: "sami",
+    lookup: publicLookup,
+    fetchImpl: sequenceFetch([emptyWiki, emptyWiki, "<html></html>", htmlResult()], calls),
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.provider, "duckduckgo");
+  assert.equal(new URL(calls[3].url).hostname, "html.duckduckgo.com");
+  assert.deepEqual(calls.map(({ url }) => new URL(url).hostname), ["ar.wikipedia.org", "en.wikipedia.org", "www.mojeek.com", "html.duckduckgo.com"]);
+});
+
+test("all search providers failing returns a localized honest failure with no invented results", async () => {
+  restoreEnv();
+  const calls = [];
+  const result = await searchWeb("unavailable providers", {
+    agent: "developer",
+    lookup: publicLookup,
+    fetchImpl: sequenceFetch([new Error("offline"), new Error("offline"), new Error("offline"), new Error("offline")], calls),
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.results, []);
+  assert.equal(result.provider, undefined);
+  assert.equal(result.failureReason, "providers_unavailable");
+  assert.match(result.notice, /تعذّر الوصول/);
+  assert.equal(calls.length, 4);
+  assert.equal(values.get("team-agent-health.json").webCalls.at(-1).ok, false);
+});
+
+test("Wikipedia provider is persisted in the web-search audit record", async () => {
+  restoreEnv();
+  const result = await searchWeb("Arabic encyclopedia", {
+    agent: "mohamed",
+    lookup: publicLookup,
+    fetchImpl: sequenceFetch([{ query: { search: [{ title: "عنوان", snippet: "<b>مقتطف</b>" }] } }]),
+  });
+  assert.equal(result.provider, "wikipedia_ar");
+  assert.equal(values.get("team-agent-health.json").webCalls.at(-1).provider, "wikipedia_ar");
 });
 
 test("kill switch disables both tools gracefully and performs no request", async () => {
