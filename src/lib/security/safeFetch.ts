@@ -166,3 +166,103 @@ export async function safeFetchBytes(
   }
   throw new BlockedFetchError("too_many_redirects");
 }
+
+/** Pure URL policy for read-only web research. Unlike media URLs, public web hosts are allowed. */
+export function checkWebFetchUrl(raw: string): UrlCheck {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return { ok: false, reason: "invalid_url" };
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") return { ok: false, reason: "http_https_only" };
+  if (url.username || url.password) return { ok: false, reason: "credentials_in_url" };
+  if (url.port && url.port !== (url.protocol === "http:" ? "80" : "443")) return { ok: false, reason: "port_not_allowed" };
+  const host = url.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  if (!host || isIP(host)) return { ok: false, reason: "ip_literal_not_allowed" };
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal") || host.endsWith(".corp") || host.endsWith(".lan")) {
+    return { ok: false, reason: "internal_host" };
+  }
+  return { ok: true, url };
+}
+
+/** Validate a public web target and every resolved address before a request is made. */
+export async function assertSafeWebFetchTarget(raw: string, opts: { lookup?: LookupFn } = {}): Promise<URL> {
+  const check = checkWebFetchUrl(raw);
+  if (!check.ok) throw new BlockedFetchError(check.reason);
+  const addresses = await (opts.lookup ?? defaultLookup)(check.url.hostname).catch(() => []);
+  if (!addresses.length) throw new BlockedFetchError("dns_failed");
+  if (addresses.some((item) => isBlockedAddress(item.address))) throw new BlockedFetchError("private_address");
+  return check.url;
+}
+
+const FORWARDED_WEB_HEADERS = new Set(["user-agent", "accept", "accept-language"]);
+
+function safeWebHeaders(headers: Record<string, string> | undefined): Record<string, string> | undefined {
+  if (!headers) return undefined;
+  const output: Record<string, string> = {};
+  for (const [name, value] of Object.entries(headers)) {
+    const lower = name.toLowerCase();
+    if (FORWARDED_WEB_HEADERS.has(lower)) output[lower] = value.slice(0, 300);
+  }
+  return output;
+}
+
+async function readWebResponse(response: Response, maxBytes: number, truncate: boolean): Promise<Buffer> {
+  if (!response.body) {
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length > maxBytes && !truncate) throw new BlockedFetchError("too_large");
+    return bytes.subarray(0, maxBytes);
+  }
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const next = await reader.read();
+    if (next.done) break;
+    const chunk = next.value;
+    if (total + chunk.length > maxBytes) {
+      if (!truncate) {
+        await reader.cancel();
+        throw new BlockedFetchError("too_large");
+      }
+      chunks.push(chunk.subarray(0, Math.max(0, maxBytes - total)));
+      await reader.cancel();
+      total = maxBytes;
+      break;
+    }
+    chunks.push(chunk);
+    total += chunk.length;
+  }
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)), Math.min(total, maxBytes));
+}
+
+/** Safe read-only fetch for public HTTP(S) pages; never forwards credentials or auth headers. */
+export async function safeWebFetchBytes(
+  raw: string,
+  opts: { maxBytes?: number; timeoutMs?: number; lookup?: LookupFn; fetchImpl?: typeof fetch; headers?: Record<string, string>; truncate?: boolean } = {},
+): Promise<{ bytes: Buffer; contentType: string }> {
+  const maxBytes = opts.maxBytes ?? 2 * 1024 * 1024;
+  const fetchImpl = opts.fetchImpl ?? fetch;
+  let current = raw;
+  for (let hop = 0; hop <= 3; hop += 1) {
+    const url = await assertSafeWebFetchTarget(current, { lookup: opts.lookup });
+    const response = await fetchImpl(url, {
+      redirect: "manual",
+      signal: AbortSignal.timeout(opts.timeoutMs ?? 8_000),
+      headers: safeWebHeaders(opts.headers),
+    });
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location) throw new BlockedFetchError("redirect_without_location");
+      current = new URL(location, url).toString();
+      continue;
+    }
+    if (!response.ok) throw new BlockedFetchError(`http_${response.status}`);
+    const declared = Number(response.headers.get("content-length") || 0);
+    if (declared > maxBytes && !opts.truncate) throw new BlockedFetchError("too_large");
+    const bytes = await readWebResponse(response, maxBytes, opts.truncate === true);
+    return { bytes, contentType: response.headers.get("content-type") || "application/octet-stream" };
+  }
+  throw new BlockedFetchError("too_many_redirects");
+}

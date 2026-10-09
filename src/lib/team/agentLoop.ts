@@ -10,6 +10,7 @@ import { loadTeamMemory, recordTeamHealth, saveTeamMemory, escalateTeamAgent, ty
 import { TEAM_AGENT_NAMES_AR, type TeamAgentId } from "./types";
 import { redactSecrets } from "./secrets";
 import { teamMessages } from "@/lib/i18n/ns/team";
+import { fetchWebPage, searchWeb } from "./webSearch";
 
 const TEAM_LOOP_MAX_STEPS = 8;
 const TEAM_LOOP_MAX_TOOLS = 6;
@@ -26,7 +27,7 @@ export type TeamLoopResult = {
   notice?: string;
 };
 
-export type ToolState = { names: string[]; outputs: string[] };
+export type ToolState = { names: string[]; outputs: string[]; webUsed?: boolean; webSources?: string[] };
 
 type Tool = { run: (name: string, args: Record<string, unknown>) => Promise<string> };
 
@@ -45,11 +46,11 @@ function toolProtocol(agent: TeamAgentId): string {
 {"thought":"جملة قصيرة","action":"tool","tool":"اسم الأداة","args":{}}
 أو
 {"thought":"جملة قصيرة","action":"reply","replyAr":"الجواب الكامل"}
-الأدوات المشتركة: list_tree, grep, read_file, find_references, tests_for, project_rules, team_memory, run_tests.
+الأدوات المشتركة: list_tree, grep, read_file, find_references, tests_for, project_rules, team_memory, run_tests, web_search, web_fetch.
 أدوات محمد: secretary_actions, send_owner_whatsapp, explain_video.
 أدوات يوسف: create_design.
 أداة حمزة نفسها هي أدوات المستودع والاختبارات عبر حلقة حمزة الخلفية؛ لا تكتب ولا تنفّذ shell.
-لا تدّعِ إرسالاً أو حفظاً أو توليداً أو فحصاً لم يظهر في نتيجة أداة. إذا احتجت قرار منذر أو لم تستطع التحقق، اذكر ذلك صراحة.`;
+إذا استعنت بنتيجة ويب ناجحة، يجب أن تضع رابط المصدر/الروابط نفسها في الجواب النهائي؛ وإلا سترفض المنصة الجواب. لا تدّعِ إرسالاً أو حفظاً أو توليداً أو فحصاً لم يظهر في نتيجة أداة. إذا احتجت قرار منذر أو لم تستطع التحقق، اذكر ذلك صراحة.`;
 }
 
 function safeText(value: string, max = 500): string {
@@ -75,6 +76,14 @@ export function verifyReply(input: { text: string; intent: string; tools: ToolSt
   }
   if (isMathIntent(input.intent) && !/(تحقق|تعويض|verification|check|substitut)/i.test(input.text)) {
     reasons.push("لم يظهر تحقق رياضي مستقل");
+  }
+  const webUsed = input.tools.webUsed ?? input.tools.names.some((name) => name === "web_search" || name === "web_fetch");
+  if (webUsed) {
+    const sources = input.tools.webSources ?? [];
+    const cited = (input.text.match(/https?:\/\/[^\s)\]}>]+/gi) ?? []).map((url) => url.replace(/[.,;:!?]+$/g, ""));
+    if (!cited.length || (sources.length > 0 && !cited.some((url) => sources.some((source) => url.startsWith(source))))) {
+      reasons.push(teamMessages.ar.web.citationRequired);
+    }
   }
   const confidence = reasons.length ? "منخفض" : input.tools.names.length > 1 ? "مرتفع" : "متوسط";
   return { ok: reasons.length === 0, confidence, couldNotVerify: reasons.join("؛ ") || "لم أجد شيئاً غير متحقق منه في الفحص المحدد" };
@@ -110,6 +119,20 @@ async function createTeamTools(agent: TeamAgentId, memory: Awaited<ReturnType<ty
       } else if (name === "create_design" && agent === "sami") {
         const design = await createYoussefDesign(stringArg(args, "request", 280), stringArg(args, "title", 180));
         output = JSON.stringify({ ok: true, id: design.id, title: design.title, private: true });
+      } else if (name === "web_search") {
+        const result = await searchWeb(stringArg(args, "query", 2_000), { agent });
+        if (result.ok && result.results.length) {
+          state.webUsed = true;
+          state.webSources = [...new Set([...(state.webSources ?? []), ...result.results.map((item) => item.url)])].slice(0, 12);
+        }
+        output = JSON.stringify(result);
+      } else if (name === "web_fetch") {
+        const result = await fetchWebPage(stringArg(args, "url", 4_000), { agent });
+        if (result.ok && result.url) {
+          state.webUsed = true;
+          state.webSources = [...new Set([...(state.webSources ?? []), result.url])].slice(0, 12);
+        }
+        output = JSON.stringify(result);
       } else {
         output = `الأداة ${name} غير متاحة لهذا الوكيل.`;
       }
@@ -132,7 +155,7 @@ function memorySummary(intent: string, text: string): string {
 export async function runTeamAgentTurn(input: { agent: TeamAgentId; intent: string; system: string; turns: LlmTurn[] }): Promise<TeamLoopResult> {
   const started = Date.now();
   const memory = await loadTeamMemory(input.agent);
-  const state: ToolState = { names: [], outputs: [] };
+  const state: ToolState = { names: [], outputs: [], webUsed: false, webSources: [] };
   const tools = await createTeamTools(input.agent, memory, state);
   const call = async (request: { step: string; system: string; turns: Array<{ role: "user" | "model"; text: string }>; json: boolean; temperature?: number }) => {
     const raw = await callTeamLlm({ agent: `team-loop:${input.agent}:${request.step}`, system: request.system, turns: request.turns.map((turn) => ({ role: turn.role, parts: [{ text: turn.text }] })), json: request.json, temperature: request.temperature });

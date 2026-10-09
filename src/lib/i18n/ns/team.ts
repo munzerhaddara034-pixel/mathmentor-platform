@@ -188,6 +188,14 @@ const en = {
     confidence: "Confidence: {value}.",
     unknown: "Could not verify: {reason}.",
   },
+  web: {
+    disabled: "Web research is disabled by the server setting; no search or page fetch was performed.",
+    rateLimited: "The web-research budget for this agent has been reached; no request was sent.",
+    failed: "Could not reach the web source; no web result is being claimed.",
+    emptyQuery: "The web query was empty after safety scrubbing; no request was sent.",
+    citationRequired: "Web evidence was consulted, but the answer did not cite a source URL.",
+    citationLine: "Sources: {urls}",
+  },
   escalation: {
     created: "Escalated to Agent Hub with id {id}. {detail}",
     failed: "Could not create the Agent Hub escalation: {reason}. The request is not considered complete.",
@@ -383,6 +391,14 @@ const ar: TeamMessages = {
     confidence: "الثقة: {value}.",
     unknown: "ما لم أتمكن من التحقق منه: {reason}.",
   },
+  web: {
+    disabled: "البحث على الويب متوقف بإعداد الخادم؛ لم يُنفّذ أي بحث أو جلب صفحة.",
+    rateLimited: "تم بلوغ ميزانية البحث على الويب لهذا الوكيل؛ لم يُرسل أي طلب.",
+    failed: "تعذّر الوصول إلى المصدر على الويب؛ لا أدّعي وجود نتيجة ويب.",
+    emptyQuery: "أصبح استعلام الويب فارغاً بعد التنظيف الأمني؛ لم يُرسل أي طلب.",
+    citationRequired: "تمت الاستعانة بدليل ويب، لكن الجواب لم يتضمن رابط مصدر.",
+    citationLine: "المصادر: {urls}",
+  },
   escalation: {
     created: "صُعّد الطلب إلى Agent Hub بالمعرّف {id}. {detail}",
     failed: "تعذّر إنشاء التصعيد في Agent Hub: {reason}. لم أعتبر الطلب منجزاً.",
@@ -575,6 +591,14 @@ const fr: TeamMessages = {
     refused: "Je n’ai pas validé une réponse non vérifiée. L’auto-contrôle a échoué : {reason}. Une relecture ou une information supplémentaire est nécessaire.",
     confidence: "Confiance : {value}.",
     unknown: "Impossible de vérifier : {reason}.",
+  },
+  web: {
+    disabled: "La recherche web est désactivée par le serveur ; aucune recherche ni page n’a été récupérée.",
+    rateLimited: "Le budget de recherche web de cet agent est atteint ; aucune requête n’a été envoyée.",
+    failed: "Impossible d’atteindre la source web ; aucun résultat web n’est revendiqué.",
+    emptyQuery: "La requête web était vide après le nettoyage de sécurité ; aucune requête n’a été envoyée.",
+    citationRequired: "Des éléments web ont été consultés, mais la réponse ne cite aucune URL source.",
+    citationLine: "Sources : {urls}",
   },
   escalation: {
     created: "Demande transmise à Agent Hub avec l’identifiant {id}. {detail}",

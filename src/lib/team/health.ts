@@ -8,6 +8,7 @@ import { TEAM_AGENT_IDS, type TeamAgentId } from "./types";
 export const TEAM_MEMORY_LIMIT = 12;
 export const TEAM_NOTES_LIMIT = 3_000;
 export const TEAM_HEALTH_LIMIT = 240;
+export const TEAM_WEB_AUDIT_LIMIT = 240;
 
 export type TeamMemorySummary = {
   at: string;
@@ -37,8 +38,20 @@ export type TeamHealthRecord = {
   createdAt: string;
 };
 
+export type TeamWebAuditRecord = {
+  id: string;
+  agent: TeamAgentId | "unknown";
+  query: string;
+  resultCount: number;
+  durationMs: number;
+  ok: boolean;
+  failureReason?: string;
+  createdAt: string;
+};
+
 export type TeamHealthSnapshot = {
   records: TeamHealthRecord[];
+  webCalls: TeamWebAuditRecord[];
   memory: Record<TeamAgentId, TeamAgentMemory>;
 };
 
@@ -88,6 +101,22 @@ function cleanRecord(value: unknown): TeamHealthRecord | null {
     verified: item.verified === true,
     escalation: item.escalation === true,
     failure: typeof item.failure === "string" ? clean(item.failure, 300) : undefined,
+    createdAt: clean(typeof item.createdAt === "string" ? item.createdAt : new Date(0).toISOString(), 40),
+  };
+}
+
+function cleanWebAudit(value: unknown): TeamWebAuditRecord | null {
+  if (!value || typeof value !== "object") return null;
+  const item = value as Partial<TeamWebAuditRecord>;
+  if ((!TEAM_AGENT_IDS.includes(item.agent as TeamAgentId) && item.agent !== "unknown") || typeof item.query !== "string") return null;
+  return {
+    id: clean(typeof item.id === "string" ? item.id : createId("team-web"), 80),
+    agent: item.agent as TeamAgentId | "unknown",
+    query: clean(item.query, 180),
+    resultCount: Number.isFinite(item.resultCount) ? Math.max(0, Math.min(5, Math.floor(Number(item.resultCount)))) : 0,
+    durationMs: Number.isFinite(item.durationMs) ? Math.max(0, Math.min(900_000, Number(item.durationMs))) : 0,
+    ok: item.ok === true,
+    failureReason: typeof item.failureReason === "string" ? clean(item.failureReason, 180) : undefined,
     createdAt: clean(typeof item.createdAt === "string" ? item.createdAt : new Date(0).toISOString(), 40),
   };
 }
@@ -142,8 +171,27 @@ export async function recordTeamHealth(record: Omit<TeamHealthRecord, "id" | "cr
     failure: record.failure ? clean(record.failure, 300) : undefined,
     createdAt: new Date().toISOString(),
   };
-  await updateJsonFile<{ records: TeamHealthRecord[] }>(TEAM_HEALTH_DOCUMENT, { records: [] }, (current) => ({
+  await updateJsonFile<{ records: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[] }>(TEAM_HEALTH_DOCUMENT, { records: [], webCalls: [] }, (current) => ({
     records: [...(Array.isArray(current.records) ? current.records : []), saved].slice(-TEAM_HEALTH_LIMIT),
+    webCalls: (Array.isArray(current.webCalls) ? current.webCalls.map(cleanWebAudit).filter((item): item is TeamWebAuditRecord => Boolean(item)) : []).slice(-TEAM_WEB_AUDIT_LIMIT),
+  }));
+  return saved;
+}
+
+export async function recordTeamWebAudit(record: Omit<TeamWebAuditRecord, "id" | "createdAt">): Promise<TeamWebAuditRecord> {
+  const saved: TeamWebAuditRecord = {
+    id: createId("team-web"),
+    agent: record.agent,
+    query: clean(record.query, 180),
+    resultCount: Number.isFinite(record.resultCount) ? Math.max(0, Math.min(5, Math.floor(record.resultCount))) : 0,
+    durationMs: Number.isFinite(record.durationMs) ? Math.max(0, Math.min(900_000, record.durationMs)) : 0,
+    ok: record.ok === true,
+    failureReason: record.failureReason ? clean(record.failureReason, 180) : undefined,
+    createdAt: new Date().toISOString(),
+  };
+  await updateJsonFile<{ records: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[] }>(TEAM_HEALTH_DOCUMENT, { records: [], webCalls: [] }, (current) => ({
+    records: (Array.isArray(current.records) ? current.records : []).slice(-TEAM_HEALTH_LIMIT),
+    webCalls: [...(Array.isArray(current.webCalls) ? current.webCalls.map(cleanWebAudit).filter((item): item is TeamWebAuditRecord => Boolean(item)) : []), saved].slice(-TEAM_WEB_AUDIT_LIMIT),
   }));
   return saved;
 }
@@ -169,16 +217,17 @@ export async function escalateTeamAgent(input: {
   return { itemId: staged.item.id, whatsapp: notification.detailAr };
 }
 
-function emptyHealth(): { records: TeamHealthRecord[] } {
-  return { records: [] };
+function emptyHealth(): { records: TeamHealthRecord[]; webCalls: TeamWebAuditRecord[] } {
+  return { records: [], webCalls: [] };
 }
 
 export async function readTeamHealth(): Promise<TeamHealthSnapshot> {
-  const stored = await readJsonFile<{ records?: TeamHealthRecord[] }>(TEAM_HEALTH_DOCUMENT, emptyHealth());
+  const stored = await readJsonFile<{ records?: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[] }>(TEAM_HEALTH_DOCUMENT, emptyHealth());
   const records = (Array.isArray(stored.records) ? stored.records.map(cleanRecord).filter((item): item is TeamHealthRecord => Boolean(item)) : []).slice(-TEAM_HEALTH_LIMIT);
+  const webCalls = (Array.isArray(stored.webCalls) ? stored.webCalls.map(cleanWebAudit).filter((item): item is TeamWebAuditRecord => Boolean(item)) : []).slice(-TEAM_WEB_AUDIT_LIMIT);
   const memory = {} as Record<TeamAgentId, TeamAgentMemory>;
   for (const agent of TEAM_AGENT_IDS) memory[agent] = await loadTeamMemory(agent);
-  return { records, memory };
+  return { records, webCalls, memory };
 }
 
 export function medianDuration(records: TeamHealthRecord[]): number {
