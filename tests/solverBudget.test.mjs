@@ -51,6 +51,14 @@ describe("solver time budget", () => {
     assert.ok(budget.SOLVER_TOTAL_BUDGET_MS >= budget.SOLVER_VERIFY_MIN_MS);
   });
 
+  test("a rescue window is held back so a fast provider can still answer", () => {
+    assert.equal(budget.primaryBudgetMs(55_000, 15_000), 40_000);
+    assert.equal(budget.primaryBudgetMs(20_000, 15_000), 5_000 > budget.SOLVER_MIN_CALL_MS ? 5_000 : budget.SOLVER_MIN_CALL_MS);
+    assert.equal(budget.primaryBudgetMs(10_000, 15_000), budget.SOLVER_MIN_CALL_MS);
+    assert.equal(budget.primaryBudgetMs(40_000, 0), 40_000);
+    assert.ok(budget.SOLVER_RESCUE_RESERVE_MS > 0);
+  });
+
   test("DeepSeek is optional and refuses to run without a key", async () => {
     const previous = process.env.DEEPSEEK_API_KEY;
     delete process.env.DEEPSEEK_API_KEY;

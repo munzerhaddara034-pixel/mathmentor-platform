@@ -16,9 +16,15 @@ function envMs(name: string, fallback: number): number {
 }
 
 /** Total wall-clock budget for one solve request; keeps every answer inside the platform timeout. */
-export const SOLVER_TOTAL_BUDGET_MS = envMs("SOLVER_TOTAL_BUDGET_MS", 50_000);
+export const SOLVER_TOTAL_BUDGET_MS = envMs("SOLVER_TOTAL_BUDGET_MS", 55_000);
 /** Below this, the synchronous verification pass is deferred to the background. */
 export const SOLVER_VERIFY_MIN_MS = envMs("SOLVER_VERIFY_MIN_MS", 18_000);
+/**
+ * Time held back from the primary provider so a slow Gemini answer still leaves room for one fast rescue
+ * call (DeepSeek / OpenAI). Without it the primary provider spends the whole budget and the student gets
+ * the offline demo answer even though a fast provider was available.
+ */
+export const SOLVER_RESCUE_RESERVE_MS = envMs("SOLVER_RESCUE_RESERVE_MS", 15_000);
 /** A provider call needs at least this much time left to be worth starting. */
 export const SOLVER_MIN_CALL_MS = 6_000;
 
@@ -58,6 +64,11 @@ export function clampSolverBudget<T extends SolverBudget>(budget: T, remainingMs
 
 /** True when there is still enough time for the extra verification pass before answering. */
 /** True when a further provider call can still finish inside the deadline. */
+/** Budget handed to the primary provider once the rescue window is held back. */
+export function primaryBudgetMs(remainingMs: number, reserveMs: number = 0): number {
+  return Math.max(SOLVER_MIN_CALL_MS, Math.round(remainingMs) - Math.max(0, Math.round(reserveMs)));
+}
+
 export function canStartCall(remainingMs: number, minimumMs: number = SOLVER_MIN_CALL_MS): boolean {
   return remainingMs >= minimumMs;
 }

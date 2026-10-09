@@ -5,7 +5,7 @@ import { DEMO_AVATAR_VIDEO } from "@/lib/studio/heygenClient";
 import { hasHeyGenKey } from "@/lib/studio/heygen";
 import { newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygenJobs";
 import { attachDemoMedia } from "./assemble";
-import { canStartCall, createDeadline, type SolverDeadline } from "./budget";
+import { canStartCall, createDeadline, SOLVER_RESCUE_RESERVE_MS, type SolverDeadline } from "./budget";
 import { demoSolve, type SolveRequest } from "./demoSolver";
 import { deepseekSolverKey, demoFallback, hasGeminiKey, openaiSolverKey, solveWithDeepSeek, solveWithOpenAI } from "./llm";
 import { solveAndVerify } from "./pipeline";
@@ -67,6 +67,9 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
   const typedIsMath = looksLikeMath(typed);
   // One deadline for the whole request: every provider call is clamped to it (see budget.ts).
   const deadline = createDeadline();
+  // When a fast rescue provider is configured, hold a window open for it (see SOLVER_RESCUE_RESERVE_MS).
+  const rescueConfigured = Boolean(deepseekSolverKey() || openaiSolverKey());
+  const reserveMs = rescueConfigured ? SOLVER_RESCUE_RESERVE_MS : 0;
 
   if (hasGeminiKey() && (typed || input.imageBase64)) {
     try {
@@ -76,7 +79,7 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
         mimeType: input.mimeType,
         curriculum: input.curriculum,
         platformCurriculum: input.platformCurriculum,
-      }, deadline);
+      }, deadline, { reserveMs });
     } catch (error) {
       if (input.imageBase64 && !typedIsMath) {
         return retakeSolution({

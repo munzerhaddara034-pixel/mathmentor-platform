@@ -8,7 +8,7 @@
  */
 import { NEEDS_REVIEW_AR } from "@/lib/agent/persona";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
-import { canStartCall, createDeadline, shouldVerifySynchronously, SOLVER_TOTAL_BUDGET_MS, type SolverDeadline } from "./budget";
+import { canStartCall, createDeadline, primaryBudgetMs, shouldVerifySynchronously, SOLVER_TOTAL_BUDGET_MS, type SolverDeadline } from "./budget";
 import { casFailureSummary, runCasChecks, type CasReport } from "./cas/index";
 import { decideFor, solveWithGemini, type GeminiSolveRequest } from "./llm";
 import type { MathSolution, SolverMeta, SolverVerification } from "./types";
@@ -73,19 +73,22 @@ function applyVerdict(solution: MathSolution, verdict: SolutionVerdict, report: 
 export async function solveAndVerify(
   request: GeminiSolveRequest,
   deadline: SolverDeadline = createDeadline(SOLVER_TOTAL_BUDGET_MS),
+  options: { reserveMs?: number } = {},
 ): Promise<MathSolution> {
   const started = Date.now();
   const decision = decideFor(request);
   const question = `${request.question ?? ""}\n${request.latex ?? ""}`;
-  let solution = await solveWithGemini({ ...request, decision }, { deadlineMs: deadline.remaining() });
+  // The reserve keeps a window open for the fast rescue provider when Gemini runs out of time.
+  const reserve = options.reserveMs ?? 0;
+  let solution = await solveWithGemini({ ...request, decision }, { deadlineMs: primaryBudgetMs(deadline.remaining(), reserve) });
   if (solution.needsRetake || !solution.solverMeta) return solution;
   const meta: SolverMeta = solution.solverMeta;
   let report = cas(solution, question);
 
   // One repair pass whenever the CAS rejects the answer — but only if the request still has room for it.
-  if (report.failed > 0 && canStartCall(deadline.remaining())) {
+  if (report.failed > 0 && canStartCall(primaryBudgetMs(deadline.remaining(), reserve))) {
     try {
-      const repaired = await solveWithGemini({ ...request, decision, feedback: casFailureSummary(report) }, { deadlineMs: deadline.remaining() });
+      const repaired = await solveWithGemini({ ...request, decision, feedback: casFailureSummary(report) }, { deadlineMs: primaryBudgetMs(deadline.remaining(), reserve) });
       const second = cas(repaired, question);
       meta.calls.push(...(repaired.solverMeta?.calls ?? []));
       if (!repaired.needsRetake && second.failed <= report.failed) {

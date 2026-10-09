@@ -20,6 +20,12 @@ export type OwnerWhatsAppFile = {
 
 export type OwnerWhatsAppResult = { ok: boolean; sent: boolean; detailAr: string };
 
+const NOT_CONFIGURED: OwnerWhatsAppResult = {
+  ok: false,
+  sent: false,
+  detailAr: "قناة واتساب غير مهيّأة على الخادم (لا مزوّد ولا توكن) — لم يُرسل شيء إلى واتساب.",
+};
+
 /** The platform's WhatsApp number (the owner). */
 export function ownerWhatsAppNumber(): string {
   return instructorWhatsAppNumber();
@@ -29,64 +35,45 @@ function categoryFor(mimeType: string): "image" | "document" {
   return /^image\/(png|jpe?g|webp|gif)$/i.test(mimeType) ? "image" : "document";
 }
 
+/** One file (chat attachment bytes or a public link) with the caption text. */
+async function sendOwnerFile(to: string, text: string, file: OwnerWhatsAppFile): Promise<OwnerWhatsAppResult> {
+  const mimeType = file.mimeType?.trim() || "application/octet-stream";
+  const filename = file.filename?.trim() || "mathmentor-file";
+  let bytes: Buffer | undefined;
+  if (file.attachmentId) {
+    const stored = await teamRepo().getAttachment(file.attachmentId);
+    if (!stored) return { ok: false, sent: false, detailAr: `لم أجد المرفق ${file.attachmentId} في محادثة الفريق.` };
+    bytes = stored.bytes;
+  }
+  const result = await sendWhatsAppMedia(to, {
+    type: categoryFor(mimeType),
+    ...(bytes ? { bytes } : { link: file.link }),
+    mimeType,
+    filename,
+    caption: text || undefined,
+  });
+  if (result.status === "sent") {
+    return { ok: true, sent: true, detailAr: `أُرسل إلى واتساب رقم المنصة: ${filename}${text ? " مع نص" : ""}.` };
+  }
+  if (result.status === "logged") {
+    return { ok: true, sent: false, detailAr: `سُجّل الإرسال (المزوّد غير مفعّل فعلياً): ${filename}.` };
+  }
+  return { ok: false, sent: false, detailAr: `لم يُرسل الملف (${result.status}): ${result.error ?? "سبب غير معروف"}.` };
+}
+
 /** Sends a text and/or one file to the owner's WhatsApp from the platform number. Never throws. */
 export async function sendOwnerWhatsApp(input: { text: string; file?: OwnerWhatsAppFile }): Promise<OwnerWhatsAppResult> {
-  const to = ownerWhatsAppNumber();
   const text = (input.text ?? "").trim().slice(0, 3500);
   const file = input.file;
-  if (!text && !file?.attachmentId && !file?.link) {
-    return { ok: false, sent: false, detailAr: "لا نص ولا ملف للإرسال." };
-  }
-  if (!whatsappConfigured()) {
-    return {
-      ok: false,
-      sent: false,
-      detailAr: "قناة واتساب غير مهيّأة على الخادم (لا مزوّد ولا توكن) — لم يُرسل شيء إلى واتساب.",
-    };
-  }
+  if (!text && !file?.attachmentId && !file?.link) return { ok: false, sent: false, detailAr: "لا نص ولا ملف للإرسال." };
+  if (!whatsappConfigured()) return NOT_CONFIGURED;
+  const to = ownerWhatsAppNumber();
   try {
-    if (file?.attachmentId || file?.link) {
-      const mimeType = file.mimeType?.trim() || "application/octet-stream";
-      const filename = file.filename?.trim() || "mathmentor-file";
-      let bytes: Buffer | undefined;
-      if (file.attachmentId) {
-        const stored = await teamRepo().getAttachment(file.attachmentId);
-        if (!stored) {
-          return { ok: false, sent: false, detailAr: `لم أجد المرفق ${file.attachmentId} في محادثة الفريق.` };
-        }
-        bytes = stored.bytes;
-      }
-      const result = await sendWhatsAppMedia(to, {
-        type: categoryFor(mimeType),
-        ...(bytes ? { bytes } : { link: file.link }),
-        mimeType,
-        filename,
-        caption: text || undefined,
-      });
-      const delivered = result.status === "sent" || result.status === "logged";
-      return {
-        ok: delivered,
-        sent: result.status === "sent",
-        detailAr:
-          result.status === "sent"
-            ? `أُرسل إلى واتساب رقم المنصة: ${filename}${text ? " مع نص" : ""}.`
-            : result.status === "logged"
-              ? `سُجّل الإرسال (المزوّد غير مفعّل فعلياً): ${filename}.`
-              : `لم يُرسل الملف (${result.status}): ${result.error ?? "سبب غير معروف"}.`,
-      };
-    }
+    if (file?.attachmentId || file?.link) return await sendOwnerFile(to, text, file);
     const message = await sendWhatsApp({ to, body: text, kind: "agent_ops", relatedId: "team-chat" });
-    const delivered = message.status === "sent" || message.status === "logged";
-    return {
-      ok: delivered,
-      sent: message.status === "sent",
-      detailAr:
-        message.status === "sent"
-          ? "أُرسل النص إلى واتساب رقم المنصة."
-          : message.status === "logged"
-            ? "سُجّل النص (المزوّد غير مفعّل فعلياً)."
-            : "لم يُرسل النص إلى واتساب (فشل الإرسال).",
-    };
+    if (message.status === "sent") return { ok: true, sent: true, detailAr: "أُرسل النص إلى واتساب رقم المنصة." };
+    if (message.status === "logged") return { ok: true, sent: false, detailAr: "سُجّل النص (المزوّد غير مفعّل فعلياً)." };
+    return { ok: false, sent: false, detailAr: "لم يُرسل النص إلى واتساب (فشل الإرسال)." };
   } catch (error) {
     return {
       ok: false,
