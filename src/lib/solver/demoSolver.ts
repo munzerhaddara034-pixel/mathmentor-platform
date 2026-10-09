@@ -850,11 +850,161 @@ function genericSolution(question: string, language: LessonLanguage, track: Cert
   });
 }
 
+/** a·x^p as both LaTeX and readable text (fractions written a/b or (a·x^p)/b). */
+function powerTerm(coeff: number, power: number): { latex: string; plain: string } {
+  if (coeff === 0) return { latex: "0", plain: "0" };
+  const sign = coeff < 0 ? "-" : "";
+  const abs = Math.abs(coeff);
+  const latexPower = power === 0 ? "" : power === 1 ? "x" : `x^{${power}}`;
+  const plainPower = power === 0 ? "" : power === 1 ? "x" : `x^${power}`;
+  const den = Number.isInteger(abs) ? 0 : smallDenominator(abs);
+  if (!den) {
+    const latexCoeff = abs === 1 ? (latexPower ? "" : "1") : String(abs);
+    const plainCoeff = abs === 1 ? (plainPower ? "" : "1") : String(abs);
+    return { latex: `${sign}${latexCoeff}${latexPower}`, plain: `${sign}${plainCoeff}${plainPower}` };
+  }
+  const num = Math.round(abs * den);
+  const latex = num === 1 ? `${sign}\\dfrac{${latexPower}}{${den}}` : `${sign}\\dfrac{${num}${latexPower}}{${den}}`;
+  const plain = num === 1 ? `${sign}(${plainPower || "1"})/${den}` : `${sign}${num}${plainPower}/${den}`;
+  return { latex, plain };
+}
+
+function smallDenominator(value: number): number {
+  for (const den of [2, 3, 4, 5, 6, 8, 10, 12]) {
+    if (Math.abs(value * den - Math.round(value * den)) < 1e-9) return den;
+  }
+  return 0;
+}
+
+/** Everything after ∫/\\int, without dx and without the prose around it; null for definite integrals. */
+function extractIntegrand(raw: string): string | null {
+  let text = raw.replace(/\\int/g, "∫");
+  const at = text.indexOf("∫");
+  if (at >= 0) {
+    text = text.slice(at + 1);
+    if (/^\s*[_^]/.test(text)) return null;
+  }
+  text = text.replace(/\\?d\s*x/gi, "");
+  text = text.replace(/[^\dA-Za-z+\-*/^().\s]/g, " ");
+  text = text.replace(/\s+/g, "").replace(/^[.,:=]+|[.,:=]+$/g, "");
+  text = text.replace(/^\(+/, "").replace(/\)+$/, "");
+  return text || null;
+}
+
+/** ∫a·xⁿ dx = a·xⁿ⁺¹/(n+1) and ∫c dx = c·x for a simple polynomial; null when it is not one. */
+function integrateSimplePolynomial(raw: string): { latex: string; plain: string } | null {
+  const body = extractIntegrand(raw);
+  if (!body || /[a-z]{2,}/i.test(body)) return null;
+  const terms = body.match(/[+-]?[^+-]+/g);
+  if (!terms || terms.length === 0 || terms.length > 6) return null;
+  const latexParts: string[] = [];
+  const plainParts: string[] = [];
+  for (const rawTerm of terms) {
+    const term = rawTerm.trim().replace(/^\(+/, "").replace(/\)+$/, "");
+    if (!term) continue;
+    const power = term.match(/^([+-]?)(\d*\.?\d*)\*?x(?:\^(\d+))?$/i);
+    if (power) {
+      const sign = power[1] === "-" ? -1 : 1;
+      const coeff = power[2] === "" ? 1 : Number(power[2]);
+      const n = power[3] === undefined ? 1 : Number(power[3]);
+      if (!Number.isFinite(coeff) || !Number.isFinite(n)) return null;
+      const termOut = powerTerm((sign * coeff) / (n + 1), n + 1);
+      latexParts.push(termOut.latex);
+      plainParts.push(termOut.plain);
+      continue;
+    }
+    const constant = term.match(/^([+-]?\d*\.?\d+)$/);
+    if (constant) {
+      const value = Number(constant[1]);
+      if (!Number.isFinite(value)) return null;
+      const termOut = powerTerm(value, 1);
+      latexParts.push(termOut.latex);
+      plainParts.push(termOut.plain);
+      continue;
+    }
+    return null;
+  }
+  const join = (parts: string[]) => `${parts.join("+").replace(/\+-/g, "-")}+C`;
+  return { latex: join(latexParts), plain: join(plainParts) };
+}
+
+/**
+ * Offline integral answer. It must never be another integral's answer: the old fallback returned
+ * "x^2 + C" for every integral, which is only right for ∫2x dx.
+ */
+function integralSolution(raw: string, language: LessonLanguage, track: CertificateTrack): MathSolution {
+  const integrand = raw.trim() || "\\int f(x)\\,dx";
+  const given = { latex: integrand, aimEn: "Find the antiderivative (+C).", aimAr: "إيجاد الدالة الأصلية (+C)." };
+  const integrated = integrateSimplePolynomial(raw);
+  if (!integrated) {
+    return assembleSolution({
+      question: integrand,
+      summary: "Antiderivative: reverse the power rule, then +C.",
+      finalAnswer: "\\int f(x)\\,dx + C",
+      finalAnswerLatex: "\\int f(x)\\,dx+C",
+      steps: [
+        {
+          title: "Reverse power rule",
+          titleFr: "Primitive de puissance",
+          latex: "\\int x^{n}\\,dx=\\dfrac{x^{n+1}}{n+1}+C",
+          explanationEn: "Split the integrand into terms, apply the power rule to each, then add C.",
+          explanationFr: "Séparez l’intégrande en termes, appliquez la règle de puissance, puis ajoutez C.",
+        },
+        {
+          title: "Differentiate back",
+          titleFr: "Revérifier par dérivation",
+          latex: "\\left(F(x)+C\\right)'=f(x)",
+          explanationEn: "The official check of an antiderivative is differentiation.",
+          explanationFr: "Le contrôle officiel d’une primitive est la dérivation.",
+        },
+      ],
+      topic: "Integrals",
+      topicTag: "integrals",
+      given,
+      track,
+      language,
+      source: "demo",
+    });
+  }
+  const primitiveLatex = integrated.latex.replace("+C", "");
+  const primitivePlain = integrated.plain.replace("+C", "");
+  return assembleSolution({
+    question: integrand,
+    summary: "Antiderivative: reverse the power rule, then +C.",
+    finalAnswer: integrated.plain,
+    finalAnswerLatex: integrated.latex,
+    steps: [
+      {
+        title: "Reverse power rule",
+        titleFr: "Primitive de puissance",
+        latex: "\\int a\\,x^{n}\\,dx=a\\,\\dfrac{x^{n+1}}{n+1}+C",
+        explanationEn: `Power rule with the constant factor: the antiderivative is ${primitivePlain} plus C.`,
+        explanationFr: `Règle de puissance avec facteur constant : la primitive est ${primitivePlain} plus C.`,
+      },
+      {
+        title: "Check by differentiating",
+        titleFr: "Revérifier par dérivation",
+        latex: `\\left(${primitiveLatex}\\right)'`,
+        explanationEn: "Differentiating the antiderivative returns the integrand: that is the official check.",
+        explanationFr: "Dériver la primitive redonne l’intégrande : c’est le contrôle officiel.",
+      },
+    ],
+    topic: "Integrals",
+    topicTag: "integrals",
+    given,
+    track,
+    language,
+    source: "demo",
+  });
+}
+
 export function demoSolve(request: SolveRequest): MathSolution {
   const language: LessonLanguage = request.language === "fr" ? "fr" : request.language === "ar" ? "ar" : "en";
   const track: CertificateTrack = request.track ?? "ls";
   const raw = `${request.latex ?? ""} ${request.question ?? ""}`.trim();
   const n = normalize(raw).toLowerCase();
+
+  if (/∫|\\int|integral|تكامل|intégr/i.test(n)) return integralSolution(raw, language, track);
 
   if (isGarbledPrompt(raw)) {
     return retakeSolution({
@@ -915,29 +1065,6 @@ export function demoSolve(request: SolveRequest): MathSolution {
     });
   }
 
-  if (/integral|\\int|تكامل|intégr/.test(n)) {
-    return assembleSolution({
-      question: raw || "∫ 2x dx",
-      summary: "Antiderivative: reverse the power rule, then +C.",
-      finalAnswer: "x^2 + C",
-      finalAnswerLatex: "\\int 2x\\,dx=x^{2}+C",
-      steps: [
-        { title: "Reverse power rule", titleFr: " Primitive de puissance", latex: "\\int x^{n}\\,dx=\\dfrac{x^{n+1}}{n+1}+C", explanationEn: "For n=1, ∫x dx = x^2/2 + C, so ∫2x dx = x^2+C.", explanationFr: "Pour n=1, ∫x dx = x^2/2 + C." },
-        { title: "Constant factor", titleFr: "Facteur constant", latex: "2\\cdot\\dfrac{x^{2}}{2}=x^{2}", explanationEn: "Constants factor out of the integral.", explanationFr: "Les constantes sortent de l’intégrale." },
-        { title: "Differentiate back", titleFr: "Revérifier par dérivation", latex: "(x^{2}+C)'=2x", explanationEn: "The official check of an antiderivative is differentiation.", explanationFr: "Le contrôle officiel d’une primitive est la dérivation." },
-      ],
-      topic: "Integrals",
-      topicTag: "integrals",
-      given: {
-        latex: "\\int 2x\\,dx",
-        aimEn: "Find the antiderivative (+C).",
-        aimAr: "إيجاد الدالة الأصلية (+C).",
-      },
-      track,
-      language,
-      source: "demo",
-    });
-  }
 
   return genericSolution(raw || "Show a complete Lebanese-curriculum solution.", language, track);
 }

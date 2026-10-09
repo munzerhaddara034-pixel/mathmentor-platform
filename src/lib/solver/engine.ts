@@ -6,6 +6,7 @@ import { hasHeyGenKey } from "@/lib/studio/heygen";
 import { newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygenJobs";
 import { attachDemoMedia } from "./assemble";
 import { canStartCall, createDeadline, SOLVER_RESCUE_RESERVE_MS, type SolverDeadline } from "./budget";
+import { recordOpsError, scrubErrorText } from "@/lib/ops/errorLog";
 import { demoSolve, type SolveRequest } from "./demoSolver";
 import { deepseekSolverKey, demoFallback, hasGeminiKey, openaiSolverKey, solveWithDeepSeek, solveWithOpenAI } from "./llm";
 import { solveAndVerify } from "./pipeline";
@@ -90,9 +91,12 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
         });
       }
       console.warn("[mathmentor] Gemini solve failed:", error instanceof Error ? error.message : error);
-      const rescued = await solveWithFastProvider(request, typedIsMath, Boolean(input.imageBase64), deadline);
+      const rescueFailures: string[] = [];
+      const rescued = await solveWithFastProvider(request, typedIsMath, Boolean(input.imageBase64), deadline, rescueFailures);
       if (rescued) return rescued;
-      return demoFallback(request, "يحتاج مراجعة — the AI tutor is busy right now; this is a basic offline answer. Please try again in a minute.");
+      const reason = rescueFailures.join(" | ").slice(0, 180);
+      const base = "يحتاج مراجعة — the AI tutor is busy right now; this is a basic offline answer. Please try again in a minute.";
+      return demoFallback(request, reason ? `${base} [${reason}]` : base);
     }
   }
 
@@ -209,21 +213,32 @@ async function solveWithFastProvider(
   typedIsMath: boolean,
   hasImage: boolean,
   deadline: SolverDeadline,
+  failures: string[] = [],
 ): Promise<MathSolution | null> {
   if (!typedIsMath || hasImage || !canStartCall(deadline.remaining())) return null;
   if (deepseekSolverKey()) {
     try {
       return await solveWithDeepSeek(request, { deadlineMs: deadline.remaining() });
     } catch (error) {
-      console.warn("[mathmentor] DeepSeek solve failed:", error instanceof Error ? error.message : error);
+      const reason = scrubErrorText(error instanceof Error ? error.message : String(error)).slice(0, 160);
+      failures.push(`deepseek: ${reason}`);
+      console.warn("[mathmentor] DeepSeek solve failed:", reason);
     }
   }
   if (openaiSolverKey() && canStartCall(deadline.remaining())) {
     try {
       return await solveWithOpenAI(request, { deadlineMs: deadline.remaining() });
     } catch (error) {
-      console.warn("[mathmentor] OpenAI solve failed:", error instanceof Error ? error.message : error);
+      const reason = scrubErrorText(error instanceof Error ? error.message : String(error)).slice(0, 160);
+      failures.push(`openai: ${reason}`);
+      console.warn("[mathmentor] OpenAI solve failed:", reason);
     }
+  }
+  if (failures.length > 0) {
+    await recordOpsError({
+      source: "solver.rescue",
+      message: `every rescue provider failed: ${failures.join(" | ")}`,
+    }).catch(() => undefined);
   }
   return null;
 }
