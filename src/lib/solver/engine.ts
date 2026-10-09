@@ -8,7 +8,7 @@ import { attachDemoMedia } from "./assemble";
 import { canStartCall, createDeadline, SOLVER_RESCUE_RESERVE_MS, type SolverDeadline } from "./budget";
 import { recordOpsError, scrubErrorText } from "@/lib/ops/errorLog";
 import { demoSolve, type SolveRequest } from "./demoSolver";
-import { deepseekSolverKey, demoFallback, hasGeminiKey, openaiSolverKey, solveWithDeepSeek, solveWithOpenAI } from "./llm";
+import { deepseekConfigIssue, deepseekSolverKey, demoFallback, hasGeminiKey, openaiSolverKey, solveWithDeepSeek, solveWithOpenAI } from "./llm";
 import { solveAndVerify } from "./pipeline";
 import { looksLikeMath, retakeSolution } from "./retake";
 import { saveMathQuery } from "./store";
@@ -69,6 +69,9 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
   // One deadline for the whole request: every provider call is clamped to it (see budget.ts).
   const deadline = createDeadline();
   // When a fast rescue provider is configured, hold a window open for it (see SOLVER_RESCUE_RESERVE_MS).
+  const configIssues: string[] = [];
+  const deepseekIssue = deepseekConfigIssue();
+  if (deepseekIssue) configIssues.push(deepseekIssue);
   const rescueConfigured = Boolean(deepseekSolverKey() || openaiSolverKey());
   const reserveMs = rescueConfigured ? SOLVER_RESCUE_RESERVE_MS : 0;
 
@@ -91,7 +94,7 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
         });
       }
       console.warn("[mathmentor] Gemini solve failed:", error instanceof Error ? error.message : error);
-      const rescueFailures: string[] = [];
+      const rescueFailures: string[] = [...configIssues];
       const rescued = await solveWithFastProvider(request, typedIsMath, Boolean(input.imageBase64), deadline, rescueFailures);
       if (rescued) return rescued;
       const reason = rescueFailures.join(" | ").slice(0, 180);
@@ -237,7 +240,7 @@ async function solveWithFastProvider(
   if (failures.length > 0) {
     await recordOpsError({
       source: "solver.rescue",
-      message: `every rescue provider failed: ${failures.join(" | ")}`,
+      message: `solver rescue unavailable: ${failures.join(" | ")}`,
     }).catch(() => undefined);
   }
   return null;

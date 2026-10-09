@@ -328,8 +328,23 @@ export async function solveWithOpenAI(request: SolveRequest, options: { deadline
 }
 
 /** DeepSeek key (OpenAI-compatible endpoint). Empty when the provider is not configured. */
+const PROVIDER_KEY_SHAPE = /^[A-Za-z0-9_\-]{20,}$/;
+
+/**
+ * A key that is present but unusable (placeholder text, quotes, spaces, non-ASCII) must never be used:
+ * it would fail anyway AND it would shorten Gemini's budget by the rescue reserve.
+ */
+export function deepseekConfigIssue(): string | null {
+  const raw = process.env.DEEPSEEK_API_KEY?.trim() || "";
+  if (!raw) return null;
+  return PROVIDER_KEY_SHAPE.test(raw)
+    ? null
+    : "deepseek: DEEPSEEK_API_KEY is set but unusable — paste only the sk-… key, without quotes, spaces or placeholder text";
+}
+
 export function deepseekSolverKey(): string {
-  return process.env.DEEPSEEK_API_KEY?.trim() || "";
+  const raw = process.env.DEEPSEEK_API_KEY?.trim() || "";
+  return deepseekConfigIssue() ? "" : raw;
 }
 
 const DEEPSEEK_TIMEOUT_MS = 45_000;

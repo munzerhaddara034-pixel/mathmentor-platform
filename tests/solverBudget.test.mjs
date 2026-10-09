@@ -51,6 +51,19 @@ describe("solver time budget", () => {
     assert.ok(budget.SOLVER_TOTAL_BUDGET_MS >= budget.SOLVER_VERIFY_MIN_MS);
   });
 
+  test("an unusable DeepSeek key is refused instead of shortening Gemini's budget", async () => {
+    const llm = await import("../src/lib/solver/llm.ts");
+    const saved = process.env.DEEPSEEK_API_KEY;
+    process.env.DEEPSEEK_API_KEY = "ضع_مفتاح_DeepSeek_هنا";
+    assert.equal(llm.deepseekSolverKey(), "");
+    assert.match(String(llm.deepseekConfigIssue()), /unusable/);
+    process.env.DEEPSEEK_API_KEY = "unit-test-deepseek-key-0001";
+    assert.equal(llm.deepseekSolverKey().length > 0, true);
+    assert.equal(llm.deepseekConfigIssue(), null);
+    if (saved === undefined) delete process.env.DEEPSEEK_API_KEY;
+    else process.env.DEEPSEEK_API_KEY = saved;
+  });
+
   test("a rescue window is held back so a fast provider can still answer", () => {
     assert.equal(budget.primaryBudgetMs(55_000, 15_000), 40_000);
     assert.equal(budget.primaryBudgetMs(20_000, 15_000), 5_000 > budget.SOLVER_MIN_CALL_MS ? 5_000 : budget.SOLVER_MIN_CALL_MS);
