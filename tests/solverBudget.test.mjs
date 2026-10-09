@@ -51,6 +51,27 @@ describe("solver time budget", () => {
     assert.ok(budget.SOLVER_TOTAL_BUDGET_MS >= budget.SOLVER_VERIFY_MIN_MS);
   });
 
+  test("speed knobs lower thinking and cap output without raising the tier cap", async () => {
+    const llm = await import("../src/lib/solver/llm.ts");
+    const decision = { level: "secondary", curriculum: "lebanese", proof: false, style: "lebanese" };
+    const saved = { thinking: process.env.SOLVER_THINKING, tokens: process.env.SOLVER_MAX_OUTPUT_TOKENS };
+    delete process.env.SOLVER_THINKING;
+    delete process.env.SOLVER_MAX_OUTPUT_TOKENS;
+    const base = llm.budgetFor(decision, "strong");
+    process.env.SOLVER_THINKING = "low";
+    process.env.SOLVER_MAX_OUTPUT_TOKENS = "4096";
+    const tuned = llm.budgetFor(decision, "strong");
+    assert.equal(base.thinking, "medium");
+    assert.equal(tuned.thinking, "low");
+    assert.equal(tuned.maxOutputTokens, 4096);
+    assert.equal(tuned.maxOutputTokens <= base.maxOutputTokens, true);
+    const savedTokens = process.env.SOLVER_MAX_OUTPUT_TOKENS;
+    process.env.SOLVER_MAX_OUTPUT_TOKENS = "999999";
+    assert.equal(llm.budgetFor(decision, "strong").maxOutputTokens <= base.maxOutputTokens, true);
+    if (saved.thinking === undefined) delete process.env.SOLVER_THINKING; else process.env.SOLVER_THINKING = saved.thinking;
+    if (savedTokens === undefined) delete process.env.SOLVER_MAX_OUTPUT_TOKENS; else process.env.SOLVER_MAX_OUTPUT_TOKENS = savedTokens;
+  });
+
   test("the rescue path forces the fast model tier on the free Gemini key", async () => {
     const seen = [];
     const originalFetch = globalThis.fetch;

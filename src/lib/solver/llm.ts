@@ -222,7 +222,7 @@ export type GeminiSolveRequest = SolveRequest & {
 type TierBudget = { thinking: "low" | "medium" | "high"; maxOutputTokens: number; deadlineMs: number; callTimeoutMs: number };
 
 /** Token caps and time budgets per level. Middle school targets < 15 s. */
-function budgetFor(decision: CurriculumDecision, tier: ModelTier): TierBudget {
+function baseBudgetFor(decision: CurriculumDecision, tier: ModelTier): TierBudget {
   if (tier === "fast") return { thinking: "low", maxOutputTokens: 8192, deadlineMs: 30_000, callTimeoutMs: 25_000 };
   if (decision.level === "university") return { thinking: "high", maxOutputTokens: 20_480, deadlineMs: 180_000, callTimeoutMs: 100_000 };
   return { thinking: "medium", maxOutputTokens: 16_384, deadlineMs: 120_000, callTimeoutMs: 90_000 };
@@ -244,6 +244,25 @@ export function decideFor(request: GeminiSolveRequest): CurriculumDecision {
 
 export function tierFor(decision: CurriculumDecision): ModelTier {
   return tierForLevel(decision.level, { satAct: decision.curriculum === "sat_act" && !decision.proof });
+}
+
+/**
+ * Speed knobs for the free tier, where a 6k-token answer with medium reasoning costs ~20s:
+ * SOLVER_THINKING=low|medium|high and SOLVER_MAX_OUTPUT_TOKENS=n (never raises the tier's own cap).
+ */
+function applySpeedOverrides(budget: TierBudget): TierBudget {
+  const thinking = process.env.SOLVER_THINKING?.trim().toLowerCase();
+  const allowed = thinking === "low" || thinking === "medium" || thinking === "high";
+  const capped = Number(process.env.SOLVER_MAX_OUTPUT_TOKENS);
+  return {
+    ...budget,
+    thinking: allowed ? (thinking as TierBudget["thinking"]) : budget.thinking,
+    maxOutputTokens: Number.isFinite(capped) && capped >= 2048 ? Math.min(budget.maxOutputTokens, capped) : budget.maxOutputTokens,
+  };
+}
+
+export function budgetFor(decision: CurriculumDecision, tier: ModelTier): TierBudget {
+  return applySpeedOverrides(baseBudgetFor(decision, tier));
 }
 
 export async function solveWithGemini(
