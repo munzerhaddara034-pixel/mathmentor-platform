@@ -10,8 +10,9 @@ import { hamzaNotConfiguredTextAr, hamzaReadiness } from "@/lib/hamza/readiness"
 import { enqueueHamzaTask } from "@/lib/hamza/tasks/enqueue";
 import { taskDeps } from "@/lib/hamza/tasks/deps";
 import { toRouterTurns } from "@/lib/hamza/tasks/turns";
+import { runTeamAgentTurn } from "./agentLoop";
 import { looksLikeApprovalText, namedBranch } from "./developer";
-import { TeamLlmUnavailableError, callTeamLlm, parseJsonObject, stringField, type LlmPart, type LlmTurn } from "./gemini";
+import { TeamLlmUnavailableError, parseJsonObject, stringField, type LlmPart, type LlmTurn } from "./gemini";
 import { FORBIDDEN_BRANCHES, isProtectedBranch, isValidBranchName, teamGithubConfig } from "./github";
 import { generateImage, imageProviderAvailable } from "./images";
 import { applyMohamedActions } from "./mohamedActions";
@@ -153,14 +154,17 @@ type AgentRun = { message: TeamMessage; proposal?: TeamProposal };
 async function runMohamed(turns: LlmTurn[], ctx: string, channel: TeamChannelId, replyToId: string, requestText: string): Promise<AgentRun> {
   const pending = await pendingProposals(channel);
   const system = [MOHAMED_SYSTEM_PROMPT_AR, ctx, await mohamedDataContext(pending), MOHAMED_ACTIONS_PROTOCOL_AR].join("\n\n");
-  const raw = await callTeamLlm({ agent: "mohamed", system, turns, temperature: 0.3 });
-  const { text, recorded } = await applyMohamedActions(raw, requestText);
+  const loop = await runTeamAgentTurn({ agent: "mohamed", intent: requestText, system, turns });
+  const actionResult = loop.tools.some((tool) => ["secretary_actions", "send_owner_whatsapp", "explain_video"].includes(tool))
+    ? { text: loop.text, recorded: [] }
+    : await applyMohamedActions(loop.text, requestText);
+  const { text, recorded } = actionResult;
   const suffix = recorded.length ? `\n\n✅ سُجّل في جدول السكرتير (Agent Hub):\n${recorded.map((line) => `- ${line}`).join("\n")}` : "";
   const quarter = baremeQuarterIssues(text);
   const notice = quarter.length
     ? `⚠️ يحتاج مراجعة: علامات ليست من مضاعفات 0.25 في الـ Barème (${quarter.join("، ")}).`
     : undefined;
-  return { message: agentMessage(channel, "mohamed", `${text}${suffix}`, { replyToId, notice }) };
+  return { message: agentMessage(channel, "mohamed", `${text}${suffix}`, { replyToId, notice: notice ?? loop.notice }) };
 }
 
 const SAMI_PROTOCOL = `## بروتوكول الرد (تقني — مضاف من المنصة)
@@ -186,16 +190,17 @@ async function runSami(
     SAMI_PROTOCOL,
     YOUSSEF_ACTIONS_PROTOCOL_AR,
   ].join("\n\n");
-  const raw = await callTeamLlm({ agent: "sami", system, turns, json: true, temperature: 0.6 });
+  const loop = await runTeamAgentTurn({ agent: "sami", intent: requestText, system, turns });
+  const raw = loop.text;
   const parsed = parseJsonObject(raw);
-  const actionResult = await applyYoussefActions(raw, requestText);
+  const actionResult = loop.tools.includes("create_design") ? { text: raw, recorded: [] } : await applyYoussefActions(raw, requestText);
   const reply = actionResult.text || stringField(parsed, "reply") || raw;
   const imagePrompt = stringField(parsed, "imagePrompt").trim();
   const wantsImage = parsed?.generateImage === true && imagePrompt.length > 0;
   const actionSuffix = actionResult.recorded.length
     ? `\n\n✅ ${actionResult.recorded.map((line) => `- ${line}`).join("\n")}`
     : "";
-  const message = agentMessage(channel, "sami", `${reply}${actionSuffix}`, { replyToId, imagePrompt: imagePrompt || undefined, ...extra });
+  const message = agentMessage(channel, "sami", `${reply}${actionSuffix}`, { replyToId, imagePrompt: imagePrompt || undefined, notice: loop.notice, ...extra });
   if (wantsImage && provider) {
     try {
       const image = await generateImage(imagePrompt);
@@ -216,7 +221,7 @@ async function runSami(
     }
   } else if (wantsImage) {
     message.text = withoutPreviewClaims(message.text);
-    message.notice = "لا يوجد مفتاح توليد صور على الخادم — استعمل الـ prompt أعلاه في أداة التصميم.";
+    message.notice = "توليد الصور غير مهيّأ على الخادم — لم تُنتَج أي معاينة؛ استعمل الـ prompt أعلاه في أداة التصميم.";
   }
   return { message };
 }
@@ -228,8 +233,9 @@ async function runYasmine(turns: LlmTurn[], ctx: string, channel: TeamChannelId,
     ctx,
     "- سياق مالي إضافي: التكاليف الثابتة المعروفة للمنصة هي استضافة Render، ومفاتيح الذكاء الاصطناعي، وقناة واتساب، والنطاق والبريد. أي رقم إيراد فعلي يُقرأ من بيانات المنصة أو من الأستاذ منذر.",
   ].join("\n\n");
-  const raw = await callTeamLlm({ agent: "finance", system, turns, temperature: 0.3 });
-  return { message: agentMessage(channel, "finance", raw, { replyToId, ...extra }) };
+  const intent = turns.at(-1)?.parts.map((part) => ("text" in part ? part.text : "")).join(" ") ?? "طلب مالي";
+  const loop = await runTeamAgentTurn({ agent: "finance", intent, system, turns });
+  return { message: agentMessage(channel, "finance", loop.text, { replyToId, notice: loop.notice, ...extra }) };
 }
 
 async function pendingProposals(channel?: TeamChannelId): Promise<TeamProposal[]> {
@@ -325,7 +331,7 @@ function llmFailureMessage(channel: TeamChannelId, agent: TeamAgentId, human: Te
   return systemMessage(
     channel,
     missingKey
-      ? `تعذّر تشغيل ${TEAM_AGENT_NAMES_AR[agent]}: مفتاح GEMINI_API_KEY غير معرّف على الخادم.`
+      ? `تعذّر تشغيل ${TEAM_AGENT_NAMES_AR[agent]}: Gemini غير مهيّأ لأن مفتاح GEMINI_API_KEY غير موجود على الخادم.`
       : `تعذّر الحصول على ردّ ${TEAM_AGENT_NAMES_AR[agent]} الآن. أعد المحاولة بعد قليل.`,
     { replyToId: human.id, notice: error instanceof Error ? error.message.slice(0, 160) : undefined },
   );

@@ -83,6 +83,11 @@ export async function runAgentLoop(deps: AgentDeps, limits: AgentLimits, input: 
     const action = parseAgentAction(result.json);
     const meta = { model: result.model, usd: result.usd };
     if (action.action === "reply") {
+      if (input.requireToolCall && state.toolCalls === 0) {
+        state.turns.push({ role: "user", text: "[platform] لا يمكن إنهاء دور فريق قبل استعمال أداة واحدة على الأقل. استعمل أداة قراءة/ذاكرة/إجراء ثم أجب." });
+        await record(deps, state, "invalid", "A team turn must use at least one tool before replying.", meta);
+        continue;
+      }
       await record(deps, state, "reply", action.replyAr, meta);
       return { ...common(state), kind: "reply", text: action.replyAr || "…" };
     }

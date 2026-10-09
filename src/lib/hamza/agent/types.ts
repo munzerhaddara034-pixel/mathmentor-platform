@@ -24,7 +24,14 @@ export type AgentDeps = {
 
 export type AgentLimits = { maxSteps: number; maxToolCalls: number; timeoutMs: number; maxPatchRounds: number; taskCapUsd: number; monthCapUsd: number };
 
-export type AgentInput = { system: string; turns: RouterTurn[]; resume?: AgentCheckpoint; estimateUsd?: number };
+export type AgentInput = {
+  system: string;
+  turns: RouterTurn[];
+  resume?: AgentCheckpoint;
+  estimateUsd?: number;
+  /** Team turns must inspect memory/repository/action state before a final answer. */
+  requireToolCall?: boolean;
+};
 
 export type ProposalDraft = {
   files: TeamProposalFile[];

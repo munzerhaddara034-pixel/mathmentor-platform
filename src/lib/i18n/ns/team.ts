@@ -183,6 +183,15 @@ const en = {
     videoFailed: "Explanation video job {id} could not be started; no video was produced.",
     designSaved: "Youssef saved the internal design {id}; open /admin/designs to review it.",
   },
+  verification: {
+    refused: "I did not approve an unverified answer. Self-check failed: {reason}. I need review or more information before presenting a result.",
+    confidence: "Confidence: {value}.",
+    unknown: "Could not verify: {reason}.",
+  },
+  escalation: {
+    created: "Escalated to Agent Hub with id {id}. {detail}",
+    failed: "Could not create the Agent Hub escalation: {reason}. The request is not considered complete.",
+  },
   diffNew: "new",
 } as const;
 
@@ -369,6 +378,15 @@ const ar: TeamMessages = {
     videoFailed: "تعذّر بدء مهمة فيديو الشرح {id}؛ لم يُنتَج أي فيديو.",
     designSaved: "حفظ يوسف التصميم الداخلي {id}؛ افتحه للمراجعة من /admin/designs.",
   },
+  verification: {
+    refused: "لم أعتمد جواباً غير متحقق منه. فشل فحص التحقق الذاتي: {reason}. سأحتاج إلى مراجعة أو معلومة إضافية قبل أن أقدّم نتيجة.",
+    confidence: "الثقة: {value}.",
+    unknown: "ما لم أتمكن من التحقق منه: {reason}.",
+  },
+  escalation: {
+    created: "صُعّد الطلب إلى Agent Hub بالمعرّف {id}. {detail}",
+    failed: "تعذّر إنشاء التصعيد في Agent Hub: {reason}. لم أعتبر الطلب منجزاً.",
+  },
   diffNew: "جديد",
 };
 
@@ -552,6 +570,15 @@ const fr: TeamMessages = {
     videoNoQuestion: "Envoyez l’énoncé complet pour préparer la vidéo d’explication.",
     videoFailed: "La tâche vidéo d’explication {id} n’a pas démarré ; aucune vidéo n’a été produite.",
     designSaved: "Youssef a enregistré le design interne {id} ; ouvrez /admin/designs pour le relire.",
+  },
+  verification: {
+    refused: "Je n’ai pas validé une réponse non vérifiée. L’auto-contrôle a échoué : {reason}. Une relecture ou une information supplémentaire est nécessaire.",
+    confidence: "Confiance : {value}.",
+    unknown: "Impossible de vérifier : {reason}.",
+  },
+  escalation: {
+    created: "Demande transmise à Agent Hub avec l’identifiant {id}. {detail}",
+    failed: "Impossible de créer l’escalade Agent Hub : {reason}. La demande n’est pas considérée comme terminée.",
   },
   diffNew: "nouveau",
 };
