@@ -51,6 +51,32 @@ describe("solver time budget", () => {
     assert.ok(budget.SOLVER_TOTAL_BUDGET_MS >= budget.SOLVER_VERIFY_MIN_MS);
   });
 
+  test("the rescue path forces the fast model tier on the free Gemini key", async () => {
+    const seen = [];
+    const originalFetch = globalThis.fetch;
+    const saved = { key: process.env.GEMINI_API_KEY, strong: process.env.GEMINI_STRONG_MODELS, fast: process.env.GEMINI_FAST_MODELS };
+    process.env.GEMINI_API_KEY = "unit-test-gemini-key-0001";
+    process.env.GEMINI_STRONG_MODELS = "gemini-pro-latest";
+    process.env.GEMINI_FAST_MODELS = "gemini-flash-latest";
+    globalThis.fetch = async (url) => {
+      seen.push(String(url));
+      return new Response("{}", { status: 500 });
+    };
+    try {
+      const llm = await import("../src/lib/solver/llm.ts");
+      await llm
+        .solveWithGemini({ question: "حل المعادلة x^2-5x+6=0", language: "ar" }, { deadlineMs: 20000, tierOverride: "fast" })
+        .catch(() => undefined);
+      assert.equal(seen.some((u) => u.includes("gemini-flash-latest")), true);
+      assert.equal(seen.some((u) => u.includes("gemini-pro-latest")), false);
+    } finally {
+      globalThis.fetch = originalFetch;
+      if (saved.key === undefined) delete process.env.GEMINI_API_KEY; else process.env.GEMINI_API_KEY = saved.key;
+      if (saved.strong === undefined) delete process.env.GEMINI_STRONG_MODELS; else process.env.GEMINI_STRONG_MODELS = saved.strong;
+      if (saved.fast === undefined) delete process.env.GEMINI_FAST_MODELS; else process.env.GEMINI_FAST_MODELS = saved.fast;
+    }
+  });
+
   test("an unusable DeepSeek key is refused instead of shortening Gemini's budget", async () => {
     const llm = await import("../src/lib/solver/llm.ts");
     const saved = process.env.DEEPSEEK_API_KEY;

@@ -8,7 +8,7 @@ import { attachDemoMedia } from "./assemble";
 import { canStartCall, createDeadline, SOLVER_RESCUE_RESERVE_MS, type SolverDeadline } from "./budget";
 import { recordOpsError, scrubErrorText } from "@/lib/ops/errorLog";
 import { demoSolve, type SolveRequest } from "./demoSolver";
-import { deepseekConfigIssue, deepseekSolverKey, demoFallback, hasGeminiKey, openaiSolverKey, solveWithDeepSeek, solveWithOpenAI } from "./llm";
+import { deepseekConfigIssue, deepseekSolverKey, demoFallback, hasGeminiKey, openaiSolverKey, solveWithDeepSeek, solveWithGemini, solveWithOpenAI } from "./llm";
 import { solveAndVerify } from "./pipeline";
 import { looksLikeMath, retakeSolution } from "./retake";
 import { saveMathQuery } from "./store";
@@ -72,7 +72,8 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
   const configIssues: string[] = [];
   const deepseekIssue = deepseekConfigIssue();
   if (deepseekIssue) configIssues.push(deepseekIssue);
-  const rescueConfigured = Boolean(deepseekSolverKey() || openaiSolverKey());
+  // A rescue window is held whenever any rescue can answer — including the free Gemini fast tier.
+  const rescueConfigured = Boolean(deepseekSolverKey() || openaiSolverKey() || hasGeminiKey());
   const reserveMs = rescueConfigured ? SOLVER_RESCUE_RESERVE_MS : 0;
 
   if (hasGeminiKey() && (typed || input.imageBase64)) {
@@ -219,6 +220,17 @@ async function solveWithFastProvider(
   failures: string[] = [],
 ): Promise<MathSolution | null> {
   if (!typedIsMath || hasImage || !canStartCall(deadline.remaining())) return null;
+  // Free rescue first: the same Gemini key on the fast tier — no paid provider needed, and it stays
+  // high quality, so a slow quota-limited tier never turns into a dead request.
+  if (hasGeminiKey()) {
+    try {
+      return await solveWithGemini(request, { deadlineMs: deadline.remaining(), tierOverride: "fast" });
+    } catch (error) {
+      const reason = scrubErrorText(error instanceof Error ? error.message : String(error)).slice(0, 160);
+      failures.push(`gemini-fast: ${reason}`);
+      console.warn("[mathmentor] Gemini fast rescue failed:", reason);
+    }
+  }
   if (deepseekSolverKey()) {
     try {
       return await solveWithDeepSeek(request, { deadlineMs: deadline.remaining() });

@@ -246,10 +246,14 @@ export function tierFor(decision: CurriculumDecision): ModelTier {
   return tierForLevel(decision.level, { satAct: decision.curriculum === "sat_act" && !decision.proof });
 }
 
-export async function solveWithGemini(request: GeminiSolveRequest, options: { deadlineMs?: number } = {}): Promise<MathSolution> {
+export async function solveWithGemini(
+  request: GeminiSolveRequest,
+  options: { deadlineMs?: number; tierOverride?: ModelTier } = {},
+): Promise<MathSolution> {
   const started = Date.now();
   const decision = decideFor(request);
-  const tier = tierFor(decision);
+  // The rescue path forces the fast tier on the same free key: the question level (and prompt) stay intact.
+  const tier = options.tierOverride ?? tierFor(decision);
   // The tier budget is the ceiling, never the promise: it is clamped to what the request has left.
   const budget = clampSolverBudget(budgetFor(decision, tier), options.deadlineMs ?? SOLVER_TOTAL_BUDGET_MS);
   const language: LessonLanguage = request.language ?? "en";
