@@ -9,9 +9,12 @@ export const MAX_AGENT_REPLIES_PER_HUMAN = 3;
 
 const MENTION_RES: Record<TeamAgentId, RegExp> = {
   mohamed: /@\s?(?:محمد|mohamed|mohammad|muhammad)/i,
-  sami: /@\s?(?:سامي|sami)/i,
+  /** «يوسف» is the web designer's display name; the internal id stays `sami` (@سامي is kept as an alias). */
+  sami: /@\s?(?:يوسف|youssef|yousef|سامي|sami)/i,
   /** «حمزة» is the display name; @المبرمج / @المطوّر / @developer stay as aliases. */
   developer: /@\s?(?:حمزة|حمزه|hamza|المطوّر|المطور|المبرمج|وكيل المطوّر|developer|dev)/i,
+  /** «ياسمين» — المديرة المالية. */
+  finance: /@\s?(?:ياسمين|yasmin|yasmine)/i,
 };
 
 const DESIGN_RE =
@@ -20,10 +23,12 @@ const DESIGN_RE =
 const CODE_RE =
   /(كود|برمج|diff|commit|كوميت|push|build|tsc|خطأ بناء|bug|باغ|route\.ts|\.tsx?\b|component|مكوّن|مكون|endpoint|github|branch|deploy|صفحة\s+(?:تسجيل|جديدة|دفع|حجز)|(?<![\u0600-\u06FF])(?:ال)?(?:زر|زرار)(?![\u0600-\u06FF])|button|typescript|next\.js)/i;
 
+const FINANCE_RE =
+  /(ميزانية|ميزانيات|إيرادات|ايرادات|إيراد|تكاليف|تكلفة|أرباح|ارباح|ربح|هامش|ضرائب|ضريبة|رواتب|راتب|فاتورة|فواتير|تسعير|سعر|أسعار|اسعار|اشتراك|اشتراكات|مدفوعات|دفع|تدفق نقدي|سيولة|نقطة التعادل|عائد الاستثمار|مصاريف|budget|revenue|profit|pricing|invoice|salary|payroll|cost|margin|cash ?flow|break.?even|roi)/i;
 const GENERAL_RE =
   /(موعد|اجتماع|تذكير|ذكّرني|ذكرني|موجز|امتحان|نموذج امتحان|نموذج|رياضيات|دالة|معادلة|احتمال|تمرين|barème|bareme|brevet|بريفيه|توظيف|مقابلة|مرشح|أستاذ|HR|خطة|إطلاق|اطلاق|دورة|\\\(|\\frac|\\sin|\\lim)/i;
 
-export type Topic = "design" | "code" | "general";
+export type Topic = "design" | "code" | "finance" | "general";
 
 export function detectMentions(text: string): TeamAgentId[] {
   const found: Array<{ agent: TeamAgentId; index: number }> = [];
@@ -38,6 +43,7 @@ export function detectTopics(text: string): Topic[] {
   const topics: Topic[] = [];
   if (DESIGN_RE.test(text)) topics.push("design");
   if (CODE_RE.test(text)) topics.push("code");
+  if (FINANCE_RE.test(text)) topics.push("finance");
   if (GENERAL_RE.test(text)) topics.push("general");
   return topics;
 }
@@ -56,6 +62,7 @@ export function routeHumanMessage(channel: TeamChannelId, text: string): RouteDe
   if (topics.length === 1) {
     if (topics[0] === "design") return { responders: ["sami"], reason: "topic" };
     if (topics[0] === "code") return { responders: ["developer"], reason: "topic" };
+    if (topics[0] === "finance") return { responders: ["finance"], reason: "topic" };
     return { responders: ["mohamed"], reason: "topic" };
   }
   if (topics.length === 0) return { responders: ["mohamed"], reason: "topic" };

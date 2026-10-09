@@ -1,5 +1,5 @@
 /**
- * سامي image generation. Uses a real image API only when a key exists:
+ * يوسف image generation. Uses a real image API only when a key exists:
  *  - SAMI_IMAGE_PROVIDER=openai + OPENAI_API_KEY → OpenAI Images (gpt-image-1)
  *  - otherwise GEMINI_API_KEY → Gemini image model (SAMI_IMAGE_MODEL, default gemini-3.1-flash-image → gemini-3-pro-image; gemini-2.5-flash-image shut down 2026-10-02)
  *  - SAMI_IMAGE_GEN=off or no key → prompt only (the chat shows the prompt + a clear description).

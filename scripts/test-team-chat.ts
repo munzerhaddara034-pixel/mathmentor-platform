@@ -54,15 +54,18 @@ async function main() {
     assert.deepEqual(r.responders, ["mohamed"]);
   });
   test("§2.2 explicit mentions win, in order", () => {
-    assert.deepEqual(routing.routeHumanMessage("team", "@سامي و @المطوّر شوفو هيدا").responders, ["sami", "developer"]);
+    assert.deepEqual(routing.routeHumanMessage("team", "@يوسف و @المطوّر شوفو هيدا").responders, ["sami", "developer"]);
     assert.deepEqual(routing.routeHumanMessage("team", "بدي بانر لإنستغرام").responders, ["sami"]);
+    assert.deepEqual(routing.routeHumanMessage("team", "شو الميزانية والتكاليف والإيرادات هالشهر؟").responders, ["finance"]);
+    assert.deepEqual(routing.routeHumanMessage("team", "@ياسمين قدّميلي تسعير الخطط").responders, ["finance"]);
+    assert.deepEqual(routing.routeHumanMessage("finance", "أي رسالة").responders, ["finance"]);
     assert.deepEqual(routing.routeHumanMessage("team", "في خطأ بناء بـ tsc").responders, ["developer"]);
     assert.deepEqual(routing.routeHumanMessage("sami", "@محمد شو رأيك").responders, ["sami"]);
   });
   test("developer agent is «حمزة»: @حمزة routes to developer, @المبرمج stays an alias", () => {
     assert.deepEqual(routing.routeHumanMessage("team", "@حمزة زبّط زر الحجز").responders, ["developer"]);
     assert.deepEqual(routing.routeHumanMessage("team", "@المبرمج زبّط زر الحجز").responders, ["developer"]);
-    assert.deepEqual(routing.routeHumanMessage("team", "@سامي و @حمزة شوفو هيدا").responders, ["sami", "developer"]);
+    assert.deepEqual(routing.routeHumanMessage("team", "@يوسف و @حمزة شوفو هيدا").responders, ["sami", "developer"]);
     assert.deepEqual(routing.detectMentions("@حمزة"), ["developer"]);
     assert.deepEqual(routing.detectMentions("@المبرمج"), ["developer"]);
     const refs = routing.parseReferrals("@حمزة: Diff لزر الحجز بصفحة /courses/g12-se", "mohamed", ["mohamed"]);
@@ -74,7 +77,7 @@ async function main() {
     );
   });
   test("§2.3 referrals: one per agent, never self, never already-answered", () => {
-    const reply = "خطة الإطلاق…\n@سامي: بوستر 1080×1350 للدورة، عربي، مقترحان.\n@المطوّر: Diff لصفحة تسجيل /courses/g12-se حسب المواصفات.\n@سامي: شي تاني";
+    const reply = "خطة الإطلاق…\n@يوسف: بوستر 1080×1350 للدورة، عربي، مقترحان.\n@المطوّر: Diff لصفحة تسجيل /courses/g12-se حسب المواصفات.\n@يوسف: شي تاني";
     const refs = routing.parseReferrals(reply, "mohamed", ["mohamed"]);
     assert.deepEqual(refs.map((r) => r.agent), ["sami", "developer"]);
     assert.ok(refs[0].task.includes("1080×1350"));
@@ -141,14 +144,14 @@ async function main() {
     const all = req.turns.flatMap((t) => t.parts.map((p) => ("text" in p ? p.text : ""))).join("\n");
     seen.push(`${req.agent}::${all}`);
     if (req.agent === "mohamed") {
-      return "خطة الإطلاق: الخميس 15 تشرين الأول 2026 (بتوقيت بيروت).\n@سامي: بوستر 1080×1350 للدورة، عربي، مقترحان.\n@المطوّر: Diff لصفحة تسجيل /courses/g12-se حسب المواصفات.\n\nمحمد — سكرتير الأستاذ منذر حداره / MathMentor";
+      return "خطة الإطلاق: الخميس 15 تشرين الأول 2026 (بتوقيت بيروت).\n@يوسف: بوستر 1080×1350 للدورة، عربي، مقترحان.\n@المطوّر: Diff لصفحة تسجيل /courses/g12-se حسب المواصفات.\n\nمحمد — سكرتير الأستاذ منذر حداره / MathMentor";
     }
     if (req.agent === "sami") return JSON.stringify({ reply: "مقترحان للبوستر… @المطوّر: ركّب البوستر بالصفحة", imagePrompt: "", generateImage: false });
     if (req.agent === "developer:plan") return JSON.stringify({ mode: "reply", reply: "سؤال واحد: هل الصفحة عربية فقط؟" });
     return "{}";
   });
 
-  test("test 5 end-to-end: محمد + one hop to سامي and المطوّر, max 3, no ping-pong", async () => {
+  test("test 5 end-to-end: محمد + one hop to يوسف and المطوّر, max 3, no ping-pong", async () => {
     const res = await agents.handleHumanMessage({
       channel: "team",
       text: "بدنا نطلق دورة G12 SE الشهر الجاي: بدنا صفحة تسجيل، وبوستر، ونموذج امتحان تجريبي.",

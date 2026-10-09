@@ -3,18 +3,20 @@ import type { Widen } from "../widen";
 
 /** Admin team chat chrome. Message bodies, diffs and agent write-ups are content and stay as written. */
 const en = {
-  agents: { mohamed: "Mohammad", sami: "Sami", developer: "Hamza" },
+  agents: { mohamed: "Mohammad", sami: "Youssef", developer: "Hamza", finance: "Yasmine" },
   channels: {
-    team: { label: "Whole team", subtitle: "Mohammad · Sami · Hamza" },
+    team: { label: "Whole team", subtitle: "Mohammad · Yasmine · Youssef · Hamza" },
     mohamed: { label: "Mohammad", subtitle: "Platform manager · secretary · maths doctor" },
-    sami: { label: "Sami", subtitle: "Web design · images · media" },
+    sami: { label: "Youssef", subtitle: "Web design · images · media" },
     developer: { label: "Hamza", subtitle: "Developer · dev agent · diff, then approval" },
+    finance: { label: "Yasmine", subtitle: "Finance manager · budget · revenue · costs · pricing" },
   },
   placeholders: {
-    team: "Write to the team… (@Mohammad, @Sami, @Hamza)",
+    team: "Write to the team… (@Mohammad, @Yasmine, @Youssef, @Hamza)",
     mohamed: "Write to Mohammad: appointment, brief, maths solution, exam model…",
     sami: "Write to Sami: banner, poster, UI, video…",
     developer: "Write to Hamza (developer): the change you need — he proposes a diff, then waits for your approval",
+    finance: "Write to Yasmine (finance): budget, revenue, costs, pricing, cash flow",
   },
   channelsLabel: "Team channels",
   conversation: "Conversation: {name}",
@@ -180,18 +182,20 @@ const en = {
 export type TeamMessages = Widen<typeof en>;
 
 const ar: TeamMessages = {
-  agents: { mohamed: "محمد", sami: "سامي", developer: "حمزة" },
+  agents: { mohamed: "محمد", sami: "يوسف", developer: "حمزة", finance: "ياسمين" },
   channels: {
-    team: { label: "الفريق كله", subtitle: "محمد · سامي · حمزة" },
+    team: { label: "الفريق كله", subtitle: "محمد · ياسمين · يوسف · حمزة" },
     mohamed: { label: "محمد", subtitle: "مدير المنصة · السكرتير · دكتور الرياضيات" },
-    sami: { label: "سامي", subtitle: "تصميم الويب · الصور · الميديا" },
+    sami: { label: "يوسف", subtitle: "تصميم الويب · الصور · الميديا" },
     developer: { label: "حمزة", subtitle: "المبرمج · وكيل المطوّر · Diff ثم موافقة" },
+    finance: { label: "ياسمين", subtitle: "المديرة المالية · الميزانية · الإيرادات · التكاليف · التسعير" },
   },
   placeholders: {
-    team: "اكتب للفريق… (@محمد، @سامي، @حمزة)",
+    team: "اكتب للفريق… (@محمد، @ياسمين، @يوسف، @حمزة)",
     mohamed: "اكتب لمحمد: موعد، موجز، حل رياضيات، نموذج امتحان…",
-    sami: "اكتب لسامي: بانر، بوستر، واجهة، فيديو…",
+    sami: "اكتب ليوسف: بانر، بوستر، واجهة، فيديو…",
     developer: "اكتب لحمزة (المبرمج): التعديل المطلوب — يقترح Diff ثم ينتظر موافقتك",
+    finance: "اكتب لياسمين (المديرة المالية): الميزانية، الإيرادات، التكاليف، التسعير، التدفق النقدي",
   },
   channelsLabel: "قنوات الفريق",
   conversation: "محادثة {name}",
@@ -208,7 +212,7 @@ const ar: TeamMessages = {
   messageFrom: "رسالة من {name}",
   referredBy: "إحالة من {name}",
   imagePrompt: "Prompt الصورة",
-  generatedPreview: "معاينة من سامي",
+  generatedPreview: "معاينة من يوسف",
   attachments: "المرفقات",
   remove: "إزالة {name}",
   attach: "إرفاق ملف أو صورة",
@@ -355,18 +359,20 @@ const ar: TeamMessages = {
 };
 
 const fr: TeamMessages = {
-  agents: { mohamed: "Mohammad", sami: "Sami", developer: "Hamza" },
+  agents: { mohamed: "Mohammad", sami: "Youssef", developer: "Hamza", finance: "Yasmine" },
   channels: {
-    team: { label: "Toute l’équipe", subtitle: "Mohammad · Sami · Hamza" },
+    team: { label: "Toute l’équipe", subtitle: "Mohammad · Yasmine · Youssef · Hamza" },
     mohamed: { label: "Mohammad", subtitle: "Gestion de la plateforme · secrétariat · docteur en maths" },
-    sami: { label: "Sami", subtitle: "Web design · images · médias" },
+    sami: { label: "Youssef", subtitle: "Web design · images · médias" },
     developer: { label: "Hamza", subtitle: "Développeur · agent dev · diff puis validation" },
+    finance: { label: "Yasmine", subtitle: "Directrice financière · budget · revenus · coûts" },
   },
   placeholders: {
-    team: "Écrire à l’équipe… (@Mohammad, @Sami, @Hamza)",
+    team: "Écrire à l’équipe… (@Mohammad, @Yasmine, @Youssef, @Hamza)",
     mohamed: "Écrire à Mohammad : rendez-vous, brief, solution de maths, sujet d’examen…",
     sami: "Écrire à Sami : bannière, affiche, interface, vidéo…",
     developer: "Écrire à Hamza (développeur) : la modification voulue — il propose un diff puis attend votre accord",
+    finance: "Écrire à Yasmine (finance) : budget, revenus, coûts, tarification, trésorerie",
   },
   channelsLabel: "Canaux de l’équipe",
   conversation: "Conversation : {name}",

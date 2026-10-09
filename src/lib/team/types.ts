@@ -6,10 +6,10 @@ import type { HamzaReadiness } from "@/lib/hamza/readiness";
 import type { PublicHamzaTask } from "@/lib/hamza/tasks/types";
 import type { HamzaPipelineState } from "@/lib/hamza/types";
 
-export const TEAM_CHANNEL_IDS = ["team", "mohamed", "sami", "developer"] as const;
+export const TEAM_CHANNEL_IDS = ["team", "mohamed", "sami", "developer", "finance"] as const;
 export type TeamChannelId = (typeof TEAM_CHANNEL_IDS)[number];
 
-export const TEAM_AGENT_IDS = ["mohamed", "sami", "developer"] as const;
+export const TEAM_AGENT_IDS = ["mohamed", "sami", "developer", "finance"] as const;
 export type TeamAgentId = (typeof TEAM_AGENT_IDS)[number];
 
 export type TeamAuthorKind = "human" | "agent" | "system";
@@ -27,7 +27,7 @@ export type TeamAttachmentRef = {
   name: string;
   mimeType: string;
   sizeBytes: number;
-  /** "upload" = sent by a human, "generated" = produced by an agent (e.g. سامي image). */
+  /** "upload" = sent by a human, "generated" = produced by an agent (e.g. يوسف image). */
   origin: "upload" | "generated";
 };
 
@@ -49,7 +49,7 @@ export type TeamMessage = {
   proposalId?: string;
   /** Hamza background task this message belongs to (TaskCard renders under it). */
   taskId?: string;
-  /** Image prompt drafted by سامي (always shown, image or not). */
+  /** Image prompt drafted by يوسف (always shown, image or not). */
   imagePrompt?: string;
   /** Redaction notice when a secret was removed from a human message. */
   redactedSecrets?: number;
@@ -142,16 +142,18 @@ export type TeamChannelMeta = {
 };
 
 export const TEAM_CHANNELS: TeamChannelMeta[] = [
-  { id: "team", labelAr: "الفريق كله", subtitleAr: "محمد · سامي · حمزة", avatar: "👥" },
+  { id: "team", labelAr: "الفريق كله", subtitleAr: "محمد · ياسمين · يوسف · حمزة", avatar: "👥" },
   { id: "mohamed", labelAr: "محمد", subtitleAr: "مدير المنصة · السكرتير · دكتور الرياضيات", avatar: "م" },
-  { id: "sami", labelAr: "سامي", subtitleAr: "تصميم الويب · الصور · الميديا", avatar: "س" },
+  { id: "sami", labelAr: "يوسف", subtitleAr: "تصميم الويب · الصور · الميديا", avatar: "س" },
   { id: "developer", labelAr: "حمزة", subtitleAr: "المبرمج · وكيل المطوّر · Diff ثم موافقة", avatar: "</>" },
+  { id: "finance", labelAr: "ياسمين", subtitleAr: "المديرة المالية · الميزانية · الإيرادات · التكاليف", avatar: "ي" },
 ];
 
 export const TEAM_AGENT_NAMES_AR: Record<TeamAgentId, string> = {
   mohamed: "محمد",
-  sami: "سامي",
+  sami: "يوسف",
   developer: "حمزة",
+  finance: "ياسمين",
 };
 
 /**

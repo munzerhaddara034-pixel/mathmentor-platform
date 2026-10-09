@@ -3,6 +3,7 @@ import { saveAppointment, saveReminder } from "@/lib/agent/store";
 import type { ActionReminderPriority } from "@/lib/agent/types";
 import { createId } from "@/lib/ids";
 import { parseJsonObject } from "./gemini";
+import { sendOwnerWhatsApp } from "./ownerWhatsApp";
 
 const BLOCK_RE = /```mm-actions\s*([\s\S]*?)```/;
 
@@ -68,6 +69,29 @@ export async function applyMohamedActions(reply: string): Promise<{ text: string
       item.priority === "low" || item.priority === "medium" || item.priority === "high" ? item.priority : "medium";
     await saveReminder({ id: createId("rem"), task, dueDate, priority, status: "open", createdAt: now, updatedAt: now, source: "hub" });
     recorded.push(`تذكير: ${task} — ${fmtBeirut(dueDate)} (بتوقيت بيروت)`);
+  }
+  // «محمد» يرسل إلى واتساب رقم المنصة (نص و/أو ملف) — بطلب صريح من الأستاذ منذر فقط.
+  const whatsapp = Array.isArray(data.whatsapp) ? data.whatsapp.slice(0, 2) : [];
+  for (const raw of whatsapp) {
+    if (!raw || typeof raw !== "object") continue;
+    const item = raw as Record<string, unknown>;
+    const body = str(item.text, 2000);
+    const attachmentId = str(item.attachmentId, 80);
+    const link = str(item.link, 500);
+    if (!body && !attachmentId && !link) continue;
+    const result = await sendOwnerWhatsApp({
+      text: body,
+      file:
+        attachmentId || link
+          ? {
+              attachmentId: attachmentId || undefined,
+              link: link || undefined,
+              filename: str(item.filename, 120) || undefined,
+              mimeType: str(item.mimeType, 120) || undefined,
+            }
+          : undefined,
+    });
+    recorded.push(`واتساب: ${result.detailAr}`);
   }
   return { text, recorded };
 }
