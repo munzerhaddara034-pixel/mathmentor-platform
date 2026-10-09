@@ -2,6 +2,7 @@ import { z } from "zod";
 import { SOLVER_SYSTEM_PROMPT } from "@/lib/pedagogy/lebanese";
 import type { LessonLanguage } from "@/lib/studio/timeline";
 import { assembleSolution, type GraphSpec } from "./assemble";
+import { clampSolverBudget, SOLVER_TOTAL_BUDGET_MS } from "./budget";
 import { detectCurriculum, type CurriculumDecision } from "./curriculum/index";
 import { demoSolve, type SolveRequest } from "./demoSolver";
 import { generate, GeminiError, type CallRecord, type GeminiPart } from "./gemini/client";
@@ -245,11 +246,12 @@ export function tierFor(decision: CurriculumDecision): ModelTier {
   return tierForLevel(decision.level, { satAct: decision.curriculum === "sat_act" && !decision.proof });
 }
 
-export async function solveWithGemini(request: GeminiSolveRequest): Promise<MathSolution> {
+export async function solveWithGemini(request: GeminiSolveRequest, options: { deadlineMs?: number } = {}): Promise<MathSolution> {
   const started = Date.now();
   const decision = decideFor(request);
   const tier = tierFor(decision);
-  const budget = budgetFor(decision, tier);
+  // The tier budget is the ceiling, never the promise: it is clamped to what the request has left.
+  const budget = clampSolverBudget(budgetFor(decision, tier), options.deadlineMs ?? SOLVER_TOTAL_BUDGET_MS);
   const language: LessonLanguage = request.language ?? "en";
   const text = buildSolverPrompt({
     question: request.question,
@@ -295,13 +297,14 @@ export async function solveWithGemini(request: GeminiSolveRequest): Promise<Math
 /** Hard deadline: without it a stalled provider holds the route until the platform timeout. */
 const OPENAI_TIMEOUT_MS = 60_000;
 
-export async function solveWithOpenAI(request: SolveRequest): Promise<MathSolution> {
+export async function solveWithOpenAI(request: SolveRequest, options: { deadlineMs?: number } = {}): Promise<MathSolution> {
   const key = openaiSolverKey();
   if (!key) throw new Error("OPENAI_API_KEY is not set.");
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
+  const timeoutMs = clampSolverBudget({ deadlineMs: OPENAI_TIMEOUT_MS, callTimeoutMs: OPENAI_TIMEOUT_MS }, options.deadlineMs ?? SOLVER_TOTAL_BUDGET_MS).callTimeoutMs;
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
-    signal: AbortSignal.timeout(OPENAI_TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
@@ -322,6 +325,48 @@ export async function solveWithOpenAI(request: SolveRequest): Promise<MathSoluti
   const json = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const parsed = geminiJsonSchema.parse(JSON.parse(json.choices?.[0]?.message?.content ?? "{}"));
   return solutionFromLlm(parsed, request, "openai");
+}
+
+/** DeepSeek key (OpenAI-compatible endpoint). Empty when the provider is not configured. */
+export function deepseekSolverKey(): string {
+  return process.env.DEEPSEEK_API_KEY?.trim() || "";
+}
+
+const DEEPSEEK_TIMEOUT_MS = 45_000;
+
+/**
+ * DeepSeek solve: cheap, fast, OpenAI-compatible JSON mode. Used as the rescue provider when Gemini is
+ * missing, slow or failing, so a student still gets an answer instead of a dead request.
+ */
+export async function solveWithDeepSeek(request: SolveRequest, options: { deadlineMs?: number } = {}): Promise<MathSolution> {
+  const key = deepseekSolverKey();
+  if (!key) throw new Error("DEEPSEEK_API_KEY is not set.");
+  const model = process.env.DEEPSEEK_MODEL?.trim() || "deepseek-chat";
+  const base = (process.env.DEEPSEEK_API_BASE?.trim() || "https://api.deepseek.com").replace(/\/+$/, "");
+  const timeoutMs = clampSolverBudget({ deadlineMs: DEEPSEEK_TIMEOUT_MS, callTimeoutMs: DEEPSEEK_TIMEOUT_MS }, options.deadlineMs ?? SOLVER_TOTAL_BUDGET_MS).callTimeoutMs;
+  const response = await fetch(`${base}/chat/completions`, {
+    method: "POST",
+    signal: AbortSignal.timeout(timeoutMs),
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: SYSTEM },
+        { role: "user", content: `${request.latex ?? ""}\n${request.question}` },
+      ],
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`DeepSeek ${response.status}: ${(await response.text()).slice(0, 240)}`);
+  }
+  const json = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+  const parsed = geminiJsonSchema.parse(JSON.parse(json.choices?.[0]?.message?.content ?? "{}"));
+  return solutionFromLlm(parsed, request, "deepseek");
 }
 
 export function demoFallback(request: SolveRequest, warning: string): MathSolution {

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { NEEDS_REVIEW_AR, SOLUTION_VERIFIER_RULES_AR } from "@/lib/agent/persona";
 import { TUTOR_VERIFIER_PERSONA_EN } from "@/lib/tutor/persona";
 import { generate, type CallRecord } from "./gemini/client";
+import { clampSolverBudget, SOLVER_TOTAL_BUDGET_MS } from "./budget";
 import type { ModelTier } from "./gemini/models";
 import { extractJson, geminiApiKey } from "./llm";
 import { getMathQuery, patchMathQuery } from "./store";
@@ -22,7 +23,6 @@ export type VerifiableSolution = {
   finalAnswerLatex: string;
 };
 
-export type VerifyOptions = { tier?: ModelTier; casReport?: string; university?: boolean };
 
 const verdictSchema = z.object({
   verdict: z.enum(["correct", "incorrect", "uncertain"]),
@@ -67,13 +67,17 @@ function buildPrompt(record: VerifiableSolution, options: VerifyOptions): string
 }
 
 async function callVerifier(prompt: string, options: VerifyOptions) {
+  const budget = clampSolverBudget(
+    { deadlineMs: options.tier === "strong" ? 90_000 : 40_000, callTimeoutMs: options.tier === "strong" ? 75_000 : 30_000 },
+    options.deadlineMs ?? SOLVER_TOTAL_BUDGET_MS,
+  );
   const result = await generate({
     parts: [{ text: prompt }],
     tier: options.tier ?? "fast",
     thinking: options.university ? "high" : options.tier === "strong" ? "medium" : "low",
     maxOutputTokens: options.tier === "strong" ? 16_384 : 6_144,
-    deadlineMs: options.tier === "strong" ? 90_000 : 40_000,
-    callTimeoutMs: options.tier === "strong" ? 75_000 : 30_000,
+    deadlineMs: budget.deadlineMs,
+    callTimeoutMs: budget.callTimeoutMs,
   });
   return { verdict: verdictSchema.parse(extractJson(result.text)), calls: result.calls };
 }
@@ -152,3 +156,4 @@ export function scheduleSolutionVerification(record: MathQueryRecord): void {
     }
   })();
 }
+export type VerifyOptions = { tier?: ModelTier; casReport?: string; university?: boolean; deadlineMs?: number };

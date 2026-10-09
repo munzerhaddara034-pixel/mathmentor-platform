@@ -2,7 +2,7 @@ import type { CertificateTrack, LessonLanguage, LessonTimeline } from "@/lib/stu
 import type { SolverCurriculum, SolverLevel } from "./curriculum/types";
 import type { CallRecord } from "./gemini/client";
 
-export type SolverSource = "gemini" | "openai" | "demo";
+export type SolverSource = "gemini" | "openai" | "deepseek" | "demo";
 
 /** Outcome of the AI verification pass + CAS check as applied to the answer the student sees. */
 export type SolverVerification = {

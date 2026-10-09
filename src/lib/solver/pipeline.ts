@@ -1,9 +1,14 @@
 /**
- * Solve → deterministic CAS check → (strong tier) one repair pass → synchronous AI verification pass.
+ * Solve → deterministic CAS check → (strong tier) one repair pass → AI verification pass.
  * Middle school / SAT stay on the fast path (CAS only; the verifier runs in the background).
+ *
+ * Every provider call is clamped to one request-wide deadline (see budget.ts): the answer is always
+ * delivered inside the platform's request timeout, and the second (verification) pass moves to the
+ * background when there is no room left for it — instead of the request dying with no answer at all.
  */
 import { NEEDS_REVIEW_AR } from "@/lib/agent/persona";
 import { formatLebaneseEquation } from "@/lib/math/lebaneseEquationFormat";
+import { canStartCall, createDeadline, shouldVerifySynchronously, SOLVER_TOTAL_BUDGET_MS, type SolverDeadline } from "./budget";
 import { casFailureSummary, runCasChecks, type CasReport } from "./cas/index";
 import { decideFor, solveWithGemini, type GeminiSolveRequest } from "./llm";
 import type { MathSolution, SolverMeta, SolverVerification } from "./types";
@@ -65,19 +70,22 @@ function applyVerdict(solution: MathSolution, verdict: SolutionVerdict, report: 
   return { status: verdict.status === "needs_fix" ? "needs_fix" : "unverified", noteAr: verdict.noteAr, mode: "sync", applied: false };
 }
 
-export async function solveAndVerify(request: GeminiSolveRequest): Promise<MathSolution> {
+export async function solveAndVerify(
+  request: GeminiSolveRequest,
+  deadline: SolverDeadline = createDeadline(SOLVER_TOTAL_BUDGET_MS),
+): Promise<MathSolution> {
   const started = Date.now();
   const decision = decideFor(request);
   const question = `${request.question ?? ""}\n${request.latex ?? ""}`;
-  let solution = await solveWithGemini({ ...request, decision });
+  let solution = await solveWithGemini({ ...request, decision }, { deadlineMs: deadline.remaining() });
   if (solution.needsRetake || !solution.solverMeta) return solution;
   const meta: SolverMeta = solution.solverMeta;
   let report = cas(solution, question);
 
-  // One repair pass whenever the CAS rejects the answer (both tiers; fast tier stays on fast models).
-  if (report.failed > 0) {
+  // One repair pass whenever the CAS rejects the answer — but only if the request still has room for it.
+  if (report.failed > 0 && canStartCall(deadline.remaining())) {
     try {
-      const repaired = await solveWithGemini({ ...request, decision, feedback: casFailureSummary(report) });
+      const repaired = await solveWithGemini({ ...request, decision, feedback: casFailureSummary(report) }, { deadlineMs: deadline.remaining() });
       const second = cas(repaired, question);
       meta.calls.push(...(repaired.solverMeta?.calls ?? []));
       if (!repaired.needsRetake && second.failed <= report.failed) {
@@ -95,12 +103,23 @@ export async function solveAndVerify(request: GeminiSolveRequest): Promise<MathS
   solution.solverMeta = meta;
 
   if (meta.tier === "strong") {
-    const verdict = await verifySolution(
-      { ...solution, question: request.question || request.latex || "", latex: request.latex, track: solution.track },
-      { tier: "strong", casReport: casReportText(report), university: meta.level === "university" },
-    );
-    meta.calls.push(...verdict.calls);
-    meta.verification = applyVerdict(solution, verdict, report);
+    if (shouldVerifySynchronously(deadline.remaining())) {
+      const verdict = await verifySolution(
+        { ...solution, question: request.question || request.latex || "", latex: request.latex, track: solution.track },
+        { tier: "strong", casReport: casReportText(report), university: meta.level === "university", deadlineMs: deadline.remaining() },
+      );
+      meta.calls.push(...verdict.calls);
+      meta.verification = applyVerdict(solution, verdict, report);
+    } else {
+      // No room for a second pass: deliver the answer now and let the background verifier audit it
+      // (recordSolution schedules it whenever the mode is not "sync").
+      meta.verification = {
+        status: "unverified",
+        noteAr: `${NEEDS_REVIEW_AR} — التحقق الآلي يجري في الخلفية لتسليم الحل بسرعة.`,
+        mode: "background",
+        applied: false,
+      };
+    }
   } else if (report.failed > 0) {
     solution.needsReview = true;
     solution.warning = `${NEEDS_REVIEW_AR} — ${casFailureSummary(report).slice(0, 240)}`;

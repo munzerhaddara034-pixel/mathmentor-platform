@@ -5,8 +5,9 @@ import { DEMO_AVATAR_VIDEO } from "@/lib/studio/heygenClient";
 import { hasHeyGenKey } from "@/lib/studio/heygen";
 import { newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygenJobs";
 import { attachDemoMedia } from "./assemble";
+import { canStartCall, createDeadline, type SolverDeadline } from "./budget";
 import { demoSolve, type SolveRequest } from "./demoSolver";
-import { demoFallback, hasGeminiKey, openaiSolverKey, solveWithOpenAI } from "./llm";
+import { deepseekSolverKey, demoFallback, hasGeminiKey, openaiSolverKey, solveWithDeepSeek, solveWithOpenAI } from "./llm";
 import { solveAndVerify } from "./pipeline";
 import { looksLikeMath, retakeSolution } from "./retake";
 import { saveMathQuery } from "./store";
@@ -64,6 +65,8 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
   };
   const typed = `${input.question ?? ""} ${input.latex ?? ""}`.trim();
   const typedIsMath = looksLikeMath(typed);
+  // One deadline for the whole request: every provider call is clamped to it (see budget.ts).
+  const deadline = createDeadline();
 
   if (hasGeminiKey() && (typed || input.imageBase64)) {
     try {
@@ -73,7 +76,7 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
         mimeType: input.mimeType,
         curriculum: input.curriculum,
         platformCurriculum: input.platformCurriculum,
-      });
+      }, deadline);
     } catch (error) {
       if (input.imageBase64 && !typedIsMath) {
         return retakeSolution({
@@ -84,17 +87,14 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
         });
       }
       console.warn("[mathmentor] Gemini solve failed:", error instanceof Error ? error.message : error);
+      const rescued = await solveWithFastProvider(request, typedIsMath, Boolean(input.imageBase64), deadline);
+      if (rescued) return rescued;
       return demoFallback(request, "يحتاج مراجعة — the AI tutor is busy right now; this is a basic offline answer. Please try again in a minute.");
     }
   }
 
-  if (openaiSolverKey() && typedIsMath && !input.imageBase64) {
-    try {
-      return await solveWithOpenAI(request);
-    } catch (error) {
-      return demoFallback(request, error instanceof Error ? error.message : "OpenAI failed; used demo solver.");
-    }
-  }
+  const fast = await solveWithFastProvider(request, typedIsMath, Boolean(input.imageBase64), deadline);
+  if (fast) return fast;
 
   if (input.imageBase64 && !typedIsMath) {
     return retakeSolution({
@@ -109,10 +109,10 @@ export async function runMathSolver(input: EngineInput): Promise<MathSolution> {
   if (!hasGeminiKey() && input.imageBase64 && typedIsMath) {
     solution.warning =
       "No GEMINI_API_KEY — solved the typed given. Photo OCR needs Gemini Vision; the image was not invented from.";
-  } else if (!hasGeminiKey() && !openaiSolverKey()) {
+  } else if (!hasGeminiKey() && !openaiSolverKey() && !deepseekSolverKey()) {
     solution.warning =
       solution.warning ||
-      "No GEMINI_API_KEY / OPENAI_API_KEY — deterministic Lebanese curriculum demo solver.";
+      "No GEMINI_API_KEY / DEEPSEEK_API_KEY / OPENAI_API_KEY — deterministic Lebanese curriculum demo solver.";
   }
   return solution;
 }
@@ -195,4 +195,32 @@ export async function recordSolution(
   // AI verification pass (مدقّق الحلول): background second check; failures fall back to the current "pending" audit.
   scheduleSolutionVerification(record);
   return record;
+}
+
+/**
+ * Fast rescue providers used when Gemini is missing, slow or failing: DeepSeek first (cheap and quick),
+ * then OpenAI. Typed questions only — photo OCR needs Gemini Vision.
+ */
+async function solveWithFastProvider(
+  request: SolveRequest,
+  typedIsMath: boolean,
+  hasImage: boolean,
+  deadline: SolverDeadline,
+): Promise<MathSolution | null> {
+  if (!typedIsMath || hasImage || !canStartCall(deadline.remaining())) return null;
+  if (deepseekSolverKey()) {
+    try {
+      return await solveWithDeepSeek(request, { deadlineMs: deadline.remaining() });
+    } catch (error) {
+      console.warn("[mathmentor] DeepSeek solve failed:", error instanceof Error ? error.message : error);
+    }
+  }
+  if (openaiSolverKey() && canStartCall(deadline.remaining())) {
+    try {
+      return await solveWithOpenAI(request, { deadlineMs: deadline.remaining() });
+    } catch (error) {
+      console.warn("[mathmentor] OpenAI solve failed:", error instanceof Error ? error.message : error);
+    }
+  }
+  return null;
 }
