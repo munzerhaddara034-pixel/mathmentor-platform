@@ -18,6 +18,7 @@ export default async function AdminPage() {
     { href: "/admin/exams", label: t.linkExams },
     { href: "/admin/agent-hub", label: t.linkAgent },
     { href: "/admin/team", label: t.linkTeam },
+    { href: "/admin/designs", label: t.linkDesigns },
     { href: "/admin/ops", label: opsMessages[locale].pages.opsTitle },
     { href: "/admin/b2b-manager", label: t.linkB2b },
     { href: "/dashboard", label: t.linkCodes },

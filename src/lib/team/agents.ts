@@ -5,7 +5,7 @@
 import { agentCommitBranchCheck } from "@/lib/security/agentBranches";
 import { createId } from "@/lib/ids";
 import { baremeQuarterIssues, enforceConstants } from "./constants";
-import { MOHAMED_ACTIONS_PROTOCOL_AR, beirutNowAr, mohamedDataContext } from "./context";
+import { MOHAMED_ACTIONS_PROTOCOL_AR, YOUSSEF_ACTIONS_PROTOCOL_AR, beirutNowAr, mohamedDataContext } from "./context";
 import { hamzaNotConfiguredTextAr, hamzaReadiness } from "@/lib/hamza/readiness";
 import { enqueueHamzaTask } from "@/lib/hamza/tasks/enqueue";
 import { taskDeps } from "@/lib/hamza/tasks/deps";
@@ -15,6 +15,7 @@ import { TeamLlmUnavailableError, callTeamLlm, parseJsonObject, stringField, typ
 import { FORBIDDEN_BRANCHES, isProtectedBranch, isValidBranchName, teamGithubConfig } from "./github";
 import { generateImage, imageProviderAvailable } from "./images";
 import { applyMohamedActions } from "./mohamedActions";
+import { applyYoussefActions } from "./youssefActions";
 import { MOHAMED_SYSTEM_PROMPT_AR, SAMI_SYSTEM_PROMPT_AR, YASMINE_SYSTEM_PROMPT_AR } from "./prompts";
 import { parseReferrals, planReplies, routeHumanMessage, type Referral, type RouteDecision } from "./routing";
 import { redactSecrets, secretRotationNoticeAr } from "./secrets";
@@ -149,11 +150,11 @@ function systemMessage(channel: TeamChannelId, text: string, extra: Partial<Team
 
 type AgentRun = { message: TeamMessage; proposal?: TeamProposal };
 
-async function runMohamed(turns: LlmTurn[], ctx: string, channel: TeamChannelId, replyToId: string): Promise<AgentRun> {
+async function runMohamed(turns: LlmTurn[], ctx: string, channel: TeamChannelId, replyToId: string, requestText: string): Promise<AgentRun> {
   const pending = await pendingProposals(channel);
   const system = [MOHAMED_SYSTEM_PROMPT_AR, ctx, await mohamedDataContext(pending), MOHAMED_ACTIONS_PROTOCOL_AR].join("\n\n");
   const raw = await callTeamLlm({ agent: "mohamed", system, turns, temperature: 0.3 });
-  const { text, recorded } = await applyMohamedActions(raw);
+  const { text, recorded } = await applyMohamedActions(raw, requestText);
   const suffix = recorded.length ? `\n\n✅ سُجّل في جدول السكرتير (Agent Hub):\n${recorded.map((line) => `- ${line}`).join("\n")}` : "";
   const quarter = baremeQuarterIssues(text);
   const notice = quarter.length
@@ -169,20 +170,32 @@ const SAMI_PROTOCOL = `## بروتوكول الرد (تقني — مضاف من 
 - قائمة تحقق قبل الإرسال: الأرقام تُكتب كاملة حرفياً (واتساب 96176532421، Whish 96170772968)، اسم العلامة «منذر حداره / Munzer Haddara» ظاهر في كل مقترح، النص العربي RTL، وجملة صريحة أنك لن تنشر وأن النشر يحتاج موافقة منذر على التصميم النهائي وعلى النشر.
 - لا تكتب «ولّدت معاينة» أو «أرفقت صورة»: المنصة تحاول توليد المعاينة بعد ردّك وترفقها تلقائياً أو تعرض تنبيهاً إن فشلت.`;
 
-async function runSami(turns: LlmTurn[], ctx: string, channel: TeamChannelId, replyToId: string, extra: Partial<TeamMessage>): Promise<AgentRun> {
+async function runSami(
+  turns: LlmTurn[],
+  ctx: string,
+  channel: TeamChannelId,
+  replyToId: string,
+  extra: Partial<TeamMessage>,
+  requestText: string,
+): Promise<AgentRun> {
   const provider = imageProviderAvailable();
   const system = [
     SAMI_SYSTEM_PROMPT_AR,
     ctx,
     `- توليد الصور: ${provider ? `متاح عبر ${provider} (معاينة داخلية فقط)` : "غير متاح (لا يوجد مفتاح) — اكتب الـ prompt ووصفاً دقيقاً للتصميم"}`,
     SAMI_PROTOCOL,
+    YOUSSEF_ACTIONS_PROTOCOL_AR,
   ].join("\n\n");
   const raw = await callTeamLlm({ agent: "sami", system, turns, json: true, temperature: 0.6 });
   const parsed = parseJsonObject(raw);
-  const reply = stringField(parsed, "reply") || raw;
+  const actionResult = await applyYoussefActions(raw, requestText);
+  const reply = actionResult.text || stringField(parsed, "reply") || raw;
   const imagePrompt = stringField(parsed, "imagePrompt").trim();
   const wantsImage = parsed?.generateImage === true && imagePrompt.length > 0;
-  const message = agentMessage(channel, "sami", reply, { replyToId, imagePrompt: imagePrompt || undefined, ...extra });
+  const actionSuffix = actionResult.recorded.length
+    ? `\n\n✅ ${actionResult.recorded.map((line) => `- ${line}`).join("\n")}`
+    : "";
+  const message = agentMessage(channel, "sami", `${reply}${actionSuffix}`, { replyToId, imagePrompt: imagePrompt || undefined, ...extra });
   if (wantsImage && provider) {
     try {
       const image = await generateImage(imagePrompt);
@@ -273,11 +286,11 @@ async function runAgent(input: {
   const turns = await buildTurns(agent, history, human, referral);
   const extra: Partial<TeamMessage> = referral ? { referredById: referral.fromMessageId } : {};
   if (agent === "mohamed") {
-    const run = await runMohamed(turns, ctx, channel, human.id);
+    const run = await runMohamed(turns, ctx, channel, human.id, referral?.task ?? human.text);
     Object.assign(run.message, extra);
     return run;
   }
-  if (agent === "sami") return runSami(turns, ctx, channel, human.id, extra);
+  if (agent === "sami") return runSami(turns, ctx, channel, human.id, extra, referral?.task ?? human.text);
   if (agent === "finance") return runYasmine(turns, ctx, channel, human.id, extra);
 
   // Hamza is OFF unless fully configured: a fixed notice, no model call, no task, no GitHub.

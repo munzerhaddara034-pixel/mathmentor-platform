@@ -176,6 +176,13 @@ const en = {
       caps: "Task cap {task} (max {max}) · monthly cap {month}",
     },
   },
+  actions: {
+    videoStarted: "Explanation video job started: {id}.",
+    videoNotConfigured: "Explanation video is not configured: set HEYGEN_API_KEY; no video was produced.",
+    videoNoQuestion: "Send the full maths question so I can prepare the explanation video.",
+    videoFailed: "Explanation video job {id} could not be started; no video was produced.",
+    designSaved: "Youssef saved the internal design {id}; open /admin/designs to review it.",
+  },
   diffNew: "new",
 } as const;
 
@@ -355,6 +362,13 @@ const ar: TeamMessages = {
       caps: "حد المهمة {task} (أقصى {max}) · الحد الشهري {month}",
     },
   },
+  actions: {
+    videoStarted: "بدأت مهمة فيديو الشرح: {id}.",
+    videoNotConfigured: "فيديو الشرح غير مهيّأ: عرّف HEYGEN_API_KEY؛ لم يُنتَج أي فيديو.",
+    videoNoQuestion: "أرسل نص المسألة كاملاً لأحضّر فيديو الشرح.",
+    videoFailed: "تعذّر بدء مهمة فيديو الشرح {id}؛ لم يُنتَج أي فيديو.",
+    designSaved: "حفظ يوسف التصميم الداخلي {id}؛ افتحه للمراجعة من /admin/designs.",
+  },
   diffNew: "جديد",
 };
 
@@ -531,6 +545,13 @@ const fr: TeamMessages = {
       events: "Journal d’audit (hamza.*)",
       caps: "Plafond tâche {task} (max {max}) · plafond mensuel {month}",
     },
+  },
+  actions: {
+    videoStarted: "La tâche vidéo d’explication a démarré : {id}.",
+    videoNotConfigured: "La vidéo d’explication n’est pas configurée : définissez HEYGEN_API_KEY ; aucune vidéo n’a été produite.",
+    videoNoQuestion: "Envoyez l’énoncé complet pour préparer la vidéo d’explication.",
+    videoFailed: "La tâche vidéo d’explication {id} n’a pas démarré ; aucune vidéo n’a été produite.",
+    designSaved: "Youssef a enregistré le design interne {id} ; ouvrez /admin/designs pour le relire.",
   },
   diffNew: "nouveau",
 };
