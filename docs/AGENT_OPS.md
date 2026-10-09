@@ -196,3 +196,20 @@ Set these on Netlify (Site settings → Environment variables) so approved `code
 Voice/text matching code-evolution phrases **only stages** an approval draft. Commit + Netlify rebuild run **only after** instructor replies موافق / اعتمد / انشر (or Hub approve). Never auto-commit.
 
 School outreach (`school_outreach_request`) likewise stages a pitch; WhatsApp to the school is sent only after approval.
+
+## First-party error log (ops)
+
+The platform fails loudly instead of silently: every unhandled server error (route handler, RSC, server
+action) is captured by the Next.js `onRequestError` hook (`src/instrumentation.ts`) and stored through
+`src/lib/ops/errorLogStore.ts` in the same locked document store as the rest of the platform.
+
+- Core logic (`src/lib/ops/errorLog.ts`) is runtime-agnostic, so the edge compilation stays clean; the
+  Node-only adapter is registered at startup and by the admin page/API.
+- Rows are grouped by fingerprint (same failure, different ids/numbers = one row with a counter), capped at
+  200 rows, and merged inside a 24-hour window.
+- Messages are scrubbed of e-mail addresses, phone numbers, token-like strings and query strings before
+  they are written; no request body, header or stack trace is ever stored.
+- A failing log store returns null and never breaks the request it is describing.
+- Staff view: `/admin/ops` (counters for total / 24h / 7d, grouped rows, sources). API:
+  `GET /api/admin/ops/errors?limit=50` and `DELETE /api/admin/ops/errors` (staff only).
+- Tests: `tests/opsErrorLog.test.mjs`.

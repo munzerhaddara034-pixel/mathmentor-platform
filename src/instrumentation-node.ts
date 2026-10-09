@@ -3,6 +3,8 @@ import { ensureDatabaseReady, isPostgresEnabled } from "./lib/db/pg";
 /** Failures are logged, never fatal — requests retry the migration lazily. */
 export async function migrateOnStartup(): Promise<void> {
   if (process.env.NEXT_PHASE === "phase-production-build") return;
+  // Give the ops error log its storage adapter before the first request can fail (see lib/ops/errorLog).
+  await import("./lib/ops/errorLogStore");
   if (isPostgresEnabled()) {
     try {
       await ensureDatabaseReady();
@@ -46,4 +48,18 @@ export async function startHamzaIfConfigured(): Promise<boolean> {
     console.error("[mathmentor] Hamza worker failed to start:", error instanceof Error ? error.message : error);
     return false;
   }
+}
+
+/**
+ * Records one unhandled server error in the first-party ops log. Lives here (Node-only) so the edge
+ * bundle never pulls in the storage layer; the hook in instrumentation.ts calls it only for NEXT_RUNTIME
+ * "nodejs" and never lets a failure escape.
+ */
+export async function recordRequestErrorNode(
+  error: unknown,
+  request?: { path?: string; method?: string },
+  context?: { routerKind?: string; routePath?: string; routeType?: string },
+): Promise<void> {
+  const { recordRequestError } = await import("./lib/ops/errorLog");
+  await recordRequestError(error, request, context);
 }
