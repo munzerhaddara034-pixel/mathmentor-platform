@@ -16,7 +16,7 @@ export default async function AdminTeamPage() {
       <p className="eyebrow">{t.teamEyebrow}</p>
       <h1>{t.teamTitle}</h1>
       <p className="muted">
-        {t.teamLead} <Link href="/admin/team-health">{t.linkTeamHealth}</Link> · <Link href="/admin/agent-hub">Agent Hub</Link> · <Link href="/admin">{t.backToAdmin}</Link>
+        {t.teamLead} <Link href="/admin/team-health">{t.linkTeamHealth}</Link> · <Link href="/admin/team-pr-drafts">{t.linkTeamPrDrafts}</Link> · <Link href="/admin/agent-hub">Agent Hub</Link> · <Link href="/admin">{t.backToAdmin}</Link>
       </p>
       <TeamChat staffName={live.user.name} />
     </main>

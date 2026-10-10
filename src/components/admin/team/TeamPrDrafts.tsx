@@ -1,0 +1,15 @@
+"use client";
+import { useEffect, useState } from "react";
+import { adminMessages } from "@/lib/i18n/ns/admin";
+import { teamMessages } from "@/lib/i18n/ns/team";
+import { useI18n } from "@/components/i18n/I18nProvider";
+type Draft = { id: string; agentId: keyof typeof teamMessages.en.agents; title: string; branch: string; files: string[]; additions: number; deletions: number; verdict: string; status: string; prUrl?: string; prNumber?: number; error?: string; ci: string };
+export function TeamPrDrafts() {
+  const { locale } = useI18n(); const t = adminMessages[locale].pages; const names = teamMessages[locale].agents;
+  const [drafts, setDrafts] = useState<Draft[]>([]); const [loading, setLoading] = useState(true); const [failed, setFailed] = useState(false); const [busy, setBusy] = useState(""); const [error, setError] = useState("");
+  const load = () => fetch("/api/admin/team/pr-drafts", { credentials: "same-origin", cache: "no-store" }).then(async r => { if (!r.ok) throw Error(); return r.json(); }).then(d => { setDrafts(d.drafts); setLoading(false); }).catch(() => { setFailed(true); setLoading(false); });
+  useEffect(() => { void load(); }, []);
+  async function create(id: string) { setBusy(id); setError(""); try { const response = await fetch(`/api/admin/team/pr-drafts/${encodeURIComponent(id)}`, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: "{}" }); const data = await response.json(); if (!response.ok) throw Error(response.status === 503 ? t.teamPrDraftNotConfigured : t.teamPrDraftError); await load(); } catch (e) { setError(e instanceof Error ? e.message : t.teamPrDraftError); } finally { setBusy(""); } }
+  if (loading) return <p className="muted">{t.teamPrDraftsLoading}</p>; if (failed) return <p role="alert">{t.teamPrDraftsFailed}</p>; if (!drafts.length) return <p className="muted">{t.teamPrDraftsEmpty}</p>;
+  return <section className="grid" style={{ gap: 16 }}>{error && <p role="alert">{error}</p>}{drafts.map(d => <article className="card" key={d.id}><h2>{d.title}</h2><dl className="health-summary"><div><dt>{t.teamPrDraftAgent}</dt><dd>{names[d.agentId]}</dd></div><div><dt>{t.teamPrDraftBranch}</dt><dd><code>{d.branch}</code></dd></div><div><dt>{t.teamPrDraftFiles}</dt><dd>{d.files.join(", ")}</dd></div><div><dt>{t.teamPrDraftChanges}</dt><dd>+{d.additions} / -{d.deletions}</dd></div><div><dt>{t.teamPrDraftStatus}</dt><dd>{d.status}{d.ci === "pending" ? ` · ${t.teamPrDraftCiPending}` : ""}</dd></div></dl><p><strong>{t.teamPrDraftVerdict}:</strong> {d.verdict}</p>{d.error && <p role="alert">{t.teamPrDraftError}</p>}{d.prUrl ? <a href={d.prUrl} target="_blank" rel="noreferrer">{t.teamPrDraftOpen} #{d.prNumber ?? ""}</a> : <button type="button" disabled={busy === d.id || d.status === "failed"} onClick={() => void create(d.id)}>{busy === d.id ? t.teamPrDraftWorking : t.teamPrDraftCreate}</button>}</article>)}</section>;
+}

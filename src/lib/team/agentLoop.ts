@@ -11,6 +11,7 @@ import { TEAM_AGENT_NAMES_AR, type TeamAgentId } from "./types";
 import { redactSecrets } from "./secrets";
 import { teamMessages } from "@/lib/i18n/ns/team";
 import { fetchWebPage, searchWeb } from "./webSearch";
+import { draftPullRequest } from "./prDrafts";
 
 const TEAM_LOOP_MAX_STEPS = 8;
 const TEAM_LOOP_MAX_TOOLS = 6;
@@ -27,7 +28,7 @@ export type TeamLoopResult = {
   notice?: string;
 };
 
-export type ToolState = { names: string[]; outputs: string[]; webUsed?: boolean; webSources?: string[] };
+export type ToolState = { names: string[]; outputs: string[]; webUsed?: boolean; webSources?: string[]; prDraftPrepared?: boolean; prDraftVerdict?: string };
 
 type Tool = { run: (name: string, args: Record<string, unknown>) => Promise<string> };
 
@@ -46,7 +47,7 @@ function toolProtocol(agent: TeamAgentId): string {
 {"thought":"جملة قصيرة","action":"tool","tool":"اسم الأداة","args":{}}
 أو
 {"thought":"جملة قصيرة","action":"reply","replyAr":"الجواب الكامل"}
-الأدوات المشتركة: list_tree, grep, read_file, find_references, tests_for, project_rules, team_memory, run_tests, web_search, web_fetch.
+الأدوات المشتركة: list_tree, grep, read_file, find_references, tests_for, project_rules, team_memory, run_tests, web_search, web_fetch, draft_pull_request.
 أدوات محمد: secretary_actions, send_owner_whatsapp, explain_video.
 أدوات يوسف: create_design.
 أداة حمزة نفسها هي أدوات المستودع والاختبارات عبر حلقة حمزة الخلفية؛ لا تكتب ولا تنفّذ shell.
@@ -77,6 +78,8 @@ export function verifyReply(input: { text: string; intent: string; tools: ToolSt
   if (isMathIntent(input.intent) && !/(تحقق|تعويض|verification|check|substitut)/i.test(input.text)) {
     reasons.push("لم يظهر تحقق رياضي مستقل");
   }
+  const claimsPreparedChange = /((?:جهزت|أعددت|حضّرت|أجريت|نفذت|أنشأت|حفظت).{0,30}(?:تعديل|كود|مسود|patch|PR)|(?:prepared|implemented|made|updated|created).{0,40}(?:code|change|patch|draft|PR)|(?:change|patch|draft).{0,20}(?:prepared|ready|created))/i.test(input.text);
+  if (claimsPreparedChange && (!input.tools.prDraftPrepared || !input.tools.prDraftVerdict?.startsWith("PASS") || !input.tools.outputs.some((output) => output.includes("patchPresent\":true")))) reasons.push(teamMessages.ar.prDrafts.claimRequiresDraft);
   const webUsed = input.tools.webUsed ?? input.tools.names.some((name) => name === "web_search" || name === "web_fetch");
   if (webUsed) {
     const sources = input.tools.webSources ?? [];
@@ -119,6 +122,10 @@ async function createTeamTools(agent: TeamAgentId, memory: Awaited<ReturnType<ty
       } else if (name === "create_design" && agent === "sami") {
         const design = await createYoussefDesign(stringArg(args, "request", 280), stringArg(args, "title", 180));
         output = JSON.stringify({ ok: true, id: design.id, title: design.title, private: true });
+      } else if (name === "draft_pull_request") {
+        const result = await draftPullRequest({ agentId: agent, title: stringArg(args, "title", 180), summary: stringArg(args, "summary", 1_000), rationale: stringArg(args, "rationale", 1_200), patch: stringArg(args, "patch", 200 * 1024), files: Array.isArray(args.files) ? args.files.filter((item): item is string => typeof item === "string").slice(0, 20) : [], commitMessage: stringArg(args, "commitMessage", 200) || undefined });
+        if (result.ok) { state.prDraftPrepared = true; state.prDraftVerdict = result.draft.verdict; }
+        output = JSON.stringify(result.ok ? { ok: true, id: result.draft.id, branch: result.draft.branch, files: result.draft.files, additions: result.draft.additions, deletions: result.draft.deletions, verdict: result.draft.verdict, patchPresent: Boolean(result.draft.patch), status: "draft", notice: result.notice } : result);
       } else if (name === "web_search") {
         const result = await searchWeb(stringArg(args, "query", 2_000), { agent });
         if (result.ok && result.results.length) {

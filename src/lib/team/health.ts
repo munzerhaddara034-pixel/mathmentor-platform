@@ -173,7 +173,8 @@ export async function recordTeamHealth(record: Omit<TeamHealthRecord, "id" | "cr
     failure: record.failure ? clean(record.failure, 300) : undefined,
     createdAt: new Date().toISOString(),
   };
-  await updateJsonFile<{ records: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[] }>(TEAM_HEALTH_DOCUMENT, { records: [], webCalls: [] }, (current) => ({
+  await updateJsonFile<{ records: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[]; prDrafts?: unknown[]; prDraftAudits?: unknown[] }>(TEAM_HEALTH_DOCUMENT, { records: [], webCalls: [] }, (current) => ({
+    ...current,
     records: [...(Array.isArray(current.records) ? current.records : []), saved].slice(-TEAM_HEALTH_LIMIT),
     webCalls: (Array.isArray(current.webCalls) ? current.webCalls.map(cleanWebAudit).filter((item): item is TeamWebAuditRecord => Boolean(item)) : []).slice(-TEAM_WEB_AUDIT_LIMIT),
   }));
@@ -192,7 +193,8 @@ export async function recordTeamWebAudit(record: Omit<TeamWebAuditRecord, "id" |
     provider: record.provider,
     createdAt: new Date().toISOString(),
   };
-  await updateJsonFile<{ records: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[] }>(TEAM_HEALTH_DOCUMENT, { records: [], webCalls: [] }, (current) => ({
+  await updateJsonFile<{ records: TeamHealthRecord[]; webCalls?: TeamWebAuditRecord[]; prDrafts?: unknown[]; prDraftAudits?: unknown[] }>(TEAM_HEALTH_DOCUMENT, { records: [], webCalls: [] }, (current) => ({
+    ...current,
     records: (Array.isArray(current.records) ? current.records : []).slice(-TEAM_HEALTH_LIMIT),
     webCalls: [...(Array.isArray(current.webCalls) ? current.webCalls.map(cleanWebAudit).filter((item): item is TeamWebAuditRecord => Boolean(item)) : []), saved].slice(-TEAM_WEB_AUDIT_LIMIT),
   }));

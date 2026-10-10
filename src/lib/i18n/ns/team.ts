@@ -183,6 +183,8 @@ const en = {
     videoFailed: "Explanation video job {id} could not be started; no video was produced.",
     designSaved: "Youssef saved the internal design {id}; open /admin/designs to review it.",
   },
+  prDrafts: { disabled: "PR drafting is disabled by the server; no draft was created.", invalidAgent: "Unknown agent; no draft was created.", missingFields: "Title, summary, rationale, patch and file list are required.", patchTooLarge: "Patch exceeds the 200 KB limit.", invalidPatch: "Patch is not a valid unified diff or its file list does not match.", tooManyFiles: "A draft may change no more than 12 files.", forbiddenPath: "The patch includes a forbidden or out-of-scope path.", tooManyLines: "A draft may change no more than 400 lines.", commitTooLong: "Commit message exceeds 200 characters.", invalidBranch: "Could not generate an allowed agent/<agent>-<slug> branch.", dailyLimit: "This agent has reached its daily draft limit.", notConfigured: "GitHub PR creation is not configured; set GITHUB_AGENT_TOKEN and GITHUB_AGENT_REPO.", notFound: "PR draft was not found.", githubFailed: "GitHub could not create the branch and pull request.", ownerNotified: "Owner escalation created ({id}).", ownerNotifyFailed: "The owner notification could not be sent.", secretInPatch: "Patch contains secret-like content and was rejected; remove credentials before drafting.", claimRequiresDraft: "The agent cannot claim a prepared code change without a passing guardrail verdict and a stored patch." },
+
   verification: {
     refused: "I did not approve an unverified answer. Self-check failed: {reason}. I need review or more information before presenting a result.",
     confidence: "Confidence: {value}.",
@@ -386,6 +388,8 @@ const ar: TeamMessages = {
     videoFailed: "تعذّر بدء مهمة فيديو الشرح {id}؛ لم يُنتَج أي فيديو.",
     designSaved: "حفظ يوسف التصميم الداخلي {id}؛ افتحه للمراجعة من /admin/designs.",
   },
+  prDrafts: { disabled: "إنشاء مسودّات PR متوقف بإعداد الخادم؛ لم تُنشأ أي مسودّة.", invalidAgent: "الوكيل غير معروف؛ لم تُنشأ مسودّة.", missingFields: "العنوان والملخص والمبررات والـ patch وقائمة الملفات مطلوبة.", patchTooLarge: "تجاوز الـ patch حد 200 كيلوبايت.", invalidPatch: "الـ patch ليس unified diff صالحاً أو لا تطابقه قائمة الملفات.", tooManyFiles: "لا يجوز للمسودّة تعديل أكثر من 12 ملفاً.", forbiddenPath: "يتضمن التعديل مساراً محظوراً أو خارج النطاق.", tooManyLines: "لا يجوز للمسودّة تعديل أكثر من 400 سطر.", commitTooLong: "تجاوزت رسالة الـ commit حد 200 محرف.", invalidBranch: "تعذّر إنشاء فرع مطابق للنمط agent/<agent>-<slug>.", dailyLimit: "بلغ هذا الوكيل الحد اليومي للمسودّات.", notConfigured: "إنشاء PR عبر GitHub غير مهيّأ؛ اضبط GITHUB_AGENT_TOKEN وGITHUB_AGENT_REPO.", notFound: "مسودّة PR غير موجودة.", githubFailed: "تعذّر على GitHub إنشاء الفرع وطلب السحب.", ownerNotified: "أُنشئ تصعيد لإشعار المالك ({id}).", ownerNotifyFailed: "تعذّر إرسال إشعار المالك.", secretInPatch: "يحتوي الـ patch على بيانات تشبه الأسرار؛ أزل بيانات الاعتماد قبل إنشاء المسودّة.", claimRequiresDraft: "لا يجوز للوكيل ادّعاء إعداد تغيير كود من دون نجاح حواجز النطاق ووجود patch محفوظ." },
+
   verification: {
     refused: "لم أعتمد جواباً غير متحقق منه. فشل فحص التحقق الذاتي: {reason}. سأحتاج إلى مراجعة أو معلومة إضافية قبل أن أقدّم نتيجة.",
     confidence: "الثقة: {value}.",
@@ -587,6 +591,8 @@ const fr: TeamMessages = {
     videoFailed: "La tâche vidéo d’explication {id} n’a pas démarré ; aucune vidéo n’a été produite.",
     designSaved: "Youssef a enregistré le design interne {id} ; ouvrez /admin/designs pour le relire.",
   },
+  prDrafts: { disabled: "La création de brouillons PR est désactivée par le serveur ; aucun brouillon n’a été créé.", invalidAgent: "Agent inconnu ; aucun brouillon créé.", missingFields: "Le titre, le résumé, la justification, le patch et la liste des fichiers sont requis.", patchTooLarge: "Le patch dépasse la limite de 200 Ko.", invalidPatch: "Le patch n’est pas un unified diff valide ou sa liste de fichiers ne correspond pas.", tooManyFiles: "Un brouillon ne peut modifier plus de 12 fichiers.", forbiddenPath: "Le patch contient un chemin interdit ou hors périmètre.", tooManyLines: "Un brouillon ne peut modifier plus de 400 lignes.", commitTooLong: "Le message de commit dépasse 200 caractères.", invalidBranch: "Impossible de créer une branche agent/<agent>-<slug> autorisée.", dailyLimit: "Cet agent a atteint sa limite quotidienne de brouillons.", notConfigured: "La création PR GitHub n’est pas configurée ; définissez GITHUB_AGENT_TOKEN et GITHUB_AGENT_REPO.", notFound: "Brouillon PR introuvable.", githubFailed: "GitHub n’a pas pu créer la branche et la pull request.", ownerNotified: "Escalade propriétaire créée ({id}).", ownerNotifyFailed: "La notification au propriétaire n’a pas pu être envoyée.", secretInPatch: "Le patch contient des données ressemblant à un secret ; retirez les identifiants avant de créer le brouillon.", claimRequiresDraft: "L’agent ne peut pas déclarer une modification préparée sans verdict de garde-fou positif et patch enregistré." },
+
   verification: {
     refused: "Je n’ai pas validé une réponse non vérifiée. L’auto-contrôle a échoué : {reason}. Une relecture ou une information supplémentaire est nécessaire.",
     confidence: "Confiance : {value}.",
