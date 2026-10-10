@@ -13,7 +13,7 @@ export const PR_DRAFT_FILE_LIMIT = 12;
 export const PR_DRAFT_LINE_LIMIT = 400;
 export const PR_DRAFT_COMMIT_LIMIT = 200;
 export const PR_DEPLOY_BRANCH = "agent-hub-latest";
-export type TeamPrDraft = { id: string; agent: TeamAgentId; agentId: TeamAgentId; title: string; summary: string; rationale: string; patch: string; branch: string; files: string[]; additions: number; deletions: number; commitMessage: string; verdict: string; status: "draft" | "pr_open" | "failed"; createdAt: string; prUrl?: string; prNumber?: number; ci: "unknown" | "pending"; error?: string };
+export type TeamPrDraft = { id: string; agent: TeamAgentId; agentId: TeamAgentId; title: string; summary: string; rationale: string; patch: string; branch: string; files: string[]; additions: number; deletions: number; commitMessage: string; verdict: string; status: "draft" | "branch_pushed" | "pr_open" | "failed"; createdAt: string; prUrl?: string; prNumber?: number; compareUrl?: string; notice?: string; ci: "unknown" | "pending"; error?: string };
 type Store = { records?: unknown[]; webCalls?: unknown[]; prDrafts?: TeamPrDraft[]; prDraftAudits?: Array<{ id: string; draftId: string; status: string; prUrl?: string; prNumber?: number; ci: string; error?: string; createdAt: string }> };
 type PatchFile = { path: string; lines: string[]; additions: number; deletions: number; hunkOpen: boolean; oldRemaining: number; newRemaining: number; hasOldHeader: boolean; hasNewHeader: boolean };
 type GithubPr = { html_url?: unknown; number?: unknown };
@@ -141,7 +141,7 @@ function slug(s: string) {
 async function store() { return readJsonFile<Store>(PR_DRAFT_STORE, { records: [], webCalls: [], prDrafts: [], prDraftAudits: [] }); }
 function safeString(value: unknown, max = 2_000) { return clean(value, max); }
 function safeDraft(draft: TeamPrDraft, includePatch = false): TeamPrDraft {
-  const result = { ...draft, id: safeString(draft.id, 160), title: safeString(draft.title, 180), summary: safeString(draft.summary, 1_000), rationale: safeString(draft.rationale, 1_200), branch: safeString(draft.branch, 120), files: draft.files.map((file) => safeString(file, 240)), commitMessage: safeString(draft.commitMessage, PR_DRAFT_COMMIT_LIMIT), verdict: safeString(draft.verdict, 300), createdAt: safeString(draft.createdAt, 80), prUrl: draft.prUrl ? safeString(draft.prUrl, 500) : undefined, error: draft.error ? safeString(draft.error, 200) : undefined };
+  const result = { ...draft, id: safeString(draft.id, 160), title: safeString(draft.title, 180), summary: safeString(draft.summary, 1_000), rationale: safeString(draft.rationale, 1_200), branch: safeString(draft.branch, 120), files: draft.files.map((file) => safeString(file, 240)), commitMessage: safeString(draft.commitMessage, PR_DRAFT_COMMIT_LIMIT), verdict: safeString(draft.verdict, 300), createdAt: safeString(draft.createdAt, 80), prUrl: draft.prUrl ? safeString(draft.prUrl, 500) : undefined, compareUrl: draft.compareUrl ? safeString(draft.compareUrl, 500) : undefined, notice: draft.notice ? safeString(draft.notice, 600) : undefined, error: draft.error ? safeString(draft.error, 200) : undefined };
   if (includePatch) result.patch = stripAgentToken(draft.patch);
   else delete (result as Partial<TeamPrDraft>).patch;
   return result;
@@ -190,11 +190,16 @@ export async function draftPullRequest(input: { agentId: string; title: string; 
 
 class GithubRequestError extends Error {
   readonly status: number;
-  constructor(status: number) { super(`GitHub API failed (${status}).`); this.status = status; }
+  readonly responseMessage: string;
+  constructor(status: number, responseMessage = "") { super(`GitHub API failed (${status}).`); this.status = status; this.responseMessage = stripAgentToken(responseMessage); }
 }
 async function gh<T>(repo: string, token: string, endpoint: string, init?: RequestInit): Promise<T> {
   const response = await (fetchOverride ?? fetch)(`https://api.github.com/repos/${repo}${endpoint}`, { ...init, headers: { accept: "application/vnd.github+json", authorization: `Bearer ${token}`, "x-github-api-version": "2022-11-28", ...(init?.body ? { "content-type": "application/json" } : {}) } });
-  if (!response.ok) throw new GithubRequestError(response.status);
+  if (!response.ok) {
+    let responseMessage = "";
+    try { const body = await response.text(); const parsed = JSON.parse(body) as { message?: unknown }; responseMessage = typeof parsed.message === "string" ? parsed.message : body; } catch { /* The response body is optional diagnostic information. */ }
+    throw new GithubRequestError(response.status, responseMessage);
+  }
   return response.json() as Promise<T>;
 }
 function applyPatch(original: string, file: PatchFile) {
@@ -231,6 +236,7 @@ async function createDraftPullRequestInternal(id: string) {
   if (!draft) return { ok: false as const, status: 404, error: tr("en").notFound, errorAr: tr("ar").notFound };
   if (!storedDraftGuard(draft)) return { ok: false as const, status: 422, error: tr("en").invalidPatch, errorAr: tr("ar").invalidPatch };
   if (draft.status === "pr_open" && draft.prUrl) return { ok: true as const, draft: safeDraft(draft, true) };
+  if (draft.status === "branch_pushed" && draft.compareUrl) return { ok: true as const, draft: safeDraft(draft, true), compareUrl: draft.compareUrl, notice: draft.notice ?? tr("ar").prPermissionNotice };
   try {
     if (draft.status === "failed") {
       const existing = await findOpenDraftPr(repo, token, draft);
@@ -256,7 +262,17 @@ async function createDraftPullRequestInternal(id: string) {
     const commit = await gh<{ sha: string }>(repo, token, "/git/commits", { method: "POST", body: JSON.stringify({ message: draft.commitMessage, tree: tree.sha, parents: [baseSha] }) });
     await gh(repo, token, `/git/refs/heads/${draft.branch}`, { method: "PATCH", body: JSON.stringify({ sha: commit.sha, force: false }) });
     const body = `## Agent draft evidence\n\n- Files: ${draft.files.join(", ")}\n- Changes: +${draft.additions} / -${draft.deletions}\n- Guardrail verdict: ${safeString(draft.verdict, 300)}\n- CI: GitHub Actions CI is the source of truth. This action neither merges nor deploys.\n\n### Summary\n${safeString(draft.summary, 1_000)}\n\n### Agent rationale\n${safeString(draft.rationale, 1_200)}`;
-    const pr = await gh<{ html_url: string; number: number }>(repo, token, "/pulls", { method: "POST", body: JSON.stringify({ title: `[${TEAM_AGENT_NAMES_AR[draft.agentId]}] ${safeString(draft.title, 180)}`, head: draft.branch, base: PR_DEPLOY_BRANCH, body }) });
+    let pr: { html_url: string; number: number };
+    try {
+      pr = await gh<{ html_url: string; number: number }>(repo, token, "/pulls", { method: "POST", body: JSON.stringify({ title: `[${TEAM_AGENT_NAMES_AR[draft.agentId]}] ${safeString(draft.title, 180)}`, head: draft.branch, base: PR_DEPLOY_BRANCH, body }) });
+    } catch (error) {
+      if (!(error instanceof GithubRequestError) || error.status !== 403 || !/Resource not accessible by integration/i.test(error.responseMessage)) throw error;
+      const compareUrl = `https://github.com/${repo}/compare/${PR_DEPLOY_BRANCH}...${draft.branch}?expand=1`;
+      const notice = tr("ar").prPermissionNotice;
+      const pushed = await saveDraft(id, (current) => ({ ...current, status: "branch_pushed", compareUrl, notice, prUrl: undefined, prNumber: undefined, error: undefined }));
+      await appendPrDraftAudit(pushed);
+      return { ok: true as const, draft: safeDraft(pushed, true), compareUrl, notice };
+    }
     if (typeof pr.html_url !== "string" || typeof pr.number !== "number") throw Error("GitHub returned an invalid PR.");
     const updated = await saveDraft(id, (current) => ({ ...current, status: "pr_open", prUrl: stripAgentToken(pr.html_url), prNumber: pr.number, ci: "pending", error: undefined }));
     await appendPrDraftAudit(updated);
