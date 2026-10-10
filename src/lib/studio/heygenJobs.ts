@@ -3,6 +3,7 @@ import { createId } from "../ids";
 import { getSampleLesson } from "./sampleLessons";
 import { officialExamFourPhaseLesson } from "./seedLesson";
 import { parseLessonTimeline, type LessonTimeline } from "./timeline";
+import { resolveContentLanguage } from "@/lib/contentLanguage";
 import {
   DEMO_AVATAR_VIDEO,
   DEMO_POSTER,
@@ -72,7 +73,7 @@ async function writeJobStore(store: HeyGenJobStore): Promise<HeyGenJobStore> {
 }
 
 function publicJob(job: HeyGenJobRecord): HeyGenJobRecord {
-  return { ...job };
+  return { ...job, language: resolveContentLanguage(job.language) as HeyGenLanguage };
 }
 
 export function playerPathForJob(job: Pick<HeyGenJobRecord, "id" | "lessonId" | "studentEnabled">) {
@@ -176,7 +177,7 @@ export async function getLessonOverlay(lessonId: string): Promise<StudioLessonOv
   return store.lessons[lessonId];
 }
 
-export async function upsertHeyGenJob(input: Omit<HeyGenJobRecord, "createdAt" | "updatedAt"> & { id?: string }): Promise<HeyGenJobRecord> {
+export async function upsertHeyGenJob(input: Omit<HeyGenJobRecord, "createdAt" | "updatedAt" | "language"> & { id?: string; language?: HeyGenLanguage }): Promise<HeyGenJobRecord> {
   return withDocumentLock(JOBS_FILE, async () => {
     const store = await readJobStore();
     const now = new Date().toISOString();
@@ -185,6 +186,7 @@ export async function upsertHeyGenJob(input: Omit<HeyGenJobRecord, "createdAt" |
       const next: HeyGenJobRecord = {
         ...existing,
         ...input,
+        language: resolveContentLanguage(input.language ?? existing.language) as HeyGenLanguage,
         id: existing.id,
         createdAt: existing.createdAt,
         updatedAt: now,
@@ -197,6 +199,7 @@ export async function upsertHeyGenJob(input: Omit<HeyGenJobRecord, "createdAt" |
     }
     const record: HeyGenJobRecord = {
       ...input,
+      language: resolveContentLanguage(input.language) as HeyGenLanguage,
       id: input.id || createId("heygen"),
       createdAt: now,
       updatedAt: now,
@@ -236,14 +239,15 @@ export function newQueuedJob(input: {
   script: string;
   notes: string;
   mathExamples: string;
-  language: HeyGenLanguage;
+  language?: HeyGenLanguage;
   speed: number;
   timelineJson?: string;
   demo: boolean;
 }): HeyGenJobRecord {
   const now = new Date().toISOString();
+  const language = resolveContentLanguage(input.language) as HeyGenLanguage;
   const id = input.demo
-    ? deterministicDemoVideoId(input.lessonId, input.script, input.language)
+    ? deterministicDemoVideoId(input.lessonId, input.script, language)
     : createId("heygen");
   return {
     id,
@@ -252,7 +256,7 @@ export function newQueuedJob(input: {
     script: input.script,
     notes: input.notes,
     mathExamples: input.mathExamples,
-    language: input.language,
+    language,
     speed: input.speed,
     status: "queued",
     heygenVideoId: input.demo ? id : undefined,

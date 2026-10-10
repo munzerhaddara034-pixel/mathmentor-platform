@@ -121,6 +121,7 @@ export const MOHAMED_ACTIONS_PROTOCOL_AR = `## بروتوكول التسجيل �
 
 export const YOUSSEF_ACTIONS_PROTOCOL_AR = `## بروتوكول التصميم الآلي (تقني — مضاف من المنصة)
 عند طلب صفحة أو قسم ويب من يوسف، أضف إلى JSON الرد مفتاح design أو أرسل كتلة \`\`\`ys-actions بهذا الشكل:
-{"design":{"request":"صفحة الأسعار"}}
-- المنصة تولّد وتحفظ وثيقة HTML واحدة مستقلة مع CSS inline واتجاه RTL، وتحفظ brief التصميم وتعرض المعاينة للطاقم في /admin/designs فقط.
+{"design":{"request":"pricing page","language":"en"}}
+- اللغة الافتراضية للإنتاج هي English (LESSON_CONTENT_DEFAULT_LANGUAGE، وتُستخدم en إن لم تُضبط). أرسل language=ar أو language=fr فقط عند طلب صريح.
+- المنصة تولّد وتحفظ وثيقة HTML واحدة مستقلة مع CSS inline واتجاه اللغة المختارة، وتحفظ brief التصميم واللغة وتعرض المعاينة للطاقم في /admin/designs فقط.
 - لا تدّعِ النشر أو الإرسال خارج المنصة؛ التصميم يبقى مسودة داخلية بانتظار موافقة منذر.`;

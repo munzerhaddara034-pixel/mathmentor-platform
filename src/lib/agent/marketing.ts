@@ -13,6 +13,7 @@ import { getHeyGenJob, newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygen
 import { INSTRUCTOR_AR, INSTRUCTOR_EN } from "@/lib/pedagogy/lebanese";
 import { marketingScriptsFor, parseAudience } from "./scripts";
 import { getCampaign, patchCampaign, saveCampaign } from "./store";
+import { resolveContentLanguage } from "@/lib/contentLanguage";
 import type {
   AgentAudience,
   MarketingCampaign,
@@ -50,7 +51,7 @@ export async function createMarketingCampaign(input: {
   try {
     const audience: AgentAudience = parseAudience(input.audience);
     const scripts = marketingScriptsFor(audience);
-    const language: HeyGenLanguage = input.language === "en" || input.language === "fr" ? input.language : "ar";
+    const language: HeyGenLanguage = resolveContentLanguage(input.language);
     const narration = language === "en" ? scripts.en : scripts.ar;
     const demo = !hasHeyGenKey();
     const title =

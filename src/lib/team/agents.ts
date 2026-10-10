@@ -15,6 +15,7 @@ import { looksLikeApprovalText, namedBranch } from "./developer";
 import { TeamLlmUnavailableError, parseJsonObject, stringField, type LlmPart, type LlmTurn } from "./gemini";
 import { FORBIDDEN_BRANCHES, isProtectedBranch, isValidBranchName, teamGithubConfig } from "./github";
 import { generateImage, imageProviderAvailable } from "./images";
+import { resolveContentLanguage } from "@/lib/contentLanguage";
 import { applyMohamedActions } from "./mohamedActions";
 import { applyYoussefActions } from "./youssefActions";
 import { MOHAMED_SYSTEM_PROMPT_AR, SAMI_SYSTEM_PROMPT_AR, YASMINE_SYSTEM_PROMPT_AR } from "./prompts";
@@ -168,7 +169,8 @@ async function runMohamed(turns: LlmTurn[], ctx: string, channel: TeamChannelId,
 }
 
 const SAMI_PROTOCOL = `## بروتوكول الرد (تقني — مضاف من المنصة)
-أجب بـ JSON فقط: {"reply":"ردّك العربي الكامل (المقترحات، المقاسات، الألوان، النصوص، طلب الموافقة)","imagePrompt":"وصف إنكليزي دقيق لصورة المعاينة أو \\"\\"","generateImage":true|false}
+أجب بـ JSON فقط: {"reply":"ردّك العربي الكامل (المقترحات، المقاسات، الألوان، النصوص، طلب الموافقة)","imagePrompt":"وصف إنكليزي دقيق لصورة المعاينة أو \\"\\"","generateImage":true|false,"language":"en|ar|fr"}
+- لغة الإنتاج الافتراضية للتصميم والـ imagePrompt هي English (LESSON_CONTENT_DEFAULT_LANGUAGE، وen إن لم تُضبط). استخدم ar أو fr فقط عند طلب صريح، وسجّل language في الرد.
 - generateImage=true فقط إذا طُلب تصميم/صورة/معاينة بصرية. الصورة تبقى معاينة داخلية للمراجعة ولا تُنشر.
 - في imagePrompt: اكتب النص العربي المطلوب على التصميم بين علامتي تنصيص، والعلامة "Munzer Haddara / منذر حداره" فقط.
 - قائمة تحقق قبل الإرسال: الأرقام تُكتب كاملة حرفياً (واتساب 96176532421، Whish 96170772968)، اسم العلامة «منذر حداره / Munzer Haddara» ظاهر في كل مقترح، النص العربي RTL، وجملة صريحة أنك لن تنشر وأن النشر يحتاج موافقة منذر على التصميم النهائي وعلى النشر.
@@ -197,6 +199,7 @@ async function runSami(
   const loop = await runTeamAgentTurn({ agent: "sami", intent: requestText, system, turns });
   const raw = loop.text;
   const parsed = parseJsonObject(raw);
+  const language = resolveContentLanguage(parsed?.language);
   const actionResult = loop.tools.includes("create_design") ? { text: raw, recorded: [] } : await applyYoussefActions(raw, requestText);
   const reply = actionResult.text || stringField(parsed, "reply") || raw;
   const imagePrompt = stringField(parsed, "imagePrompt").trim();
@@ -211,7 +214,7 @@ async function runSami(
     const timer = setTimeout(() => controller.abort(), SAMI_IMAGE_ATTEMPT_TIMEOUT_MS);
     if (typeof timer.unref === "function") timer.unref();
     try {
-      const result = await generateImage(imagePrompt, { signal: controller.signal });
+      const result = await generateImage(imagePrompt, { signal: controller.signal, language });
       if (result.ok) {
         const ext = result.image.mimeType.includes("jpeg") ? "jpg" : "png";
         const ref: TeamAttachmentRef = {

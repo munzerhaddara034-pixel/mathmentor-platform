@@ -1,3 +1,5 @@
+import { isLocale, type Locale } from "./i18n/config";
+
 export type NoteBlock =
   | { type: "h2"; text: string }
   | { type: "h3"; text: string }
@@ -7,10 +9,10 @@ export type NoteBlock =
   | { type: "example"; title: string; given: string; tex?: string; steps: string[]; result: string }
   | { type: "mistake"; title: string; wrong: string; right: string };
 
-export type LessonLang = "en" | "fr";
+export type LessonLang = Locale;
 
 export const DEFAULT_LESSON_LANG: LessonLang = "en";
 
 export function isLessonLang(value: string | null | undefined): value is LessonLang {
-  return value === "en" || value === "fr";
+  return isLocale(value);
 }

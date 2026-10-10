@@ -27,7 +27,7 @@ export default async function PrintResourcePage({
       <main className="shell print-sheet" dir={dir}>
         <p className="eyebrow">Protected view · academy notes, not a textbook scan</p>
         <h1>
-          {lesson.gradeLabel} · {pack ? (lang === "fr" ? pack.titleFr : pack.titleEn) : lesson.arabicTitle || lesson.title}
+            {lesson.gradeLabel} · {pack ? (lang === "fr" ? pack.titleFr : lang === "ar" ? pack.titleAr : pack.titleEn) : lesson.arabicTitle || lesson.title}
         </h1>
         <p className="muted">On-platform view. Printing carries a watermark. Direct file download is not offered.</p>
         {pack ? (

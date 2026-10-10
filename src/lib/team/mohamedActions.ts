@@ -9,6 +9,7 @@ import { createId } from "@/lib/ids";
 import { teamMessages } from "@/lib/i18n/ns/team";
 import { parseJsonObject } from "./gemini";
 import { sendOwnerWhatsApp } from "./ownerWhatsApp";
+import { resolveContentLanguage } from "@/lib/contentLanguage";
 
 const BLOCK_RE = /```mm-actions\s*([\s\S]*?)```/;
 
@@ -71,19 +72,19 @@ function isNarrationSolution(value: unknown): value is VideoSolution {
 }
 
 /** Uses the solver's Arabic avatar script, with a readable step-by-step fallback. */
-export function narrationFromSolution(solution: NarrationSolution): string {
-  const script = solution.avatarScript?.ar?.trim();
+export function narrationFromSolution(solution: NarrationSolution, language: HeyGenLanguage = "ar"): string {
+  const script = solution.avatarScript?.[language]?.trim();
   if (script) return script.slice(0, 4000);
   const steps = solution.steps
     .map((step, index) => {
-      const title = step.titleAr?.trim() || step.title.trim() || `الخطوة ${index + 1}`;
-      const explanation = step.explanationAr?.trim() || step.explanationEn.trim() || step.explanationFr.trim();
+      const title = (language === "ar" ? step.titleAr : language === "fr" ? step.titleFr : step.title)?.trim() || step.title.trim() || `Step ${index + 1}`;
+      const explanation = (language === "ar" ? step.explanationAr : language === "fr" ? step.explanationFr : step.explanationEn)?.trim() || step.explanationEn.trim() || step.explanationFr.trim() || step.explanationAr?.trim() || "";
       const math = step.latex.trim() ? `\n\(${step.latex.trim()}\)` : "";
       return `${index + 1}. ${title}: ${explanation}${math}`.trim();
     })
     .filter(Boolean);
   const answer = solution.finalAnswer.trim();
-  return [...steps, answer ? `الجواب النهائي: ${answer}` : ""].filter(Boolean).join("\n\n").slice(0, 4000);
+  return [...steps, answer ? `${language === "ar" ? "الجواب النهائي" : language === "fr" ? "Réponse finale" : "Final answer"}: ${answer}` : ""].filter(Boolean).join("\n\n").slice(0, 4000);
 }
 
 /** Starts one real HeyGen job; no demo job is claimed when the provider is not configured. */
@@ -91,10 +92,11 @@ export async function startMohamedExplanationVideo(input: ExplanationVideoReques
   if (!hasHeyGenKey()) {
     return { ok: false, configured: false, detailAr: actionText("videoNotConfigured") };
   }
+  const language = resolveContentLanguage(input.language) as HeyGenLanguage;
   const suppliedQuestion = str(input.question, 2000);
-  const solution = input.solution ?? (suppliedQuestion ? await runMathSolver({ question: suppliedQuestion, language: "ar" }) : undefined);
+  const solution = input.solution ?? (suppliedQuestion ? await runMathSolver({ question: suppliedQuestion, language }) : undefined);
   if (!solution) return { ok: false, configured: hasHeyGenKey(), detailAr: actionText("videoNoQuestion") };
-  const script = narrationFromSolution(solution);
+  const script = narrationFromSolution(solution, language);
   if (!script) return { ok: false, configured: hasHeyGenKey(), detailAr: actionText("videoNoQuestion") };
 
   const lessonId = `team-explanation-${createId("lesson")}`;
@@ -106,7 +108,7 @@ export async function startMohamedExplanationVideo(input: ExplanationVideoReques
       script,
       notes: solution.summary ?? "",
       mathExamples: solution.finalAnswerLatex ?? "",
-      language: input.language ?? "ar",
+      language,
       speed: 1,
       timelineJson: JSON.stringify(solution.timeline),
       demo: false,
@@ -115,7 +117,7 @@ export async function startMohamedExplanationVideo(input: ExplanationVideoReques
   try {
     const heygen = await createAvatarTalkingVideo({
       script,
-      language: input.language ?? "ar",
+      language,
       title,
       speed: 1,
       callbackId: job.id,
@@ -221,7 +223,7 @@ export async function applyMohamedActions(reply: string, requestText = ""): Prom
         question,
         solution,
         title: str(item.title, 160) || undefined,
-        language: item.language === "en" || item.language === "fr" || item.language === "ar" ? item.language : "ar",
+        language: resolveContentLanguage(item.language) as HeyGenLanguage,
       });
       recorded.push(result.detailAr);
     } catch {

@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { StoryboardScene } from "@/lib/types";
+import type { LessonLang } from "@/lib/lessonNotes";
 
-function pickVoice(lang: "en" | "fr") {
+function pickVoice(lang: LessonLang) {
   const prefix = lang === "fr" ? "fr" : "en";
   const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(prefix));
   if (lang === "fr") {
@@ -25,7 +26,7 @@ export function ClassroomStudio({
   scenes: StoryboardScene[];
   heading: string;
   watermark?: string;
-  lang?: "en" | "fr";
+  lang?: LessonLang;
 }) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);

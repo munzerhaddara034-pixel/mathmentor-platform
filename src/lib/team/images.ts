@@ -5,6 +5,8 @@
  *  - SAMI_IMAGE_GEN=off or no key → prompt only (the chat shows the prompt + a clear description).
  */
 import { geminiApiKey, openaiSolverKey } from "@/lib/solver/llm";
+import { defaultContentLanguage, resolveContentLanguage } from "@/lib/contentLanguage";
+import type { Locale } from "@/lib/i18n/config";
 import { redactSecrets } from "./secrets";
 
 type ImageProvider = "openai" | "gemini";
@@ -79,6 +81,15 @@ function apiErrorMessage(body: string): string {
 }
 
 export type GeneratedImage = { bytes: Buffer; mimeType: string; provider: string };
+
+export type ImageGenerationOptions = { signal?: AbortSignal; language?: Locale };
+
+/** Keeps the production image brief in English unless a request explicitly selects AR/FR. */
+export function imagePromptForLanguage(prompt: string, language: Locale = defaultContentLanguage()): string {
+  const clean = prompt.trim();
+  if (resolveContentLanguage(language) !== "en") return clean;
+  return `Create this MathMentor visual design with all specification text in English. Preserve mathematical notation and the requested brand constraints.\n\n${clean}`;
+}
 
 export function imageProviderAvailable(): ImageProvider | null {
   if (process.env.SAMI_IMAGE_GEN === "off") return null;
@@ -155,13 +166,14 @@ async function viaOpenAi(prompt: string, signal?: AbortSignal): Promise<Generate
   return { bytes: Buffer.from(b64, "base64"), mimeType: "image/png", provider: "openai:gpt-image-1" };
 }
 
-export async function generateImage(prompt: string, options: { signal?: AbortSignal } = {}): Promise<ImageGenerationResult> {
+export async function generateImage(prompt: string, options: ImageGenerationOptions = {}): Promise<ImageGenerationResult> {
+  const generationPrompt = imagePromptForLanguage(prompt, resolveContentLanguage(options.language));
   const provider = imageProviderAvailable();
   if (!provider) return { ok: false, reason: "provider", message: "No image-generation key configured." };
   // A quota block is process-local: subsequent turns avoid another doomed provider request until the TTL expires.
   if (imageProviderCoolingDown(provider)) return { ok: false, reason: "quota" };
   try {
-    const image = provider === "openai" ? await viaOpenAi(prompt, options.signal) : await viaGemini(prompt, options.signal);
+    const image = provider === "openai" ? await viaOpenAi(generationPrompt, options.signal) : await viaGemini(generationPrompt, options.signal);
     return { ok: true, image };
   } catch (error) {
     const failure = error instanceof ImageProviderFailure

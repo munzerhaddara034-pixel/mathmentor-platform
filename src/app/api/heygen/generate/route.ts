@@ -11,6 +11,7 @@ import {
 } from "@/lib/studio/heygen";
 import { getHeyGenJob, newQueuedJob, upsertHeyGenJob } from "@/lib/studio/heygenJobs";
 import { lessonLanguageSchema } from "@/lib/studio/timeline";
+import { resolveContentLanguage } from "@/lib/contentLanguage";
 
 export const runtime = "nodejs";
 
@@ -18,7 +19,7 @@ const bodySchema = z.object({
   script: z.string().min(1),
   notes: z.string().optional(),
   mathExamples: z.string().optional(),
-  language: lessonLanguageSchema.default("en"),
+  language: lessonLanguageSchema.optional(),
   speed: z.number().optional(),
   lessonId: z.string().min(1).default("leb-term-func-01"),
   title: z.string().optional(),
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
   }
 
   const data = parsed.data;
-  const language = data.language as HeyGenLanguage;
+  const language = resolveContentLanguage(data.language) as HeyGenLanguage;
   const speed = clampHeyGenSpeed(data.speed);
   const demo = !hasHeyGenKey();
   const title = data.title?.trim() || `MathMentor · ${data.lessonId}`;

@@ -43,10 +43,13 @@ export type VideoLessonPack = {
   trackLabelFr: string;
   videoEn: string;
   videoFr: string;
+  videoAr?: string;
   notesEn: NoteBlock[];
   notesFr: NoteBlock[];
+  notesAr?: NoteBlock[];
   fallbackEn: StoryboardScene[];
   fallbackFr: StoryboardScene[];
+  fallbackAr?: StoryboardScene[];
   practiceHref: string;
   contestHref: string;
   contestLabelEn: string;
@@ -131,29 +134,35 @@ export function getVideoLessonPack(idOrSlug: string): VideoLessonPack | undefine
 }
 
 export function notesForPack(pack: VideoLessonPack, lang: LessonLang): NoteBlock[] {
-  return lang === "fr" ? pack.notesFr : pack.notesEn;
+  if (lang === "fr") return pack.notesFr;
+  if (lang === "ar" && pack.notesAr?.length) return pack.notesAr;
+  return pack.notesEn;
 }
 
 export function scenesForPack(pack: VideoLessonPack, lang: LessonLang, lesson?: AcademyLesson): StoryboardScene[] {
   if (lang === "fr") return pack.fallbackFr;
+  if (lang === "ar" && pack.fallbackAr?.length) return pack.fallbackAr;
   if (pack.fallbackEn.length) return pack.fallbackEn;
   return lesson ? classroomScenes(lesson) : [];
 }
 
 export function copyForLang(pack: VideoLessonPack, lang: LessonLang) {
   const fr = lang === "fr";
+  const ar = lang === "ar";
   return {
-    title: fr ? pack.titleFr : pack.titleEn,
-    trackLabel: fr ? pack.trackLabelFr : pack.trackLabelEn,
-    contestLabel: fr ? pack.contestLabelFr : pack.contestLabelEn,
+    title: fr ? pack.titleFr : ar ? pack.titleAr : pack.titleEn,
+    trackLabel: fr ? pack.trackLabelFr : ar ? pack.trackLabelAr : pack.trackLabelEn,
+    contestLabel: fr ? pack.contestLabelFr : ar ? "مسابقة الدرس" : pack.contestLabelEn,
     afterVideo: fr
       ? "Après la vidéo : relire le tableau, puis l'entraînement ou le concours."
-      : "After the video: reread the board, then practice or the contest.",
-    classroom: fr ? "Page de classe" : "Classroom page",
-    exam: fr ? "Examen de la leçon" : "Lesson exam",
-    practice: fr ? "Entraînement" : "Practice",
-    finished: fr ? "Leçon terminée" : "I finished this lesson",
-    saved: fr ? "Enregistré" : "Saved to your path",
+      : ar
+        ? "بعد الفيديو: أعد قراءة اللوح، ثم انتقل إلى التدريب أو المسابقة."
+        : "After the video: reread the board, then practice or the contest.",
+    classroom: fr ? "Page de classe" : ar ? "صفحة الصف" : "Classroom page",
+    exam: fr ? "Examen de la leçon" : ar ? "اختبار الدرس" : "Lesson exam",
+    practice: fr ? "Entraînement" : ar ? "تدريب" : "Practice",
+    finished: fr ? "Leçon terminée" : ar ? "أنهيت هذا الدرس" : "I finished this lesson",
+    saved: fr ? "Enregistré" : ar ? "حُفظ في مسارك" : "Saved to your path",
   };
 }
 

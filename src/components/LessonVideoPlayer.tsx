@@ -12,6 +12,7 @@ import { lessonsMessages } from "@/lib/i18n/ns/lessons";
 export function LessonVideoPlayer({
   videoUrl,
   videoUrlFr,
+  videoUrlAr,
   heading,
   scenes,
   scenesFr,
@@ -21,6 +22,7 @@ export function LessonVideoPlayer({
 }: {
   videoUrl?: string;
   videoUrlFr?: string;
+  videoUrlAr?: string;
   heading: string;
   scenes: StoryboardScene[];
   scenesFr?: StoryboardScene[];
@@ -36,8 +38,8 @@ export function LessonVideoPlayer({
     onLangChange?.(next);
   };
 
-  const bilingual = Boolean(videoUrl && videoUrlFr);
-  const activeUrl = currentLang === "fr" && videoUrlFr ? videoUrlFr : videoUrl;
+  const hasAlternateVideo = Boolean(videoUrl && (videoUrlFr || videoUrlAr));
+  const activeUrl = currentLang === "fr" && videoUrlFr ? videoUrlFr : currentLang === "ar" && videoUrlAr ? videoUrlAr : videoUrl;
   const media = resolveLessonVideo({ videoUrl: activeUrl });
   const activeScenes = currentLang === "fr" && scenesFr?.length ? scenesFr : scenes;
 
@@ -68,7 +70,6 @@ export function LessonVideoPlayer({
   const toggle = (
     <LanguageToggle
       lang={currentLang}
-      disabled={!bilingual && media.kind !== "storyboard"}
       onChange={(next) => {
         rememberPosition();
         setLang(next);
@@ -100,6 +101,7 @@ export function LessonVideoPlayer({
             key={activeUrl}
             className="lesson-media"
             src={media.src}
+            lang={currentLang}
             controls
             controlsList="nodownload noplaybackrate"
             disablePictureInPicture
@@ -110,6 +112,7 @@ export function LessonVideoPlayer({
           <iframe
             className="lesson-media"
             title={heading}
+            lang={currentLang}
             src={media.src}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             allowFullScreen
@@ -121,7 +124,7 @@ export function LessonVideoPlayer({
           <bdi dir="ltr">{currentLang.toUpperCase()}</bdi> · <bdi dir="ltr">{media.providerLabel}</bdi> · {t.protectedTag}
         </p>
       </div>
-      {bilingual ? (
+      {hasAlternateVideo ? (
         <p className="muted" style={{ marginBlockStart: 8 }}>
           {t.langHint}
         </p>

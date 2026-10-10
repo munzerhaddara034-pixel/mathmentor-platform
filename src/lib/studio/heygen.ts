@@ -11,6 +11,7 @@
 
 import { createHash } from "node:crypto";
 import { DEMO_AVATAR_VIDEO, DEMO_POSTER } from "./heygenClient";
+import { defaultContentLanguage, resolveContentLanguage } from "@/lib/contentLanguage";
 
 export const HEYGEN_GENERATE_URL = "https://api.heygen.com/v2/video/generate";
 export const HEYGEN_STATUS_PATH = "/v1/video_status.get";
@@ -22,7 +23,7 @@ export type HeyGenLanguage = "en" | "fr" | "ar";
 
 export type CreateAvatarVideoInput = {
   script: string;
-  language: HeyGenLanguage;
+  language?: HeyGenLanguage;
   title?: string;
   avatarId?: string;
   voiceId?: string;
@@ -87,6 +88,10 @@ export function heygenLocale(language: HeyGenLanguage): string {
   return "en-US";
 }
 
+export function defaultHeyGenLanguage(): HeyGenLanguage {
+  return defaultContentLanguage();
+}
+
 export function resolveHeyGenVoiceId(language: HeyGenLanguage, explicit?: string): string {
   if (explicit?.trim()) return explicit.trim();
   if (language === "fr") return process.env.HEYGEN_VOICE_ID_FR?.trim() || process.env.HEYGEN_VOICE_ID?.trim() || "";
@@ -121,8 +126,9 @@ function demoJob(script: string, language: HeyGenLanguage, videoId?: string): He
 }
 
 export function buildHeyGenGeneratePayload(input: CreateAvatarVideoInput): HeyGenGeneratePayload {
+  const language: HeyGenLanguage = resolveContentLanguage(input.language);
   const avatarId = input.avatarId || process.env.HEYGEN_AVATAR_ID?.trim() || "";
-  const voiceId = resolveHeyGenVoiceId(input.language, input.voiceId);
+  const voiceId = resolveHeyGenVoiceId(language, input.voiceId);
   const speed = clampHeyGenSpeed(input.speed);
   const character = avatarId
     ? { type: "avatar" as const, avatar_id: avatarId, avatar_style: "normal" as const }
@@ -135,7 +141,7 @@ export function buildHeyGenGeneratePayload(input: CreateAvatarVideoInput): HeyGe
     type: "text",
     input_text: input.script.slice(0, 4000),
     speed,
-    locale: heygenLocale(input.language),
+    locale: heygenLocale(language),
   };
   if (voiceId) voice.voice_id = voiceId;
 
@@ -192,10 +198,12 @@ export function mapHeyGenStatus(value: unknown): HeyGenVideoStatus {
  * Stubs locally when the API key is missing — no network call.
  */
 export async function createAvatarTalkingVideo(input: CreateAvatarVideoInput): Promise<HeyGenVideoJob> {
-  if (!hasHeyGenKey()) return demoJob(input.script, input.language, input.callbackId);
+  const language: HeyGenLanguage = resolveContentLanguage(input.language);
+  if (!hasHeyGenKey()) return demoJob(input.script, language, input.callbackId);
 
   const body = buildHeyGenGeneratePayload({
     ...input,
+    language,
     callbackUrl: input.callbackUrl ?? heygenCallbackUrl(),
   });
 

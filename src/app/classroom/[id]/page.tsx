@@ -11,6 +11,7 @@ import { watermarkText } from "@/lib/videoSecurity";
 import type { ProgressEntry, StoreData } from "@/lib/types";
 import Link from "next/link";
 import { useI18n } from "@/components/i18n/I18nProvider";
+import { saveLocale } from "@/components/i18n/LocaleSwitcher";
 import { fmt } from "@/lib/i18n/format";
 import { classroomMessages } from "@/lib/i18n/ns/classroom";
 import { pickTitle } from "@/lib/i18n/pick";
@@ -86,6 +87,10 @@ export default function ClassroomLessonPage() {
   const hasPilotNotes = lesson.id === GRADE_12_LS_LIMITS_LESSON_ID;
   const copy = pack ? copyForLang(pack, lang) : null;
   const pageDir = pack ? "ltr" : "rtl";
+  const changeLanguage = (next: LessonLang) => {
+    setLang(next);
+    void saveLocale(next);
+  };
 
   return (
     <main className="shell protected-lesson mm-mobile-stack" dir={pageDir} onContextMenu={(event) => event.preventDefault()}>
@@ -109,7 +114,7 @@ export default function ClassroomLessonPage() {
         scenesFr={pack?.fallbackFr}
         watermark={watermark}
         lang={lang}
-        onLangChange={setLang}
+        onLangChange={changeLanguage}
       />
       {!lesson.videoUrl ? (
         <p className="muted" style={{ marginTop: 8 }}>

@@ -6,6 +6,7 @@ import { LessonNotes } from "@/components/LessonNotes";
 import { LessonVideoPlayer } from "@/components/LessonVideoPlayer";
 import { Ltr } from "@/components/ui/Ltr";
 import { useI18n } from "@/components/i18n/I18nProvider";
+import { saveLocale } from "@/components/i18n/LocaleSwitcher";
 import { useNs } from "@/components/i18n/useNs";
 import { lessonsMessages } from "@/lib/i18n/ns/lessons";
 import { getAcademyLesson } from "@/lib/academyLessons";
@@ -29,15 +30,19 @@ export function LessonWatchView({
 }) {
   const { locale, m } = useI18n();
   const t = useNs(lessonsMessages);
-  const [lang, setLang] = useState<LessonLang>(DEFAULT_LESSON_LANG);
+  const [lang, setLang] = useState<LessonLang>(locale || DEFAULT_LESSON_LANG);
   const lesson = academyLessonForPack(pack) ?? getAcademyLesson(pack.lessonId);
   const copy = copyForLang(pack, lang);
   const watermark = watermarkText(watermarkName ?? m.result.watermarkGuest, "76532421");
+  const changeLanguage = (next: LessonLang) => {
+    setLang(next);
+    void saveLocale(next);
+  };
 
   return (
     <main className="shell mm-watch">
-      <p className="eyebrow">{locale === "ar" ? pack.trackLabelAr : locale === "fr" ? pack.trackLabelFr : pack.trackLabelEn}</p>
-      <h1>{locale === "ar" ? pack.titleAr : locale === "fr" ? pack.titleFr : pack.titleEn}</h1>
+      <p className="eyebrow">{copy.trackLabel}</p>
+      <h1>{copy.title}</h1>
       <p className="muted">
         {locale === "ar" ? (
           <>
@@ -46,7 +51,7 @@ export function LessonWatchView({
         ) : null}
         {t.watchLead}
       </p>
-      <div dir="ltr" lang={lang}>
+      <div dir={lang === "ar" ? "rtl" : "ltr"} lang={lang}>
         <LessonVideoPlayer
           videoUrl={pack.videoEn}
           videoUrlFr={pack.videoFr}
@@ -55,7 +60,7 @@ export function LessonWatchView({
           scenesFr={pack.fallbackFr}
           watermark={watermark}
           lang={lang}
-          onLangChange={setLang}
+          onLangChange={changeLanguage}
         />
         <LessonNotes blocks={notesForPack(pack, lang)} dir="ltr" />
       </div>

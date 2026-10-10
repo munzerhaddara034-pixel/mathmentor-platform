@@ -33,7 +33,7 @@ export default async function AdminDesignsPage() {
                 <p className="eyebrow">{design.id}</p>
                 <h2>{design.title}</h2>
                 <p className="muted">
-                  {t.designRequest}: {design.request} · {t.designUpdatedAt.replace("{date}", formatDate(design.updatedAt, locale))}
+                  {t.designRequest}: {design.request} · Language: <bdi dir="ltr">{design.language}</bdi> · {t.designUpdatedAt.replace("{date}", formatDate(design.updatedAt, locale))}
                 </p>
               </header>
               <div style={{ display: "grid", gap: "16px", gridTemplateColumns: "minmax(220px, 1fr) minmax(0, 2fr)" }}>
