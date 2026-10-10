@@ -174,6 +174,10 @@ const SAMI_PROTOCOL = `## بروتوكول الرد (تقني — مضاف من 
 - قائمة تحقق قبل الإرسال: الأرقام تُكتب كاملة حرفياً (واتساب 96176532421، Whish 96170772968)، اسم العلامة «منذر حداره / Munzer Haddara» ظاهر في كل مقترح، النص العربي RTL، وجملة صريحة أنك لن تنشر وأن النشر يحتاج موافقة منذر على التصميم النهائي وعلى النشر.
 - لا تكتب «ولّدت معاينة» أو «أرفقت صورة»: المنصة تحاول توليد المعاينة بعد ردّك وترفقها تلقائياً أو تعرض تنبيهاً إن فشلت.`;
 
+const SAMI_IMAGE_ATTEMPT_TIMEOUT_MS = 5_000;
+const SAMI_IMAGE_QUOTA_NOTICE =
+  "⚠️ لم تُولَّد معاينة التصميم لأن مزوّد الصور خارج الحصّة (image provider out of quota). المواصفات النصية كاملة وجاهزة للمراجعة.";
+
 async function runSami(
   turns: LlmTurn[],
   ctx: string,
@@ -202,22 +206,36 @@ async function runSami(
     : "";
   const message = agentMessage(channel, "sami", `${reply}${actionSuffix}`, { replyToId, imagePrompt: imagePrompt || undefined, notice: loop.notice, ...extra });
   if (wantsImage && provider) {
+    // The text turn is complete before image work starts; this hard cap keeps a slow image API from consuming the whole 45s message-turn budget.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), SAMI_IMAGE_ATTEMPT_TIMEOUT_MS);
+    if (typeof timer.unref === "function") timer.unref();
     try {
-      const image = await generateImage(imagePrompt);
-      const ext = image.mimeType.includes("jpeg") ? "jpg" : "png";
-      const ref: TeamAttachmentRef = {
-        id: createId("tatt"),
-        name: `sami-preview.${ext}`,
-        mimeType: image.mimeType,
-        sizeBytes: image.bytes.length,
-        origin: "generated",
-      };
-      await teamRepo().saveAttachment(ref, image.bytes);
-      message.attachments = [ref];
-      message.notice = `معاينة مولّدة (${image.provider}) — للمراجعة الداخلية فقط، لا نشر بدون موافقة منذر.`;
+      const result = await generateImage(imagePrompt, { signal: controller.signal });
+      if (result.ok) {
+        const ext = result.image.mimeType.includes("jpeg") ? "jpg" : "png";
+        const ref: TeamAttachmentRef = {
+          id: createId("tatt"),
+          name: `sami-preview.${ext}`,
+          mimeType: result.image.mimeType,
+          sizeBytes: result.image.bytes.length,
+          origin: "generated",
+        };
+        await teamRepo().saveAttachment(ref, result.image.bytes);
+        message.attachments = [ref];
+        message.notice = `معاينة مولّدة (${result.image.provider}) — للمراجعة الداخلية فقط، لا نشر بدون موافقة منذر.`;
+      } else if (result.reason === "quota") {
+        message.text = withoutPreviewClaims(message.text);
+        message.notice = SAMI_IMAGE_QUOTA_NOTICE;
+      } else {
+        message.text = withoutPreviewClaims(message.text);
+        message.notice = `⚠️ لم تُولَّد أي معاينة: تعذّر توليد الصورة الآن (${result.message || "error"}). الـ prompt جاهز في «Prompt الصورة».`;
+      }
     } catch (error) {
       message.text = withoutPreviewClaims(message.text);
-      message.notice = `⚠️ لم تُولَّد أي معاينة: تعذّر توليد الصورة الآن (${error instanceof Error ? error.message.slice(0, 140) : "error"}). الـ prompt جاهز في «Prompt الصورة».`;
+      message.notice = `⚠️ لم تُولَّد أي معاينة: تعذّر توليد الصورة الآن (${error instanceof Error ? error.message.slice(0, 140) : "error"}). الـ prompt جاهز في «Prompt الصورة».`;
+    } finally {
+      clearTimeout(timer);
     }
   } else if (wantsImage) {
     message.text = withoutPreviewClaims(message.text);
