@@ -1,9 +1,9 @@
 /** Staff-only gate for every /api/admin/team route (§2.4). */
 import { NextResponse } from "next/server";
 import { apiSession } from "@/lib/auth/guards";
-import { isTeamApproverEmail } from "@/lib/auth/adminAllowlist";
 import { isStaffRole } from "@/lib/auth/paths";
 import type { TeamActor } from "./agents";
+export { canApprove } from "./canApprove";
 
 export type TeamGate = { ok: true; actor: TeamActor } | { ok: false; response: NextResponse };
 
@@ -25,6 +25,3 @@ export async function requireTeamStaff(): Promise<TeamGate> {
  * Who may click «موافقة ونشر»: TEAM_APPROVER_EMAILS (comma-separated, case-insensitive);
  * when unset it falls back to the ADMIN_EMAILS allowlist (src/lib/auth/adminAllowlist.ts).
  */
-export function canApprove(actor: TeamActor): boolean {
-  return isTeamApproverEmail(actor.email);
-}
