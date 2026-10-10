@@ -12,7 +12,7 @@ const noopEscalate = async () => ({ itemId: "test-escalation", whatsapp: "notifi
 function patchFor(path = "src/example.ts", added = ["const b = 2;"]) { return [`diff --git a/${path} b/${path}`, "index aa..bb 100644", `--- a/${path}`, `+++ b/${path}`, `@@ -1 +1,${1 + added.length} @@`, " const a = 1;", ...added.map((x) => `+${x}`), ""].join("\n"); }
 function args(patch = patchFor(), files = ["src/example.ts"]) { return { agentId: "developer", title: "Add Example Feature", summary: "A reviewed draft", rationale: "The requested behavior needs a small implementation.", patch, files }; }
 after(() => { clear(); for (const [name, value] of Object.entries(env)) { const target = { kill: "AGENT_PR_DRAFTS", cap: "AGENT_PR_DRAFTS_MAX_PER_DAY", token: "GITHUB_AGENT_TOKEN", repo: "GITHUB_AGENT_REPO" }[name]; if (value === undefined) delete process.env[target]; else process.env[target] = value; } setPersistentStoreOverride(null); });
-function githubStub({ prStatus = 201, prBody = { html_url: "https://github.com/owner/repository/pull/17", number: 17 }, branchStatus = 201 } = {}) {
+function githubStub({ prStatus = 201, prBody = { html_url: "https://github.com/owner/repository/pull/17", number: 17 }, branchStatus = 201, prError } = {}) {
   const requests = [];
   const fetchImpl = async (url, init = {}) => {
     requests.push({ url: String(url), init }); const u = String(url);
@@ -24,7 +24,7 @@ function githubStub({ prStatus = 201, prBody = { html_url: "https://github.com/o
     if (u.endsWith("/git/trees")) return Response.json({ sha: "tree-sha" });
     if (u.endsWith("/git/commits")) return Response.json({ sha: "commit-sha" });
     if (u.includes("/git/refs/heads/agent/")) return Response.json({ ref: "updated" });
-    if (u.endsWith("/pulls")) return Response.json(prBody, { status: prStatus });
+    if (u.endsWith("/pulls")) { if (prError) throw prError; return Response.json(prBody, { status: prStatus }); }
     throw Error(`unexpected stub URL ${u}`);
   };
   return { fetchImpl, requests };
@@ -119,6 +119,37 @@ test("PR permission denial preserves the pushed branch and returns a one-click c
   assert.equal(stub.requests.some((request) => request.url.endsWith("/git/commits")), true);
   assert.equal(stub.requests.some((request) => request.url.includes("/git/refs/heads/agent/")), true);
   assert.equal(stub.requests.some((request) => request.url.endsWith("/pulls")), true);
+});
+
+test('plain "GitHub API failed (403)." after a successful push preserves the branch and compare URL without leaking token', async () => {
+  clear(); process.env.GITHUB_AGENT_TOKEN = "plain-403-test-secret"; process.env.GITHUB_AGENT_REPO = "owner/repository";
+  const made = await draftPullRequest(args()); assert.equal(made.ok, true);
+  const stub = githubStub({ prError: new Error("GitHub API failed (403).") });
+  setPrDraftTestOverrides({ fetchImpl: stub.fetchImpl, escalate: noopEscalate });
+  const result = await createDraftPullRequest(made.draft.id);
+  const stored = docs.get("team-agent-health.json").prDrafts.at(-1);
+  assert.equal(result.ok, true); assert.equal(result.draft.status, "branch_pushed");
+  assert.equal(result.compareUrl, "https://github.com/owner/repository/compare/agent-hub-latest...agent/developer-add-example-feature?expand=1");
+  assert.equal(stored.status, "branch_pushed"); assert.equal(stored.compareUrl, result.compareUrl); assert.equal(stored.prUrl, undefined); assert.equal(stored.prNumber, undefined);
+  assert.match(result.notice, /Pull requests: Read and write/);
+  assert.equal(docs.get("team-agent-health.json").prDraftAudits.at(-1).status, "branch_pushed");
+  assert.equal(stub.requests.some((request) => request.url.includes("/git/refs/heads/agent/")), true);
+  assert.equal(stub.requests.some((request) => request.url.endsWith("/pulls")), true);
+  assert.equal(JSON.stringify(docs).includes(process.env.GITHUB_AGENT_TOKEN), false);
+  assert.equal(JSON.stringify(result).includes(process.env.GITHUB_AGENT_TOKEN), false);
+});
+
+test("post-push 404 is a genuine failure, not a permission denial, and never leaks token", async () => {
+  clear(); process.env.GITHUB_AGENT_TOKEN = "post-push-404-test-secret"; process.env.GITHUB_AGENT_REPO = "owner/repository";
+  const made = await draftPullRequest(args()); assert.equal(made.ok, true);
+  const stub = githubStub({ prStatus: 404, prBody: { message: "Not Found" } });
+  setPrDraftTestOverrides({ fetchImpl: stub.fetchImpl, escalate: noopEscalate });
+  const result = await createDraftPullRequest(made.draft.id);
+  const stored = docs.get("team-agent-health.json").prDrafts.at(-1);
+  assert.equal(result.ok, false); assert.equal(stored.status, "failed"); assert.match(stored.error, /GitHub API failed \(404\)/);
+  assert.equal(stored.compareUrl, undefined); assert.equal(stored.prUrl, undefined); assert.equal(docs.get("team-agent-health.json").prDraftAudits.at(-1).status, "failed");
+  assert.equal(JSON.stringify(docs).includes(process.env.GITHUB_AGENT_TOKEN), false);
+  assert.equal(JSON.stringify(result).includes(process.env.GITHUB_AGENT_TOKEN), false);
 });
 
 test("genuine branch-creation failure remains failed with an error", async () => {

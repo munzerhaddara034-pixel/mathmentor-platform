@@ -193,6 +193,15 @@ class GithubRequestError extends Error {
   readonly responseMessage: string;
   constructor(status: number, responseMessage = "") { super(`GitHub API failed (${status}).`); this.status = status; this.responseMessage = stripAgentToken(responseMessage); }
 }
+function isPrPermissionDenied(error: unknown) {
+  if (!error || (typeof error !== "object" && typeof error !== "function")) return false;
+  const candidate = error as { message?: unknown; status?: unknown; statusCode?: unknown; responseMessage?: unknown };
+  const explicitStatuses = [error instanceof GithubRequestError ? error.status : undefined, candidate.status, candidate.statusCode].filter((status): status is number => typeof status === "number");
+  if (explicitStatuses.length) return explicitStatuses.every((status) => status === 403);
+  const message = [candidate.message, candidate.responseMessage].filter((part): part is string => typeof part === "string").join(" ");
+  // GitHub's permission wording (including "Resource not accessible by integration", "not accessible by integration", and "Forbidden") is optional; the 403 status alone is sufficient.
+  return /\(403\)/.test(message);
+}
 async function gh<T>(repo: string, token: string, endpoint: string, init?: RequestInit): Promise<T> {
   const response = await (fetchOverride ?? fetch)(`https://api.github.com/repos/${repo}${endpoint}`, { ...init, headers: { accept: "application/vnd.github+json", authorization: `Bearer ${token}`, "x-github-api-version": "2022-11-28", ...(init?.body ? { "content-type": "application/json" } : {}) } });
   if (!response.ok) {
@@ -266,7 +275,8 @@ async function createDraftPullRequestInternal(id: string) {
     try {
       pr = await gh<{ html_url: string; number: number }>(repo, token, "/pulls", { method: "POST", body: JSON.stringify({ title: `[${TEAM_AGENT_NAMES_AR[draft.agentId]}] ${safeString(draft.title, 180)}`, head: draft.branch, base: PR_DEPLOY_BRANCH, body }) });
     } catch (error) {
-      if (!(error instanceof GithubRequestError) || error.status !== 403 || !/Resource not accessible by integration/i.test(error.responseMessage)) throw error;
+      // This catch is reached only after the branch ref and commit have both been pushed successfully.
+      if (!isPrPermissionDenied(error)) throw error;
       const compareUrl = `https://github.com/${repo}/compare/${PR_DEPLOY_BRANCH}...${draft.branch}?expand=1`;
       const notice = tr("ar").prPermissionNotice;
       const pushed = await saveDraft(id, (current) => ({ ...current, status: "branch_pushed", compareUrl, notice, prUrl: undefined, prNumber: undefined, error: undefined }));
