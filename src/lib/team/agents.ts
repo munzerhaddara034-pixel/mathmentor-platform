@@ -326,28 +326,62 @@ async function runAgent(input: {
   return { message };
 }
 
-function llmFailureMessage(channel: TeamChannelId, agent: TeamAgentId, human: TeamMessage, error: unknown): TeamMessage {
-  const missingKey = error instanceof TeamLlmUnavailableError;
-  return systemMessage(
-    channel,
-    missingKey
-      ? `تعذّر تشغيل ${TEAM_AGENT_NAMES_AR[agent]}: Gemini غير مهيّأ لأن مفتاح GEMINI_API_KEY غير موجود على الخادم.`
-      : `تعذّر الحصول على ردّ ${TEAM_AGENT_NAMES_AR[agent]} الآن. أعد المحاولة بعد قليل.`,
-    { replyToId: human.id, notice: error instanceof Error ? error.message.slice(0, 160) : undefined },
-  );
+export type HandleResult = { message: TeamMessage; replies: TeamMessage[]; proposals: TeamProposal[] };
+export type AsyncHandleResult = HandleResult & { generating: boolean };
+type HumanInput = { channel: TeamChannelId; text: string; attachments: TeamAttachmentRef[]; actor: TeamActor };
+type RunOptions = { bounded?: boolean };
+
+const MAX_ASYNC_TIMEOUT_MS = 45_000;
+const DEFAULT_ASYNC_TIMEOUT_MS = 45_000;
+const MAX_ASYNC_RETRIES = 1;
+const RECOVERY_ATTEMPTS = 1;
+const activeAsyncTurns = new Map<string, Promise<HandleResult>>();
+
+function envMilliseconds(name: string, fallback: number, max: number): number {
+  const parsed = Number(process.env[name]);
+  return Number.isFinite(parsed) ? Math.max(100, Math.min(max, Math.floor(parsed))) : fallback;
 }
 
-export type HandleResult = { message: TeamMessage; replies: TeamMessage[]; proposals: TeamProposal[] };
+function asyncTimeoutMs() {
+  return envMilliseconds("TEAM_MESSAGE_LLM_TIMEOUT_MS", DEFAULT_ASYNC_TIMEOUT_MS, MAX_ASYNC_TIMEOUT_MS);
+}
 
-export async function handleHumanMessage(input: {
-  channel: TeamChannelId;
-  text: string;
-  attachments: TeamAttachmentRef[];
-  actor: TeamActor;
-}): Promise<HandleResult> {
-  const repo = teamRepo();
+function asyncRetries() {
+  const parsed = Number(process.env.TEAM_MESSAGE_LLM_RETRIES ?? "1");
+  return Number.isFinite(parsed) ? Math.max(0, Math.min(MAX_ASYNC_RETRIES, Math.floor(parsed))) : 1;
+}
+
+async function withTimeout<T>(work: Promise<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`team agent turn timed out after ${timeoutMs}ms`)), timeoutMs);
+    if (typeof timer.unref === "function") timer.unref();
+  });
+  try {
+    return await Promise.race([work, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function runAgentBounded(input: Parameters<typeof runAgent>[0]): Promise<AgentRun> {
+  let lastError: unknown;
+  const attempts = 1 + asyncRetries();
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await withTimeout(runAgent(input), asyncTimeoutMs());
+    } catch (error) {
+      lastError = error;
+      if (error instanceof TeamLlmUnavailableError || attempt + 1 >= attempts) break;
+    }
+  }
+  throw lastError ?? new Error("team agent turn failed");
+}
+
+function createHumanMessage(input: HumanInput): TeamMessage {
   const redacted = redactSecrets(input.text.trim());
-  const human: TeamMessage = {
+  const now = new Date().toISOString();
+  return {
     id: createId("tmsg"),
     channel: input.channel,
     authorKind: "human",
@@ -355,31 +389,48 @@ export async function handleHumanMessage(input: {
     authorName: input.actor.name,
     text: redacted.text,
     attachments: input.attachments,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
     redactedSecrets: redacted.count || undefined,
     notice: redacted.count ? secretRotationNoticeAr(redacted.count) : undefined,
+    asyncState: "generating",
+    asyncAttempt: 0,
+    asyncStartedAt: now,
   };
-  await repo.addMessage(human);
+}
 
+function shortFailureReason(error: unknown): string {
+  if (error instanceof TeamLlmUnavailableError) return "مفتاح النموذج غير مهيّأ";
+  if (error instanceof Error && /timed out/i.test(error.message)) return "انتهت مهلة النموذج";
+  const reason = error instanceof Error ? error.message : "خطأ غير معروف";
+  return reason.replace(/[\r\n]+/g, " ").slice(0, 120);
+}
+
+function llmFailureMessage(channel: TeamChannelId, agent: TeamAgentId, human: TeamMessage, error: unknown): TeamMessage {
+  const missingKey = error instanceof TeamLlmUnavailableError;
+  return systemMessage(
+    channel,
+    missingKey
+      ? `تعذّر تشغيل ${TEAM_AGENT_NAMES_AR[agent]}: Gemini غير مهيّأ لأن مفتاح GEMINI_API_KEY غير موجود على الخادم.`
+      : `تعذّر الحصول على ردّ ${TEAM_AGENT_NAMES_AR[agent]} الآن — أُعيدت المحاولة تلقائياً. السبب المختصر: ${shortFailureReason(error)}`,
+    { replyToId: human.id, notice: shortFailureReason(error) },
+  );
+}
+
+async function runReplies(input: HumanInput, human: TeamMessage, options: RunOptions = {}): Promise<HandleResult> {
+  const repo = teamRepo();
   const replies: TeamMessage[] = [];
   const proposals: TeamProposal[] = [];
   const route = routeHumanMessage(input.channel, human.text || describeAttachments(human.attachments));
   const history = async () => repo.listMessages(input.channel, HISTORY_LIMIT);
-
   const answered: TeamAgentId[] = [];
   const firstRuns: Array<{ agent: TeamAgentId; message: TeamMessage }> = [];
   const firstPlan = planReplies(route.responders, []).first;
   for (const agent of firstPlan) {
     let message: TeamMessage;
     try {
-      const run = await runAgent({
-        agent,
-        channel: input.channel,
-        actor: input.actor,
-        human,
-        history: await history(),
-        routeReason: route.reason,
-      });
+      const run = options.bounded
+        ? await runAgentBounded({ agent, channel: input.channel, actor: input.actor, human, history: await history(), routeReason: route.reason })
+        : await runAgent({ agent, channel: input.channel, actor: input.actor, human, history: await history(), routeReason: route.reason });
       message = run.message;
       if (run.proposal) proposals.push(run.proposal);
       firstRuns.push({ agent, message });
@@ -390,9 +441,7 @@ export async function handleHumanMessage(input: {
     await repo.addMessage(message);
     replies.push(message);
   }
-
-  // One referral hop, team channel only, and only for ambiguous/multi-part or explicitly-mentioned requests
-  // (§2.2 / §2.3). A clear single-topic message is answered by one agent alone. Referred agents never refer again.
+  // One referral hop, team channel only, and only for ambiguous/multi-part or explicitly-mentioned requests.
   if (input.channel === "team" && (route.reason === "ambiguous" || route.reason === "mention")) {
     const referrals: Array<Referral & { fromName: string; fromMessageId: string }> = [];
     for (const run of firstRuns) {
@@ -400,20 +449,14 @@ export async function handleHumanMessage(input: {
         referrals.push({ ...referral, fromName: TEAM_AGENT_NAMES_AR[run.agent], fromMessageId: run.message.id });
       }
     }
-    const allowed = planReplies(firstPlan, referrals).referrals;
-    for (const referral of allowed) {
+    for (const referral of planReplies(firstPlan, referrals).referrals) {
       const full = referrals.find((item) => item.agent === referral.agent);
       if (!full) continue;
       let message: TeamMessage;
       try {
-        const run = await runAgent({
-          agent: full.agent,
-          channel: input.channel,
-          actor: input.actor,
-          human,
-          history: await history(),
-          referral: full,
-        });
+        const run = options.bounded
+          ? await runAgentBounded({ agent: full.agent, channel: input.channel, actor: input.actor, human, history: await history(), referral: full })
+          : await runAgent({ agent: full.agent, channel: input.channel, actor: input.actor, human, history: await history(), referral: full });
         message = run.message;
         if (run.proposal) proposals.push(run.proposal);
       } catch (error) {
@@ -424,4 +467,109 @@ export async function handleHumanMessage(input: {
     }
   }
   return { message: human, replies, proposals };
+}
+
+async function markHumanState(human: TeamMessage, state: "complete" | "failed", attempt?: number): Promise<TeamMessage> {
+  const updated = await teamRepo().updateMessage(human.id, {
+    asyncState: state,
+    ...(attempt === undefined ? {} : { asyncAttempt: attempt }),
+  });
+  return updated ?? { ...human, asyncState: state, ...(attempt === undefined ? {} : { asyncAttempt: attempt }) };
+}
+
+export async function handleHumanMessage(input: HumanInput): Promise<HandleResult> {
+  const repo = teamRepo();
+  const human = createHumanMessage(input);
+  await repo.addMessage(human);
+  const result = await runReplies(input, human);
+  result.message = await markHumanState(human, result.replies.some((reply) => reply.authorKind === "agent") ? "complete" : "failed");
+  return result;
+}
+
+/** Run a saved human message after the HTTP acknowledgement. Safe to call more than once. */
+export async function completeHumanMessage(input: HumanInput, human: TeamMessage): Promise<HandleResult> {
+  const active = activeAsyncTurns.get(human.id);
+  if (active) return active;
+  const work = completeHumanMessageOnce(input, human);
+  activeAsyncTurns.set(human.id, work);
+  try {
+    return await work;
+  } finally {
+    activeAsyncTurns.delete(human.id);
+  }
+}
+
+async function completeHumanMessageOnce(input: HumanInput, human: TeamMessage): Promise<HandleResult> {
+  const repo = teamRepo();
+  const existing = await repo.listMessages(input.channel, HISTORY_LIMIT);
+  if (existing.some((message) => message.replyToId === human.id)) {
+    return { message: await markHumanState(human, "complete"), replies: [], proposals: [] };
+  }
+  try {
+    const result = await runReplies(input, human, { bounded: true });
+    result.message = await markHumanState(human, result.replies.some((reply) => reply.authorKind === "agent") ? "complete" : "failed");
+    return result;
+  } catch (error) {
+    const latest = await repo.listMessages(input.channel, HISTORY_LIMIT);
+    if (latest.some((message) => message.replyToId === human.id)) {
+      return { message: await markHumanState(human, "complete"), replies: [], proposals: [] };
+    }
+    const agent = routeHumanMessage(input.channel, human.text).responders[0] ?? "mohamed";
+    const failure = llmFailureMessage(input.channel, agent, human, error);
+    await repo.addMessage(failure);
+    return { message: await markHumanState(human, "failed"), replies: [failure], proposals: [] };
+  }
+}
+
+/** Save immediately; only long LLM turns are deferred. Developer fast paths remain synchronous. */
+export async function beginHumanMessage(input: HumanInput): Promise<AsyncHandleResult> {
+  const repo = teamRepo();
+  const human = createHumanMessage(input);
+  await repo.addMessage(human);
+  const route = routeHumanMessage(input.channel, human.text || describeAttachments(human.attachments));
+  const hasLongTurn = route.responders.some((agent) => agent !== "developer");
+  if (!hasLongTurn) {
+    const result = await handleExistingHumanMessage(input, human);
+    return { ...result, generating: false };
+  }
+  return { message: human, replies: [], proposals: [], generating: true };
+}
+
+async function handleExistingHumanMessage(input: HumanInput, human: TeamMessage): Promise<HandleResult> {
+  const result = await runReplies(input, human);
+  result.message = await markHumanState(human, result.replies.some((reply) => reply.authorKind === "agent") ? "complete" : "failed");
+  return result;
+}
+
+/** Idempotent recovery for a turn whose worker disappeared before writing either a reply or failure notice. */
+export async function recoverStrandedMessages(channel: TeamChannelId, now = Date.now()): Promise<number> {
+  const repo = teamRepo();
+  const recoveryAfterMs = envMilliseconds("TEAM_MESSAGE_RECOVERY_MINUTES", 5, 60) * 60_000;
+  const messages = await repo.listMessages(channel, HISTORY_LIMIT);
+  let recovered = 0;
+  for (const human of messages.filter((message) => message.authorKind === "human")) {
+    if (messages.some((message) => message.replyToId === human.id)) continue;
+    if (now - Date.parse(human.createdAt) < recoveryAfterMs) continue;
+    const attempt = human.asyncAttempt ?? 0;
+    if (attempt >= RECOVERY_ATTEMPTS || human.asyncState === "failed") continue;
+    const claimed = await repo.updateMessage(human.id, { asyncState: "generating", asyncAttempt: attempt + 1, asyncStartedAt: new Date(now).toISOString() });
+    if (!claimed) continue;
+    recovered += 1;
+    const input: HumanInput = {
+      channel,
+      text: human.text,
+      attachments: human.attachments,
+      actor: { id: human.authorId, name: human.authorName, email: "", role: "staff" },
+    };
+    try {
+      await completeHumanMessage(input, claimed);
+    } catch (error) {
+      const latest = await repo.listMessages(channel, HISTORY_LIMIT);
+      if (!latest.some((message) => message.replyToId === human.id)) {
+        await repo.addMessage(llmFailureMessage(channel, routeHumanMessage(channel, human.text).responders[0] ?? "mohamed", human, error));
+      }
+      await markHumanState(human, "failed", attempt + 1);
+    }
+  }
+  return recovered;
 }

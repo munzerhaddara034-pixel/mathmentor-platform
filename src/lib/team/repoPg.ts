@@ -26,6 +26,13 @@ export const pgTeamRepo: TeamRepo = {
       [message.id, message.channel, message.authorId, message.createdAt, JSON.stringify(message)],
     );
   },
+  async updateMessage(id, patch) {
+    const rows = await dbQuery<DataRow<TeamMessage>>(
+      `UPDATE mm_team_messages SET data = data || $2::jsonb WHERE id = $1 RETURNING data`,
+      [id, JSON.stringify(patch)],
+    );
+    return rows[0]?.data;
+  },
   async saveAttachment(meta, bytes) {
     await dbQuery(
       `INSERT INTO mm_team_attachments (id, name, mime_type, size_bytes, bytes) VALUES ($1, $2, $3, $4, $5)`,

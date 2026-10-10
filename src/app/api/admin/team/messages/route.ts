@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createId } from "@/lib/ids";
 import { publicProposals } from "@/lib/hamza/publicProposal";
 import { hamzaReadiness } from "@/lib/hamza/readiness";
 import { hamzaTaskRepo } from "@/lib/hamza/tasks/store";
 import { publicTask, type PublicHamzaTask } from "@/lib/hamza/tasks/types";
-import { handleHumanMessage } from "@/lib/team/agents";
+import { beginHumanMessage, completeHumanMessage, recoverStrandedMessages } from "@/lib/team/agents";
 import { requireTeamStaff, teamError } from "@/lib/team/guard";
 import { teamRepo } from "@/lib/team/store";
 import { isTeamChannelId, type TeamAttachmentRef, type TeamSendResponse, type TeamThreadResponse } from "@/lib/team/types";
@@ -17,6 +17,15 @@ const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024;
 const MAX_ATTACHMENTS = 4;
 const MAX_TEXT = 8000;
 const ALLOWED_MIME = /^(image\/(png|jpe?g|webp|gif|heic)|application\/pdf|text\/(plain|csv|markdown)|application\/vnd\.openxmlformats-officedocument\.(wordprocessingml\.document|spreadsheetml\.sheet))$/;
+
+function runAfterResponse(work: () => Promise<unknown>) {
+  try {
+    after(() => work().catch((error) => console.error("team/messages background work", error)));
+  } catch {
+    // Direct unit callers do not have Next request async-storage context.
+    void work().catch((error) => console.error("team/messages background work", error));
+  }
+}
 
 export async function GET(request: Request) {
   const gate = await requireTeamStaff();
@@ -34,6 +43,7 @@ export async function GET(request: Request) {
     } catch (error) {
       console.error("team/messages GET tasks", error);
     }
+    runAfterResponse(() => recoverStrandedMessages(channel));
     const body: TeamThreadResponse = { ok: true, channel, messages, proposals: publicProposals(proposals), tasks, storage: repo.kind, hamza: hamzaReadiness() };
     return NextResponse.json(body);
   } catch (error) {
@@ -75,8 +85,17 @@ export async function POST(request: Request) {
       await repo.saveAttachment(ref, Buffer.from(await file.arrayBuffer()));
       attachments.push(ref);
     }
-    const result = await handleHumanMessage({ channel, text, attachments, actor: gate.actor });
-    const body: TeamSendResponse = { ok: true, ...result, proposals: publicProposals(result.proposals) };
+    const input = { channel, text, attachments, actor: gate.actor };
+    const result = await beginHumanMessage(input);
+    if (result.generating) runAfterResponse(() => completeHumanMessage(input, result.message));
+    const body: TeamSendResponse = {
+      ok: true,
+      message: result.message,
+      replies: result.replies,
+      proposals: publicProposals(result.proposals),
+      status: result.generating ? "generating" : "complete",
+      generating: result.generating,
+    };
     return NextResponse.json(body);
   } catch (error) {
     console.error("team/messages POST", error);

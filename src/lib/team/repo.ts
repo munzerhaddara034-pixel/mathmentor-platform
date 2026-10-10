@@ -8,6 +8,7 @@ export interface TeamRepo {
   listMessages(channel: TeamChannelId, limit: number): Promise<TeamMessage[]>;
   getMessage(id: string): Promise<TeamMessage | undefined>;
   addMessage(message: TeamMessage): Promise<void>;
+  updateMessage(id: string, patch: Partial<TeamMessage>): Promise<TeamMessage | undefined>;
   saveAttachment(meta: TeamAttachmentRef, bytes: Buffer): Promise<void>;
   getAttachment(id: string): Promise<StoredAttachment | undefined>;
   saveProposal(proposal: TeamProposal): Promise<void>;

@@ -60,6 +60,15 @@ export const fileTeamRepo: TeamRepo = {
       store.messages.push(message);
     });
   },
+  async updateMessage(id, patch) {
+    return mutate((store) => {
+      const index = store.messages.findIndex((message) => message.id === id);
+      if (index < 0) return undefined;
+      const next = { ...store.messages[index], ...patch };
+      store.messages[index] = next;
+      return next;
+    });
+  },
   async saveAttachment(meta, bytes) {
     await mkdir(uploadsDir(), { recursive: true });
     await writeFile(path.join(uploadsDir(), safeId(meta.id)), bytes);

@@ -13,6 +13,7 @@ export const TEAM_AGENT_IDS = ["mohamed", "sami", "developer", "finance"] as con
 export type TeamAgentId = (typeof TEAM_AGENT_IDS)[number];
 
 export type TeamAuthorKind = "human" | "agent" | "system";
+export type TeamAsyncState = "generating" | "complete" | "failed";
 
 export function isTeamChannelId(value: unknown): value is TeamChannelId {
   return typeof value === "string" && (TEAM_CHANNEL_IDS as readonly string[]).includes(value);
@@ -55,6 +56,10 @@ export type TeamMessage = {
   redactedSecrets?: number;
   /** Non-fatal notice (e.g. missing GEMINI_API_KEY) rendered under the bubble. */
   notice?: string;
+  /** Durable lifecycle markers for background agent turns and stranded-message recovery. */
+  asyncState?: TeamAsyncState;
+  asyncAttempt?: number;
+  asyncStartedAt?: string;
 };
 
 /**
@@ -185,6 +190,9 @@ export type TeamSendResponse = {
   message: TeamMessage;
   replies: TeamMessage[];
   proposals: TeamProposal[];
+  /** Long LLM turns are acknowledged before the reply is ready. */
+  status?: "generating" | "complete";
+  generating?: boolean;
 };
 
 export type TeamApiError = { ok: false; error: string; errorAr: string };
