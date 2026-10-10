@@ -2,7 +2,7 @@ import type { StoryboardScene } from "./types";
 import type { NoteBlock } from "./lessonNotes";
 
 export const GRADE_12_LS_CONTINUITY_LESSON_ID = "grade-12-ch2";
-export const GRADE_12_LS_CONTINUITY_VIDEO_EN = "/videos/grade-12-ls-continuity-en.mp4";
+export const GRADE_12_LS_CONTINUITY_VIDEO_EN = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663919276832/KTjjYNrvowZHNkED.mp4";
 export const GRADE_12_LS_CONTINUITY_VIDEO_FR = "/videos/grade-12-ls-continuity-fr.mp4";
 
 export const grade12LsContinuityNotesEn: NoteBlock[] = [
